@@ -7,12 +7,13 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BRecipe {
 
 	private String[] name;
-	private ArrayList<ItemStack> ingredients = new ArrayList<>(); // material and amount
+	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>(); // material and amount
 	private int cookingTime; // time to cook in cauldron
 	private int distillruns; // runs through the brewer
 	private int distillTime; // time for one distill run in seconds
@@ -21,9 +22,11 @@ public class BRecipe {
 	private String color; // color of the destilled/finished potion
 	private int difficulty; // difficulty to brew the potion, how exact the instruction has to be followed
 	private int alcohol; // Alcohol in perfect potion
-	private ArrayList<BEffect> effects = new ArrayList<>(); // Special Effects when drinking
+	private ArrayList<BEffect> effects = new ArrayList<BEffect>(); // Special Effects when drinking
+    private List<List<String>> flavorText = new ArrayList<List<String>>(3);
 
 	public BRecipe(ConfigurationSection configSectionRecipes, String recipeId) {
+        //parse name
 		String nameList = configSectionRecipes.getString(recipeId + ".name");
 		if (nameList != null) {
 			String[] name = nameList.split("/");
@@ -36,6 +39,7 @@ public class BRecipe {
 		} else {
 			return;
 		}
+        //parse ingredients
 		List<String> ingredientsList = configSectionRecipes.getStringList(recipeId + ".ingredients");
 		if (ingredientsList != null) {
 			for (String item : ingredientsList) {
@@ -64,7 +68,7 @@ public class BRecipe {
 								if (durability == -1 && vaultItem.getSubTypeId() != 0) {
 									durability = vaultItem.getSubTypeId();
 								}
-								if (mat == Material.LEAVES) {
+								if (mat == org.bukkit.Material.LEAVES) {
 									if (durability > 3) {
 										durability -= 4; // Vault has leaves with higher durability
 									}
@@ -89,6 +93,19 @@ public class BRecipe {
 				}
 			}
 		}
+        //parse flavorText
+        List<String> flavorTextList = configSectionRecipes.getStringList(recipeId + ".flavortext");
+        /*ArrayList<String> empty = new ArrayList<String>();
+        empty.add("");
+        flavorText.add(empty);*/
+        if (flavorTextList != null) {
+			for (String item : flavorTextList) {
+				//for(String subset: item.split("/"))
+				//System.out.println(subset);
+				flavorText.add(new ArrayList<String>(Arrays.asList(item.split("/"))));
+			}
+		} 
+        //parse the rest
 		this.cookingTime = configSectionRecipes.getInt(recipeId + ".cookingtime", 1);
 		this.distillruns = configSectionRecipes.getInt(recipeId + ".distillruns", 0);
 		this.distillTime = configSectionRecipes.getInt(recipeId + ".distilltime", 0) * 20;
@@ -205,7 +222,11 @@ public class BRecipe {
 		return age != 0;
 	}
 
-	// true if given list misses an ingredient
+	public boolean hasFlavorText(){
+        return flavorText.size() !=0;
+    }
+    
+    // true if given list misses an ingredient
 	public boolean isMissingIngredients(List<ItemStack> list) {
 		if (list.size() < ingredients.size()) {
 			return true;
@@ -250,7 +271,7 @@ public class BRecipe {
 
 		int uid = Brew.generateUID();
 
-		ArrayList<ItemStack> list = new ArrayList<>(ingredients.size());
+		ArrayList<ItemStack> list = new ArrayList<ItemStack>(ingredients.size());
 		for (ItemStack item : ingredients) {
 			if (item.getDurability() == -1) {
 				list.add(new ItemStack(item.getType(), item.getAmount()));
@@ -271,6 +292,18 @@ public class BRecipe {
 		brew.convertLore(potionMeta, false);
 		Brew.addOrReplaceEffects(potionMeta, effects, quality);
 		brew.touch();
+		
+		//test item
+		if(!flavorText.isEmpty()) {
+			if(potionMeta.getLore() != null) {
+				List<String> newLore = new ArrayList<String>();
+				newLore.addAll(potionMeta.getLore());
+				newLore.addAll(getFlavorText(quality));
+				potionMeta.setLore(newLore);
+			} else {
+				potionMeta.setLore(getFlavorText(quality));
+			}
+		}
 
 		potion.setItemMeta(potionMeta);
 		return potion;
@@ -304,6 +337,32 @@ public class BRecipe {
 		}
 	}
 
+    public List<String> getFlavorText(int quality) {
+    	//System.out.println("QUALITY: " + quality + "\tFLAVORSIZE: " + flavorText.size());
+    	
+		if(flavorText.isEmpty()) {
+			return new ArrayList<String>();
+		}
+		
+		/*for(int i = 0; i < flavorText.size(); i++) {
+			System.out.println("ITERATION: " + i);
+			for(String string: flavorText.get(i))
+				System.out.println(string);
+			}*/
+		
+    	if (flavorText.size() == 3) {
+			if (quality <= 3) {
+				return flavorText.get(0);
+			} else if (quality <= 7) {
+				return flavorText.get(1);
+			} else {
+				return flavorText.get(2);
+			}
+		} else {
+			return flavorText.get(0);
+		}
+	}
+    
 	// If one of the quality names equalIgnoreCase given name
 	public boolean hasName(String name) {
 		for (String test : this.name) {

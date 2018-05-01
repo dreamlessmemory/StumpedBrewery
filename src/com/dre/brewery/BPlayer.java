@@ -19,8 +19,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class BPlayer {
-	private static Map<String, BPlayer> players = new HashMap<>();// Players name/uuid and BPlayer
-	private static Map<Player, MutableInt> pTasks = new HashMap<>();// Player and count
+	private static Map<String, BPlayer> players = new HashMap<String, BPlayer>();// Players name/uuid and BPlayer
+	private static Map<Player, MutableInt> pTasks = new HashMap<Player, MutableInt>();// Player and count
 	private static int taskId;
 	private static boolean modAge = true;
 	private static Random pukeRand;
@@ -28,7 +28,7 @@ public class BPlayer {
 	private static Field age;
 
 	// Settings
-	public static Map<Material, Integer> drainItems = new HashMap<>();// DrainItem Material and Strength
+	public static Map<Material, Integer> drainItems = new HashMap<Material, Integer>();// DrainItem Material and Strength
 	public static Material pukeItem;
 	public static int pukeDespawntime;
 	public static int hangoverTime;

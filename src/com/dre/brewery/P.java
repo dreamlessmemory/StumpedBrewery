@@ -397,7 +397,7 @@ public class P extends JavaPlugin {
 			}
 
 			// loading Ingredients into ingMap
-			Map<String, BIngredients> ingMap = new HashMap<>();
+			Map<String, BIngredients> ingMap = new HashMap<String, BIngredients>();
 			ConfigurationSection section = data.getConfigurationSection("Ingredients");
 			if (section != null) {
 				for (String id : section.getKeys(false)) {
@@ -471,7 +471,7 @@ public class P extends JavaPlugin {
 	}
 
 	public ArrayList<ItemStack> deserializeIngredients(ConfigurationSection matSection) {
-		ArrayList<ItemStack> ingredients = new ArrayList<>();
+		ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 		for (String mat : matSection.getKeys(false)) {
 			String[] matSplit = mat.split(",");
 			ItemStack item = new ItemStack(Material.getMaterial(matSplit[0]), matSection.getInt(mat));

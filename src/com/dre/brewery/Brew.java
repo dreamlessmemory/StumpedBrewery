@@ -20,7 +20,7 @@ public class Brew {
 
 	// represents the liquid in the brewed Potions
 
-	public static Map<Integer, Brew> potions = new HashMap<>();
+	public static Map<Integer, Brew> potions = new HashMap<Integer, Brew>();
 	public static long installTime = System.currentTimeMillis(); // plugin install time in millis after epoch
 	public static Boolean colorInBarrels; // color the Lore while in Barrels
 	public static Boolean colorInBrewer; // color the Lore while in Brewer
@@ -529,6 +529,21 @@ public class Brew {
 				updateWoodLore(meta);
 			}
 		}
+		
+		//flavor text
+		if(currentRecipe.hasFlavorText()) {
+			if(meta.getLore() != null) {
+				List<String> newLore = new ArrayList<String>();
+				newLore.addAll(meta.getLore());
+				newLore.addAll(currentRecipe.getFlavorText(getQuality()));
+				meta.setLore(newLore);
+			} else {
+				List<String> newLore = new ArrayList<String>();
+				newLore.add("");
+				newLore.addAll(currentRecipe.getFlavorText(getQuality()));
+				meta.setLore(newLore);
+			}
+		}
 	}
 
 	// sets the DistillLore. Prefix is the color to be used
@@ -583,7 +598,7 @@ public class Brew {
 			meta.setLore(existingLore);
 			return;
 		}
-		List<String> newLore = new ArrayList<>();
+		List<String> newLore = new ArrayList<String>();
 		newLore.add("");
 		newLore.add(prefix + lore);
 		meta.setLore(newLore);

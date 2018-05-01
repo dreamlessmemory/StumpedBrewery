@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 public class Wakeup {
 
-	public static ArrayList<Wakeup> wakeups = new ArrayList<>();
+	public static ArrayList<Wakeup> wakeups = new ArrayList<Wakeup>();
 	public static P p = P.p;
 	public static int checkId = -1;
 	public static Player checkPlayer = null;
@@ -28,7 +28,7 @@ public class Wakeup {
 			return null;
 		}
 
-		ArrayList<Wakeup> worldWakes = new ArrayList<>();
+		ArrayList<Wakeup> worldWakes = new ArrayList<Wakeup>();
 
 		for (Wakeup wakeup : wakeups) {
 			if (wakeup.active) {
@@ -120,7 +120,7 @@ public class Wakeup {
 			return;
 		}
 
-		ArrayList<String> locs = new ArrayList<>();
+		ArrayList<String> locs = new ArrayList<String>();
 		for (int id = 0; id < wakeups.size(); id++) {
 
 			Wakeup wakeup = wakeups.get(id);

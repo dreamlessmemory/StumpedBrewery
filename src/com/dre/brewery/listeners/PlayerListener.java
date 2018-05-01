@@ -22,7 +22,7 @@ import java.util.UUID;
 
 public class PlayerListener implements Listener {
 	public static boolean openEverywhere;
-	private static Set<UUID> interacted = new HashSet<>();
+	private static Set<UUID> interacted = new HashSet<UUID>();
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {

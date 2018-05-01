@@ -4,7 +4,7 @@
 
 	<groupId>com.dre</groupId>
 	<artifactId>brewery</artifactId>
-	<version>1.5</version>
+	<version>1.7-STUMPED</version>
 	<name>Brewery</name>
 
 	<properties>
@@ -42,23 +42,18 @@
 			</plugin>
 		</plugins>
 	</build>
-
 	<repositories>
 		<repository>
-			<id>md_5-releases</id>
-			<url>http://repo.md-5.net/content/repositories/releases/</url>
+			<id>md_5-public</id>
+			<url>http://repo.md-5.net/content/groups/public/</url>
 		</repository>
 		<repository>
 			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+			<url>http://repo.mvdw-software.be/content/groups/public/<!--https://hub.spigotmc.org/nexus/content/groups/public/--></url>
 		</repository>
 		<repository>
 			<id>vault-repo</id>
-			<url>http://nexus.theyeticave.net/content/repositories/pub_releases</url>
-		</repository>
-		<repository>
-			<id>mcstats-repo</id>
-			<url>http://repo.mcstats.org/content/repositories/public/</url>
+			<url>http://nexus.hc.to/content/repositories/pub_releases</url>
 		</repository>
 		<repository>
 			<id>sk89q-repo</id>
@@ -66,21 +61,27 @@
 		</repository>
 		<repository>
 			<id>dre2n-rpo</id>
-			<url>http://feuerstern.bplaced.net/repo/</url>
+			<url>http://erethon.de/repo/</url>
 		</repository>
 	</repositories>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.10.2-R0.1-SNAPSHOT</version>
+			<version>1.12.2-R0.1-SNAPSHOT<!--1.12.2--></version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+           <groupId>org.spigotmc</groupId>
+           <artifactId>spigot-api</artifactId>
+           <version>1.12.2-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
+           <type>jar</type>
+           <scope>provided</scope>
+       </dependency>
+		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
 			<artifactId>VaultAPI</artifactId>
-			<version>1.5</version>
+			<version>1.6</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -90,28 +91,28 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.griefcraft.lwc</groupId>
-			<artifactId>LWCPlugin</artifactId>
-			<version>4.5.0-SNAPSHOT</version>
+			<groupId>com.griefcraft</groupId>
+			<artifactId>entitylwc</artifactId>
+			<version>2.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>me.ryanhamshire</groupId>
 			<artifactId>GriefPrevention</artifactId>
-			<version>14.5.4</version>
+			<version>16.8</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.diddiz</groupId>
 			<artifactId>logblock</artifactId>
-			<version>1.94</version>
+			<version>1.12-SNAPSHOT</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>de.diddiz</groupId>
-			<artifactId>questioner</artifactId>
-			<version>1.94</version>
-			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>de.diddiz</groupId>
+					<artifactId>questioner</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>

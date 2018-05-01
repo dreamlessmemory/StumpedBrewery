@@ -13,12 +13,12 @@ public class Words {
 
 	// represends Words and letters, that are replaced in drunk players messages
 
-	public static ArrayList<Words> words = new ArrayList<>();
+	public static ArrayList<Words> words = new ArrayList<Words>();
 	public static List<String> commands;
-	public static List<String[]> ignoreText = new ArrayList<>();
+	public static List<String[]> ignoreText = new ArrayList<String[]>();
 	public static Boolean doSigns;
 	public static Boolean log;
-	private static Map<String, Long> waitPlayers = new HashMap<>();
+	private static Map<String, Long> waitPlayers = new HashMap<String, Long>();
 
 	private String from;
 	private String to;

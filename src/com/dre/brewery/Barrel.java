@@ -30,7 +30,7 @@ import org.apache.commons.lang.ArrayUtils;
 
 public class Barrel implements InventoryHolder {
 
-	public static CopyOnWriteArrayList<Barrel> barrels = new CopyOnWriteArrayList<>();
+	public static CopyOnWriteArrayList<Barrel> barrels = new CopyOnWriteArrayList<Barrel>();
 	private static int check = 0;
 
 	private Block spigot;
@@ -778,7 +778,7 @@ public class Barrel implements InventoryHolder {
 		int endX;
 		int endZ;
 
-		ArrayList<Integer> stairs = new ArrayList<>();
+		ArrayList<Integer> stairs = new ArrayList<Integer>();
 
 		if (direction == 1) {
 			startX = 1;
@@ -851,8 +851,8 @@ public class Barrel implements InventoryHolder {
 		int endX;
 		int endZ;
 
-		ArrayList<Integer> stairs = new ArrayList<>();
-		ArrayList<Integer> woods = new ArrayList<>();
+		ArrayList<Integer> stairs = new ArrayList<Integer>();
+		ArrayList<Integer> woods = new ArrayList<Integer>();
 
 		if (direction == 1) {
 			startX = 1;

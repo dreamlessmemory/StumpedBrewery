@@ -10,8 +10,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class LanguageReader {
-	private Map<String, String> entries = new TreeMap<>();
-	private Map<String, String> defaults = new TreeMap<>();
+	private Map<String, String> entries = new TreeMap<String, String>();
+	private Map<String, String> defaults = new TreeMap<String, String>();
 
 	private File file;
 	private boolean changed;
