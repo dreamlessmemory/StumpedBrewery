@@ -293,18 +293,6 @@ public class BRecipe {
 		Brew.addOrReplaceEffects(potionMeta, effects, quality);
 		brew.touch();
 		
-		//test item
-		if(!flavorText.isEmpty()) {
-			if(potionMeta.getLore() != null) {
-				List<String> newLore = new ArrayList<String>();
-				newLore.addAll(potionMeta.getLore());
-				newLore.addAll(getFlavorText(quality));
-				potionMeta.setLore(newLore);
-			} else {
-				potionMeta.setLore(getFlavorText(quality));
-			}
-		}
-
 		potion.setItemMeta(potionMeta);
 		return potion;
 	}

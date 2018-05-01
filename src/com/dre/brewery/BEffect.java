@@ -1,5 +1,7 @@
 package com.dre.brewery;
 
+import java.util.Random;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
@@ -12,6 +14,7 @@ public class BEffect {
 	private short minduration;
 	private short maxduration;
 	private boolean hidden = false;
+	private boolean randomEffect = false;
 
 
 	public BEffect(String effectString) {
@@ -29,10 +32,16 @@ public class BEffect {
 			hidden = true;
 			effect = effect.substring(0, effect.length() - 1);
 		}
-		type = PotionEffectType.getByName(effect);
-		if (type == null) {
-			P.p.errorLog("Effect: " + effect + " does not exist!");
-			return;
+		
+		if(effect.equalsIgnoreCase("RANDOM")) { //If random, default to heal
+			randomEffect = true;
+			type = PotionEffectType.getByName("HEAL");
+		} else {
+			type = PotionEffectType.getByName(effect);
+			if (type == null) {
+				P.p.errorLog("Effect: " + effect + " does not exist!");
+				return;
+			}
 		}
 
 		if (effectSplit.length == 3) {
@@ -84,6 +93,14 @@ public class BEffect {
 	public void apply(int quality, Player player) {
 		int duration = calcDuration(quality);
 		int lvl = calcLvl(quality);
+		
+		if(randomEffect) {
+			Random rand = new Random();
+			PotionEffectType[] possibilities = PotionEffectType.values(); 
+			do {
+				type = possibilities[rand.nextInt(possibilities.length)];
+			} while (type == null);
+		}
 
 		if (lvl < 1 || (duration < 1 && !type.isInstant())) {
 			return;
