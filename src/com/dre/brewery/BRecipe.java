@@ -245,6 +245,24 @@ public class BRecipe {
 		}
 		return false;
 	}
+	
+	public int countMissingIngredients(List<ItemStack> list) {
+		int count = 0;
+		//Code
+		for (ItemStack ingredient : ingredients) {
+			boolean matches = false;
+			for (ItemStack used : list) {
+				if (ingredientsMatch(used, ingredient)) {
+					matches = true;
+					break;
+				}
+			}
+			if (!matches) {
+				count++;
+			}
+		}
+		return count;
+	}
 
 	// Returns true if this ingredient cares about durability
 	public boolean hasExactData(ItemStack item) {

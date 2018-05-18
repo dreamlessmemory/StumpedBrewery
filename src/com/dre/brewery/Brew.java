@@ -368,7 +368,7 @@ public class Brew {
 			if (colorInBrewer != hasColorLore(potionMeta)) {
 				convertLore(potionMeta, colorInBrewer);
 			}
-		}
+		}//insert things here
 		String prefix = P.p.color("&7");
 		if (colorInBrewer && currentRecipe != null) {
 			prefix = getQualityColor(ingredients.getDistillQuality(recipe, distillRuns));
@@ -489,6 +489,7 @@ public class Brew {
 			quality = ingredients.getIngredientQuality(currentRecipe);
 			prefix = getQualityColor(quality);
 			lore = P.p.languageReader.get("Brew_Ingredients");
+			lore = lore.concat(updateIngredientDetails());
 			addOrReplaceLore(meta, prefix, lore);
 		}
 
@@ -544,6 +545,33 @@ public class Brew {
 				meta.setLore(newLore);
 			}
 		}
+	}
+	
+	//Sets up Mastermind-style ingredients hints
+	public String updateIngredientDetails() {
+		
+		String details = "";
+		if(currentRecipe != null) {
+			int[] parameters = ingredients.getIngredientMismatch(currentRecipe);
+			System.out.println("[" + parameters[0] + " " + parameters[1] + " " + parameters[2] + " " + parameters[3] + "]");
+			if(parameters[0] > 0) {
+				details = details.concat(" " + parameters[0] + "+");
+			}
+			if (parameters[1] > 0) {
+				details = details.concat(" " + parameters[1] + "-");
+			}
+			if (parameters[2] > 0) {
+				details = details.concat(" " + parameters[2] + "X");
+			}
+			if (parameters[3] > 0) {
+				details = details.concat(" " + parameters[3] + "*");
+			}
+		}
+		System.out.println(details);
+		if(details.length() > 0) {
+			details = " (" + details.substring(1) + ")";
+		}
+		return details;
 	}
 
 	// sets the DistillLore. Prefix is the color to be used

@@ -8,6 +8,7 @@ import org.bukkit.potion.PotionEffectType;
 
 public class BEffect {
 
+	
 	private PotionEffectType type;
 	private short minlvl;
 	private short maxlvl;
@@ -15,8 +16,14 @@ public class BEffect {
 	private short maxduration;
 	private boolean hidden = false;
 	private boolean randomEffect = false;
-
-
+	private boolean randomDuration = false;
+	private boolean randomLevel= false;
+	Random rand = new Random();
+	
+	private static final int DURATION_CAP = 600;
+	private static final int LEVEL_CAP_INSTANT = 20;
+	private static final int LEVEL_CAP_DURATION = 5;
+	
 	public BEffect(String effectString) {
 		String[] effectSplit = effectString.split("/");
 		String effect = effectSplit[0];
@@ -33,9 +40,9 @@ public class BEffect {
 			effect = effect.substring(0, effect.length() - 1);
 		}
 		
-		if(effect.equalsIgnoreCase("RANDOM")) { //If random, default to heal
+		if(effect.equalsIgnoreCase("RANDOM")) { //If random, default to speed
 			randomEffect = true;
-			type = PotionEffectType.getByName("HEAL");
+			type = PotionEffectType.getByName("SPEED");
 		} else {
 			type = PotionEffectType.getByName(effect);
 			if (type == null) {
@@ -47,17 +54,37 @@ public class BEffect {
 		if (effectSplit.length == 3) {
 			String[] range = effectSplit[1].split("-");
 			if (type.isInstant()) {
-				setLvl(range);
+				if(range[0].equalsIgnoreCase("RANDOM")) {
+					range[0] = LEVEL_CAP_INSTANT + "";
+					randomLevel= true;
+				}
+				setLvl(range); //level
 			} else {
-				setLvl(range);
+				if(range[0].equalsIgnoreCase("RANDOM")) {
+					range[0] = LEVEL_CAP_DURATION + "";
+					randomLevel= true;
+				}
+				setLvl(range); //level
 				range = effectSplit[2].split("-");
-				setDuration(range);
+				if(range[0].equalsIgnoreCase("RANDOM")) {
+					range[0] = DURATION_CAP + "";
+					randomDuration = true;
+				}
+				setDuration(range); //duration
 			}
 		} else if (effectSplit.length == 2) {
 			String[] range = effectSplit[1].split("-");
 			if (type.isInstant()) {
+				if(range[0].equalsIgnoreCase("RANDOM")) {
+					range[0] = LEVEL_CAP_INSTANT + "";
+					randomLevel= true;
+				}
 				setLvl(range);
 			} else {
+				if(range[0].equalsIgnoreCase("RANDOM")) {
+					range[0] = DURATION_CAP + "";
+					randomDuration = true;
+				}
 				setDuration(range);
 				maxlvl = 3;
 				minlvl = 1;
@@ -95,7 +122,6 @@ public class BEffect {
 		int lvl = calcLvl(quality);
 		
 		if(randomEffect) {
-			Random rand = new Random();
 			PotionEffectType[] possibilities = PotionEffectType.values(); 
 			do {
 				type = possibilities[rand.nextInt(possibilities.length)];
@@ -112,11 +138,13 @@ public class BEffect {
 	}
 
 	public int calcDuration(float quality) {
-		return (int) Math.round(minduration + ((maxduration - minduration) * (quality / 10.0)));
+		int effectiveMaxDuration = randomDuration ? (int)(rand.nextDouble() * maxduration) : maxduration;
+		return (int) Math.round(minduration + ((effectiveMaxDuration - minduration) * (quality / 10.0)));
 	}
 
 	public int calcLvl(float quality) {
-		return (int) Math.round(minlvl + ((maxlvl - minlvl) * (quality / 10.0)));
+		int effectiveMaxLevel = randomLevel ? (int)(rand.nextDouble() * maxlvl) : maxlvl;
+		return (int) Math.round(minlvl + ((effectiveMaxLevel - minlvl) * (quality / 10.0)));
 	}
 
 	public void writeInto(PotionMeta meta, int quality) {

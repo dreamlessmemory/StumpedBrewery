@@ -78,6 +78,7 @@ public class BIngredients {
 			P.p.debugLog("cooked potion has Quality: " + quality);
 			Brew brew = new Brew(uid, quality, cookRecipe, this);
 			Brew.addOrReplaceEffects(potionMeta, brew.getEffects(), brew.getQuality());
+			brew.convertLore(potionMeta, false);
 
 			cookedName = cookRecipe.getName(quality);
 			Brew.PotionColor.valueOf(cookRecipe.getColor()).colorBrew(potionMeta, potion, false);
@@ -263,6 +264,23 @@ public class BIngredients {
 			return Math.round(quality);
 		}
 		return -1;
+	}
+	
+	public int[] getIngredientMismatch(BRecipe recipe) {
+		int[] parameters = {0, 0, 0, 0}; //Over, Under, Incorrect, Missing
+		for (ItemStack ingredient : ingredients) {
+			int parity = ingredient.getAmount() - recipe.amountOf(ingredient);
+			if(recipe.amountOf(ingredient) == 0) {
+				parameters[2]++;
+			} else if(parity > 0) {
+				parameters[0]++;
+			} else if (parity < 0) {
+				parameters[1]++;
+			}
+		}
+		parameters[3] = recipe.countMissingIngredients(ingredients);
+		//Code here
+		return parameters;
 	}
 
 	// returns the quality regarding the cooking-time conditioning given Recipe
