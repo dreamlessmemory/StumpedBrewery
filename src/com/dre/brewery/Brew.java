@@ -490,6 +490,7 @@ public class Brew {
 			prefix = getQualityColor(quality);
 			lore = P.p.languageReader.get("Brew_Ingredients");
 			lore = lore.concat(updateIngredientDetails());
+			//lore = lore.concat(ingredients.getIngredientMismatchString(currentRecipe));
 			addOrReplaceLore(meta, prefix, lore);
 		}
 
@@ -553,7 +554,7 @@ public class Brew {
 		String details = "";
 		if(currentRecipe != null) {
 			int[] parameters = ingredients.getIngredientMismatch(currentRecipe);
-			System.out.println("[" + parameters[0] + " " + parameters[1] + " " + parameters[2] + " " + parameters[3] + "]");
+			///System.out.println("[" + parameters[0] + " " + parameters[1] + " " + parameters[2] + " " + parameters[3] + "]");
 			if(parameters[0] > 0) {
 				details = details.concat(" " + parameters[0] + "+");
 			}
@@ -567,7 +568,7 @@ public class Brew {
 				details = details.concat(" " + parameters[3] + "*");
 			}
 		}
-		System.out.println(details);
+		//System.out.println(details);
 		if(details.length() > 0) {
 			details = " (" + details.substring(1) + ")";
 		}

@@ -13,6 +13,7 @@ public class BIngredients {
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
 	private static int lastId = 0;
+	private static final float AGE_DIFF_SCALE = 1.5f;
 
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
@@ -282,6 +283,49 @@ public class BIngredients {
 		//Code here
 		return parameters;
 	}
+	
+	public String getIngredientMismatchString(BRecipe recipe) {
+		String output = "";
+		List<Integer> extra = new ArrayList<Integer>();
+		List<Integer> missing = new ArrayList<Integer>();
+		int unnecessary = 0;
+		for (ItemStack ingredient : ingredients) {
+			int parity = ingredient.getAmount() - recipe.amountOf(ingredient);
+			if(recipe.amountOf(ingredient) == 0) {//unnecessary
+				unnecessary++;
+			} else if(parity > 0) {//extra
+				extra.add(parity);
+			} else if (parity < 0) {//missing
+				missing.add(Math.abs(parity));
+			}
+		}
+		if(!extra.isEmpty()) {
+			Collections.sort(extra);
+			output = output.concat(" +(");
+			for(int i = 0; i < extra.size(); i++) {
+				output = output.concat(extra.get(i).toString());
+				if (i < extra.size() -1) {
+					output = output.concat(", ");
+				}
+			}
+			output = output.concat(")");
+		}
+		if(!missing.isEmpty()) {
+			Collections.sort(missing);
+			output = output.concat(" -(");
+			for(int i = 0; i < missing.size(); i++) {
+				output = output.concat(missing.get(i).toString());
+				if (i < missing.size() - 1) {
+					output = output.concat(", ");
+				}
+			}
+			output = output.concat(")");
+		}
+		if(unnecessary > 0) {
+			output = output.concat(" *" + unnecessary);
+		}
+		return output;
+	}
 
 	// returns the quality regarding the cooking-time conditioning given Recipe
 	public int getCookingQuality(BRecipe recipe, boolean distilled) {
@@ -323,7 +367,7 @@ public class BIngredients {
 
 	// returns the quality regarding the ageing time conditioning given Recipe
 	public int getAgeQuality(BRecipe recipe, float time) {
-		int quality = 10 - Math.round(Math.abs(time - recipe.getAge()) * ((float) recipe.getDifficulty() / 2));
+		int quality = 10 - Math.round(Math.abs(time - recipe.getAge()) * ((float) recipe.getDifficulty() / AGE_DIFF_SCALE));
 
 		if (quality > 0) {
 			return quality;

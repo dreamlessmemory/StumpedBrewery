@@ -11,6 +11,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class BRecipe {
+	
+	private static final float INGREDIENT_DIFF_SCALE = 16.5f;
+	private static final float FERMENTATION_DIFF_SCALE = 17.0f;
+	private static final float WOOD_DIFF_SCALE = 0.65f;
+	
 
 	private String[] name;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>(); // material and amount
@@ -184,7 +189,7 @@ public class BRecipe {
 		if (count < 8) {
 			count = 8;
 		}
-		int allowedCountDiff = Math.round((float) ((11.0 - difficulty) * (count / 10.0)));
+		int allowedCountDiff = Math.round((float) ((INGREDIENT_DIFF_SCALE - difficulty) * (count / 10.0)));
 
 		if (allowedCountDiff == 0) {
 			return 1;
@@ -197,7 +202,7 @@ public class BRecipe {
 		if (time < 8) {
 			time = 8;
 		}
-		int allowedTimeDiff = Math.round((float) ((11.0 - difficulty) * (time / 10.0)));
+		int allowedTimeDiff = Math.round((float) ((FERMENTATION_DIFF_SCALE - difficulty) * (time / 10.0)));
 
 		if (allowedTimeDiff == 0) {
 			return 1;
@@ -207,7 +212,7 @@ public class BRecipe {
 
 	// difference between given and recipe-wanted woodtype
 	public float getWoodDiff(float wood) {
-		return Math.abs(wood - this.wood);
+		return Math.abs(wood - this.wood) * WOOD_DIFF_SCALE;
 	}
 
 	public boolean isCookingOnly() {
