@@ -91,6 +91,7 @@ public class BCauldron {
 	// fills players bottle with cooked brew
 	public static boolean fill(Player player, Block block) {
 		BCauldron bcauldron = get(block);
+		//BlockState state = block.getState();
 		if (bcauldron != null) {
 			if (!player.hasPermission("brewery.cauldron.fill")) {
 				P.p.msg(player, P.p.languageReader.get("Perms_NoCauldronFill"));
@@ -158,9 +159,9 @@ public class BCauldron {
 			} else {
 				P.p.msg(player, P.p.languageReader.get("Player_CauldronInfo2"));
 			}
+			P.p.msgMult(player, bcauldron.ingredients.getContents());
 		}
 	}
-
 	// reset to normal cauldron
 	public static void remove(Block block) {
 		if (getFillLevel(block) != 0) {

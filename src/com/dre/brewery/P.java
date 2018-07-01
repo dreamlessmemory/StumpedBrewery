@@ -213,6 +213,10 @@ public class P extends JavaPlugin {
 	public void msg(CommandSender sender, String msg) {
 		sender.sendMessage(color("&2[Brewery] &f" + msg));
 	}
+	
+	public void msgMult(CommandSender sender, String msg) {
+			sender.sendMessage(msg.split("\n"));
+	}
 
 	public void log(String msg) {
 		this.msg(Bukkit.getConsoleSender(), msg);

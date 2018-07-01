@@ -14,6 +14,10 @@ public class BIngredients {
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
 	private static int lastId = 0;
 	private static final float AGE_DIFF_SCALE = 1.5f;
+	private static final float INGREDIENT_MULTIPLIER = 2.0f;
+	private static final float COOKING_MULTIPLIER = 1.0f;
+	private static final float WOOD_MULTIPLIER = 1.0f;
+	private static final float AGE_MULTIPLIER = 2.0f;
 
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
@@ -155,16 +159,18 @@ public class BIngredients {
 				P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName(5));
 	
 				// is this recipe better than the previous best?
-				if (getQualityScore(ingredientQuality, cookingQuality, 0, 0, recipe.needsToAge()) > quality) {
-					//System.out.println("Pick " + recipe.getName(5) + " " + getQualityScore(ingredientQuality, cookingQuality, 0, 0, recipe.needsToAge()));
-					quality = (float) getQualityScore(ingredientQuality, cookingQuality, 0, 0, recipe.needsToAge());
+				float testQuality = getQualityScore(ingredientQuality, cookingQuality);
+				System.out.println("[Brewery] (Simple) Testing - I: " + ingredientQuality + " C: " + cookingQuality + " total: " + testQuality + "/30.0 for " + recipe.getName(5));
+				if (testQuality > quality) {
+					System.out.println("[Brewery] (Simple) New Pick: " + recipe.getName(5) + " " + testQuality);
+					quality = testQuality;
 					bestRecipe = recipe;
 				}
 			}
 		}
 		if (bestRecipe != null) {
 			P.p.debugLog("best recipe: " + bestRecipe.getName(5) + " has Quality= " + quality);
-			System.out.println("[Brewery] Best Recipe (Simple): " + bestRecipe.getName(5)); 
+			//System.out.println("[Brewery] Best Recipe (Simple): " + bestRecipe.getName(5)); 
 		} 
 		return bestRecipe;
 	}
@@ -193,9 +199,9 @@ public class BIngredients {
 				
 				// is this recipe better than the previous best?
 				float testQuality = getQualityScore(ingredientQuality, cookingQuality, ageQuality, woodQuality, recipe.needsToAge());
-				System.out.println("[Brewery] Testing: " + recipe.getName(5) + " " + testQuality);
+				System.out.println("[Brewery] (Full) Testing - I: " + ingredientQuality + " C: " + cookingQuality + " A: " + ageQuality + " W: " + woodQuality +" T: " + testQuality + "/60.0 for " + recipe.getName(5));
 				if (testQuality > quality) {
-					System.out.println("[Brewery] New Pick: " + recipe.getName(5) + " " + testQuality);
+					System.out.println("[Brewery] (Full) New Pick: " + recipe.getName(5) + " " + testQuality);
 					quality = testQuality;
 					bestRecipe = recipe;
 				}
@@ -230,15 +236,22 @@ public class BIngredients {
 	}
 	
 	private float getQualityScore(int ingredientQuality, int cookingQuality, int woodQuality, int ageQuality, boolean age) {
-		final float ingredientMult = 2.0f;
-		final float cookingMult = 1.0f;
-		final float woodMult = 1.0f;
-		final float ageMult = 2.0f;
 		float score = 0;
-		score += ingredientQuality * ingredientMult;
-		score += cookingQuality * cookingMult;
-		score += woodQuality * woodMult;
-		score += ageQuality * ageMult;
+		score += ingredientQuality * INGREDIENT_MULTIPLIER;
+		score += cookingQuality * COOKING_MULTIPLIER;
+		if(age) {
+			score += woodQuality * WOOD_MULTIPLIER;
+			score += ageQuality * AGE_MULTIPLIER;
+		} else {
+			score *=2;
+		}
+		return score;
+	}
+
+	private float getQualityScore(int ingredientQuality, int cookingQuality) {
+		float score = 0;
+		score += ingredientQuality * INGREDIENT_MULTIPLIER;
+		score += cookingQuality * COOKING_MULTIPLIER;
 		return score;
 	}
 
@@ -479,6 +492,23 @@ public class BIngredients {
 			mats.put(mat, item.getAmount());
 		}
 		return mats;
+	}
+	
+	public String getContents() {
+		String manifest = "Contents:";
+		for (ItemStack item: ingredients) {
+			//System.out.println(item.getType().toString() + ": " + item.getAmount());
+			String itemName = "";
+			for(String part: item.getType().toString().split("_")) {
+				itemName = itemName.concat(part.substring(0, 1) + part.substring(1).toLowerCase()+  " ");
+			}
+			//Remove in 1.13
+			if(item.getData().getData() != 0) {
+				itemName = itemName.concat("(Variant: " + item.getData().getData() + ") - ");
+			}
+			manifest = manifest.concat("\n" + itemName + "x" + item.getAmount());
+		}
+		return manifest;
 	}
 
 }
