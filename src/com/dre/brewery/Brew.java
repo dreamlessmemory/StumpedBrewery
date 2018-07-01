@@ -346,7 +346,7 @@ public class Brew {
 		}
 
 		distillRuns += 1;
-		BRecipe recipe = ingredients.getdistillRecipe(wood, ageTime);
+		BRecipe recipe = ingredients.getDistillRecipe(wood, ageTime);
 		if (recipe != null) {
 			// distillRuns will have an effect on the amount of alcohol, not the quality
 			currentRecipe = recipe;
@@ -388,7 +388,7 @@ public class Brew {
 			return currentRecipe.getDistillTime();
 		}
 
-		BRecipe recipe = ingredients.getdistillRecipe(wood, ageTime);
+		BRecipe recipe = ingredients.getDistillRecipe(wood, ageTime);
 		if (recipe != null) {
 			return recipe.getDistillTime();
 		}
@@ -423,7 +423,12 @@ public class Brew {
 			} else {
 				quality = 0;
 				removeEffects(potionMeta);
-				potionMeta.setDisplayName(P.p.color("&f" + P.p.languageReader.get("Brew_BadPotion")));
+				BRecipe ingRecipe = ingredients.getBestRecipe();
+				if(ingRecipe != null) {
+					potionMeta.setDisplayName(P.p.color("&f" + P.p.languageReader.get("Brew_UnfinishedPotion")));
+				} else {
+					potionMeta.setDisplayName(P.p.color("&f" + P.p.languageReader.get("Brew_BadPotion")));
+				}
 				PotionColor.GREY.colorBrew(potionMeta, item, canDistill());
 			}
 		}

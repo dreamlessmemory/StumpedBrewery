@@ -92,23 +92,30 @@ public class BIngredients {
 				cookedName = P.p.languageReader.get("Brew_ThickBrew");
 				Brew.PotionColor.BLUE.colorBrew(potionMeta, potion, false);
 			} else {
+				//Get the cooked name
+				Material highest = null;
+				int highestCount = 0;
+				//Search for the cooked Name
 				for (Material ingredient : materials.keySet()) {
 					if (cookedNames.containsKey(ingredient)) {
-						// if more than half of the ingredients is of one kind
-						if (materials.get(ingredient) > (getIngredientsCount() / 2)) {
-							cookedName = cookedNames.get(ingredient);
-							Brew.PotionColor.CYAN.colorBrew(potionMeta, potion, true);
+						if(materials.get(ingredient) > highestCount) {
+							highest = ingredient;
+							highestCount = materials.get(ingredient);
 						}
 					}
 				}
+				//Assign a Name if found
+				if (highest != null) {
+					cookedName = cookedNames.get(highest);
+					Brew.PotionColor.CYAN.colorBrew(potionMeta, potion, true);
+				}
 			}
 		}
-		if (cookedName == null) {
-			// if no name could be found
+		if (cookedName == null) {// if no name could be found
 			cookedName = P.p.languageReader.get("Brew_Undefined");
 			Brew.PotionColor.CYAN.colorBrew(potionMeta, potion, true);
 		}
-
+		//Set Display Name
 		potionMeta.setDisplayName(P.p.color("&f" + cookedName));
 		// This effect stores the UID in its Duration
 		potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect((uid * 4), 0), true);
@@ -134,22 +141,67 @@ public class BIngredients {
 		return cookedTime;
 	}
 
+	public BRecipe getBestRecipe() { //Cooked Only
+		float quality = 0;
+		int ingredientQuality;
+		int cookingQuality;
+		BRecipe bestRecipe = null;
+		for (BRecipe recipe : recipes) {
+			ingredientQuality = getIngredientQuality(recipe);
+			cookingQuality = getCookingQuality(recipe);
+			
+			//If correct ingredients and timing
+			if (ingredientQuality > -1 && cookingQuality > -1) {
+				P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName(5));
+	
+				// is this recipe better than the previous best?
+				if (getQualityScore(ingredientQuality, cookingQuality, 0, 0, recipe.needsToAge()) > quality) {
+					//System.out.println("Pick " + recipe.getName(5) + " " + getQualityScore(ingredientQuality, cookingQuality, 0, 0, recipe.needsToAge()));
+					quality = (float) getQualityScore(ingredientQuality, cookingQuality, 0, 0, recipe.needsToAge());
+					bestRecipe = recipe;
+				}
+			}
+		}
+		if (bestRecipe != null) {
+			P.p.debugLog("best recipe: " + bestRecipe.getName(5) + " has Quality= " + quality);
+			System.out.println("[Brewery] Best Recipe (Simple): " + bestRecipe.getName(5)); 
+		} 
+		return bestRecipe;
+	}
+
 	// best recipe for current state of potion, STILL not always returns the
 	// correct one...
 	public BRecipe getBestRecipe(float wood, float time, boolean distilled) {
 		float quality = 0;
 		int ingredientQuality;
 		int cookingQuality;
-		int woodQuality;
-		int ageQuality;
+		int woodQuality = 0;
+		int ageQuality = 0;
 		BRecipe bestRecipe = null;
 		for (BRecipe recipe : recipes) {
 			ingredientQuality = getIngredientQuality(recipe);
 			cookingQuality = getCookingQuality(recipe, distilled);
-
+			
+			//If fermentation is close enough
 			if (ingredientQuality > -1 && cookingQuality > -1) {
 				if (recipe.needsToAge() || time > 0.5) {
-					// needs riping in barrel
+					// needs Aging in barrel
+					ageQuality = getAgeQuality(recipe, time);
+					woodQuality = getWoodQuality(recipe, wood);
+				}
+				P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName(5));
+				
+				// is this recipe better than the previous best?
+				float testQuality = getQualityScore(ingredientQuality, cookingQuality, ageQuality, woodQuality, recipe.needsToAge());
+				System.out.println("[Brewery] Testing: " + recipe.getName(5) + " " + testQuality);
+				if (testQuality > quality) {
+					System.out.println("[Brewery] New Pick: " + recipe.getName(5) + " " + testQuality);
+					quality = testQuality;
+					bestRecipe = recipe;
+				}
+				/*//If needs to Age or has aged for 10 mins
+				if (recipe.needsToAge() || time > 0.5) {
+					// needs Aging in barrel
 					ageQuality = getAgeQuality(recipe, time);
 					woodQuality = getWoodQuality(recipe, wood);
 					P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality +
@@ -167,19 +219,33 @@ public class BIngredients {
 						quality = ((float) ingredientQuality + cookingQuality) / 2;
 						bestRecipe = recipe;
 					}
-				}
+				}*/
 			}
 		}
 		if (bestRecipe != null) {
 			P.p.debugLog("best recipe: " + bestRecipe.getName(5) + " has Quality= " + quality);
+			System.out.println("[Brewery] Best Recipe (Full): " + bestRecipe.getName(5));
 		}
 		return bestRecipe;
+	}
+	
+	private float getQualityScore(int ingredientQuality, int cookingQuality, int woodQuality, int ageQuality, boolean age) {
+		final float ingredientMult = 2.0f;
+		final float cookingMult = 1.0f;
+		final float woodMult = 1.0f;
+		final float ageMult = 2.0f;
+		float score = 0;
+		score += ingredientQuality * ingredientMult;
+		score += cookingQuality * cookingMult;
+		score += woodQuality * woodMult;
+		score += ageQuality * ageMult;
+		return score;
 	}
 
 	// returns recipe that is cooking only and matches the ingredients and
 	// cooking time
 	public BRecipe getCookRecipe() {
-		BRecipe bestRecipe = getBestRecipe(0, 0, false);
+		BRecipe bestRecipe = getBestRecipe();
 
 		// Check if best recipe is cooking only
 		if (bestRecipe != null) {
@@ -192,10 +258,10 @@ public class BIngredients {
 
 	// returns the currently best matching recipe for distilling for the
 	// ingredients and cooking time
-	public BRecipe getdistillRecipe(float wood, float time) {
+	public BRecipe getDistillRecipe(float wood, float time) {
 		BRecipe bestRecipe = getBestRecipe(wood, time, true);
 
-		// Check if best recipe needs to be destilled
+		// Check if best recipe needs to be distilled
 		if (bestRecipe != null) {
 			if (bestRecipe.needsDistilling()) {
 				return bestRecipe;
@@ -334,6 +400,17 @@ public class BIngredients {
 		}
 		int quality = 10 - (int) Math.round(((float) Math.abs(cookedTime - recipe.getCookingTime()) / recipe.allowedTimeDiff(recipe.getCookingTime())) * 10.0);
 
+		if (quality >= 0) {
+			if (cookedTime <= 1) {
+				return 0;
+			}
+			return quality;
+		}
+		return -1;
+	}
+	//Only Based on Time
+	public int getCookingQuality(BRecipe recipe) {
+		int quality = 10 - (int) Math.round(((float) Math.abs(cookedTime - recipe.getCookingTime()) / recipe.allowedTimeDiff(recipe.getCookingTime())) * 10.0);
 		if (quality >= 0) {
 			if (cookedTime <= 1) {
 				return 0;

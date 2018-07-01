@@ -32,7 +32,8 @@ public class Barrel implements InventoryHolder {
 
 	public static CopyOnWriteArrayList<Barrel> barrels = new CopyOnWriteArrayList<Barrel>();
 	private static int check = 0;
-
+	private static final double MINUTES_PER_YEAR = 1.0; 
+	
 	private Block spigot;
 	private int[] woodsloc = null; // location of wood Blocks
 	private int[] stairsloc = null; // location of stair Blocks
@@ -95,7 +96,8 @@ public class Barrel implements InventoryHolder {
 	public static void onUpdate() {
 		for (Barrel barrel : barrels) {
 			// Minecraft day is 20 min, so add 1/20 to the time every minute
-			barrel.time += (1.0 / 20.0);
+			//barrel.time += (1.0 / 20.0);
+			barrel.time += (1.0 / MINUTES_PER_YEAR);
 		}
 		if (check == 0 && barrels.size() > 0) {
 			Barrel random = barrels.get((int) Math.floor(Math.random() * barrels.size()));
