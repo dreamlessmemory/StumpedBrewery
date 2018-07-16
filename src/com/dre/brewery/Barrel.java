@@ -5,7 +5,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Map;
 
 import org.bukkit.Material;
-import org.bukkit.TreeSpecies;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.block.Block;
@@ -17,14 +16,11 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Stairs;
-import org.bukkit.material.Tree;
-import org.bukkit.material.Wood;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dre.brewery.integration.GriefPreventionBarrel;
 import com.dre.brewery.integration.LWCBarrel;
-import com.dre.brewery.integration.LogBlockBarrel;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -254,7 +250,7 @@ public class Barrel implements InventoryHolder {
 		// reset barreltime, potions have new age
 		time = 0;
 
-		if (P.p.useLB) {
+		/*if (P.p.useLB) {
 			try {
 				LogBlockBarrel.openBarrel(player, inventory, spigot.getLocation());
 			} catch (Throwable e) {
@@ -262,7 +258,7 @@ public class Barrel implements InventoryHolder {
 				P.p.errorLog("Brewery was tested with version 1.94 of LogBlock!");
 				e.printStackTrace();
 			}
-		}
+		}*/
 		player.openInventory(inventory);
 	}
 
@@ -274,7 +270,7 @@ public class Barrel implements InventoryHolder {
 	// Returns true if this Block is part of this Barrel
 	public boolean hasBlock(Block block) {
 		if (block != null) {
-			if (block.getType().equals(Material.WOOD)) {
+			if (isWood(block.getType())) {
 				if (hasWoodBlock(block)) {
 					return true;
 				}
@@ -341,14 +337,14 @@ public class Barrel implements InventoryHolder {
 	public static Barrel get(Block block) {
 		if (block != null) {
 			switch (block.getType()) {
-			case FENCE:
-			case NETHER_FENCE:
-			case SIGN_POST:
+			case OAK_FENCE:
+			case NETHER_BRICK_FENCE:
+			case SIGN:
 			case WALL_SIGN:
 			case ACACIA_FENCE:
 			case BIRCH_FENCE:
 			case DARK_OAK_FENCE:
-			case IRON_FENCE:
+			case IRON_BARS:
 			case JUNGLE_FENCE:
 			case SPRUCE_FENCE:
 				Barrel barrel = getBySpigot(block);
@@ -356,11 +352,16 @@ public class Barrel implements InventoryHolder {
 					return barrel;
 				}
 				return null;
-			case WOOD:
-			case WOOD_STAIRS:
-			case BIRCH_WOOD_STAIRS:
-			case JUNGLE_WOOD_STAIRS:
-			case SPRUCE_WOOD_STAIRS:
+			case OAK_PLANKS:
+			case SPRUCE_PLANKS:
+			case BIRCH_PLANKS:
+			case JUNGLE_PLANKS:
+			case ACACIA_PLANKS:
+			case DARK_OAK_PLANKS:
+			case OAK_STAIRS:
+			case BIRCH_STAIRS:
+			case JUNGLE_STAIRS:
+			case SPRUCE_STAIRS:
 			case ACACIA_STAIRS:
 			case DARK_OAK_STAIRS:
 				Barrel barrel2 = getByWood(block);
@@ -400,7 +401,7 @@ public class Barrel implements InventoryHolder {
 
 	// Get the barrel by its corpus (Wood Planks, Stairs)
 	public static Barrel getByWood(Block wood) {
-		if (wood.getType().equals(Material.WOOD)) {
+		if (isWood(wood.getType())) {
 			for (Barrel barrel : barrels) {
 				if (barrel.hasWoodBlock(wood)) {
 					return barrel;
@@ -459,7 +460,7 @@ public class Barrel implements InventoryHolder {
 				human.closeInventory();
 			}
 			ItemStack[] items = inventory.getContents();
-			if (P.p.useLB && breaker != null) {
+			/*if (P.p.useLB && breaker != null) {
 				try {
 					LogBlockBarrel.breakBarrel(breaker.getName(), items, spigot.getLocation());
 				} catch (Throwable e) {
@@ -467,7 +468,7 @@ public class Barrel implements InventoryHolder {
 					P.p.errorLog("Brewery was tested with version 1.94 of LogBlock!");
 					e.printStackTrace();
 				}
-			}
+			}*/
 			for (ItemStack item : items) {
 				if (item != null) {
 					Brew brew = Brew.get(item);
@@ -584,11 +585,11 @@ public class Barrel implements InventoryHolder {
 	public static int getDirection(Block spigot) {
 		int direction = 0;// 1=x+ 2=x- 3=z+ 4=z-
 		Material type = spigot.getRelative(0, 0, 1).getType();
-		if (type == Material.WOOD || isStairs(type)) {
+		if (isWood(type) || isStairs(type)) {
 			direction = 3;
 		}
 		type = spigot.getRelative(0, 0, -1).getType();
-		if (type == Material.WOOD || isStairs(type)) {
+		if (isWood(type) || isStairs(type)) {
 			if (direction == 0) {
 				direction = 4;
 			} else {
@@ -596,7 +597,7 @@ public class Barrel implements InventoryHolder {
 			}
 		}
 		type = spigot.getRelative(1, 0, 0).getType();
-		if (type == Material.WOOD || isStairs(type)) {
+		if (isWood(type) || isStairs(type)) {
 			if (direction == 0) {
 				direction = 1;
 			} else {
@@ -604,7 +605,7 @@ public class Barrel implements InventoryHolder {
 			}
 		}
 		type = spigot.getRelative(-1, 0, 0).getType();
-		if (type == Material.WOOD || isStairs(type)) {
+		if (isWood(type) || isStairs(type)) {
 			if (direction == 0) {
 				direction = 2;
 			} else {
@@ -621,7 +622,7 @@ public class Barrel implements InventoryHolder {
 
 	// true for small barrels
 	public static boolean isSign(Block spigot) {
-		return spigot.getType() == Material.WALL_SIGN || spigot.getType() == Material.SIGN_POST;
+		return spigot.getType() == Material.WALL_SIGN || spigot.getType() == Material.SIGN;
 	}
 
 	// woodtype of the block the spigot is attached to
@@ -644,44 +645,22 @@ public class Barrel implements InventoryHolder {
 		}
 		try {
 			switch (wood.getType()) {
-				case WOOD:
-					MaterialData data = wood.getState().getData();
-					TreeSpecies woodType;
-					if (data instanceof Tree) {
-						woodType = ((Tree) data).getSpecies();
-					} else if (data instanceof Wood) {
-						woodType = ((Wood) data).getSpecies();
-					} else {
-						return 0;
-					}
-
-					switch (woodType) {
-						case GENERIC:
-							return 2;
-						case REDWOOD:
-							return 4;
-						case BIRCH:
-							return 1;
-						case JUNGLE:
-							return 3;
-						case ACACIA:
-							return 5;
-						case DARK_OAK:
-							return 6;
-						default:
-							return 0;
-					}
-
-				case WOOD_STAIRS:
+				case OAK_PLANKS:
+				case OAK_STAIRS:
 					return 2;
-				case SPRUCE_WOOD_STAIRS:
+				case SPRUCE_PLANKS:
+				case SPRUCE_STAIRS:
 					return 4;
-				case BIRCH_WOOD_STAIRS:
+				case BIRCH_PLANKS:
+				case BIRCH_STAIRS:
 					return 1;
-				case JUNGLE_WOOD_STAIRS:
+				case JUNGLE_PLANKS:
+				case JUNGLE_STAIRS:
 					return 3;
+				case ACACIA_PLANKS:
 				case ACACIA_STAIRS:
 					return 5;
+				case DARK_OAK_PLANKS:
 				case DARK_OAK_STAIRS:
 					return 6;
 				default:
@@ -727,10 +706,10 @@ public class Barrel implements InventoryHolder {
 
 	public static boolean isStairs(Material material) {
 		switch (material) {
-			case WOOD_STAIRS:
-			case SPRUCE_WOOD_STAIRS:
-			case BIRCH_WOOD_STAIRS:
-			case JUNGLE_WOOD_STAIRS:
+			case OAK_STAIRS:
+			case SPRUCE_STAIRS:
+			case BIRCH_STAIRS:
+			case JUNGLE_STAIRS:
 			case ACACIA_STAIRS:
 			case DARK_OAK_STAIRS:
 				return true;
@@ -739,14 +718,29 @@ public class Barrel implements InventoryHolder {
 		}
 	}
 
+	public static boolean isWood(Material material) {
+		switch (material) {
+			case OAK_PLANKS:
+			case SPRUCE_PLANKS:
+			case BIRCH_PLANKS:
+			case JUNGLE_PLANKS:
+			case ACACIA_PLANKS:
+			case DARK_OAK_PLANKS:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	
 	public static boolean isFence(Material material) {
 		switch (material) {
-			case FENCE:
-			case NETHER_FENCE:
+			case OAK_FENCE:
+			case NETHER_BRICK_FENCE:
 			case ACACIA_FENCE:
 			case BIRCH_FENCE:
 			case DARK_OAK_FENCE:
-			case IRON_FENCE:
+			case IRON_BARS:
 			case JUNGLE_FENCE:
 			case SPRUCE_FENCE:
 				return true;
@@ -823,6 +817,7 @@ public class Barrel implements InventoryHolder {
 									return block;
 								}
 							}
+							
 						}
 						stairs.add(block.getX());
 						stairs.add(block.getY());
@@ -908,8 +903,8 @@ public class Barrel implements InventoryHolder {
 							continue;
 						}
 					}
-					if (type == Material.WOOD || isStairs(type)) {
-						if (type == Material.WOOD) {
+					if (isWood(type) || isStairs(type)) {
+						if (isWood(type)) {
 							woods.add(block.getX());
 							woods.add(block.getY());
 							woods.add(block.getZ());

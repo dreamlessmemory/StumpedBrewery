@@ -1,7 +1,6 @@
 package com.dre.brewery;
 
 import com.dre.brewery.filedata.*;
-import com.dre.brewery.integration.LogBlockBarrel;
 import com.dre.brewery.integration.WGBarrel;
 import com.dre.brewery.integration.WGBarrelNew;
 import com.dre.brewery.integration.WGBarrelOld;
@@ -171,13 +170,13 @@ public class P extends JavaPlugin {
 		Words.ignoreText.clear();
 		Words.commands = null;
 		BPlayer.drainItems.clear();
-		if (useLB) {
+		/*if (useLB) {
 			try {
 				LogBlockBarrel.clear();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
+		}*/
 
 		// load the Config
 		try {
@@ -704,12 +703,12 @@ public class P extends JavaPlugin {
 			// will only remove when existing
 			BCauldron.remove(block);
 			return true;
-		case FENCE:
-		case NETHER_FENCE:
+		case OAK_FENCE:
+		case NETHER_BRICK_FENCE:
 		case ACACIA_FENCE:
 		case BIRCH_FENCE:
 		case DARK_OAK_FENCE:
-		case IRON_FENCE:
+		case IRON_BARS:
 		case JUNGLE_FENCE:
 		case SPRUCE_FENCE:
 			// remove barrel and throw potions on the ground
@@ -723,7 +722,7 @@ public class P extends JavaPlugin {
 				}
 			}
 			return true;
-		case SIGN_POST:
+		case SIGN:
 		case WALL_SIGN:
 			// remove small Barrels
 			Barrel barrel2 = Barrel.getBySpigot(block);
@@ -740,11 +739,11 @@ public class P extends JavaPlugin {
 				}
 			}
 			return true;
-		case WOOD:
-		case WOOD_STAIRS:
-		case BIRCH_WOOD_STAIRS:
-		case JUNGLE_WOOD_STAIRS:
-		case SPRUCE_WOOD_STAIRS:
+		case OAK_PLANKS:
+		case OAK_STAIRS:
+		case BIRCH_STAIRS:
+		case JUNGLE_STAIRS:
+		case SPRUCE_STAIRS:
 		case ACACIA_STAIRS:
 		case DARK_OAK_STAIRS:
 			Barrel barrel3 = Barrel.getByWood(block);
@@ -768,7 +767,7 @@ public class P extends JavaPlugin {
 		return msg;
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
+	//@SuppressWarnings("ResultOfMethodCallIgnored")
 	public static void saveFile(InputStream in, File dest, String name, boolean overwrite) throws IOException {
 		if (in == null) return;
 		if (!dest.exists()) {

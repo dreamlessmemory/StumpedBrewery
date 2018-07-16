@@ -143,7 +143,7 @@ public class LanguageReader {
 		}
 	}
 
-	@SuppressWarnings("ResultOfMethodCallIgnored")
+	//@SuppressWarnings("ResultOfMethodCallIgnored")
 	public void save() {
 		if (changed) {
 			/* Copy old File */

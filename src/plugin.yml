@@ -1,12 +1,13 @@
 name: Brewery
-version: 1.6.1
+version: 2.0.0
 main: com.dre.brewery.P
+api-version: 1.13
 authors: [Milan Albrecht, Frank Baumann, ProgrammerDan]
 softdepend: [LWC, LogBlock, WorldGuard, GriefPrevention, Vault]
 commands:
   brewery:
     description: Command for Administration
-    aliases: [brew]
+    aliases: [brew, br]
 permissions:
 # -- Groups --
 # User

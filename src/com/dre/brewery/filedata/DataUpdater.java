@@ -39,7 +39,7 @@ public class DataUpdater {
 
 
 
-	@SuppressWarnings("deprecation")
+	//@SuppressWarnings("deprecation")
 	public void update10() {
 
 		data.set("Version", DataSave.dataVersion);
@@ -54,7 +54,8 @@ public class DataUpdater {
 						Map<String, Integer> ingredients = new HashMap<String, Integer>();
 						for (String ingredient : matSection.getKeys(false)) {
 							// convert to Material
-							Material mat = Material.getMaterial(P.p.parseInt(ingredient));
+							//Material mat = Material.getMaterial(P.p.parseInt(ingredient));
+							Material mat = Material.getMaterial(ingredient);
 							if (mat != null) {
 								ingredients.put(mat.name(), matSection.getInt(ingredient));
 							}
@@ -84,7 +85,7 @@ public class DataUpdater {
 								Map<String, Integer> ingredients = new HashMap<String, Integer>();
 								for (String ingredient : ingredientSection.getKeys(false)) {
 									// convert to Material
-									Material mat = Material.getMaterial(P.p.parseInt(ingredient));
+									Material mat = Material.getMaterial(ingredient);
 									if (mat != null) {
 										ingredients.put(mat.name(), ingredientSection.getInt(ingredient));
 									}

@@ -72,8 +72,8 @@ public class BRecipe {
 								mat = vaultItem.getType();
 								if (durability == -1 && vaultItem.getSubTypeId() != 0) {
 									durability = vaultItem.getSubTypeId();
-								}
-								if (mat == org.bukkit.Material.LEAVES) {
+								}//TODO: Is this useful?
+								if (mat == org.bukkit.Material.OAK_LEAVES) {
 									if (durability > 3) {
 										durability -= 4; // Vault has leaves with higher durability
 									}

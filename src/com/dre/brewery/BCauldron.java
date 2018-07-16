@@ -37,7 +37,7 @@ public class BCauldron {
 
 	public void onUpdate() {
 		// Check if fire still alive
-		if (!block.getChunk().isLoaded() || block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.STATIONARY_LAVA
+		if (!block.getChunk().isLoaded() || block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.LAVA
 				|| block.getRelative(BlockFace.DOWN).getType() == Material.LAVA) {
 			// add a minute to cooking time
 			state++;
@@ -159,9 +159,20 @@ public class BCauldron {
 			} else {
 				P.p.msg(player, P.p.languageReader.get("Player_CauldronInfo2"));
 			}
-			P.p.msgMult(player, bcauldron.ingredients.getContents());
 		}
 	}
+	
+	public static void printContents(Player player, Block block) {
+		if (!player.hasPermission("brewery.cauldron.time")) {
+			P.p.msg(player, P.p.languageReader.get("Error_NoPermissions"));
+			return;
+		}
+		BCauldron bcauldron = get(block);
+		if (bcauldron != null) {
+			P.p.msg(player, P.p.languageReader.get("Player_CauldronContents", "" + bcauldron.ingredients.getContents()));
+		}
+	}
+	
 	// reset to normal cauldron
 	public static void remove(Block block) {
 		if (getFillLevel(block) != 0) {

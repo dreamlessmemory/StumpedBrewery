@@ -42,11 +42,14 @@ public class PlayerListener implements Listener {
 						if (materialInHand == null || materialInHand == Material.BUCKET) {
 							return;
 
-						} else if (materialInHand == Material.WATCH) {
+						} else if (materialInHand == Material.CLOCK) {
 							BCauldron.printTime(player, clickedBlock);
 							return;
 
 							// fill a glass bottle with potion
+						} else if (materialInHand == Material.COMPASS) {
+							BCauldron.printContents(player, clickedBlock);
+							return;
 						} else if (materialInHand == Material.GLASS_BOTTLE) {
 							if (player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
 								if (BCauldron.fill(player, clickedBlock)) {
@@ -78,7 +81,7 @@ public class PlayerListener implements Listener {
 
 						// Check if fire alive below cauldron when adding ingredients
 						Block down = clickedBlock.getRelative(BlockFace.DOWN);
-						if (down.getType() == Material.FIRE || down.getType() == Material.STATIONARY_LAVA || down.getType() == Material.LAVA) {
+						if (down.getType() == Material.FIRE || down.getType() == Material.LAVA || down.getType() == Material.LAVA) {
 
 							event.setCancelled(true);
 							boolean handSwap = false;
@@ -147,7 +150,7 @@ public class PlayerListener implements Listener {
 
 					// Access a Barrel
 					Barrel barrel = null;
-					if (type == Material.WOOD) {
+					if (Barrel.isWood(type)) {
 						if (openEverywhere) {
 							barrel = Barrel.get(clickedBlock);
 						}
@@ -160,7 +163,7 @@ public class PlayerListener implements Listener {
 								break;
 							}
 						}
-					} else if (Barrel.isFence(type) || type == Material.SIGN_POST || type == Material.WALL_SIGN) {
+					} else if (Barrel.isFence(type) || type == Material.SIGN || type == Material.WALL_SIGN) {
 						barrel = Barrel.getBySpigot(clickedBlock);
 					}
 

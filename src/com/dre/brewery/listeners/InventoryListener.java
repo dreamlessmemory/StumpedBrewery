@@ -1,7 +1,7 @@
 package com.dre.brewery.listeners;
 
 import com.dre.brewery.*;
-import com.dre.brewery.integration.LogBlockBarrel;
+//import com.dre.brewery.integration.LogBlockBarrel;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -315,7 +315,7 @@ public class InventoryListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
-		if (P.p.useLB) {
+		/*if (P.p.useLB) {
 			if (event.getInventory().getHolder() instanceof Barrel) {
 				try {
 					LogBlockBarrel.closeBarrel(event.getPlayer(), event.getInventory());
@@ -325,6 +325,6 @@ public class InventoryListener implements Listener {
 					e.printStackTrace();
 				}
 			}
-		}
+		}*/
 	}
 }

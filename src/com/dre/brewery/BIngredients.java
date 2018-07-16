@@ -160,9 +160,9 @@ public class BIngredients {
 	
 				// is this recipe better than the previous best?
 				float testQuality = getQualityScore(ingredientQuality, cookingQuality);
-				System.out.println("[Brewery] (Simple) Testing - I: " + ingredientQuality + " C: " + cookingQuality + " total: " + testQuality + "/30.0 for " + recipe.getName(5));
+				//System.out.println("[Brewery] (Simple) Testing - I: " + ingredientQuality + " C: " + cookingQuality + " total: " + testQuality + "/30.0 for " + recipe.getName(5));
 				if (testQuality > quality) {
-					System.out.println("[Brewery] (Simple) New Pick: " + recipe.getName(5) + " " + testQuality);
+					//System.out.println("[Brewery] (Simple) New Pick: " + recipe.getName(5) + " " + testQuality);
 					quality = testQuality;
 					bestRecipe = recipe;
 				}
@@ -199,9 +199,9 @@ public class BIngredients {
 				
 				// is this recipe better than the previous best?
 				float testQuality = getQualityScore(ingredientQuality, cookingQuality, ageQuality, woodQuality, recipe.needsToAge());
-				System.out.println("[Brewery] (Full) Testing - I: " + ingredientQuality + " C: " + cookingQuality + " A: " + ageQuality + " W: " + woodQuality +" T: " + testQuality + "/60.0 for " + recipe.getName(5));
+				//System.out.println("[Brewery] (Full) Testing - I: " + ingredientQuality + " C: " + cookingQuality + " A: " + ageQuality + " W: " + woodQuality +" T: " + testQuality + "/60.0 for " + recipe.getName(5));
 				if (testQuality > quality) {
-					System.out.println("[Brewery] (Full) New Pick: " + recipe.getName(5) + " " + testQuality);
+					//System.out.println("[Brewery] (Full) New Pick: " + recipe.getName(5) + " " + testQuality);
 					quality = testQuality;
 					bestRecipe = recipe;
 				}
@@ -495,20 +495,16 @@ public class BIngredients {
 	}
 	
 	public String getContents() {
-		String manifest = "Contents:";
+		String manifest = " ";
 		for (ItemStack item: ingredients) {
-			//System.out.println(item.getType().toString() + ": " + item.getAmount());
+			///System.out.println(item.getType().toString() + ": " + item.getAmount());
 			String itemName = "";
 			for(String part: item.getType().toString().split("_")) {
 				itemName = itemName.concat(part.substring(0, 1) + part.substring(1).toLowerCase()+  " ");
 			}
-			//Remove in 1.13
-			if(item.getData().getData() != 0) {
-				itemName = itemName.concat("(Variant: " + item.getData().getData() + ") - ");
-			}
-			manifest = manifest.concat("\n" + itemName + "x" + item.getAmount());
+			manifest = manifest.concat(itemName + "x" + item.getAmount() + " - ");
 		}
-		return manifest;
+		return manifest.substring(0, manifest.length() - 3);
 	}
 
 }
