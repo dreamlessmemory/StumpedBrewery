@@ -13,11 +13,11 @@ public class BIngredients {
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
 	private static int lastId = 0;
-	private static final float AGE_DIFF_SCALE = 1.5f;
-	private static final float INGREDIENT_MULTIPLIER = 2.0f;
-	private static final float COOKING_MULTIPLIER = 1.0f;
-	private static final float WOOD_MULTIPLIER = 1.0f;
-	private static final float AGE_MULTIPLIER = 2.0f;
+	public static float ageDifficultyScale = 2.0f;
+	public static float ingredientScoreMultiplier = 2.0f;
+	public static float cookingScoreMultiplier = 1.0f;
+	public static float woodTypeScoreMultiplier = 1.0f;
+	public static float ageScoreMultiplier = 2.0f;
 
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
@@ -230,18 +230,18 @@ public class BIngredients {
 		}
 		if (bestRecipe != null) {
 			P.p.debugLog("best recipe: " + bestRecipe.getName(5) + " has Quality= " + quality);
-			System.out.println("[Brewery] Best Recipe (Full): " + bestRecipe.getName(5));
+			//System.out.println("[Brewery] Best Recipe (Full): " + bestRecipe.getName(5));
 		}
 		return bestRecipe;
 	}
 	
 	private float getQualityScore(int ingredientQuality, int cookingQuality, int woodQuality, int ageQuality, boolean age) {
 		float score = 0;
-		score += ingredientQuality * INGREDIENT_MULTIPLIER;
-		score += cookingQuality * COOKING_MULTIPLIER;
+		score += ingredientQuality * ingredientScoreMultiplier;
+		score += cookingQuality * cookingScoreMultiplier;
 		if(age) {
-			score += woodQuality * WOOD_MULTIPLIER;
-			score += ageQuality * AGE_MULTIPLIER;
+			score += woodQuality * woodTypeScoreMultiplier;
+			score += ageQuality * ageScoreMultiplier;
 		} else {
 			score *=2;
 		}
@@ -250,8 +250,8 @@ public class BIngredients {
 
 	private float getQualityScore(int ingredientQuality, int cookingQuality) {
 		float score = 0;
-		score += ingredientQuality * INGREDIENT_MULTIPLIER;
-		score += cookingQuality * COOKING_MULTIPLIER;
+		score += ingredientQuality * ingredientScoreMultiplier;
+		score += cookingQuality * cookingScoreMultiplier;
 		return score;
 	}
 
@@ -457,7 +457,7 @@ public class BIngredients {
 
 	// returns the quality regarding the ageing time conditioning given Recipe
 	public int getAgeQuality(BRecipe recipe, float time) {
-		int quality = 10 - Math.round(Math.abs(time - recipe.getAge()) * ((float) recipe.getDifficulty() / AGE_DIFF_SCALE));
+		int quality = 10 - Math.round(Math.abs(time - recipe.getAge()) * ((float) recipe.getDifficulty() / ageDifficultyScale));
 
 		if (quality > 0) {
 			return quality;

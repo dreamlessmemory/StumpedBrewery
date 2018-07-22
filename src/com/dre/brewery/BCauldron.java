@@ -3,15 +3,18 @@ package com.dre.brewery;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.entity.Player;
+//import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
+//import org.bukkit.block.BlockState;
+//import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Effect;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.material.Cauldron;
-import org.bukkit.material.MaterialData;
+//import org.bukkit.material.Cauldron;
+//import org.bukkit.material.MaterialData;
 
 public class BCauldron {
 	public static CopyOnWriteArrayList<BCauldron> bcauldrons = new CopyOnWriteArrayList<BCauldron>();
@@ -91,7 +94,6 @@ public class BCauldron {
 	// fills players bottle with cooked brew
 	public static boolean fill(Player player, Block block) {
 		BCauldron bcauldron = get(block);
-		//BlockState state = block.getState();
 		if (bcauldron != null) {
 			if (!player.hasPermission("brewery.cauldron.fill")) {
 				P.p.msg(player, P.p.languageReader.get("Perms_NoCauldronFill"));
@@ -100,28 +102,28 @@ public class BCauldron {
 			ItemStack potion = bcauldron.ingredients.cook(bcauldron.state);
 			
 			if (potion != null) {
-				byte data = block.getData();
-				if (data > 3) {
-					data = 3;
-					block.setData(data);
-				} else if (data <= 0) {
+				
+				Levelled cauldronData = (Levelled) block.getBlockData();
+				int level = cauldronData.getLevel();
+				System.out.println("Cauldron Level: " + level);
+				
+				if(level > cauldronData.getMaximumLevel()) {
+					level = cauldronData.getMaximumLevel();
+				} else if (level <= 0) {
 					bcauldrons.remove(bcauldron);
 					return false;
 				}
-				data -= 1;
-				block.setData(data);
-
-				if (data == 0) {
+				
+				cauldronData.setLevel(--level);
+				block.setBlockData(cauldronData);
+				block.getState().update();
+				
+				if (level == 0) {
 					bcauldrons.remove(bcauldron);
 				} else {
 					bcauldron.someRemoved = true;
 				}
-				// Bukkit Bug, inventory not updating while in event so this
-				// will delay the give
-				// but could also just use deprecated updateInventory()
 				giveItem(player, potion);
-				// player.getInventory().addItem(potion);
-				// player.getInventory().updateInventory();
 				return true;
 			}
 		}
@@ -129,19 +131,11 @@ public class BCauldron {
 	}
 
 	// 0 = empty, 1 = something in, 2 = full
-	public static byte getFillLevel(Block block) {
+	public static int getFillLevel(Block block) {
 		if (block.getType() == Material.CAULDRON) {
-			MaterialData data = block.getState().getData();
-			if (data instanceof Cauldron) {
-				Cauldron cauldron = (Cauldron) data;
-				if (cauldron.isEmpty()) {
-					return 0;
-				} else if (cauldron.isFull()) {
-					return 2;
-				} else {
-					return 1;
-				}
-			}
+			Levelled fillLevel = (Levelled) block.getState().getBlockData();
+			System.out.println("XCauldron Level: " + fillLevel.getLevel());
+			return fillLevel.getLevel();
 		}
 		return 0;
 	}

@@ -5,6 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.ChatPaginator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +13,10 @@ import java.util.List;
 
 public class BRecipe {
 	
-	private static final float INGREDIENT_DIFF_SCALE = 16.5f;
-	private static final float FERMENTATION_DIFF_SCALE = 17.0f;
-	private static final float WOOD_DIFF_SCALE = 0.65f;
-	
+	//Difficulty Adjustment
+	public static float ingredientDifficultyScale = 11.0f;
+	public static float fermentationDifficultyScale = 11.0f;
+	public static float woodTypeDifficultyScale = 1.0f;
 
 	private String[] name;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>(); // material and amount
@@ -107,7 +108,7 @@ public class BRecipe {
 			for (String item : flavorTextList) {
 				//for(String subset: item.split("/"))
 				//System.out.println(subset);
-				flavorText.add(new ArrayList<String>(Arrays.asList(item.split("/"))));
+				flavorText.add(new ArrayList<String>(Arrays.asList(ChatPaginator.wordWrap(item, 25))));
 			}
 		} 
         //parse the rest
@@ -189,7 +190,7 @@ public class BRecipe {
 		if (count < 8) {
 			count = 8;
 		}
-		int allowedCountDiff = Math.round((float) ((INGREDIENT_DIFF_SCALE - difficulty) * (count / 10.0)));
+		int allowedCountDiff = Math.round((float) ((ingredientDifficultyScale - difficulty) * (count / 10.0)));
 
 		if (allowedCountDiff == 0) {
 			return 1;
@@ -202,7 +203,7 @@ public class BRecipe {
 		if (time < 8) {
 			time = 8;
 		}
-		int allowedTimeDiff = Math.round((float) ((FERMENTATION_DIFF_SCALE - difficulty) * (time / 10.0)));
+		int allowedTimeDiff = Math.round((float) ((fermentationDifficultyScale - difficulty) * (time / 10.0)));
 
 		if (allowedTimeDiff == 0) {
 			return 1;
@@ -212,7 +213,7 @@ public class BRecipe {
 
 	// difference between given and recipe-wanted woodtype
 	public float getWoodDiff(float wood) {
-		return Math.abs(wood - this.wood) * WOOD_DIFF_SCALE;
+		return Math.abs(wood - this.wood) * woodTypeDifficultyScale;
 	}
 
 	public boolean isCookingOnly() {

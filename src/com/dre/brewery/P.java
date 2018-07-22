@@ -34,7 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class P extends JavaPlugin {
 	public static P p;
-	public static final String configVersion = "1.5";
+	public static final String configVersion = "1.6";
 	public static boolean debug;
 	public static boolean useUUID;
 	public static boolean use1_9;
@@ -298,7 +298,19 @@ public class P extends JavaPlugin {
 		Brew.colorInBarrels = config.getBoolean("colorInBarrels", false);
 		Brew.colorInBrewer = config.getBoolean("colorInBrewer", false);
 		PlayerListener.openEverywhere = config.getBoolean("openLargeBarrelEverywhere", false);
-
+		
+		//difficulty settings
+		
+		BRecipe.ingredientDifficultyScale = Float.parseFloat(config.getString("ingredientDifficultyScale", "11.0f"));
+		BRecipe.fermentationDifficultyScale = Float.parseFloat(config.getString("fermentationDifficultyScale", "11.0f"));
+		BRecipe.woodTypeDifficultyScale = Float.parseFloat(config.getString("woodTypeDifficultyScale", "1.0f"));
+		Barrel.minutesPerYear = config.getDouble("minutesPerYear", 20.0);
+		BIngredients.ageDifficultyScale = Float.parseFloat(config.getString("ageDifficultyScale", "2.0f"));
+		BIngredients.ingredientScoreMultiplier = Float.parseFloat(config.getString("ingredientScoreMultiplier", "2.0f"));
+		BIngredients.cookingScoreMultiplier = Float.parseFloat(config.getString("cookingScoreMultiplier", "1.0f"));
+		BIngredients.woodTypeScoreMultiplier = Float.parseFloat(config.getString("woodTypeScoreMultiplier", "1.0f"));
+		BIngredients.ageScoreMultiplier = Float.parseFloat(config.getString("ageScoreMultiplier", "2.0f"));
+		
 		// loading recipes
 		ConfigurationSection configSection = config.getConfigurationSection("recipes");
 		if (configSection != null) {
@@ -806,14 +818,7 @@ public class P extends JavaPlugin {
 
 	// returns the Player if online
 	public static Player getPlayerfromString(String name) {
-		if (useUUID) {
-			try {
-				return Bukkit.getPlayer(UUID.fromString(name));
-			} catch (Exception e) {
-				return Bukkit.getPlayerExact(name);
-			}
-		}
-		return Bukkit.getPlayerExact(name);
+	return Bukkit.getPlayer(UUID.fromString(name));
 	}
 
 	// Runnables
