@@ -14,7 +14,6 @@ public class ReadOldData extends BukkitRunnable {
 	public FileConfiguration data;
 	public boolean done = false;
 
-	//@SuppressWarnings("ResultOfMethodCallIgnored")
 	@Override
 	public void run() {
 		File datafile = new File(P.p.getDataFolder(), "data.yml");

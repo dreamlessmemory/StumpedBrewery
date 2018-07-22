@@ -181,16 +181,12 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
+	
 	public void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
-		if (P.use1_9) {
-			if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {
-				event.getPlayer().getInventory().setItemInOffHand(new ItemStack(mat));
-			} else {
-				event.getPlayer().getInventory().setItemInMainHand(new ItemStack(mat));
-			}
+		if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {
+			event.getPlayer().getInventory().setItemInOffHand(new ItemStack(mat));
 		} else {
-			event.getPlayer().setItemInHand(new ItemStack(mat));
+			event.getPlayer().getInventory().setItemInMainHand(new ItemStack(mat));
 		}
 	}
 

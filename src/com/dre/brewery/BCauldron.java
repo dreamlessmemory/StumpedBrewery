@@ -105,7 +105,6 @@ public class BCauldron {
 				
 				Levelled cauldronData = (Levelled) block.getBlockData();
 				int level = cauldronData.getLevel();
-				System.out.println("Cauldron Level: " + level);
 				
 				if(level > cauldronData.getMaximumLevel()) {
 					level = cauldronData.getMaximumLevel();
@@ -134,7 +133,6 @@ public class BCauldron {
 	public static int getFillLevel(Block block) {
 		if (block.getType() == Material.CAULDRON) {
 			Levelled fillLevel = (Levelled) block.getState().getBlockData();
-			System.out.println("XCauldron Level: " + fillLevel.getLevel());
 			return fillLevel.getLevel();
 		}
 		return 0;

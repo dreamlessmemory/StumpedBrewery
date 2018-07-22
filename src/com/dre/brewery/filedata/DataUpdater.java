@@ -39,7 +39,6 @@ public class DataUpdater {
 
 
 
-	//@SuppressWarnings("deprecation")
 	public void update10() {
 
 		data.set("Version", DataSave.dataVersion);

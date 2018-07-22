@@ -3,7 +3,6 @@ package com.dre.brewery;
 import com.dre.brewery.filedata.*;
 import com.dre.brewery.integration.WGBarrel;
 import com.dre.brewery.integration.WGBarrelNew;
-import com.dre.brewery.integration.WGBarrelOld;
 import com.dre.brewery.listeners.*;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -265,12 +264,8 @@ public class P extends JavaPlugin {
 		useWG = config.getBoolean("useWorldGuard", true) && getServer().getPluginManager().isPluginEnabled("WorldGuard");
 		if (useWG) {
 			try {
-				try {
-					Class.forName("com.sk89q.worldguard.bukkit.RegionContainer");
-					wg = new WGBarrelNew();
-				} catch (ClassNotFoundException e) {
-					wg = new WGBarrelOld();
-				}
+				Class.forName("com.sk89q.worldguard.bukkit.RegionContainer");
+				wg = new WGBarrelNew();
 			} catch (Throwable e) {
 				wg = null;
 				P.p.errorLog("Failed loading WorldGuard Integration! Opening Barrels will NOT work!");
@@ -779,7 +774,6 @@ public class P extends JavaPlugin {
 		return msg;
 	}
 
-	//@SuppressWarnings("ResultOfMethodCallIgnored")
 	public static void saveFile(InputStream in, File dest, String name, boolean overwrite) throws IOException {
 		if (in == null) return;
 		if (!dest.exists()) {

@@ -1,7 +1,16 @@
 package com.dre.brewery.listeners;
 
+import java.io.IOException;
+import java.net.URL;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -118,8 +127,14 @@ public class CommandListener implements CommandExecutor {
 			}
 
 		} else {
-
-			if (p.getServer().getPlayerExact(cmd) != null || BPlayer.hasPlayerbyName(cmd)) {
+			//p.getServer().getPlayerExact(cmd) != null
+			UUID player = null;
+			try {
+				player = getUUID(cmd);
+			} catch (Exception e) {
+				p.msg(sender, "Hmm...parse failure?");
+			}
+			if (player != null  || BPlayer.hasPlayerbyName(cmd)) {
 
 				if (args.length == 1) {
 					if (sender.hasPermission("brewery.cmd.infoOther")) {
@@ -290,7 +305,12 @@ public class CommandListener implements CommandExecutor {
 		}
 
 		String playerName = args[0];
-		Player player = P.p.getServer().getPlayerExact(playerName);
+		Player player = null;
+		try {
+			player = Bukkit.getPlayer(getUUID(playerName));
+		} catch (Exception e) {
+			p.msg(sender, "Error: UUID failure, " + playerName + " may not exist.");
+		}
 		BPlayer bPlayer;
 		if (player == null) {
 			bPlayer = BPlayer.getByName(playerName);
@@ -337,8 +357,14 @@ public class CommandListener implements CommandExecutor {
 				return;
 			}
 		}
-
-		Player player = P.p.getServer().getPlayerExact(playerName);
+		
+		Player player = null;
+		try{ 
+			player = Bukkit.getPlayer(getUUID(playerName));
+		} catch (Exception e) {
+			p.msg(sender, "Error: UUID failure, " + playerName + " may not exist.");
+		}
+		
 		BPlayer bPlayer;
 		if (player == null) {
 			bPlayer = BPlayer.getByName(playerName);
@@ -353,7 +379,6 @@ public class CommandListener implements CommandExecutor {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	public void cmdCopy(CommandSender sender, int count) {
 
 		if (sender instanceof Player) {
@@ -363,7 +388,7 @@ public class CommandListener implements CommandExecutor {
 				return;
 			}
 			Player player = (Player) sender;
-			ItemStack hand = player.getItemInHand();
+			ItemStack hand = player.getInventory().getItemInMainHand();
 			if (hand != null) {
 				Brew brew = Brew.get(hand);
 				if (brew != null) {
@@ -390,12 +415,11 @@ public class CommandListener implements CommandExecutor {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	public void cmdDelete(CommandSender sender) {
 
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
-			ItemStack hand = player.getItemInHand();
+			ItemStack hand = player.getInventory().getItemInMainHand();
 			if (hand != null) {
 				Brew brew = Brew.get(hand);
 				if (brew != null) {
@@ -403,7 +427,7 @@ public class CommandListener implements CommandExecutor {
 						p.msg(sender, p.languageReader.get("CMD_PersistRemove"));
 					} else {
 						brew.remove(hand);
-						player.setItemInHand(new ItemStack(Material.AIR));
+						player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
 					}
 					return;
 				}
@@ -415,12 +439,11 @@ public class CommandListener implements CommandExecutor {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	public void cmdPersist(CommandSender sender) {
 
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
-			ItemStack hand = player.getItemInHand();
+			ItemStack hand = player.getInventory().getItemInMainHand();
 			if (hand != null) {
 				Brew brew = Brew.get(hand);
 				if (brew != null) {
@@ -444,12 +467,11 @@ public class CommandListener implements CommandExecutor {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	public void cmdStatic(CommandSender sender) {
 
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
-			ItemStack hand = player.getItemInHand();
+			ItemStack hand = player.getInventory().getItemInMainHand();
 			if (hand != null) {
 				Brew brew = Brew.get(hand);
 				if (brew != null) {
@@ -475,12 +497,11 @@ public class CommandListener implements CommandExecutor {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	public void cmdUnlabel(CommandSender sender) {
 
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
-			ItemStack hand = player.getItemInHand();
+			ItemStack hand = player.getInventory().getItemInMainHand();
 			if (hand != null) {
 				Brew brew = Brew.get(hand);
 				if (brew != null) {
@@ -525,9 +546,13 @@ public class CommandListener implements CommandExecutor {
 		}
 		Player player = null;
 		if (pName != null) {
-			player = p.getServer().getPlayer(pName);
+			try {
+				player = Bukkit.getPlayer(getUUID(pName));
+			} catch (Exception e) {
+				p.msg(sender, "Error: UUID failure, " + pName + " may not exist.");
+			}
 		}
-
+		
 		if (sender instanceof Player || player != null) {
 			if (player == null) {
 				player = ((Player) sender);
@@ -574,5 +599,22 @@ public class CommandListener implements CommandExecutor {
 			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
 		}
 	}
+	
+	private UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {
+        String url = "https://api.mojang.com/users/profiles/minecraft/"+name;
+        try {
+            String UUIDJson = IOUtils.toString(new URL(url), "US-ASCII");
+            if(UUIDJson.isEmpty()) {
+            	return null;
+            }
+            JSONObject UUIDObject = (JSONObject) JSONValue.parseWithException(UUIDJson);       
+            String tempID = UUIDObject.get("id").toString();
+            tempID = tempID.substring(0,  8) + "-" + tempID.substring(8,  12) + "-" + tempID.substring(12,  16) + "-" + tempID.substring(16,  20) + "-" + tempID.substring(20);
+            return UUID.fromString(tempID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }       
+        return null;
+    }
 
 }

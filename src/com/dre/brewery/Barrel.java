@@ -8,14 +8,16 @@ import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Stairs;
+import org.bukkit.block.data.Bisected;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Stairs;
+//import org.bukkit.material.MaterialData;
+//import org.bukkit.material.Stairs;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -815,13 +817,15 @@ public class Barrel implements InventoryHolder {
 							// stairs have to be upside down
 							
 							Stairs stair = (Stairs) block.getBlockData();
-							//stair.get
-							MaterialData data = block.getState().getData();
+							if(stair.getHalf() == Bisected.Half.BOTTOM) {
+								return block;
+							}
+							/*MaterialData data = block.getState().getData();
 							if (data instanceof Stairs) {
 								if (!((Stairs) data).isInverted()) {
 									return block;
 								}
-							}
+							}*/
 							
 						}
 						stairs.add(block.getX());
