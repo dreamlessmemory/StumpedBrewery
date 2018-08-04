@@ -46,6 +46,7 @@ public class P extends JavaPlugin {
 	public boolean useLB; //LogBlock
 	public boolean useGP; //GriefPrevention
 	public boolean hasVault;
+	public boolean useHolographicDisplays;
 
 	// Listeners
 	public BlockListener blockListener;
@@ -113,6 +114,8 @@ public class P extends JavaPlugin {
 		}
 
 		this.log(this.getDescription().getName() + " enabled!");
+		
+		useHolographicDisplays = Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");
 	}
 
 	@Override

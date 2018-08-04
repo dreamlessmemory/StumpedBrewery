@@ -63,18 +63,22 @@
 			<id>dre2n-rpo</id>
 			<url>http://erethon.de/repo/</url>
 		</repository>
+		<repository>
+ 			<id>filoghost-repo</id>
+  			<url>https://ci.filoghost.me/plugin/repository/everything/</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>bukkit</artifactId>
-			<version>1.13-pre7-R0.1-SNAPSHOT<!--1.13--></version>
+			<version>1.13-R0.1-SNAPSHOT<!--1.13--></version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
            <groupId>org.spigotmc</groupId>
            <artifactId>spigot-api</artifactId>
-           <version>1.13-pre7-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
+           <version>1.13-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
            <type>jar</type>
            <scope>provided</scope>
        </dependency>
@@ -113,6 +117,12 @@
 					<artifactId>questioner</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.gmail.filoghost.holographicdisplays</groupId>
+			<artifactId>holographicdisplays-api</artifactId>
+			<version>2.2.7-SNAPSHOT</version>
+			<scope>provided</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
