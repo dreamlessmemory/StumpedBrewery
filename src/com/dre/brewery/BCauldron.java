@@ -5,6 +5,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.entity.Player;
 //import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 //import org.bukkit.block.BlockState;
@@ -40,7 +42,7 @@ public class BCauldron {
 
 	public void onUpdate() {
 		// Check if fire still alive
-		if (!block.getChunk().isLoaded() || block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.LAVA
+		if (!block.getChunk().isLoaded() || block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.MAGMA_BLOCK
 				|| block.getRelative(BlockFace.DOWN).getType() == Material.LAVA) {
 			// add a minute to cooking time
 			state++;
@@ -48,6 +50,8 @@ public class BCauldron {
 				ingredients = ingredients.clone();
 				someRemoved = false;
 			}
+			block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
 		}
 	}
 

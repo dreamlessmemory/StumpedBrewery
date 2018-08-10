@@ -2,8 +2,11 @@ package com.dre.brewery.listeners;
 
 import com.dre.brewery.*;
 import com.dre.brewery.filedata.UpdateChecker;
+//import com.sk89q.worldedit.foundation.World;
+
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -47,7 +50,7 @@ public class PlayerListener implements Listener {
 							return;
 
 							// fill a glass bottle with potion
-						} else if (materialInHand == Material.COMPASS) {
+						} else if (materialInHand == Material.IRON_SHOVEL) {
 							BCauldron.printContents(player, clickedBlock);
 							return;
 						} else if (materialInHand == Material.GLASS_BOTTLE) {
@@ -136,6 +139,7 @@ public class PlayerListener implements Listener {
 											}
 										}
 									}
+									clickedBlock.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, clickedBlock.getLocation().getX() + 0.5, clickedBlock.getLocation().getY() + 1.5, clickedBlock.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 								} else {
 									P.p.msg(player, P.p.languageReader.get("Perms_NoCauldronInsert"));
 								}

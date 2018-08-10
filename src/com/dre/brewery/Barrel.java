@@ -5,6 +5,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Map;
 
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.block.Block;
@@ -222,6 +223,7 @@ public class Barrel implements InventoryHolder {
 
 	// player opens the barrel
 	public void open(Player player) {
+		player.getWorld().playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
 		if (inventory == null) {
 			if (isLarge()) {
 				inventory = org.bukkit.Bukkit.createInventory(this, 27, P.p.languageReader.get("Etc_Barrel"));
