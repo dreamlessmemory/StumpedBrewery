@@ -1,6 +1,6 @@
 name: Brewery
 version: 2.0.0
-main: com.dre.brewery.P
+main: com.dreamless.brewery.P
 api-version: 1.13
 authors: [Milan Albrecht, Frank Baumann, ProgrammerDan, Sumire Kobayashi]
 softdepend: [LWC, LogBlock, WorldGuard, GriefPrevention, Vault, HolographicDisplays]

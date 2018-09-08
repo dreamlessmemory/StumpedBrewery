@@ -67,6 +67,10 @@
  			<id>filoghost-repo</id>
   			<url>https://ci.filoghost.me/plugin/repository/everything/</url>
 		</repository>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
@@ -130,5 +134,10 @@
     		<artifactId>commons-io</artifactId>
     		<version>2.6</version>
 		</dependency>
+		<dependency>
+	    <groupId>com.github.tr7zw</groupId>
+	    <artifactId>Item-NBT-API</artifactId>
+	    <version>-SNAPSHOT</version>
+	</dependency>
 	</dependencies>
 </project>
