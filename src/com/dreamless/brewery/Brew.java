@@ -127,7 +127,7 @@ public class Brew {
 		currentRecipe = null;
 		if (name != null && !name.equals("")) {
 			for (BRecipe recipe : BIngredients.recipes) {
-				if (recipe.getName(5).equalsIgnoreCase(name)) {
+				if (recipe.getName().equalsIgnoreCase(name)) {
 					currentRecipe = recipe;
 					return true;
 				}
@@ -139,7 +139,7 @@ public class Brew {
 					if (!stat) {
 						this.quality = calcQuality();
 					}
-					P.p.log("Brew was made from Recipe: '" + name + "' which could not be found. '" + currentRecipe.getName(5) + "' used instead!");
+					P.p.log("Brew was made from Recipe: '" + name + "' which could not be found. '" + currentRecipe.getName() + "' used instead!");
 					return true;
 				} else {
 					P.p.errorLog("Brew was made from Recipe: '" + name + "' which could not be found!");
@@ -150,7 +150,7 @@ public class Brew {
 	}
 
 	public boolean reloadRecipe() {
-		return currentRecipe == null || setRecipeFromString(currentRecipe.getName(5));
+		return currentRecipe == null || setRecipeFromString(currentRecipe.getName());
 	}
 
 	// Copy a Brew with a new unique ID and return its item
@@ -340,7 +340,7 @@ public class Brew {
 	}
 
 	// distill custom potion in given slot
-	public void distillSlot(ItemStack slotItem, PotionMeta potionMeta) {
+	public void distillSlot(ItemStack slotItem, PotionMeta potionMeta) {//TODO Update
 		if (stat) {
 			return;
 		}
@@ -353,7 +353,7 @@ public class Brew {
 			quality = calcQuality();
 
 			addOrReplaceEffects(potionMeta, getEffects(), quality);
-			potionMeta.setDisplayName(P.p.color("&f" + recipe.getName(quality)));
+			potionMeta.setDisplayName(P.p.color("&f" + recipe.getName()));
 			PotionColor.valueOf(recipe.getColor()).colorBrew(potionMeta, slotItem, canDistill());
 
 		} else {
@@ -397,7 +397,7 @@ public class Brew {
 
 	// Ageing Section ------------------
 
-	public void age(ItemStack item, float time, byte woodType) {
+	public void age(ItemStack item, float time, byte woodType) {//TODO: Aging calculation
 		if (stat) {
 			return;
 		}
@@ -418,7 +418,7 @@ public class Brew {
 				quality = calcQuality();
 
 				addOrReplaceEffects(potionMeta, getEffects(), quality);
-				potionMeta.setDisplayName(P.p.color("&f" + recipe.getName(quality)));
+				potionMeta.setDisplayName(P.p.color("&f" + recipe.getName()));
 				PotionColor.valueOf(recipe.getColor()).colorBrew(potionMeta, item, canDistill());
 			} else {
 				quality = 0;
@@ -543,12 +543,12 @@ public class Brew {
 			if(meta.getLore() != null) {
 				List<String> newLore = new ArrayList<String>();
 				newLore.addAll(meta.getLore());
-				newLore.addAll(currentRecipe.getFlavorText(getQuality()));
+				newLore.add(currentRecipe.getFlavorText(getQuality()));
 				meta.setLore(newLore);
 			} else {
 				List<String> newLore = new ArrayList<String>();
 				newLore.add("");
-				newLore.addAll(currentRecipe.getFlavorText(getQuality()));
+				newLore.add(currentRecipe.getFlavorText(getQuality()));
 				meta.setLore(newLore);
 			}
 		}
@@ -715,7 +715,7 @@ public class Brew {
 				idConfig.set("wood", brew.wood);
 			}
 			if (brew.currentRecipe != null) {
-				idConfig.set("recipe", brew.currentRecipe.getName(5));
+				idConfig.set("recipe", brew.currentRecipe.getName());
 			}
 			if (brew.unlabeled) {
 				idConfig.set("unlabeled", true);

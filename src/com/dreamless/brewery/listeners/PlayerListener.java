@@ -71,11 +71,9 @@ public class PlayerListener implements Listener {
 
 							// reset cauldron when refilling to prevent unlimited source of potions
 						} else if (materialInHand == Material.WATER_BUCKET) {
-							if (!P.use1_9) {
-								if (BCauldron.getFillLevel(clickedBlock) != 0 && BCauldron.getFillLevel(clickedBlock) < 2) {
-									// will only remove when existing
-									BCauldron.remove(clickedBlock);
-								}
+							if (BCauldron.getFillLevel(clickedBlock) != 0 && BCauldron.getFillLevel(clickedBlock) < 2) {
+								// will only remove when existing
+								BCauldron.remove(clickedBlock);
 							}
 							return;
 
@@ -117,7 +115,7 @@ public class PlayerListener implements Listener {
 							if (item == null) return;
 
 							// add ingredient to cauldron that meet the previous conditions
-							if (BIngredients.possibleIngredients.contains(materialInHand)) {
+							if (BIngredients.acceptableIngredients.contains(materialInHand)) {
 
 								if (player.hasPermission("brewery.cauldron.insert")) {
 									if (BCauldron.ingredientAdd(clickedBlock, item)) {

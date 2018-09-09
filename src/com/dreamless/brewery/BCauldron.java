@@ -24,7 +24,7 @@ public class BCauldron {
 	private BIngredients ingredients = new BIngredients();
 	private Block block;
 	private int state = 1;
-	private boolean someRemoved = false;
+	private boolean partiallyFilled = false;
 
 	public BCauldron(Block block, ItemStack ingredient) {
 		this.block = block;
@@ -40,15 +40,15 @@ public class BCauldron {
 		bcauldrons.add(this);
 	}
 
-	public void onUpdate() {
+	public void onUpdate() {//UPDATE THE POTION TODO
 		// Check if fire still alive
 		if (!block.getChunk().isLoaded() || block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.MAGMA_BLOCK
 				|| block.getRelative(BlockFace.DOWN).getType() == Material.LAVA) {
 			// add a minute to cooking time
 			state++;
-			if (someRemoved) {
+			if (partiallyFilled) {
 				ingredients = ingredients.clone();
-				someRemoved = false;
+				partiallyFilled = false;
 			}
 			block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
@@ -57,9 +57,9 @@ public class BCauldron {
 
 	// add an ingredient to the cauldron
 	public void add(ItemStack ingredient) {
-		if (someRemoved) {
+		if (partiallyFilled) {
 			ingredients = ingredients.clone();
-			someRemoved = false;
+			partiallyFilled = false;
 		}
 		ingredient = new ItemStack(ingredient.getType(), 1, ingredient.getDurability());
 		ingredients.add(ingredient);
@@ -124,7 +124,7 @@ public class BCauldron {
 				if (level == 0) {
 					bcauldrons.remove(bcauldron);
 				} else {
-					bcauldron.someRemoved = true;
+					bcauldron.partiallyFilled = true;
 				}
 				giveItem(player, potion);
 				return true;

@@ -7,12 +7,14 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
 
 import java.util.*;
 
 public class BIngredients {
-	public static Set<Material> possibleIngredients = new HashSet<Material>();
+	public static Set<Material> acceptableIngredients = new HashSet<Material>();
+	public static Set<Ingredient> ingredientInfo = new HashSet<Ingredient>();
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
 	private static int lastId = 0;
@@ -68,7 +70,7 @@ public class BIngredients {
 	}
 
 	// returns an Potion item with cooked ingredients
-	public ItemStack cook(int state) {
+	public ItemStack cook(int state) {//TODO: things
 
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
@@ -88,7 +90,7 @@ public class BIngredients {
 			Brew.addOrReplaceEffects(potionMeta, brew.getEffects(), brew.getQuality());
 			brew.convertLore(potionMeta, false);
 
-			cookedName = cookRecipe.getName(quality);
+			cookedName = cookRecipe.getName();
 			Brew.PotionColor.valueOf(cookRecipe.getColor()).colorBrew(potionMeta, potion, false);
 
 		} else {
@@ -125,13 +127,19 @@ public class BIngredients {
 		//Set Display Name
 		potionMeta.setDisplayName(P.p.color("&f" + cookedName));
 		// This effect stores the UID in its Duration
-		//potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect((uid * 4), 0), true);
-		potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 100, 1), true);
+		potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect((uid * 4), 0), true);
+		potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 2000, 1), true);
 		potion.setItemMeta(potionMeta);
 
 		//Test Custom NBT
 		NBTItem nbti = new NBTItem(potion);
-		nbti.setString("recipie", cookedName);
+		NBTCompound breweryMeta = nbti.addCompound("brewery");
+		breweryMeta.setString("recipe", cookedName);
+		breweryMeta.setString("test", "BLAH");
+		
+		potion = nbti.getItem();
+		//potion.setItemMeta(potionMeta);
+		
 		return potion;
 	}
 
@@ -163,7 +171,7 @@ public class BIngredients {
 			
 			//If correct ingredients and timing
 			if (ingredientQuality > -1 && cookingQuality > -1) {
-				P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName(5));
+				P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName());
 	
 				// is this recipe better than the previous best?
 				float testQuality = getQualityScore(ingredientQuality, cookingQuality);
@@ -176,7 +184,7 @@ public class BIngredients {
 			}
 		}
 		if (bestRecipe != null) {
-			P.p.debugLog("best recipe: " + bestRecipe.getName(5) + " has Quality= " + quality);
+			P.p.debugLog("best recipe: " + bestRecipe.getName() + " has Quality= " + quality);
 			//System.out.println("[Brewery] Best Recipe (Simple): " + bestRecipe.getName(5)); 
 		} 
 		return bestRecipe;
@@ -202,7 +210,7 @@ public class BIngredients {
 					ageQuality = getAgeQuality(recipe, time);
 					woodQuality = getWoodQuality(recipe, wood);
 				}
-				P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName(5));
+				P.p.debugLog("Ingredient Quality: " + ingredientQuality + " Cooking Quality: " + cookingQuality + " for " + recipe.getName());
 				
 				// is this recipe better than the previous best?
 				float testQuality = getQualityScore(ingredientQuality, cookingQuality, ageQuality, woodQuality, recipe.needsToAge());
@@ -236,7 +244,7 @@ public class BIngredients {
 			}
 		}
 		if (bestRecipe != null) {
-			P.p.debugLog("best recipe: " + bestRecipe.getName(5) + " has Quality= " + quality);
+			P.p.debugLog("best recipe: " + bestRecipe.getName() + " has Quality= " + quality);
 			//System.out.println("[Brewery] Best Recipe (Full): " + bestRecipe.getName(5));
 		}
 		return bestRecipe;

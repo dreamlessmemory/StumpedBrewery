@@ -17,13 +17,8 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.configuration.ConfigurationSection;
-//import org.bukkit.material.MaterialData;
-//import org.bukkit.material.Stairs;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.dreamless.brewery.integration.GriefPreventionBarrel;
-import com.dreamless.brewery.integration.LWCBarrel;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -94,7 +89,7 @@ public class Barrel implements InventoryHolder {
 		barrels.add(this);
 	}
 
-	public static void onUpdate() {
+	public static void onUpdate() {//UPDATE THE POTION TODO
 		for (Barrel barrel : barrels) {
 			// Minecraft day is 20 min, so add 1/20 to the time every minute
 			//barrel.time += (1.0 / 20.0);
@@ -124,101 +119,9 @@ public class Barrel implements InventoryHolder {
 			}
 		}
 
-		if (P.p.useWG) {
-			Plugin plugin = P.p.getServer().getPluginManager().getPlugin("WorldGuard");
-			if (plugin != null) {
-				try {
-					if (!P.p.wg.checkAccess(player, spigot, plugin)) {
-						return false;
-					}
-				} catch (Throwable e) {
-					P.p.errorLog("Failed to Check WorldGuard for Barrel Open Permissions!");
-					P.p.errorLog("Brewery was tested with version 5.8 to 6.1 of WorldGuard!");
-					P.p.errorLog("Disable the WorldGuard support in the config and do /brew reload");
-					e.printStackTrace();
-					P.p.msg(player, "&cError opening Barrel, please report to an Admin!");
-					return false;
-				}
-			}
-		}
 
-		if (P.p.useGP) {
-			if (P.p.getServer().getPluginManager().isPluginEnabled("GriefPrevention")) {
-				try {
-					if (!GriefPreventionBarrel.checkAccess(player, spigot)) {
-						return false;
-					}
-				} catch (Throwable e) {
-					P.p.errorLog("Failed to Check GriefPrevention for Barrel Open Permissions!");
-					P.p.errorLog("Brewery was tested with GriefPrevention 14.5.4");
-					P.p.errorLog("Disable the GriefPrevention support in the config and do /brew reload");
-					e.printStackTrace();
-					P.p.msg(player, "&cError opening Barrel, please report to an Admin!");
-					return false;
-				}
-			}
-		}
-
-		if (event != null && P.p.useLWC) {
-			Plugin plugin = P.p.getServer().getPluginManager().getPlugin("LWC");
-			if (plugin != null) {
-
-				// If the Clicked Block was the Sign, LWC already knows and we dont need to do anything here
-				if (!isSign(event.getClickedBlock())) {
-					Block sign = getSignOfSpigot();
-					// If the Barrel does not have a Sign, it cannot be locked
-					if (!sign.equals(event.getClickedBlock())) {
-						try {
-							return LWCBarrel.checkAccess(player, sign, event, plugin);
-						} catch (Throwable e) {
-							P.p.errorLog("Failed to Check LWC for Barrel Open Permissions!");
-							P.p.errorLog("Brewery was tested with version 4.5.0 of LWC!");
-							P.p.errorLog("Disable the LWC support in the config and do /brew reload");
-							e.printStackTrace();
-							P.p.msg(player, "&cError opening Barrel, please report to an Admin!");
-							return false;
-						}
-					}
-				}
-			}
-		}
 
 		return true;
-	}
-
-	// Ask for permission to destroy barrel, remove protection if has
-	public boolean hasPermsDestroy(Player player) {
-		if (player == null) {
-			willDestroy();
-			return true;
-		}
-		if (P.p.useLWC) {
-			try {
-				return LWCBarrel.checkDestroy(player, this);
-			} catch (Throwable e) {
-				P.p.errorLog("Failed to Check LWC for Barrel Break Permissions!");
-				P.p.errorLog("Brewery was tested with version 4.5.0 of LWC!");
-				P.p.errorLog("Disable the LWC support in the config and do /brew reload");
-				e.printStackTrace();
-				P.p.msg(player, "&cError breaking Barrel, please report to an Admin!");
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	// If something other than the Player is destroying the barrel, inform protection plugins
-	public void willDestroy() {
-		if (P.p.useLWC) {
-			try {
-				LWCBarrel.remove(this);
-			} catch (Throwable e) {
-				P.p.errorLog("Failed to Remove LWC Lock from Barrel!");
-				P.p.errorLog("Brewery was tested with version 4.5.0 of LWC!");
-				e.printStackTrace();
-			}
-		}
 	}
 
 	// player opens the barrel
@@ -955,7 +858,7 @@ public class Barrel implements InventoryHolder {
 							P.p.debugLog("Barrel at " + broken.getWorld().getName() + "/" + broken.getX() + "/" + broken.getY() + "/" + broken.getZ()
 									+ " has been destroyed unexpectedly, contents will drop");
 							// remove the barrel if it was destroyed
-							barrel.willDestroy();
+							//barrel.willDestroy();
 							barrel.remove(broken, null);
 						} else {
 							// Dont check this barrel again, its enough to check it once after every restart

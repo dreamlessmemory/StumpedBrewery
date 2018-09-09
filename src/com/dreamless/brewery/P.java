@@ -28,26 +28,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.dreamless.brewery.filedata.*;
-import com.dreamless.brewery.integration.WGBarrel;
-import com.dreamless.brewery.integration.WGBarrelNew;
 import com.dreamless.brewery.listeners.*;
 
 public class P extends JavaPlugin {
 	public static P p;
-	public static final String configVersion = "1.6";
 	public static boolean debug;
 	public static boolean useUUID;
 	public static boolean use1_9;
 	public static boolean updateCheck;
-
-	// Third Party Enabled
-	public boolean useWG; //WorldGuard
-	public WGBarrel wg;
-	public boolean useLWC; //LWC
-	public boolean useLB; //LogBlock
-	public boolean useGP; //GriefPrevention
-	public boolean hasVault;
-	public boolean useHolographicDisplays;
 
 	// Listeners
 	public BlockListener blockListener;
@@ -86,9 +74,6 @@ public class P extends JavaPlugin {
 		}
 		readData();
 
-		// Setup Metrics
-		setupMetrics();
-
 		// Listeners
 		blockListener = new BlockListener();
 		playerListener = new PlayerListener();
@@ -115,8 +100,6 @@ public class P extends JavaPlugin {
 		}
 
 		this.log(this.getDescription().getName() + " enabled!");
-		
-		useHolographicDisplays = Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");
 	}
 
 	@Override
@@ -141,7 +124,7 @@ public class P extends JavaPlugin {
 		// delete Data from Ram
 		Barrel.barrels.clear();
 		BCauldron.bcauldrons.clear();
-		BIngredients.possibleIngredients.clear();
+		BIngredients.acceptableIngredients.clear();
 		BIngredients.recipes.clear();
 		BIngredients.cookedNames.clear();
 		BPlayer.clear();
@@ -154,34 +137,19 @@ public class P extends JavaPlugin {
 		this.log(this.getDescription().getName() + " disabled!");
 	}
 
-	public void setupMetrics() {
-		try {
-			new com.dreamless.brewery.integration.Metrics(this).start();
-		} catch (Exception ignored) {
-		}
-	}
-
 	public void reload(CommandSender sender) {
 		if (sender != null && !sender.equals(getServer().getConsoleSender())) {
 			reloader = sender;
 		}
 		// clear all existent config Data
-		BIngredients.possibleIngredients.clear();
+		BIngredients.acceptableIngredients.clear();
 		BIngredients.recipes.clear();
 		BIngredients.cookedNames.clear();
 		Words.words.clear();
 		Words.ignoreText.clear();
 		Words.commands = null;
 		BPlayer.drainItems.clear();
-		/*if (useLB) {
-			try {
-				LogBlockBarrel.clear();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}*/
 
-		// load the Config
 		try {
 			if (!readConfig()) {
 				p = null;
@@ -238,80 +206,67 @@ public class P extends JavaPlugin {
 	}
 
 	public boolean readConfig() {
-		File file = new File(p.getDataFolder(), "config.yml");
+		// Load LanguageReader
+		languageReader = new LanguageReader(new File(p.getDataFolder(), "en.yml"));
+		
+		/*** config.yml ***/
+		File currentFile = new File(p.getDataFolder(), "config.yml");
 		if (!checkConfigs()) {
 			return false;
 		}
-		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-
-		// Set the Language
-		language = config.getString("language", "en");
-
-		// Load LanguageReader
-		languageReader = new LanguageReader(new File(p.getDataFolder(), "languages/" + language + ".yml"));
-
-		// Check if config is the newest version
-		String version = config.getString("version", null);
-		if (version != null) {
-			if (!version.equals(configVersion)) {
-				copyDefaultConfigs(true);
-				new ConfigUpdater(file).update(version, language);
-				P.p.log("Config Updated to version: " + configVersion);
-				config = YamlConfiguration.loadConfiguration(file);
-			}
-		}
-
-		// If the Update Checker should be enabled
-		updateCheck = config.getBoolean("updateCheck", false);
-
-		// Third-Party
-		useWG = config.getBoolean("useWorldGuard", true) && getServer().getPluginManager().isPluginEnabled("WorldGuard");
-		if (useWG) {
-			try {
-				Class.forName("com.sk89q.worldguard.bukkit.RegionContainer");
-				wg = new WGBarrelNew();
-			} catch (Throwable e) {
-				wg = null;
-				P.p.errorLog("Failed loading WorldGuard Integration! Opening Barrels will NOT work!");
-				P.p.errorLog("Brewery was tested with version 5.8 to 6.1 of WorldGuard!");
-				P.p.errorLog("Disable the WorldGuard support in the config and do /brew reload");
-				e.printStackTrace();
-			}
-		}
-		useLWC = config.getBoolean("useLWC", true) && getServer().getPluginManager().isPluginEnabled("LWC");
-		useGP = config.getBoolean("useGriefPrevention", true) && getServer().getPluginManager().isPluginEnabled("GriefPrevention");
-		useLB = config.getBoolean("useLogBlock", false) && getServer().getPluginManager().isPluginEnabled("LogBlock");
-		hasVault = getServer().getPluginManager().isPluginEnabled("Vault");
+		FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(currentFile);
 
 		// various Settings
-		DataSave.autosave = config.getInt("autosave", 3);
-		debug = config.getBoolean("debug", false);
-		BPlayer.pukeItem = Material.matchMaterial(config.getString("pukeItem", "SOUL_SAND"));
-		BPlayer.hangoverTime = config.getInt("hangoverDays", 0) * 24 * 60;
-		BPlayer.overdrinkKick = config.getBoolean("enableKickOnOverdrink", false);
-		BPlayer.enableHome = config.getBoolean("enableHome", false);
-		BPlayer.enableLoginDisallow = config.getBoolean("enableLoginDisallow", false);
-		BPlayer.enablePuke = config.getBoolean("enablePuke", false);
-		BPlayer.pukeDespawntime = config.getInt("pukeDespawntime", 60) * 20;
-		BPlayer.homeType = config.getString("homeType", null);
-		Brew.colorInBarrels = config.getBoolean("colorInBarrels", false);
-		Brew.colorInBrewer = config.getBoolean("colorInBrewer", false);
-		PlayerListener.openEverywhere = config.getBoolean("openLargeBarrelEverywhere", false);
+		DataSave.autosave = currentConfig.getInt("autosave", 3);
+		debug = currentConfig.getBoolean("debug", false);
+		BPlayer.pukeItem = Material.matchMaterial(currentConfig.getString("pukeItem", "SOUL_SAND"));
+		BPlayer.hangoverTime = currentConfig.getInt("hangoverDays", 0) * 24 * 60;
+		BPlayer.overdrinkKick = currentConfig.getBoolean("enableKickOnOverdrink", false);
+		BPlayer.enableHome = currentConfig.getBoolean("enableHome", false);
+		BPlayer.enableLoginDisallow = currentConfig.getBoolean("enableLoginDisallow", false);
+		BPlayer.enablePuke = currentConfig.getBoolean("enablePuke", false);
+		BPlayer.pukeDespawntime = currentConfig.getInt("pukeDespawntime", 60) * 20;
+		BPlayer.homeType = currentConfig.getString("homeType", null);
+		Brew.colorInBarrels = currentConfig.getBoolean("colorInBarrels", false);
+		Brew.colorInBrewer = currentConfig.getBoolean("colorInBrewer", false);
+		PlayerListener.openEverywhere = currentConfig.getBoolean("openLargeBarrelEverywhere", false);
+		
+		
+		/*** parameters.yml ***/
+		currentFile = new File(p.getDataFolder(), "parameters.yml");
+		if(!currentFile.exists()) {
+			return false;
+		}
+		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
 		
 		//difficulty settings
+		Barrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 20.0);
 		
-		BRecipe.ingredientDifficultyScale = Float.parseFloat(config.getString("ingredientDifficultyScale", "11.0f"));
-		BRecipe.fermentationDifficultyScale = Float.parseFloat(config.getString("fermentationDifficultyScale", "11.0f"));
-		BRecipe.woodTypeDifficultyScale = Float.parseFloat(config.getString("woodTypeDifficultyScale", "1.0f"));
-		Barrel.minutesPerYear = config.getDouble("minutesPerYear", 20.0);
-		BIngredients.ageDifficultyScale = Float.parseFloat(config.getString("ageDifficultyScale", "2.0f"));
-		BIngredients.ingredientScoreMultiplier = Float.parseFloat(config.getString("ingredientScoreMultiplier", "2.0f"));
-		BIngredients.cookingScoreMultiplier = Float.parseFloat(config.getString("cookingScoreMultiplier", "1.0f"));
-		BIngredients.woodTypeScoreMultiplier = Float.parseFloat(config.getString("woodTypeScoreMultiplier", "1.0f"));
-		BIngredients.ageScoreMultiplier = Float.parseFloat(config.getString("ageScoreMultiplier", "2.0f"));
+		// loading drainItems
+		List<String> drainList = currentConfig.getStringList("drainItems");
+		if (drainList != null) {
+			for (String drainString : drainList) {
+				String[] drainSplit = drainString.split("/");
+				if (drainSplit.length > 1) {
+					Material mat = Material.matchMaterial(drainSplit[0]);
+					int strength = p.parseInt(drainSplit[1]);
+					if (mat != null && strength > 0) {
+						BPlayer.drainItems.put(mat, strength);
+					}
+				}
+			}
+		}
+		
+		
+		/*** recipes.yml ***/
+		currentFile = new File(p.getDataFolder(), "recipes.yml");
+		if(!currentFile.exists()) {
+			return false;
+		}
+		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
 		
 		// loading recipes
-		ConfigurationSection configSection = config.getConfigurationSection("recipes");
+		ConfigurationSection configSection = currentConfig.getConfigurationSection("recipes");
 		if (configSection != null) {
 			for (String recipeId : configSection.getKeys(false)) {
 				BRecipe recipe = new BRecipe(configSection, recipeId);
@@ -324,68 +279,74 @@ public class P extends JavaPlugin {
 		}
 
 		// loading cooked names and possible ingredients
-		configSection = config.getConfigurationSection("cooked");
+		configSection = currentConfig.getConfigurationSection("cooked");
 		if (configSection != null) {
 			for (String ingredient : configSection.getKeys(false)) {
 				Material mat = Material.matchMaterial(ingredient);
-				if (mat == null && hasVault) {
-					try {
-						net.milkbowl.vault.item.ItemInfo vaultItem = net.milkbowl.vault.item.Items.itemByString(ingredient);
-						if (vaultItem != null) {
-							mat = vaultItem.getType();
-						}
-					} catch (Exception e) {
-						P.p.errorLog("Could not check vault for Item Name");
-						e.printStackTrace();
-					}
-				}
 				if (mat != null) {
 					BIngredients.cookedNames.put(mat, (configSection.getString(ingredient, null)));
-					BIngredients.possibleIngredients.add(mat);
+					BIngredients.acceptableIngredients.add(mat);
 				} else {
 					errorLog("Unknown Material: " + ingredient);
 				}
 			}
 		}
-
-		// loading drainItems
-		List<String> drainList = config.getStringList("drainItems");
-		if (drainList != null) {
-			for (String drainString : drainList) {
-				String[] drainSplit = drainString.split("/");
-				if (drainSplit.length > 1) {
-					Material mat = Material.matchMaterial(drainSplit[0]);
-					int strength = p.parseInt(drainSplit[1]);
-					if (mat == null && hasVault && strength > 0) {
-						try {
-							net.milkbowl.vault.item.ItemInfo vaultItem = net.milkbowl.vault.item.Items.itemByString(drainSplit[0]);
-							if (vaultItem != null) {
-								mat = vaultItem.getType();
+		
+		/*** ingredients.yml ***/
+		currentFile = new File(p.getDataFolder(), "ingredients.yml");
+		if(!currentFile.exists()) {
+			return false;
+		}
+		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
+		
+		configSection = currentConfig.getConfigurationSection("ingredients");
+		if (configSection != null) {
+			for (String ingredient : configSection.getKeys(false)) {
+				Material mat = Material.matchMaterial(ingredient);
+				if (mat != null) {
+					//Add to ingredients
+					BIngredients.acceptableIngredients.add(mat);
+					
+					Map<String, String> aspects = new HashMap<String, String>();
+					List<String> aspectList = configSection.getStringList(ingredient + ".aspects");
+					if(aspectList != null) {
+						for (String aspectString : aspectList) {
+							String[] aspectSplit = aspectString.split("/");
+							if (aspectSplit.length > 1) {
+								aspects.put(aspectSplit[0], aspectSplit[1]);
+								p.debugLog("Info: " + aspectSplit[0] + " " + aspectSplit[1]);
+							} else {
+								aspects.put(aspectSplit[0], "COMMON");
 							}
-						} catch (Exception e) {
-							P.p.errorLog("Could not check vault for Item Name");
-							e.printStackTrace();
 						}
 					}
-					if (mat != null && strength > 0) {
-						BPlayer.drainItems.put(mat, strength);
-					}
+					
+					//BIngredients.ingredientInfo.add(new Ingredient())
+					p.debugLog("Added " + mat.toString());
+				} else {
+					errorLog("Unknown Material: " + ingredient);
 				}
 			}
 		}
-
+		
+		/*** words.yml ***/
+		currentFile = new File(p.getDataFolder(), "words.yml");
+		if(!currentFile.exists()) {
+			return false;
+		}
+		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
 		// Loading Words
-		if (config.getBoolean("enableChatDistortion", false)) {
-			for (Map<?, ?> map : config.getMapList("words")) {
+		if (currentConfig.getBoolean("enableChatDistortion", false)) {
+			for (Map<?, ?> map : currentConfig.getMapList("words")) {
 				new Words(map);
 			}
-			for (String bypass : config.getStringList("distortBypass")) {
+			for (String bypass : currentConfig.getStringList("distortBypass")) {
 				Words.ignoreText.add(bypass.split(","));
 			}
-			Words.commands = config.getStringList("distortCommands");
+			Words.commands = currentConfig.getStringList("distortCommands");
 		}
-		Words.log = config.getBoolean("logRealChat", false);
-		Words.doSigns = config.getBoolean("distortSignText", false);
+		Words.log = currentConfig.getBoolean("logRealChat", false);
+		Words.doSigns = currentConfig.getBoolean("distortSignText", false);
 
 		return true;
 	}
@@ -725,12 +686,7 @@ public class P extends JavaPlugin {
 			// remove barrel and throw potions on the ground
 			Barrel barrel = Barrel.getBySpigot(block);
 			if (barrel != null) {
-				if (barrel.hasPermsDestroy(player)) {
-					barrel.remove(null, player);
-					return true;
-				} else {
-					return false;
-				}
+				barrel.remove(null, player);
 			}
 			return true;
 		case SIGN:
@@ -739,12 +695,7 @@ public class P extends JavaPlugin {
 			Barrel barrel2 = Barrel.getBySpigot(block);
 			if (barrel2 != null) {
 				if (!barrel2.isLarge()) {
-					if (barrel2.hasPermsDestroy(player)) {
 						barrel2.remove(null, player);
-						return true;
-					} else {
-						return false;
-					}
 				} else {
 					barrel2.destroySign();
 				}
@@ -759,11 +710,7 @@ public class P extends JavaPlugin {
 		case DARK_OAK_STAIRS:
 			Barrel barrel3 = Barrel.getByWood(block);
 			if (barrel3 != null) {
-				if (barrel3.hasPermsDestroy(player)) {
 					barrel3.remove(block, player);
-				} else {
-					return false;
-				}
 			}
 		default:
 			break;
