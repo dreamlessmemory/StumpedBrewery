@@ -40,18 +40,22 @@ public class BCauldron {
 		bcauldrons.add(this);
 	}
 
-	public void onUpdate() {//UPDATE THE POTION TODO
+	public void onUpdate() {//UPDATE THE POTION
 		// Check if fire still alive
 		if (!block.getChunk().isLoaded() || block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.MAGMA_BLOCK
 				|| block.getRelative(BlockFace.DOWN).getType() == Material.LAVA) {
 			// add a minute to cooking time
 			state++;
+			block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
+			//Still not sure what this does
 			if (partiallyFilled) {
 				ingredients = ingredients.clone();
 				partiallyFilled = false;
 			}
-			block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
+			
+			//TODO: Aspect Calculation
+			//Run aspect calculation
 		}
 	}
 

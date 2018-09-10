@@ -8,16 +8,17 @@ import org.bukkit.Material;
 public class Ingredient {
 	private Material type;
 	private Map<String, String> aspects = new HashMap<String, String>();
-	private int fermentationMultiplier = 1;
-	private int agingMultiplier = 1;
-	private int distillingMultiplier = 1;
+	private double fermentationMultiplier = 1;
+	private double agingMultiplier = 1;
+	private double distillingMultiplier = 1;
 	
-	public Ingredient(Material type, Map<String, String> aspects, int fMult, int aMult, int dMult) {
+	public Ingredient(Material type, Map<String, String> aspects, double fMult, double aMult, double dMult) {
 		this.type = type;
 		this.aspects = aspects;
 		fermentationMultiplier = fMult;
 		agingMultiplier = aMult;
 		distillingMultiplier = dMult;
+		
 	}
 	
 	public Ingredient(Material type, Map<String, String> aspects) {
@@ -33,15 +34,15 @@ public class Ingredient {
 		return aspects;
 	}
 
-	public int getFermentationMultiplier() {
+	public double getFermentationMultiplier() {
 		return fermentationMultiplier;
 	}
 
-	public int getAgingMultiplier() {
+	public double getAgingMultiplier() {
 		return agingMultiplier;
 	}
 
-	public int getDistillingMultiplier() {
+	public double getDistillingMultiplier() {
 		return distillingMultiplier;
 	}
 }

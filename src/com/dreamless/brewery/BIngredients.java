@@ -14,7 +14,7 @@ import java.util.*;
 
 public class BIngredients {
 	public static Set<Material> acceptableIngredients = new HashSet<Material>();
-	public static List<Ingredient> ingredientInfo = new ArrayList<Ingredient>();
+	public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
 	private static int lastId = 0;
@@ -26,8 +26,10 @@ public class BIngredients {
 
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
-	//private Map<Material, Integer> materials = new HashMap<Material, Integer>(); // Merged List Of ingredients that doesnt consider Durability
 	private Hashtable<String, Aspect> aspects = new Hashtable<String, Aspect>();
+	private double fermenationMultiplier = 1.0;
+	private double agingMultiplier = 1.0;
+	private double distilMultiplier = 1.0;
 	private int cookedTime;
 
 	// Represents ingredients in Cauldron, Brew
@@ -59,26 +61,28 @@ public class BIngredients {
 			ingredients.add(ingredient);
 		}
 		
-		//TODO: Add Aspects
+		//Ingredient Info
+		Ingredient info = ingredientInfo.get(ingredient.getType());
+		//Multipliers
+				
+				
 		//Aspects
-		for(Ingredient info: ingredientInfo) {//Find the info
-			if(info.getType().equals(ingredient.getType())) {//Found the info
-				Map<String, String> ingAspects = info.getAspects();//Get the aspects from the ingredient
-				for (String aspect : ingAspects.keySet()) {//work on each aspect
-					Aspect cAspect = aspects.get(aspect);
-					if (cAspect != null) {//aspect is found
-						cAspect.setPotency(cAspect.getPotency() + (Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount()));
-						cAspect.setSaturation(cAspect.getSaturation() + (Aspect.calculateRaritySaturation(ingAspects.get(aspect)) * ingredient.getAmount()));
-					} else {
-						Aspect nAspect = new Aspect (aspect, Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount(), Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount());
-						aspects.put(aspect, nAspect);
-					}
-				}
-				break;
+		Map<String, String> ingAspects = info.getAspects();//Get the aspects from the ingredient
+		for (String aspect : ingAspects.keySet()) {//work on each aspect
+			Aspect cAspect = aspects.get(aspect);
+			if (cAspect != null) {//aspect is found
+				cAspect.setPotency(cAspect.getPotency() + (Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount()));
+				cAspect.setSaturation(cAspect.getSaturation() + (Aspect.calculateRaritySaturation(ingAspects.get(aspect)) * ingredient.getAmount()));
+			} else {
+				Aspect nAspect = new Aspect (aspect, Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount(), Aspect.calculateRaritySaturation(ingAspects.get(aspect)) * ingredient.getAmount());
+				aspects.put(aspect, nAspect);
 			}
 		}
+	
+		
 		
 		if(P.debug) {
+			P.p.debugLog("Added: " + ingredient.toString());
 			Set<String> keys = aspects.keySet();
 			for (String key : keys) {
 				P.p.debugLog(aspects.get(key).toString());
@@ -533,4 +537,36 @@ public class BIngredients {
 		return manifest.substring(0, manifest.length() - 3);
 	}
 
+	public double calcuateFermentationMultiplier() {
+		double multiplier = 0.0;
+		int counter = 0;
+		for(ItemStack item: ingredients) {
+			Ingredient info = ingredientInfo.get(item.getType());
+			multiplier += info.getFermentationMultiplier() * item.getAmount();
+			counter += item.getAmount();
+		}
+		return multiplier/counter;
+	}
+	
+	public double calcuateAgingMultiplier() {
+		double multiplier = 0.0;
+		int counter = 0;
+		for(ItemStack item: ingredients) {
+			Ingredient info = ingredientInfo.get(item.getType());
+			multiplier += info.getAgingMultiplier() * item.getAmount();
+			counter += item.getAmount();
+		}
+		return multiplier/counter;
+	}
+	
+	public double calcuateDistillingMultiplier() {
+		double multiplier = 0.0;
+		int counter = 0;
+		for(ItemStack item: ingredients) {
+			Ingredient info = ingredientInfo.get(item.getType());
+			multiplier += info.getDistillingMultiplier() * item.getAmount();
+			counter += item.getAmount();
+		}
+		return multiplier/counter;
+	}
 }
