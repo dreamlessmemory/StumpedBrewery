@@ -17,7 +17,9 @@ public class BIngredients {
 	public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
+	
 	private static int lastId = 0;
+	
 	public static float ageDifficultyScale = 2.0f;
 	public static float ingredientScoreMultiplier = 2.0f;
 	public static float cookingScoreMultiplier = 1.0f;
@@ -27,9 +29,6 @@ public class BIngredients {
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 	private Hashtable<String, Aspect> aspects = new Hashtable<String, Aspect>();
-	private double fermenationMultiplier = 1.0;
-	private double agingMultiplier = 1.0;
-	private double distilMultiplier = 1.0;
 	private int cookedTime;
 
 	// Represents ingredients in Cauldron, Brew
@@ -569,4 +568,5 @@ public class BIngredients {
 		}
 		return multiplier/counter;
 	}
+	//TODO: Determine type, use cookname 
 }
