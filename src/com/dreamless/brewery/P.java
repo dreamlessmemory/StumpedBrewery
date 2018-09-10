@@ -321,7 +321,11 @@ public class P extends JavaPlugin {
 						}
 					}
 					
-					//BIngredients.ingredientInfo.add(new Ingredient())
+					int fermentationMultiplier = configSection.getInt(ingredient + ".fermentationMultiplier", 1);
+					int ageMultiplier = configSection.getInt(ingredient + ".ageMultiplier", 1);
+					int distillMultiplier = configSection.getInt(ingredient + ".distillnMultiplier", 1);
+					
+					BIngredients.ingredientInfo.add(new Ingredient(mat, aspects, fermentationMultiplier, ageMultiplier, distillMultiplier));
 					p.debugLog("Added " + mat.toString());
 				} else {
 					errorLog("Unknown Material: " + ingredient);

@@ -1,6 +1,9 @@
 package com.dreamless.brewery;
 
 public class Aspect {
+	//Static Numbers for balancing
+	
+	//Private
 	private String name;
 	private int potency = 0;
 	private double saturation = 0.0;
@@ -33,5 +36,17 @@ public class Aspect {
 
 	public String getName() {
 		return name;
+	}
+	
+	public String toString() {
+		return "Name: " + name + " Potency: " + potency + " Saturation: " + saturation;
+	}
+	
+	public static int calculateRarityPotency(String rarity){
+		return 1;
+	}
+	
+	public static double calculateRaritySaturation(String rarity){
+		return 1.2;
 	}
 }

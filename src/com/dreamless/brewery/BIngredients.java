@@ -14,7 +14,7 @@ import java.util.*;
 
 public class BIngredients {
 	public static Set<Material> acceptableIngredients = new HashSet<Material>();
-	public static Set<Ingredient> ingredientInfo = new HashSet<Ingredient>();
+	public static List<Ingredient> ingredientInfo = new ArrayList<Ingredient>();
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
 	private static int lastId = 0;
@@ -26,7 +26,8 @@ public class BIngredients {
 
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
-	private Map<Material, Integer> materials = new HashMap<Material, Integer>(); // Merged List Of ingredients that doesnt consider Durability
+	//private Map<Material, Integer> materials = new HashMap<Material, Integer>(); // Merged List Of ingredients that doesnt consider Durability
+	private Hashtable<String, Aspect> aspects = new Hashtable<String, Aspect>();
 	private int cookedTime;
 
 	// Represents ingredients in Cauldron, Brew
@@ -43,31 +44,48 @@ public class BIngredients {
 		this.id = lastId;
 		lastId++;
 
-		for (ItemStack item : ingredients) {
+		/*for (ItemStack item : ingredients) {
 			addMaterial(item);
-		}
+		}*/
 	}
 
 	// Add an ingredient to this
-	public void add(ItemStack ingredient) {
-		addMaterial(ingredient);
-		for (ItemStack item : ingredients) {
-			if (item.isSimilar(ingredient)) {
-				item.setAmount(item.getAmount() + ingredient.getAmount());
-				return;
+	public void add(ItemStack ingredient) {//TODO: Start adding aspects
+		//Add Item
+		int ingPosition = ingredients.indexOf(ingredient);
+		if(ingPosition != -1) {
+			ingredients.get(ingPosition).setAmount(ingredients.get(ingPosition).getAmount() + ingredient.getAmount());
+		} else {
+			ingredients.add(ingredient);
+		}
+		
+		//TODO: Add Aspects
+		//Aspects
+		for(Ingredient info: ingredientInfo) {//Find the info
+			if(info.getType().equals(ingredient.getType())) {//Found the info
+				Map<String, String> ingAspects = info.getAspects();//Get the aspects from the ingredient
+				for (String aspect : ingAspects.keySet()) {//work on each aspect
+					Aspect cAspect = aspects.get(aspect);
+					if (cAspect != null) {//aspect is found
+						cAspect.setPotency(cAspect.getPotency() + (Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount()));
+						cAspect.setSaturation(cAspect.getSaturation() + (Aspect.calculateRaritySaturation(ingAspects.get(aspect)) * ingredient.getAmount()));
+					} else {
+						Aspect nAspect = new Aspect (aspect, Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount(), Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount());
+						aspects.put(aspect, nAspect);
+					}
+				}
+				break;
 			}
 		}
-		ingredients.add(ingredient);
-	}
-
-	private void addMaterial(ItemStack ingredient) {
-		if (materials.containsKey(ingredient.getType())) {
-			int newAmount = materials.get(ingredient.getType()) + ingredient.getAmount();
-			materials.put(ingredient.getType(), newAmount);
-		} else {
-			materials.put(ingredient.getType(), ingredient.getAmount());
+		
+		if(P.debug) {
+			Set<String> keys = aspects.keySet();
+			for (String key : keys) {
+				P.p.debugLog(aspects.get(key).toString());
+			}
 		}
 	}
+
 
 	// returns an Potion item with cooked ingredients
 	public ItemStack cook(int state) {//TODO: things
@@ -105,11 +123,11 @@ public class BIngredients {
 				Material highest = null;
 				int highestCount = 0;
 				//Search for the cooked Name
-				for (Material ingredient : materials.keySet()) {
-					if (cookedNames.containsKey(ingredient)) {
-						if(materials.get(ingredient) > highestCount) {
-							highest = ingredient;
-							highestCount = materials.get(ingredient);
+				for (ItemStack ingredient : ingredients) {
+					if (cookedNames.containsKey(ingredient.getType())) {
+						if(ingredient.getAmount() > highestCount) {
+							highest = ingredient.getType();
+							highestCount = ingredient.getAmount();
 						}
 					}
 				}
@@ -143,14 +161,7 @@ public class BIngredients {
 		return potion;
 	}
 
-	// returns amount of ingredients
-	private int getIngredientsCount() {
-		int count = 0;
-		for (ItemStack item : ingredients) {
-			count += item.getAmount();
-		}
-		return count;
-	}
+	
 
 	/*public Map<Material, Integer> getIngredients() {
 		return ingredients;
@@ -314,7 +325,7 @@ public class BIngredients {
 	// returns the quality of the ingredients conditioning given recipe, -1 if
 	// no recipe is near them
 	public int getIngredientQuality(BRecipe recipe) {
-		float quality = 10;
+		/*float quality = 10;
 		int count;
 		int badStuff = 0;
 		if (recipe.isMissingIngredients(ingredients)) {
@@ -357,7 +368,7 @@ public class BIngredients {
 		}
 		if (quality >= 0) {
 			return Math.round(quality);
-		}
+		}*/
 		return -1;
 	}
 	
@@ -484,7 +495,7 @@ public class BIngredients {
 	public BIngredients clone() {
 		BIngredients copy = new BIngredients();
 		copy.ingredients.addAll(ingredients);
-		copy.materials.putAll(materials);
+		//copy.materials.putAll(materials);
 		copy.cookedTime = cookedTime;
 		return copy;
 	}
