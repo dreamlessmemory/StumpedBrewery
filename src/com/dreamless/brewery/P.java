@@ -351,8 +351,30 @@ public class P extends JavaPlugin {
 		}
 		Words.log = currentConfig.getBoolean("logRealChat", false);
 		Words.doSigns = currentConfig.getBoolean("distortSignText", false);
+		
+		
+		/*** aspects.yml ***/
+		currentFile = new File(p.getDataFolder(), "aspects.yml");
+		if(!currentFile.exists()) {
+			return false;
+		}
+		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
+		configSection = currentConfig.getConfigurationSection("aspects");
+		if(configSection != null) {
+			for (String aspect: configSection.getKeys(false)) {
+				double[] multipliers = new double[3];
+				multipliers[0] = configSection.getDouble(aspect + ".fermentation", 1.0);
+				multipliers[1] = configSection.getDouble(aspect + ".aging", 1.0);
+				multipliers[2] = configSection.getDouble(aspect + ".distilling", 1.0);
+				debugLog("Aspect: " + aspect + " - " + multipliers[0] + " " + multipliers[1] + " " +multipliers[2]);
+				Aspect.aspectStageMultipliers.put(aspect, multipliers);
+			}
+		}
 
 		return true;
+		
+		//TODO: Aspects
+		
 	}
 
 	// load all Data

@@ -1,5 +1,7 @@
 package com.dreamless.brewery;
 
+import java.util.HashMap;
+
 public class Aspect {
 	//Static Numbers for balancing
 	public static double commonPotency = 6;
@@ -12,6 +14,8 @@ public class Aspect {
 	public static double superiorSaturation = 0.6;
 	public static double rareSaturation = 0.8;
 	public static double legendarySaturation = 1.0;
+	
+	public static HashMap<String, double[]>aspectStageMultipliers = new HashMap<String, double[]>();
 	
 	//Private
 	private String name;
