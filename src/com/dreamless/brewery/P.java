@@ -362,12 +362,15 @@ public class P extends JavaPlugin {
 		configSection = currentConfig.getConfigurationSection("aspects");
 		if(configSection != null) {
 			for (String aspect: configSection.getKeys(false)) {
-				double[] multipliers = new double[3];
-				multipliers[0] = configSection.getDouble(aspect + ".fermentation", 1.0);
-				multipliers[1] = configSection.getDouble(aspect + ".aging", 1.0);
-				multipliers[2] = configSection.getDouble(aspect + ".distilling", 1.0);
-				debugLog("Aspect: " + aspect + " - " + multipliers[0] + " " + multipliers[1] + " " +multipliers[2]);
-				Aspect.aspectStageMultipliers.put(aspect, multipliers);
+				
+				AspectParameters aspectParameters = new AspectParameters(currentConfig.getConfigurationSection("aspects." + aspect));
+				debugLog(aspectParameters.toString());
+				//double[] multipliers = new double[3];
+				//multipliers[0] = configSection.getDouble(aspect + ".fermentation", 1.0);
+				//multipliers[1] = configSection.getDouble(aspect + ".aging", 1.0);
+				//multipliers[2] = configSection.getDouble(aspect + ".distilling", 1.0);
+				//debugLog("Aspect: " + aspect + " - " + multipliers[0] + " " + multipliers[1] + " " +multipliers[2]);
+				Aspect.aspectStageMultipliers.put(aspect, aspectParameters);
 			}
 		}
 

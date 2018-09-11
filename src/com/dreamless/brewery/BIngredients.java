@@ -77,9 +77,6 @@ public class BIngredients {
 				aspects.put(aspect, nAspect);
 			}
 		}
-	
-		
-		
 		if(P.debug) {
 			P.p.debugLog("Added: " + ingredient.toString());
 			Set<String> keys = aspects.keySet();
@@ -164,7 +161,15 @@ public class BIngredients {
 		return potion;
 	}
 
-	
+	public void fermentOneStep(int state) {
+		for(String containedAspects : aspects.keySet()) {
+			Aspect aspect = aspects.get(containedAspects);
+			double newPotency = aspect.getPotency() + Aspect.aspectStageMultipliers.get(containedAspects).getFermentationStageStep(state);
+			aspect.setPotency(newPotency);
+			P.p.debugLog("Update Potency of " + containedAspects + " - " + newPotency);
+			aspects.put(containedAspects, aspect);
+		}
+	}
 
 	/*public Map<Material, Integer> getIngredients() {
 		return ingredients;

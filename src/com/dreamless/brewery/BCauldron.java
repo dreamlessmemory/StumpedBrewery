@@ -56,6 +56,7 @@ public class BCauldron {
 			
 			//TODO: Aspect Calculation
 			//Run aspect calculation
+			ingredients.fermentOneStep(state);
 		}
 	}
 

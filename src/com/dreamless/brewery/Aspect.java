@@ -15,7 +15,7 @@ public class Aspect {
 	public static double rareSaturation = 0.8;
 	public static double legendarySaturation = 1.0;
 	
-	public static HashMap<String, double[]>aspectStageMultipliers = new HashMap<String, double[]>();
+	public static HashMap<String, AspectParameters>aspectStageMultipliers = new HashMap<String, AspectParameters>();
 	
 	//Private
 	private String name;
