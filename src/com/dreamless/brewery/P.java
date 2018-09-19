@@ -299,6 +299,14 @@ public class P extends JavaPlugin {
 		}
 		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
 		
+		//bases
+		//configSection = currentConfig.getConfigurationSection("bases");
+		for(String base : currentConfig.getStringList("bases")) {
+			debugLog(base + " added as base");
+			BIngredients.baseIngredients.add(base);
+		}
+		
+		//ingredients
 		configSection = currentConfig.getConfigurationSection("ingredients");
 		if (configSection != null) {
 			for (String ingredient : configSection.getKeys(false)) {

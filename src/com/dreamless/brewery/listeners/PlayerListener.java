@@ -1,8 +1,10 @@
 package com.dreamless.brewery.listeners;
 
+import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -47,12 +49,15 @@ public class PlayerListener implements Listener {
 						} else if (materialInHand == Material.CLOCK) {
 							BCauldron.printTime(player, clickedBlock);
 							return;
-
-							// fill a glass bottle with potion
 						} else if (materialInHand == Material.IRON_SHOVEL) {
-							BCauldron.printContents(player, clickedBlock);
+							if(BCauldron.isCooking(clickedBlock)) {
+								BCauldron.printContents(player, clickedBlock);
+							} else {
+								BCauldron.setCooking(clickedBlock, true);
+								clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
+							}
 							return;
-						} else if (materialInHand == Material.GLASS_BOTTLE) {
+						} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
 							if (player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
 								if (BCauldron.fill(player, clickedBlock)) {
 									event.setCancelled(true);
@@ -81,7 +86,7 @@ public class PlayerListener implements Listener {
 
 						// Check if fire alive below cauldron when adding ingredients
 						Block down = clickedBlock.getRelative(BlockFace.DOWN);
-						if (down.getType() == Material.FIRE || down.getType() == Material.MAGMA_BLOCK || down.getType() == Material.LAVA) {
+						if ((down.getType() == Material.FIRE || down.getType() == Material.MAGMA_BLOCK || down.getType() == Material.LAVA) && !BCauldron.isCooking(clickedBlock)) {
 
 							event.setCancelled(true);
 							boolean handSwap = false;

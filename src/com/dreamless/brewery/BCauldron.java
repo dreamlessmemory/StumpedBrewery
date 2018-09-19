@@ -25,10 +25,12 @@ public class BCauldron {
 	private Block block;
 	private int state = 1;
 	private boolean partiallyFilled = false;
+	private boolean cooking = false;
 
 	public BCauldron(Block block, ItemStack ingredient) {
 		this.block = block;
 		add(ingredient);
+		cooking = false;
 		bcauldrons.add(this);
 	}
 
@@ -37,15 +39,16 @@ public class BCauldron {
 		this.block = block;
 		this.state = state;
 		this.ingredients = ingredients;
+		cooking = false;
 		bcauldrons.add(this);
 	}
 
 	public void onUpdate() {//UPDATE THE POTION
 		// Check if fire still alive
-		if (!block.getChunk().isLoaded() || block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.MAGMA_BLOCK
-				|| block.getRelative(BlockFace.DOWN).getType() == Material.LAVA) {
+		if ((!block.getChunk().isLoaded() || fireActive()) && cooking) {
 			// add a minute to cooking time
 			state++;
+			//Sound and particle effects
 			block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
 			//Still not sure what this does
@@ -57,6 +60,11 @@ public class BCauldron {
 			//TODO: Aspect Calculation
 			//Run aspect calculation
 			ingredients.fermentOneStep(state);
+		} else { //no fire, stop cooking
+			if(cooking = true) {
+				cooking = false;
+				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 2.0f, 1.0f);
+			}
 		}
 	}
 
@@ -214,6 +222,7 @@ public class BCauldron {
 					config.set(prefix + ".state", cauldron.state);
 				}
 				config.set(prefix + ".ingredients", cauldron.ingredients.serializeIngredients());
+				config.set(prefix + ".cooking", cauldron.cooking);
 				id++;
 			}
 		}
@@ -235,5 +244,30 @@ public class BCauldron {
 				player.getInventory().addItem(item);
 			}
 		}, 1L);
+	}
+	
+	private boolean fireActive() {
+		return block.getRelative(BlockFace.DOWN).getType() == Material.FIRE || block.getRelative(BlockFace.DOWN).getType() == Material.MAGMA_BLOCK
+				|| block.getRelative(BlockFace.DOWN).getType() == Material.LAVA;
+	}
+	
+	public static boolean isCooking(Block block) {
+		BCauldron bcauldron = get(block);
+		if(bcauldron != null) {
+			return bcauldron.cooking;
+		} else {
+			return false;
+		}
+	}
+
+	public static void setCooking(Block block, boolean cooking) {
+		BCauldron bcauldron = get(block);
+		if(bcauldron!= null) {
+			bcauldron.cooking = cooking;
+		}
+	}
+	
+	public void startCooking() {
+		
 	}
 }

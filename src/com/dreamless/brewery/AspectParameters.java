@@ -34,6 +34,21 @@ public class AspectParameters {
 		return 0.0;
 	}
 
+	public double getFermentationMultiplier() {
+		return fermentationMultiplier;
+	}
+
+
+	public double getAgingMultiplier() {
+		return agingMultiplier;
+	}
+
+
+	public double getDistillingMultiplier() {
+		return distillingMultiplier;
+	}
+
+
 	@Override
 	public String toString() {
 		return "AspectParameters [fermentationMultiplier=" + fermentationMultiplier + ", fermentationPeak="

@@ -17,8 +17,12 @@ public class BIngredients {
 	public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
+	public static ArrayList<String> baseIngredients = new ArrayList<String>();
 	
 	private static int lastId = 0;
+	private static String[] bases = {"BEER", "CIDER", "VODKA", "CHOCOLATE", "HERB", "WINE", "RUM", "NETHER", "END"};
+	
+	
 	
 	public static float ageDifficultyScale = 2.0f;
 	public static float ingredientScoreMultiplier = 2.0f;
@@ -30,6 +34,7 @@ public class BIngredients {
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 	private Hashtable<String, Aspect> aspects = new Hashtable<String, Aspect>();
 	private int cookedTime;
+	private String type;
 
 	// Represents ingredients in Cauldron, Brew
 	// Init a new BIngredients
@@ -573,5 +578,18 @@ public class BIngredients {
 		}
 		return multiplier/counter;
 	}
-	//TODO: Determine type, use cookname 
+	//TODO: Determine type, use cookname
+	public String getType() {
+		return type;
+	}
+	
+	
+	//private static String[] bases = {"BEER", "CIDER", "VODKA", "CHOCOLATE", "HERB", "WINE", "RUM", "NETHER", "END"};
+	public void calculateType() {
+		
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 }
