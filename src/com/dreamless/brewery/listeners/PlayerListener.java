@@ -47,15 +47,15 @@ public class PlayerListener implements Listener {
 							return;
 
 						} else if (materialInHand == Material.CLOCK) {
-							BCauldron.printTime(player, clickedBlock);
-							return;
-						} else if (materialInHand == Material.IRON_SHOVEL) {
 							if(BCauldron.isCooking(clickedBlock)) {
-								BCauldron.printContents(player, clickedBlock);
+								BCauldron.printTime(player, clickedBlock);
 							} else {
 								BCauldron.setCooking(clickedBlock, true);
 								clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
-							}
+							}	
+							return;
+						} else if (materialInHand == Material.IRON_SHOVEL) {
+							BCauldron.printContents(player, clickedBlock);
 							return;
 						} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
 							if (player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
