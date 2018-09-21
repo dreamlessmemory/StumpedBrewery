@@ -2,7 +2,7 @@ package com.dreamless.brewery;
 
 import java.util.HashMap;
 
-public class Aspect implements Comparable {
+public class Aspect implements Comparable<Object> {
 	//Static Numbers for balancing
 	public static double commonPotency = 6;
 	public static double uncommonPotency = 20;

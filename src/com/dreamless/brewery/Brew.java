@@ -126,7 +126,7 @@ public class Brew {
 	public boolean setRecipeFromString(String name) {
 		currentRecipe = null;
 		if (name != null && !name.equals("")) {
-			for (BRecipe recipe : BIngredients.recipes) {
+			for (BRecipe recipe : BRecipe.recipes) {
 				if (recipe.getName().equalsIgnoreCase(name)) {
 					currentRecipe = recipe;
 					return true;

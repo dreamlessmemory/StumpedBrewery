@@ -125,8 +125,8 @@ public class P extends JavaPlugin {
 		Barrel.barrels.clear();
 		BCauldron.bcauldrons.clear();
 		BIngredients.acceptableIngredients.clear();
-		BIngredients.recipes.clear();
-		BIngredients.cookedNames.clear();
+		BRecipe.recipes.clear();
+		//BIngredients.cookedNames.clear();
 		BPlayer.clear();
 		Brew.potions.clear();
 		Wakeup.wakeups.clear();
@@ -143,8 +143,8 @@ public class P extends JavaPlugin {
 		}
 		// clear all existent config Data
 		BIngredients.acceptableIngredients.clear();
-		BIngredients.recipes.clear();
-		BIngredients.cookedNames.clear();
+		BRecipe.recipes.clear();
+		//BIngredients.cookedNames.clear();
 		Words.words.clear();
 		Words.ignoreText.clear();
 		Words.commands = null;
@@ -271,7 +271,7 @@ public class P extends JavaPlugin {
 			for (String recipeId : configSection.getKeys(false)) {
 				BRecipe recipe = new BRecipe(configSection, recipeId);
 				if (recipe.isValid()) {
-					BIngredients.recipes.add(recipe);
+					BRecipe.recipes.add(recipe);
 				} else {
 					errorLog("Loading the Recipe with id: '" + recipeId + "' failed!");
 				}
@@ -284,7 +284,7 @@ public class P extends JavaPlugin {
 			for (String ingredient : configSection.getKeys(false)) {
 				Material mat = Material.matchMaterial(ingredient);
 				if (mat != null) {
-					BIngredients.cookedNames.put(mat, (configSection.getString(ingredient, null)));
+					//BIngredients.cookedNames.put(mat, (configSection.getString(ingredient, null)));
 					BIngredients.acceptableIngredients.add(mat);
 				} else {
 					errorLog("Unknown Material: " + ingredient);

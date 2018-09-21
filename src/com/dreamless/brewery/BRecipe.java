@@ -16,7 +16,10 @@ public class BRecipe {
 	public static float ingredientDifficultyScale = 11.0f;
 	public static float fermentationDifficultyScale = 11.0f;
 	public static float woodTypeDifficultyScale = 1.0f;
-
+	
+	//Static
+	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
+	//Individual recipe
 	private String name;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>(); // material and amount
 	private int cookingTime; // time to cook in cauldron

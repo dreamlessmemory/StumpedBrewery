@@ -583,7 +583,7 @@ public class CommandListener implements CommandExecutor {
 			}
 
 			BRecipe recipe = null;
-			for (BRecipe r : BIngredients.recipes) {
+			for (BRecipe r : BRecipe.recipes) {
 				if (r.hasName(name)) {
 					recipe = r;
 					break;

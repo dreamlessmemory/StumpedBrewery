@@ -16,9 +16,6 @@ public class BIngredients {
 	public static Set<Material> acceptableIngredients = new HashSet<Material>();
 	public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
 	public static HashMap<String, String> typeMap = new HashMap<String, String>();
-	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
-	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
-	public static ArrayList<String> baseIngredients = new ArrayList<String>();
 	
 	private static int lastId = 0;
 	
