@@ -169,7 +169,9 @@ public class BIngredients {
 	public void fermentOneStep(int state) {
 		for(String containedAspects : aspects.keySet()) {
 			Aspect aspect = aspects.get(containedAspects);
-			double newPotency = aspect.getPotency() + (Aspect.aspectStageMultipliers.get(containedAspects).getFermentationStageStep(state) * Aspect.aspectStageMultipliers.get(type).getFermentationMultiplier());
+			double fermentationBonus = Aspect.aspectStageMultipliers.get(containedAspects).getFermentationStageStep(state);
+			double typeBonus = fermentationBonus * (1 - Aspect.aspectStageMultipliers.get(type).getFermentationMultiplier());
+			double newPotency = aspect.getPotency() + fermentationBonus + typeBonus;
 			if(newPotency <= 0) {
 				newPotency = 0;
 			}
