@@ -4,32 +4,68 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class AspectParameters {
 	private double fermentationMultiplier;
-	private int fermentationPeak;
-	private int fermentationRange;
+	private int [] fermentationCurve;
 	private double agingMultiplier;
-	private int agingPeak;
-	private int agingRange;
+	private int [] agingCurve;
 	private double distillingMultiplier;
-	private int distillingPeak;
-	private int distillingRange;
+	private int distillingCurve[];
 
 	public AspectParameters(ConfigurationSection configSection) {
 		fermentationMultiplier = configSection.getDouble("fermentationMultiplier", 0);
-		fermentationPeak = configSection.getInt("fermentationPeak", 1);
-		fermentationRange = configSection.getInt("fermentationRange", 1);
 		agingMultiplier = configSection.getDouble("agingMultiplier", 0);
-		agingPeak = configSection.getInt("agingPeak", 1);
-		agingRange = configSection.getInt("agingRange", 1);
 		distillingMultiplier = configSection.getDouble("distillingMultiplier", 0);
-		distillingPeak = configSection.getInt("distillingPeak", 1);
-		distillingRange = configSection.getInt("distillingRange", 1);
+		
+		//Parse Curves
+		if(fermentationMultiplier != 0) {
+			String[] numbers = configSection.getString("fermentationCurve", "").split("/");
+			if(numbers.length > 1) {
+				fermentationCurve = new int[numbers.length];
+				for(int i = 0; i < numbers.length; i++) {
+					fermentationCurve[i] = Integer.parseInt(numbers[i]);
+				}
+			}
+		}
+		
+		if(agingMultiplier != 0) {
+			String[] numbers = configSection.getString("agingCurve", "").split("/");
+			if(numbers.length > 1) {
+				agingCurve = new int[numbers.length];
+				for(int i = 0; i < numbers.length; i++) {
+					agingCurve[i] = Integer.parseInt(numbers[i]);
+				}
+			}
+		}
+		
+		if(fermentationMultiplier != 0) {
+			String[] numbers = configSection.getString("distillingCurve", "").split("/");
+			if(numbers.length > 1){
+				distillingCurve = new int[numbers.length];
+				for(int i = 0; i < numbers.length; i++) {
+					distillingCurve[i] = Integer.parseInt(numbers[i]);
+				}
+			}
+		}
 	}
 	
 	
 	public double getFermentationStageStep(int time) {
-		//int difference = time - fermentationPeak;
-		if (time >= fermentationPeak - fermentationRange + 1 && time <= fermentationPeak + fermentationRange) {
-			return fermentationMultiplier * (time - fermentationPeak <= 0 ? 1 : -1);
+		if(fermentationCurve.length == 2) { //ramp up only
+			if (time >= fermentationCurve[0] && time <= fermentationCurve[1]) {
+				return fermentationMultiplier;
+			}
+			//return  ((time >= fermentationCurve[0] && time <= fermentationCurve[1]) <= 0 ? 1 : -1);
+		} else if (fermentationCurve.length == 3) {
+			if (time >= fermentationCurve[0] && time <= fermentationCurve[1]) {
+				return fermentationMultiplier;
+			} else if (time >= fermentationCurve[2]) {
+				return fermentationMultiplier * -1;
+			}
+		} else if (fermentationCurve.length == 4) {
+			if (time >= fermentationCurve[0] && time <= fermentationCurve[1]) {
+				return fermentationMultiplier;
+			} else if (time >= fermentationCurve[2] && time <= fermentationCurve[3]) {
+				return fermentationMultiplier * -1;
+			} else return 0.0;
 		}
 		return 0.0;
 	}
@@ -51,11 +87,8 @@ public class AspectParameters {
 
 	@Override
 	public String toString() {
-		return "AspectParameters [fermentationMultiplier=" + fermentationMultiplier + ", fermentationPeak="
-				+ fermentationPeak + ", fermentationRange=" + fermentationRange + ", agingMultiplier=" + agingMultiplier
-				+ ", agingPeak=" + agingPeak + ", agingRange=" + agingRange + ", distillingMultiplier="
-				+ distillingMultiplier + ", distillingPeak=" + distillingPeak + ", distillingRange=" + distillingRange
-				+ "]";
+		return "AspectParameters [fermentationMultiplier=" + fermentationMultiplier + ", agingMultiplier=" + agingMultiplier + ", distillingMultiplier="
+				+ distillingMultiplier + "]";
 	}
 	
 }

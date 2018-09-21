@@ -170,6 +170,9 @@ public class BIngredients {
 		for(String containedAspects : aspects.keySet()) {
 			Aspect aspect = aspects.get(containedAspects);
 			double newPotency = aspect.getPotency() + Aspect.aspectStageMultipliers.get(containedAspects).getFermentationStageStep(state);
+			if(newPotency <= 0) {
+				newPotency = 0;
+			}
 			aspect.setPotency(newPotency);
 			P.p.debugLog("Update Potency of " + containedAspects + " - " + newPotency);
 			aspects.put(containedAspects, aspect);
