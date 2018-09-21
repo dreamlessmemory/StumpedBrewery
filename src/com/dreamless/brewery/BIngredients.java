@@ -103,8 +103,12 @@ public class BIngredients {
 
 		//Test Custom NBT
 		NBTItem nbti = new NBTItem(potion);
+		//All brewery NBT gets set here.
 		NBTCompound breweryMeta = nbti.addCompound("brewery");
 		breweryMeta.setString("test", "BLAH");
+		
+		//Then add your effects?
+		//potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 2000, 1), true);
 		
 		potion = nbti.getItem();
 		//potion.setItemMeta(potionMeta);

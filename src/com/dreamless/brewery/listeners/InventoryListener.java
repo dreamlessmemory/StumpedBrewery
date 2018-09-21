@@ -190,9 +190,6 @@ public class InventoryListener implements Listener {
 			if (brew != null) {
 				if (!glowstone) {
 					return 1;
-				}
-				if (brew.canDistill()) {
-					return 2;
 				} else {
 					customFound = 1;
 				}
@@ -219,12 +216,7 @@ public class InventoryListener implements Listener {
 		Brew[] contents = getDistillContents(inv);
 		for (int slot = 0; slot < 3; slot++) {
 			if (contents[slot] == null) continue;
-			if (contents[slot].canDistill()) {
-				// is further distillable
-				custom = true;
-			} else {
-				contents[slot] = null;
-			}
+			custom = true;
 		}
 		if (custom) {
 			Brew.distillAll(inv, contents);
@@ -234,23 +226,6 @@ public class InventoryListener implements Listener {
 	}
 
 	private int getLongestDistillTime(BrewerInventory inv) {
-		int bestTime = 0;
-		int time;
-		Brew[] contents = getDistillContents(inv);
-		for (int slot = 0; slot < 3; slot++) {
-			if (contents[slot] == null) continue;
-			time = contents[slot].getDistillTimeNextRun();
-			if (time == 0) {
-				// Undefined Potion needs 40 seconds
-				time = 800;
-			}
-			if (time > bestTime) {
-				bestTime = time;
-			}
-		}
-		if (bestTime > 0) {
-			return bestTime;
-		}
 		return 800;
 	}
 
@@ -268,7 +243,7 @@ public class InventoryListener implements Listener {
 						BRecipe recipe = brew.getCurrentRecipe();
 						if (recipe != null) {
 							Brew.removeEffects(potion);
-							Brew.PotionColor.valueOf(recipe.getColor()).colorBrew(potion, item, brew.canDistill());
+							//Brew.PotionColor.valueOf(recipe.getColor()).colorBrew(potion, item, brew.canDistill());
 							item.setItemMeta(potion);
 						}
 					}
@@ -297,7 +272,7 @@ public class InventoryListener implements Listener {
 					Brew brew = Brew.get(meta);
 					if (brew != null) {
 						if (Brew.hasColorLore(meta)) {
-							brew.convertLore(meta, false);
+							//brew.convertLore(meta, false);
 							item.setItemMeta(meta);
 						}
 					}

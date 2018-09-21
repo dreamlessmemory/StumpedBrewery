@@ -2,7 +2,7 @@ package com.dreamless.brewery;
 
 import java.util.HashMap;
 
-public class Aspect {
+public class Aspect implements Comparable {
 	//Static Numbers for balancing
 	public static double commonPotency = 6;
 	public static double uncommonPotency = 20;
@@ -87,6 +87,19 @@ public class Aspect {
 			return legendarySaturation;
 		default:
 			return commonSaturation;
+		}
 	}
+
+	@Override
+	public int compareTo(Object arg0) {
+		// TODO Auto-generated method stub
+		double difference = this.potency - ((Aspect)arg0).getPotency();
+		if(difference > 0) {
+			return 1; 
+		} else if (difference < 0) {
+			return -1;
+		} else {
+			return 0;
+		}
 	}
 }

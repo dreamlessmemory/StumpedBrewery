@@ -145,16 +145,11 @@ public class BPlayer {
 			bPlayer = addPlayer(player);
 		}
 		bPlayer.drunkeness += brewAlc;
-		if (brew.getQuality() > 0) {
-			bPlayer.quality += brew.getQuality() * brewAlc;
-		} else {
-			bPlayer.quality += brewAlc;
-		}
 
 		if (bPlayer.drunkeness <= 100) {
 
 			addBrewEffects(brew, player);
-			addQualityEffects(brew.getQuality(), brewAlc, player);
+			//addQualityEffects(brew.getQuality(), brewAlc, player);
 
 		} else {
 			bPlayer.drinkCap(player);
@@ -506,7 +501,7 @@ public class BPlayer {
 		ArrayList<BEffect> effects = brew.getEffects();
 		if (effects != null) {
 			for (BEffect effect : effects) {
-				effect.apply(brew.getQuality(), player);
+				effect.apply(10, player);
 			}
 		}
 	}

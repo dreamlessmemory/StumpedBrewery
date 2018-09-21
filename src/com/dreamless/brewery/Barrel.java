@@ -386,7 +386,7 @@ public class Barrel implements InventoryHolder {
 						brew.age(item, time, getWood());
 						PotionMeta meta = (PotionMeta) item.getItemMeta();
 						if (Brew.hasColorLore(meta)) {
-							brew.convertLore(meta, false);
+							//brew.convertLore(meta, false);
 							item.setItemMeta(meta);
 						}
 					}
