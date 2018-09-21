@@ -264,6 +264,9 @@ public class BCauldron {
 		BCauldron bcauldron = get(block);
 		if(bcauldron!= null) {
 			bcauldron.cooking = cooking;
+			if(cooking) {
+				bcauldron.ingredients.startCooking();
+			}
 		}
 	}
 	

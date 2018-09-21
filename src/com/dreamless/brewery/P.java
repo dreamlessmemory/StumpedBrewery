@@ -298,14 +298,6 @@ public class P extends JavaPlugin {
 			return false;
 		}
 		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
-		
-		//bases
-		//configSection = currentConfig.getConfigurationSection("bases");
-		for(String base : currentConfig.getStringList("bases")) {
-			debugLog(base + " added as base");
-			BIngredients.baseIngredients.add(base);
-		}
-		
 		//ingredients
 		configSection = currentConfig.getConfigurationSection("ingredients");
 		if (configSection != null) {
@@ -367,17 +359,26 @@ public class P extends JavaPlugin {
 			return false;
 		}
 		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
+		
+		//type map
+		configSection = currentConfig.getConfigurationSection("types");
+		if(configSection != null) {
+			for (String types: configSection.getKeys(false)) {
+				List<String> ingredient = configSection.getStringList(types);
+				for(String type : ingredient) {
+					debugLog("added: " + type + " makes a " + types);
+					BIngredients.typeMap.put(type, types);
+				}
+			}
+		}
+		
+		//Aspects
 		configSection = currentConfig.getConfigurationSection("aspects");
 		if(configSection != null) {
 			for (String aspect: configSection.getKeys(false)) {
 				
 				AspectParameters aspectParameters = new AspectParameters(currentConfig.getConfigurationSection("aspects." + aspect));
 				debugLog(aspectParameters.toString());
-				//double[] multipliers = new double[3];
-				//multipliers[0] = configSection.getDouble(aspect + ".fermentation", 1.0);
-				//multipliers[1] = configSection.getDouble(aspect + ".aging", 1.0);
-				//multipliers[2] = configSection.getDouble(aspect + ".distilling", 1.0);
-				//debugLog("Aspect: " + aspect + " - " + multipliers[0] + " " + multipliers[1] + " " +multipliers[2]);
 				Aspect.aspectStageMultipliers.put(aspect, aspectParameters);
 			}
 		}

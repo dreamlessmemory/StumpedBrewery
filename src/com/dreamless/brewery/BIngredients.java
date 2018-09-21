@@ -15,12 +15,12 @@ import java.util.*;
 public class BIngredients {
 	public static Set<Material> acceptableIngredients = new HashSet<Material>();
 	public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
+	public static HashMap<String, String> typeMap = new HashMap<String, String>();
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
 	public static Map<Material, String> cookedNames = new HashMap<Material, String>();
 	public static ArrayList<String> baseIngredients = new ArrayList<String>();
 	
 	private static int lastId = 0;
-	private static String[] bases = {"BEER", "CIDER", "VODKA", "CHOCOLATE", "HERB", "WINE", "RUM", "NETHER", "END"};
 	
 	
 	
@@ -32,7 +32,7 @@ public class BIngredients {
 
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
-	private Hashtable<String, Aspect> aspects = new Hashtable<String, Aspect>();
+	private HashMap<String, Aspect> aspects = new HashMap<String, Aspect>();
 	private int cookedTime;
 	private String type;
 
@@ -56,7 +56,7 @@ public class BIngredients {
 	}
 
 	// Add an ingredient to this
-	public void add(ItemStack ingredient) {//TODO: Start adding aspects
+	public void add(ItemStack ingredient) {
 		//Add Item
 		int ingPosition = ingredients.indexOf(ingredient);
 		if(ingPosition != -1) {
@@ -169,7 +169,7 @@ public class BIngredients {
 	public void fermentOneStep(int state) {
 		for(String containedAspects : aspects.keySet()) {
 			Aspect aspect = aspects.get(containedAspects);
-			double newPotency = aspect.getPotency() + Aspect.aspectStageMultipliers.get(containedAspects).getFermentationStageStep(state);
+			double newPotency = aspect.getPotency() + (Aspect.aspectStageMultipliers.get(containedAspects).getFermentationStageStep(state) * Aspect.aspectStageMultipliers.get(type).getFermentationMultiplier());
 			if(newPotency <= 0) {
 				newPotency = 0;
 			}
@@ -581,18 +581,34 @@ public class BIngredients {
 		}
 		return multiplier/counter;
 	}
-	//TODO: Determine type, use cookname
 	public String getType() {
 		return type;
 	}
 	
-	
-	//private static String[] bases = {"BEER", "CIDER", "VODKA", "CHOCOLATE", "HERB", "WINE", "RUM", "NETHER", "END"};
-	public void calculateType() {
-		
-	}
-
 	public void setType(String type) {
 		this.type = type;
+	}
+	
+	public void calculateType() {
+		Material highest = null;
+		int highestCount = 0;
+		for (ItemStack ingredient : ingredients) {
+			if (typeMap.containsKey(ingredient.getType().name())) {
+				if(ingredient.getAmount() > highestCount) {
+					highest = ingredient.getType();
+					highestCount = ingredient.getAmount();
+				}
+			}
+		}
+		//Assign a Name if found
+		if (highest != null) {
+			type = typeMap.get(highest.name());
+			P.p.debugLog("BREW IS A " + type);
+		}
+		
+	}
+	
+	public void startCooking() {
+		calculateType();
 	}
 }
