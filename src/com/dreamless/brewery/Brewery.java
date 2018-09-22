@@ -289,14 +289,6 @@ public class Brewery extends JavaPlugin {
 		Brew.colorInBrewer = currentConfig.getBoolean("colorInBrewer", false);
 		PlayerListener.openEverywhere = currentConfig.getBoolean("openLargeBarrelEverywhere", false);
 		
-		
-		/*** parameters.yml ***/
-		currentFile = new File(breweryDriver.getDataFolder(), "parameters.yml");
-		if(!currentFile.exists()) {
-			return false;
-		}
-		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
-		
 		//difficulty settings
 		Barrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 20.0);
 		
