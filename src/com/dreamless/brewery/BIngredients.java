@@ -16,19 +16,9 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class BIngredients {
-	//public static Set<Material> acceptableIngredients = new HashSet<Material>();
-	//public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
 	public static HashMap<String, String> typeMap = new HashMap<String, String>();
 	
 	private static int lastId = 0;
-	
-	
-	
-	public static float ageDifficultyScale = 2.0f;
-	public static float ingredientScoreMultiplier = 2.0f;
-	public static float cookingScoreMultiplier = 1.0f;
-	public static float woodTypeScoreMultiplier = 1.0f;
-	public static float ageScoreMultiplier = 2.0f;
 
 	private int id;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
@@ -49,10 +39,6 @@ public class BIngredients {
 		this.cookedTime = cookedTime;
 		this.id = lastId;
 		lastId++;
-
-		/*for (ItemStack item : ingredients) {
-			addMaterial(item);
-		}*/
 	}
 
 	// Add an ingredient to this
@@ -64,14 +50,8 @@ public class BIngredients {
 		} else {
 			ingredients.add(ingredient);
 		}
-		
-		//Ingredient Info
-		//Ingredient info = ingredientInfo.get(ingredient.getType());
-		//Multipliers
-		
+		//Aspect multipliers
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
-		
-		//SQL test
 		try {
 			String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name='" + ingredient.getType().name() + "'";
 			PreparedStatement stmt;
@@ -125,7 +105,6 @@ public class BIngredients {
 				}
 			}
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -178,10 +157,6 @@ public class BIngredients {
 			//Brewery.breweryDriver.debugLog("SQL says bonus of " + currentAspect + " is " + Aspect.getStepBonus(state, currentAspect, "fermentation"));
 		}
 	}
-
-	/*public Map<Material, Integer> getIngredients() {
-		return ingredients;
-	}*/
 
 	public int getCookedTime() {
 		return cookedTime;
