@@ -57,9 +57,9 @@ public class Brewery extends JavaPlugin {
 	private CommandSender reloader;
 	
 	//DataBase vars.
-	final String username="root"; //Enter in your db username
-	final String password="MyNewPass"; //Enter your password for the db
-	final String url = "jdbc:mysql://localhost:3306/sys"; //Enter URL w/db name
+	final String username="mchost_214986"; //Enter in your db username
+	final String password="StumpedDB!"; //Enter your password for the db
+	final String url = "jdbc:mysql://mu1.mchost.pro:3306/mchost_214986"; //Enter URL w/db name
 
 	//Connection vars
 	static Connection connection; //This is the variable we will use to connect to database
