@@ -1,9 +1,14 @@
 package com.dreamless.brewery;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class BEffect {
@@ -97,6 +102,64 @@ public class BEffect {
 		}
 	}
 
+	public static ArrayList<PotionEffect> calculateEffect(HashMap<String, Double> aspects){
+		ArrayList<PotionEffect> effects = new ArrayList<PotionEffect>();
+		
+		//debug
+		Brewery.breweryDriver.debugLog("TEST " + aspects.size());
+		
+		
+		double bonusPotency = 0;
+		double bonusDuration = 0;
+		if(aspects.containsKey("RAW_POTENCY")) {
+			bonusPotency = aspects.remove("RAW_POTENCY");
+		}
+		if(aspects.containsKey("RAW_DURATION")) {
+			bonusPotency = aspects.remove("RAW_DURATION");
+		}
+		if(aspects.size() == 0 && aspects.containsKey(null)) {
+			Brewery.breweryDriver.debugLog("Woah, empty?");
+			return effects;
+		}
+		
+		Iterator<Map.Entry<String, Double>> it = aspects.entrySet().iterator();
+		while(it.hasNext()) {//TODO: be able to search for paired things w/ concurrentmodificationexception
+			Map.Entry<String, Double> entry = it.next();
+			String currentAspect = entry.getKey();
+			double potency = 1;
+			double duration = 90;
+			String trueAspect = currentAspect;
+			PotionEffectType type;
+			//Parse the PotionEffect name
+			if(currentAspect.contains("_POTENCY")) {
+				trueAspect = currentAspect.substring(0, currentAspect.length() - 8);
+			} else if (currentAspect.contains("_DURATION")) {
+				trueAspect = currentAspect.substring(0, currentAspect.length() - 10);
+			}
+			//check if really potion type
+			type = PotionEffectType.getByName(trueAspect);
+			if(type != null){
+				if(aspects.containsKey(trueAspect + "_POTENCY")) {
+					potency = calculatePotency(aspects.remove(trueAspect + "_POTENCY"), bonusPotency, (PotionEffectType.getByName(trueAspect).isInstant()));
+				}
+				if(aspects.containsKey(trueAspect + "_DURATION")) {
+				potency = calculateDuration(aspects.remove(trueAspect + "_DURATION"), bonusDuration);
+				}
+				effects.add(new PotionEffect(type, ((int) duration) * 20, (int)potency));
+			}
+		}
+		
+		return effects;
+	}
+
+	public static int calculateDuration(double duration, double bonusDuration) {
+		return 180;
+	}
+	
+	public static int calculatePotency(double potency, double bonusPotency, boolean isInstant) {
+		return 2;
+	}
+	
 	private void setLvl(String[] range) {
 		if (range.length == 1) {
 			maxlvl = (short) Brewery.breweryDriver.parseInt(range[0]);

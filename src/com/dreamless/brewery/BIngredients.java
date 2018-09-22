@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 //import org.bukkit.potion.PotionEffect;
 //import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionEffect;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
@@ -120,25 +121,45 @@ public class BIngredients {
 
 
 	// returns an Potion item with cooked ingredients
-	public ItemStack cook(int state) {//TODO: things
-
+	public ItemStack cook(int state) {
+		//TODO: Calculate final potency for each aspect, convert it to an aspect value 
+		//TODO: Add it as NBT data
+		//TODO: recipe lookup
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
 		// cookedTime is always time in minutes, state may differ with number of ticks
 		cookedTime = state;
 
-		//Test Custom NBT
+		//Custom NBT
 		NBTItem nbti = new NBTItem(potion);
-		//All brewery NBT gets set here.
-		NBTCompound breweryMeta = nbti.addCompound("brewery");
-		breweryMeta.setString("test", "BLAH");
+		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
 		
-		//Then add your effects?
-		//potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 2000, 1), true);
+		/** Aspect Calculation **/
+		//temporary Map
+		HashMap <String, Double> cookedAspects = new HashMap<String, Double>();
+		//Determine overflow
+		double aspectSaturation = (aspects.size() <= 6 ? 1 : aspects.size() / 6);
+		//Add calculated aspects to the map
+		for(String currentAspect: aspects.keySet()) {
+			Aspect aspect = aspects.get(currentAspect);
+			cookedAspects.put(currentAspect, (aspect.getPotency() / (aspect.getSaturation() * aspectSaturation)));
+			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + cookedAspects.get(currentAspect));
+		}
+		Brewery.breweryDriver.debugLog("SIZE? " + cookedAspects.size());
+		//Add effects based on aspects
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(cookedAspects));
+		for (PotionEffect effect: effects) {
+			potionMeta.addCustomEffect(effect, true);
+		}
+		
+		//Write NBT data
+		for(String currentAspect: cookedAspects.keySet()) {
+			breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
+		}
 		
 		potion = nbti.getItem();
-		//potion.setItemMeta(potionMeta);
+		potion.setItemMeta(potionMeta);
 		
 		return potion;
 	}
