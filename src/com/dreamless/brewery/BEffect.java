@@ -46,7 +46,7 @@ public class BEffect {
 		} else {
 			type = PotionEffectType.getByName(effect);
 			if (type == null) {
-				P.p.errorLog("Effect: " + effect + " does not exist!");
+				Brewery.breweryDriver.errorLog("Effect: " + effect + " does not exist!");
 				return;
 			}
 		}
@@ -99,21 +99,21 @@ public class BEffect {
 
 	private void setLvl(String[] range) {
 		if (range.length == 1) {
-			maxlvl = (short) P.p.parseInt(range[0]);
+			maxlvl = (short) Brewery.breweryDriver.parseInt(range[0]);
 			minlvl = 1;
 		} else {
-			maxlvl = (short) P.p.parseInt(range[1]);
-			minlvl = (short) P.p.parseInt(range[0]);
+			maxlvl = (short) Brewery.breweryDriver.parseInt(range[1]);
+			minlvl = (short) Brewery.breweryDriver.parseInt(range[0]);
 		}
 	}
 
 	private void setDuration(String[] range) {
 		if (range.length == 1) {
-			maxduration = (short) P.p.parseInt(range[0]);
+			maxduration = (short) Brewery.breweryDriver.parseInt(range[0]);
 			minduration = (short) (maxduration / 8);
 		} else {
-			maxduration = (short) P.p.parseInt(range[1]);
-			minduration = (short) P.p.parseInt(range[0]);
+			maxduration = (short) Brewery.breweryDriver.parseInt(range[1]);
+			minduration = (short) Brewery.breweryDriver.parseInt(range[0]);
 		}
 	}
 

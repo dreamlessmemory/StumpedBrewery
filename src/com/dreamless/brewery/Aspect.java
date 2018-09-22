@@ -15,6 +15,7 @@ public class Aspect implements Comparable<Object> {
 	public static double rareSaturation = 0.8;
 	public static double legendarySaturation = 1.0;
 	
+	//Aspect Databases
 	public static HashMap<String, AspectParameters>aspectStageMultipliers = new HashMap<String, AspectParameters>();
 	
 	//Private

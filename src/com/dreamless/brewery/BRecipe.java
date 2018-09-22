@@ -44,7 +44,7 @@ public class BRecipe {
 		ConfigurationSection aspectsSection = configSectionRecipes.getConfigurationSection(recipeId+ ".aspects");
 		for (String aspect: aspectsSection.getKeys(false)) {
 			aspects.put(aspect, aspectsSection.getInt(aspect));
-			P.p.debugLog(aspect + " - " + aspectsSection.getInt(aspect));
+			Brewery.breweryDriver.debugLog(aspect + " - " + aspectsSection.getInt(aspect));
 		}
         //parse flavorText
 		flavorText = configSectionRecipes.getString(recipeId + ".flavortext");
@@ -183,7 +183,7 @@ public class BRecipe {
 		Brew brew = new Brew(uid, bIngredients, quality, distillruns, getAge(), wood, getName(), false, false, true, 0);
 
 		Brew.PotionColor.valueOf(getColor()).colorBrew(potionMeta, potion, false);
-		potionMeta.setDisplayName(P.p.color("&f" + getName()));
+		potionMeta.setDisplayName(Brewery.breweryDriver.color("&f" + getName()));
 		// This effect stores the UID in its Duration
 		potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect((uid * 4), 0), true);
 

@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 public class Wakeup {
 
 	public static ArrayList<Wakeup> wakeups = new ArrayList<Wakeup>();
-	public static P p = P.p;
+	public static Brewery p = Brewery.breweryDriver;
 	public static int checkId = -1;
 	public static Player checkPlayer = null;
 

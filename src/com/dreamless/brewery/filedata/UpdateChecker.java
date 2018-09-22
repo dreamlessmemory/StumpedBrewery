@@ -12,7 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.dreamless.brewery.P;
+import com.dreamless.brewery.Brewery;
 
 
 /**
@@ -43,7 +43,7 @@ public class UpdateChecker implements Runnable {
 		if (update == null || !player.isOp()) {
 			return;
 		}
-		P.p.msg(player, update);
+		Brewery.breweryDriver.msg(player, update);
 	}
 
 	@Override
@@ -108,18 +108,18 @@ public class UpdateChecker implements Runnable {
 
 				String[] split = versionName.split(DELIMETER);
 				if (split.length < 2) {
-					P.p.log("Malformed Remote File Name, could not check for updates");
+					Brewery.breweryDriver.log("Malformed Remote File Name, could not check for updates");
 				} else {
 					String version = split[1];
-					if (!P.p.getDescription().getVersion().equals(split[1].split(" ")[0])) {
+					if (!Brewery.breweryDriver.getDescription().getVersion().equals(split[1].split(" ")[0])) {
 						String[] verNew = version.split("\\.");
-						String[] verOld = P.p.getDescription().getVersion().split("\\.");
+						String[] verOld = Brewery.breweryDriver.getDescription().getVersion().split("\\.");
 
 						for (int i = 0; i < verNew.length; i++) {
-							if (i < verOld.length && P.p.parseInt(verOld[i]) > P.p.parseInt(verNew[i])) {
+							if (i < verOld.length && Brewery.breweryDriver.parseInt(verOld[i]) > Brewery.breweryDriver.parseInt(verNew[i])) {
 								break;
-							} else if (i >= verOld.length || P.p.parseInt(verOld[i]) < P.p.parseInt(verNew[i])) {
-								P.p.log("Update available for Brewery-" + P.p.getDescription().getVersion() + ": " + versionName);
+							} else if (i >= verOld.length || Brewery.breweryDriver.parseInt(verOld[i]) < Brewery.breweryDriver.parseInt(verNew[i])) {
+								Brewery.breweryDriver.log("Update available for Brewery-" + Brewery.breweryDriver.getDescription().getVersion() + ": " + versionName);
 								update = "Update available: v" + version;
 								break;
 							}
@@ -128,11 +128,11 @@ public class UpdateChecker implements Runnable {
 				}
 
 			} else {
-				P.p.log("There are no files for this project");
+				Brewery.breweryDriver.log("There are no files for this project");
 			}
 		} catch (IOException e) {
 			// There was an error reading the query
-			P.p.errorLog("Could not check for Updates. This error can probably be ignored");
+			Brewery.breweryDriver.errorLog("Could not check for Updates. This error can probably be ignored");
 			e.printStackTrace();
 		}
 	}

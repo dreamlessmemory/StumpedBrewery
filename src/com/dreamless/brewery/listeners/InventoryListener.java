@@ -46,12 +46,12 @@ public class InventoryListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerOpen(InventoryOpenEvent event) {
-		if (!P.use1_9) return;
+		if (!Brewery.use1_9) return;
 		HumanEntity player = event.getPlayer();
 		Inventory inv = event.getInventory();
 		if (player == null || inv == null || !(inv instanceof BrewerInventory)) return;
 
-		P.p.debugLog("Starting brew inventory tracking");
+		Brewery.breweryDriver.debugLog("Starting brew inventory tracking");
 		trackedBrewmen.add(player.getUniqueId());
 	}
 
@@ -61,18 +61,18 @@ public class InventoryListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerClose(InventoryCloseEvent event) {
-		if (!P.use1_9) return;
+		if (!Brewery.use1_9) return;
 		HumanEntity player = event.getPlayer();
 		Inventory inv = event.getInventory();
 		if (player == null || inv == null || !(inv instanceof BrewerInventory)) return;
 
-		P.p.debugLog("Stopping brew inventory tracking");
+		Brewery.breweryDriver.debugLog("Stopping brew inventory tracking");
 		trackedBrewmen.remove(player.getUniqueId());
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerDrag(InventoryDragEvent event) {
-		if (!P.use1_9) return;
+		if (!Brewery.use1_9) return;
 		// Workaround the Drag event when only clicking a slot
 		if (event.getInventory() instanceof BrewerInventory) {
 			onBrewerClick(new InventoryClickEvent(event.getView(), InventoryType.SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PLACE_ALL));
@@ -88,7 +88,7 @@ public class InventoryListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerClick(InventoryClickEvent event) {
-		if (!P.use1_9) return;
+		if (!Brewery.use1_9) return;
 		HumanEntity player = event.getWhoClicked();
 		Inventory inv = event.getInventory();
 		if (player == null || inv == null || !(inv instanceof BrewerInventory)) return;
@@ -134,12 +134,12 @@ public class InventoryListener implements Listener {
 								// No custom potion, cancel and ignore
 								this.cancel();
 								trackedBrewers.remove(brewery);
-								P.p.debugLog("nothing to distill");
+								Brewery.breweryDriver.debugLog("nothing to distill");
 								return;
 							default:
 								runTime = getLongestDistillTime(stand.getInventory());
 								brewTime = runTime;
-								P.p.debugLog("using brewtime: " + runTime);
+								Brewery.breweryDriver.debugLog("using brewtime: " + runTime);
 
 						}
 					}
@@ -153,20 +153,20 @@ public class InventoryListener implements Listener {
 							this.cancel();
 							trackedBrewers.remove(brewery);
 							stand.setBrewingTime(0);
-							P.p.debugLog("All done distilling");
+							Brewery.breweryDriver.debugLog("All done distilling");
 						} else {
 							brewTime = -1; // go again.
 							stand.setBrewingTime(0);
-							P.p.debugLog("Can distill more! Continuing.");
+							Brewery.breweryDriver.debugLog("Can distill more! Continuing.");
 						}
 					}
 				} else {
 					this.cancel();
 					trackedBrewers.remove(brewery);
-					P.p.debugLog("The block was replaced; not a brewing stand.");
+					Brewery.breweryDriver.debugLog("The block was replaced; not a brewing stand.");
 				}
 			}
-		}.runTaskTimer(P.p, 2L, 1L).getTaskId());
+		}.runTaskTimer(Brewery.breweryDriver, 2L, 1L).getTaskId());
 	}
 
 	// Returns a Brew or null for every Slot in the BrewerInventory
@@ -200,7 +200,7 @@ public class InventoryListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBrew(BrewEvent event) {
-		if (P.use1_9) {
+		if (Brewery.use1_9) {
 			if (hasCustom(event.getContents()) != 0) {
 				event.setCancelled(true);
 			}
@@ -239,7 +239,7 @@ public class InventoryListener implements Listener {
 				Brew brew = Brew.get(potion);
 				if (brew != null) {
 					// convert potions from 1.8 to 1.9 for color and to remove effect descriptions
-					if (P.use1_9 && !potion.hasItemFlag(ItemFlag.HIDE_POTION_EFFECTS)) {
+					if (Brewery.use1_9 && !potion.hasItemFlag(ItemFlag.HIDE_POTION_EFFECTS)) {
 						BRecipe recipe = brew.getCurrentRecipe();
 						if (recipe != null) {
 							Brew.removeEffects(potion);

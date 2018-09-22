@@ -57,16 +57,16 @@ public class BPlayer {
 
 	public static BPlayer get(Player player) {
 		if (!players.isEmpty()) {
-			return players.get(P.playerString(player));
+			return players.get(Brewery.playerString(player));
 		}
 		return null;
 	}
 
 	// This method may be slow and should not be used if not needed
 	public static BPlayer getByName(String playerName) {
-		if (P.useUUID) {
+		if (Brewery.useUUID) {
 			for (Map.Entry<String, BPlayer> entry : players.entrySet()) {
-				OfflinePlayer p = P.p.getServer().getOfflinePlayer(UUID.fromString(entry.getKey()));
+				OfflinePlayer p = Brewery.breweryDriver.getServer().getOfflinePlayer(UUID.fromString(entry.getKey()));
 				if (p != null) {
 					String name = p.getName();
 					if (name != null) {
@@ -83,9 +83,9 @@ public class BPlayer {
 
 	// This method may be slow and should not be used if not needed
 	public static boolean hasPlayerbyName(String playerName) {
-		if (P.useUUID) {
+		if (Brewery.useUUID) {
 			for (Map.Entry<String, BPlayer> entry : players.entrySet()) {
-				OfflinePlayer p = P.p.getServer().getOfflinePlayer(UUID.fromString(entry.getKey()));
+				OfflinePlayer p = Brewery.breweryDriver.getServer().getOfflinePlayer(UUID.fromString(entry.getKey()));
 				if (p != null) {
 					String name = p.getName();
 					if (name != null) {
@@ -105,18 +105,18 @@ public class BPlayer {
 	}
 
 	public static boolean hasPlayer(Player player) {
-		return players.containsKey(P.playerString(player));
+		return players.containsKey(Brewery.playerString(player));
 	}
 
 	// Create a new BPlayer and add it to the list
 	public static BPlayer addPlayer(Player player) {
 		BPlayer bPlayer = new BPlayer();
-		players.put(P.playerString(player), bPlayer);
+		players.put(Brewery.playerString(player), bPlayer);
 		return bPlayer;
 	}
 
 	public static void remove(Player player) {
-		players.remove(P.playerString(player));
+		players.remove(Brewery.playerString(player));
 	}
 
 	public void remove() {
@@ -164,7 +164,7 @@ public class BPlayer {
 			passOut(player);
 		} else {
 			addPuke(player, 60 + (int) (Math.random() * 60.0));
-			P.p.msg(player, P.p.languageReader.get("Player_CantDrink"));
+			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CantDrink"));
 		}
 	}
 
@@ -228,7 +228,7 @@ public class BPlayer {
 							if (time == 0) {
 								// push him only to the side? or any direction
 								// like now
-								if (P.use1_9) { // Pushing is way stronger in 1.9
+								if (Brewery.use1_9) { // Pushing is way stronger in 1.9
 									push.setX((Math.random() - 0.5) / 2.0);
 									push.setZ((Math.random() - 0.5) / 2.0);
 								} else {
@@ -251,7 +251,7 @@ public class BPlayer {
 	}
 
 	public void passOut(Player player) {
-		player.kickPlayer(P.p.languageReader.get("Player_DrunkPassOut"));
+		player.kickPlayer(Brewery.breweryDriver.languageReader.get("Player_DrunkPassOut"));
 		offlineDrunk = drunkeness;
 	}
 
@@ -293,7 +293,7 @@ public class BPlayer {
 			return;
 		}
 		// delayed login event as the player is not fully accessible pre login
-		P.p.getServer().getScheduler().runTaskLater(P.p, new Runnable() {
+		Brewery.breweryDriver.getServer().getScheduler().runTaskLater(Brewery.breweryDriver, new Runnable() {
 			public void run() {
 				login(player);
 			}
@@ -310,14 +310,14 @@ public class BPlayer {
 			}
 			hangoverEffects(player);
 			// wird der spieler noch gebraucht?
-			players.remove(P.playerString(player));
+			players.remove(Brewery.playerString(player));
 
 		} else if (offlineDrunk - drunkeness >= 30) {
 			Location randomLoc = Wakeup.getRandom(player.getLocation());
 			if (randomLoc != null) {
 				if (!player.hasPermission("brewery.bypass.teleport")) {
 					player.teleport(randomLoc);
-					P.p.msg(player, P.p.languageReader.get("Player_Wake"));
+					Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_Wake"));
 				}
 			}
 		}
@@ -339,7 +339,7 @@ public class BPlayer {
 			} else if (homeType.startsWith("cmd:")) {
 				player.performCommand(homeType.substring(4));
 			} else {
-				P.p.errorLog("Config.yml 'homeType: " + homeType + "' unknown!");
+				Brewery.breweryDriver.errorLog("Config.yml 'homeType: " + homeType + "' unknown!");
 			}
 			if (home != null) {
 				player.teleport(home);
@@ -374,7 +374,7 @@ public class BPlayer {
 		}
 
 		if (pTasks.isEmpty()) {
-			taskId = P.p.getServer().getScheduler().scheduleSyncRepeatingTask(P.p, new Runnable() {
+			taskId = Brewery.breweryDriver.getServer().getScheduler().scheduleSyncRepeatingTask(Brewery.breweryDriver, new Runnable() {
 				public void run() {
 					pukeTask();
 				}
@@ -398,7 +398,7 @@ public class BPlayer {
 			}
 		}
 		if (pTasks.isEmpty()) {
-			P.p.getServer().getScheduler().cancelTask(taskId);
+			Brewery.breweryDriver.getServer().getScheduler().cancelTask(taskId);
 		}
 	}
 
@@ -426,7 +426,7 @@ public class BPlayer {
 			}
 			try {
 				if (gh == null) {
-					gh = Class.forName(P.p.getServer().getClass().getPackage().getName() + ".entity.CraftItem").getMethod("getHandle", (Class<?>[]) null);
+					gh = Class.forName(Brewery.breweryDriver.getServer().getClass().getPackage().getName() + ".entity.CraftItem").getMethod("getHandle", (Class<?>[]) null);
 				}
 				Object entityItem = gh.invoke(item, (Object[]) null);
 				if (age == null) {
@@ -450,7 +450,7 @@ public class BPlayer {
 				e.printStackTrace();
 			}
 			modAge = false;
-			P.p.errorLog("Failed to set Despawn Time on item " + pukeItem.name());
+			Brewery.breweryDriver.errorLog("Failed to set Despawn Time on item " + pukeItem.name());
 		}
 	}
 
@@ -524,7 +524,7 @@ public class BPlayer {
 
 			if (bplayer.drunkeness > 30) {
 				if (bplayer.offlineDrunk == 0) {
-					Player player = P.getPlayerfromString(name);
+					Player player = Brewery.getPlayerfromString(name);
 					if (player != null) {
 
 						bplayer.drunkEffects(player);
@@ -552,7 +552,7 @@ public class BPlayer {
 					// Prevent 0 drunkeness
 					soberPerMin++;
 				}
-				if (bplayer.drain(P.getPlayerfromString(name), soberPerMin)) {
+				if (bplayer.drain(Brewery.getPlayerfromString(name), soberPerMin)) {
 					iter.remove();
 				}
 			}
@@ -594,7 +594,7 @@ public class BPlayer {
 
 	public int getQuality() {
 		if (drunkeness == 0) {
-			P.p.errorLog("drunkeness should not be 0!");
+			Brewery.breweryDriver.errorLog("drunkeness should not be 0!");
 			return quality;
 		}
 		if (drunkeness < 0) {

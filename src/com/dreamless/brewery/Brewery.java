@@ -5,6 +5,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,9 +33,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
+import com.mysql.jdbc.Connection;
+//import com.mysql.jdbc.PreparedStatement;
 
-public class P extends JavaPlugin {
-	public static P p;
+public class Brewery extends JavaPlugin {
+	public static Brewery breweryDriver;
 	public static boolean debug;
 	public static boolean useUUID;
 	public static boolean use1_9;
@@ -49,26 +55,70 @@ public class P extends JavaPlugin {
 	public LanguageReader languageReader;
 
 	private CommandSender reloader;
+	
+	//DataBase vars.
+	final String username="root"; //Enter in your db username
+	final String password="MyNewPass"; //Enter your password for the db
+	final String url = "jdbc:mysql://localhost:3306/sys"; //Enter URL w/db name
+
+	//Connection vars
+	static Connection connection; //This is the variable we will use to connect to database
 
 	@Override
 	public void onEnable() {
-		p = this;
+		breweryDriver = this;
 
 		// Version check
 		String v = Bukkit.getBukkitVersion();
 		useUUID = !v.matches("(^|.*[^\\.\\d])1\\.[0-6]([^\\d].*|$)") && !v.matches("(^|.*[^\\.\\d])1\\.7\\.[0-5]([^\\d].*|$)");
 		use1_9 = !v.matches("(^|.*[^\\.\\d])1\\.[0-8]([^\\d].*|$)");
+		
+		//Server Check
+		try { //We use a try catch to avoid errors, hopefully we don't get any.
+		    Class.forName("com.mysql.jdbc.Driver"); //this accesses Driver in jdbc.
+		} catch (ClassNotFoundException e) {
+		    e.printStackTrace();
+		    System.err.println("jdbc driver unavailable!");
+		    return;
+		}
+		try { //Another try catch to get any SQL errors (for example connections errors)
+		    connection = (Connection) DriverManager.getConnection(url,username,password);
+		    //with the method getConnection() from DriverManager, we're trying to set
+		    //the connection's url, username, password to the variables we made earlier and
+		    //trying to get a connection at the same time. JDBC allows us to do this.
+		} catch (SQLException e) { //catching errors)
+		    e.printStackTrace(); //prints out SQLException errors to the console (if any)
+		}
+		
+		//On enable, try to get something.
+		try {
+			String sql = "SELECT * FROM ingredients WHERE name='WHEAT_SEEDS'";
+			PreparedStatement stmt;
+			stmt = connection.prepareStatement(sql);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {
+			    System.out.println("Failed");
+			} else {
+				int rating = results.getInt("aspect2rating");
+			    debugLog("Success " + rating);
+			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 
 		// load the Config
 		try {
 			if (!readConfig()) {
-				p = null;
+				breweryDriver = null;
 				getServer().getPluginManager().disablePlugin(this);
 				return;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			p = null;
+			breweryDriver = null;
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -82,21 +132,21 @@ public class P extends JavaPlugin {
 		worldListener = new WorldListener();
 		getCommand("Brewery").setExecutor(new CommandListener());
 
-		p.getServer().getPluginManager().registerEvents(blockListener, p);
-		p.getServer().getPluginManager().registerEvents(playerListener, p);
-		p.getServer().getPluginManager().registerEvents(entityListener, p);
-		p.getServer().getPluginManager().registerEvents(inventoryListener, p);
-		p.getServer().getPluginManager().registerEvents(worldListener, p);
+		breweryDriver.getServer().getPluginManager().registerEvents(blockListener, breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(playerListener, breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(entityListener, breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(inventoryListener, breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(worldListener, breweryDriver);
 		if (use1_9) {
-			p.getServer().getPluginManager().registerEvents(new CauldronListener(), p);
+			breweryDriver.getServer().getPluginManager().registerEvents(new CauldronListener(), breweryDriver);
 		}
 
 		// Heartbeat
-		p.getServer().getScheduler().runTaskTimer(p, new BreweryRunnable(), 650, 1200);
-		p.getServer().getScheduler().runTaskTimer(p, new DrunkRunnable(), 120, 120);
+		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
+		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
 
 		if (updateCheck) {
-			p.getServer().getScheduler().runTaskLaterAsynchronously(p, new UpdateChecker(), 135);
+			breweryDriver.getServer().getScheduler().runTaskLaterAsynchronously(breweryDriver, new UpdateChecker(), 135);
 		}
 
 		this.log(this.getDescription().getName() + " enabled!");
@@ -104,6 +154,16 @@ public class P extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		
+		// Disable Server
+	    try { //using a try catch to catch connection errors (like wrong sql password...)
+	        if (connection!=null && !connection.isClosed()){ //checking if connection isn't null to
+	            //avoid receiving a nullpointer
+	            connection.close(); //closing the connection field variable.
+	        }
+	    } catch(Exception e) {
+	        e.printStackTrace();
+	    }
 
 		// Disable listeners
 		HandlerList.unregisterAll(this);
@@ -111,7 +171,7 @@ public class P extends JavaPlugin {
 		// Stop shedulers
 		getServer().getScheduler().cancelTasks(this);
 
-		if (p == null) {
+		if (breweryDriver == null) {
 			return;
 		}
 
@@ -152,20 +212,20 @@ public class P extends JavaPlugin {
 
 		try {
 			if (!readConfig()) {
-				p = null;
+				breweryDriver = null;
 				getServer().getPluginManager().disablePlugin(this);
 				return;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			p = null;
+			breweryDriver = null;
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
 
 		// save and load LanguageReader
 		languageReader.save();
-		languageReader = new LanguageReader(new File(p.getDataFolder(), "languages/" + language + ".yml"));
+		languageReader = new LanguageReader(new File(breweryDriver.getDataFolder(), "languages/" + language + ".yml"));
 
 		// Reload Recipes
 		Boolean successful = true;
@@ -175,7 +235,7 @@ public class P extends JavaPlugin {
 			}
 		}
 		if (!successful) {
-			msg(sender, p.languageReader.get("Error_Recipeload"));
+			msg(sender, breweryDriver.languageReader.get("Error_Recipeload"));
 		}
 		reloader = null;
 	}
@@ -207,10 +267,10 @@ public class P extends JavaPlugin {
 
 	public boolean readConfig() {
 		// Load LanguageReader
-		languageReader = new LanguageReader(new File(p.getDataFolder(), "en.yml"));
+		languageReader = new LanguageReader(new File(breweryDriver.getDataFolder(), "en.yml"));
 		
 		/*** config.yml ***/
-		File currentFile = new File(p.getDataFolder(), "config.yml");
+		File currentFile = new File(breweryDriver.getDataFolder(), "config.yml");
 		if (!checkConfigs()) {
 			return false;
 		}
@@ -233,7 +293,7 @@ public class P extends JavaPlugin {
 		
 		
 		/*** parameters.yml ***/
-		currentFile = new File(p.getDataFolder(), "parameters.yml");
+		currentFile = new File(breweryDriver.getDataFolder(), "parameters.yml");
 		if(!currentFile.exists()) {
 			return false;
 		}
@@ -249,7 +309,7 @@ public class P extends JavaPlugin {
 				String[] drainSplit = drainString.split("/");
 				if (drainSplit.length > 1) {
 					Material mat = Material.matchMaterial(drainSplit[0]);
-					int strength = p.parseInt(drainSplit[1]);
+					int strength = breweryDriver.parseInt(drainSplit[1]);
 					if (mat != null && strength > 0) {
 						BPlayer.drainItems.put(mat, strength);
 					}
@@ -259,7 +319,7 @@ public class P extends JavaPlugin {
 		
 		
 		/*** recipes.yml ***/
-		currentFile = new File(p.getDataFolder(), "recipes.yml");
+		currentFile = new File(breweryDriver.getDataFolder(), "recipes.yml");
 		if(!currentFile.exists()) {
 			return false;
 		}
@@ -293,7 +353,7 @@ public class P extends JavaPlugin {
 		}
 		
 		/*** ingredients.yml ***/
-		currentFile = new File(p.getDataFolder(), "ingredients.yml");
+		currentFile = new File(breweryDriver.getDataFolder(), "ingredients.yml");
 		if(!currentFile.exists()) {
 			return false;
 		}
@@ -314,7 +374,7 @@ public class P extends JavaPlugin {
 							String[] aspectSplit = aspectString.split("/");
 							if (aspectSplit.length > 1) {
 								aspects.put(aspectSplit[0], aspectSplit[1]);
-								p.debugLog("Info: " + aspectSplit[0] + " " + aspectSplit[1]);
+								breweryDriver.debugLog("Info: " + aspectSplit[0] + " " + aspectSplit[1]);
 							} else {
 								aspects.put(aspectSplit[0], "COMMON");
 							}
@@ -326,7 +386,7 @@ public class P extends JavaPlugin {
 					int distillMultiplier = configSection.getInt(ingredient + ".distillnMultiplier", 1);
 					
 					BIngredients.ingredientInfo.put(mat, new Ingredient(mat, aspects, fermentationMultiplier, ageMultiplier, distillMultiplier));
-					p.debugLog("Added " + mat.toString());
+					breweryDriver.debugLog("Added " + mat.toString());
 				} else {
 					errorLog("Unknown Material: " + ingredient);
 				}
@@ -334,7 +394,7 @@ public class P extends JavaPlugin {
 		}
 		
 		/*** words.yml ***/
-		currentFile = new File(p.getDataFolder(), "words.yml");
+		currentFile = new File(breweryDriver.getDataFolder(), "words.yml");
 		if(!currentFile.exists()) {
 			return false;
 		}
@@ -354,7 +414,7 @@ public class P extends JavaPlugin {
 		
 		
 		/*** aspects.yml ***/
-		currentFile = new File(p.getDataFolder(), "aspects.yml");
+		currentFile = new File(breweryDriver.getDataFolder(), "aspects.yml");
 		if(!currentFile.exists()) {
 			return false;
 		}
@@ -391,7 +451,7 @@ public class P extends JavaPlugin {
 
 	// load all Data
 	public void readData() {
-		File file = new File(p.getDataFolder(), "data.yml");
+		File file = new File(breweryDriver.getDataFolder(), "data.yml");
 		if (file.exists()) {
 
 			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
@@ -402,10 +462,10 @@ public class P extends JavaPlugin {
 			String version = data.getString("Version", null);
 			if (version != null) {
 				if (!version.equals(DataSave.dataVersion)) {
-					P.p.log("Data File is being updated...");
+					Brewery.breweryDriver.log("Data File is being updated...");
 					new DataUpdater(data, file).update(version);
 					data = YamlConfiguration.loadConfiguration(file);
-					P.p.log("Data Updated to version: " + DataSave.dataVersion);
+					Brewery.breweryDriver.log("Data Updated to version: " + DataSave.dataVersion);
 				}
 			}
 
@@ -470,7 +530,7 @@ public class P extends JavaPlugin {
 				}
 			}
 
-			for (World world : p.getServer().getWorlds()) {
+			for (World world : breweryDriver.getServer().getWorlds()) {
 				if (world.getName().startsWith("DXL_")) {
 					loadWorldData(getDxlName(world.getName()), world);
 				} else {
@@ -489,7 +549,7 @@ public class P extends JavaPlugin {
 			String[] matSplit = mat.split(",");
 			ItemStack item = new ItemStack(Material.getMaterial(matSplit[0]), matSection.getInt(mat));
 			if (matSplit.length == 2) {
-				item.setDurability((short) P.p.parseInt(matSplit[1]));
+				item.setDurability((short) Brewery.breweryDriver.parseInt(matSplit[1]));
 			}
 			ingredients.add(item);
 		}
@@ -520,7 +580,7 @@ public class P extends JavaPlugin {
 	// load Block locations of given world
 	public void loadWorldData(String uuid, World world) {
 
-		File file = new File(p.getDataFolder(), "data.yml");
+		File file = new File(breweryDriver.getDataFolder(), "data.yml");
 		if (file.exists()) {
 
 			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
@@ -613,7 +673,7 @@ public class P extends JavaPlugin {
 	}
 
 	private boolean checkConfigs() {
-		File cfg = new File(p.getDataFolder(), "config.yml");
+		File cfg = new File(breweryDriver.getDataFolder(), "config.yml");
 		if (!cfg.exists()) {
 			errorLog("No config.yml found, creating default file! You may want to choose a config according to your language!");
 			errorLog("You can find them in plugins/Brewery/configs/");
@@ -675,7 +735,7 @@ public class P extends JavaPlugin {
 
 	// create empty World save Sections
 	public void createWorldSections(ConfigurationSection section) {
-		for (World world : p.getServer().getWorlds()) {
+		for (World world : breweryDriver.getServer().getWorlds()) {
 			String worldName = world.getName();
 			if (worldName.startsWith("DXL_")) {
 				worldName = getDxlName(worldName);

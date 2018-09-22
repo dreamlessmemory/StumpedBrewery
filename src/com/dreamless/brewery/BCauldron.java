@@ -113,7 +113,7 @@ public class BCauldron {
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (!player.hasPermission("brewery.cauldron.fill")) {
-				P.p.msg(player, P.p.languageReader.get("Perms_NoCauldronFill"));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronFill"));
 				return true;
 			}
 			ItemStack potion = bcauldron.ingredients.cook(bcauldron.state);
@@ -158,27 +158,27 @@ public class BCauldron {
 	// prints the current cooking time to the player
 	public static void printTime(Player player, Block block) {
 		if (!player.hasPermission("brewery.cauldron.time")) {
-			P.p.msg(player, P.p.languageReader.get("Error_NoPermissions"));
+			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoPermissions"));
 			return;
 		}
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (bcauldron.state > 1) {
-				P.p.msg(player, P.p.languageReader.get("Player_CauldronInfo1", "" + bcauldron.state));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo1", "" + bcauldron.state));
 			} else {
-				P.p.msg(player, P.p.languageReader.get("Player_CauldronInfo2"));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo2"));
 			}
 		}
 	}
 	
 	public static void printContents(Player player, Block block) {
 		if (!player.hasPermission("brewery.cauldron.time")) {
-			P.p.msg(player, P.p.languageReader.get("Error_NoPermissions"));
+			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoPermissions"));
 			return;
 		}
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
-			P.p.msg(player, P.p.languageReader.get("Player_CauldronContents", "" + bcauldron.ingredients.getContents()));
+			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronContents", "" + bcauldron.ingredients.getContents()));
 		}
 	}
 	
@@ -203,7 +203,7 @@ public class BCauldron {
 	}
 
 	public static void save(ConfigurationSection config, ConfigurationSection oldData) {
-		P.p.createWorldSections(config);
+		Brewery.breweryDriver.createWorldSections(config);
 
 		if (!bcauldrons.isEmpty()) {
 			int id = 0;
@@ -212,7 +212,7 @@ public class BCauldron {
 				String prefix;
 
 				if (worldName.startsWith("DXL_")) {
-					prefix = P.p.getDxlName(worldName) + "." + id;
+					prefix = Brewery.breweryDriver.getDxlName(worldName) + "." + id;
 				} else {
 					prefix = cauldron.block.getWorld().getUID().toString() + "." + id;
 				}
@@ -239,7 +239,7 @@ public class BCauldron {
 	// bukkit bug not updating the inventory while executing event, have to
 	// schedule the give
 	public static void giveItem(final Player player, final ItemStack item) {
-		P.p.getServer().getScheduler().runTaskLater(P.p, new Runnable() {
+		Brewery.breweryDriver.getServer().getScheduler().runTaskLater(Brewery.breweryDriver, new Runnable() {
 			public void run() {
 				player.getInventory().addItem(item);
 			}

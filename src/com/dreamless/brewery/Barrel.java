@@ -48,14 +48,14 @@ public class Barrel implements InventoryHolder {
 		this.spigot = spigot;
 		this.signoffset = sign;
 		if (isLarge()) {
-			this.inventory = org.bukkit.Bukkit.createInventory(this, 27, P.p.languageReader.get("Etc_Barrel"));
+			this.inventory = org.bukkit.Bukkit.createInventory(this, 27, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
 		} else {
-			this.inventory = org.bukkit.Bukkit.createInventory(this, 9, P.p.languageReader.get("Etc_Barrel"));
+			this.inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
 		}
 		if (items != null) {
 			for (String slot : items.keySet()) {
 				if (items.get(slot) instanceof ItemStack) {
-					this.inventory.setItem(P.p.parseInt(slot), (ItemStack) items.get(slot));
+					this.inventory.setItem(Brewery.breweryDriver.parseInt(slot), (ItemStack) items.get(slot));
 				}
 			}
 		}
@@ -65,7 +65,7 @@ public class Barrel implements InventoryHolder {
 		if (wo.length > 1) {
 			woodsloc = new int[wo.length];
 			for (String wos : wo) {
-				woodsloc[i] = P.p.parseInt(wos);
+				woodsloc[i] = Brewery.breweryDriver.parseInt(wos);
 				i++;
 			}
 			i = 0;
@@ -73,7 +73,7 @@ public class Barrel implements InventoryHolder {
 		if (st.length > 1) {
 			stairsloc = new int[st.length];
 			for (String sts : st) {
-				stairsloc[i] = P.p.parseInt(sts);
+				stairsloc[i] = Brewery.breweryDriver.parseInt(sts);
 				i++;
 			}
 		}
@@ -102,19 +102,19 @@ public class Barrel implements InventoryHolder {
 				// We want to check at least one barrel every time
 				random.checked = false;
 			}
-			new BarrelCheck().runTaskTimer(P.p, 1, 1);
+			new BarrelCheck().runTaskTimer(Brewery.breweryDriver, 1, 1);
 		}
 	}
 
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
 		if (isLarge()) {
 			if (!player.hasPermission("brewery.openbarrel.big")) {
-				P.p.msg(player, P.p.languageReader.get("Error_NoBarrelAccess"));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoBarrelAccess"));
 				return false;
 			}
 		} else {
 			if (!player.hasPermission("brewery.openbarrel.small")) {
-				P.p.msg(player, P.p.languageReader.get("Error_NoBarrelAccess"));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoBarrelAccess"));
 				return false;
 			}
 		}
@@ -129,9 +129,9 @@ public class Barrel implements InventoryHolder {
 		player.getWorld().playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
 		if (inventory == null) {
 			if (isLarge()) {
-				inventory = org.bukkit.Bukkit.createInventory(this, 27, P.p.languageReader.get("Etc_Barrel"));
+				inventory = org.bukkit.Bukkit.createInventory(this, 27, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
 			} else {
-				inventory = org.bukkit.Bukkit.createInventory(this, 9, P.p.languageReader.get("Etc_Barrel"));
+				inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
 			}
 		} else {
 			if (time > 0) {
@@ -151,7 +151,7 @@ public class Barrel implements InventoryHolder {
 						}
 						loadTime = System.nanoTime() - loadTime;
 						float ftime = (float) (loadTime / 1000000.0);
-						P.p.debugLog("opening Barrel with potions (" + ftime + "ms)");
+						Brewery.breweryDriver.debugLog("opening Barrel with potions (" + ftime + "ms)");
 					}
 				}
 			}
@@ -341,12 +341,12 @@ public class Barrel implements InventoryHolder {
 			if (barrel.getBrokenBlock(true) == null) {
 				if (isSign(spigot)) {
 					if (!player.hasPermission("brewery.createbarrel.small")) {
-						P.p.msg(player, P.p.languageReader.get("Perms_NoSmallBarrelCreate"));
+						Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoSmallBarrelCreate"));
 						return false;
 					}
 				} else {
 					if (!player.hasPermission("brewery.createbarrel.big")) {
-						P.p.msg(player, P.p.languageReader.get("Perms_NoBigBarrelCreate"));
+						Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoBigBarrelCreate"));
 						return false;
 					}
 				}
@@ -419,7 +419,7 @@ public class Barrel implements InventoryHolder {
 
 	// Saves all data
 	public static void save(ConfigurationSection config, ConfigurationSection oldData) {
-		P.p.createWorldSections(config);
+		Brewery.breweryDriver.createWorldSections(config);
 
 		if (!barrels.isEmpty()) {
 			int id = 0;
@@ -429,7 +429,7 @@ public class Barrel implements InventoryHolder {
 				String prefix;
 
 				if (worldName.startsWith("DXL_")) {
-					prefix = P.p.getDxlName(worldName) + "." + id;
+					prefix = Brewery.breweryDriver.getDxlName(worldName) + "." + id;
 				} else {
 					prefix = barrel.spigot.getWorld().getUID().toString() + "." + id;
 				}
@@ -855,7 +855,7 @@ public class Barrel implements InventoryHolder {
 					if (!barrel.checked) {
 						Block broken = barrel.getBrokenBlock(false);
 						if (broken != null) {
-							P.p.debugLog("Barrel at " + broken.getWorld().getName() + "/" + broken.getX() + "/" + broken.getY() + "/" + broken.getZ()
+							Brewery.breweryDriver.debugLog("Barrel at " + broken.getWorld().getName() + "/" + broken.getX() + "/" + broken.getY() + "/" + broken.getZ()
 									+ " has been destroyed unexpectedly, contents will drop");
 							// remove the barrel if it was destroyed
 							//barrel.willDestroy();

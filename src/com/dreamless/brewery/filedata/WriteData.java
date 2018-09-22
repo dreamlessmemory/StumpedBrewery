@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
-import com.dreamless.brewery.P;
+import com.dreamless.brewery.Brewery;
 
 public class WriteData implements Runnable {
 
@@ -18,7 +18,7 @@ public class WriteData implements Runnable {
 
 	@Override
 	public void run() {
-		File datafile = new File(P.p.getDataFolder(), "data.yml");
+		File datafile = new File(Brewery.breweryDriver.getDataFolder(), "data.yml");
 
 		try {
 			data.save(datafile);

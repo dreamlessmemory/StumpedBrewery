@@ -94,11 +94,11 @@ public class PlayerListener implements Listener {
 							// Certain Items in Hand cause one of them to be cancelled or not called at all sometimes.
 							// We mark if a player had the event for the main hand
 							// If not, we handle the main hand in the event for the off hand
-							if (P.use1_9) {
+							if (Brewery.use1_9) {
 								if (event.getHand() == EquipmentSlot.HAND) {
 									final UUID id = player.getUniqueId();
 									interacted.add(id);
-									P.p.getServer().getScheduler().runTask(P.p, new Runnable() {
+									Brewery.breweryDriver.getServer().getScheduler().runTask(Brewery.breweryDriver, new Runnable() {
 										@Override
 										public void run() {
 											interacted.remove(id);
@@ -142,14 +142,14 @@ public class PlayerListener implements Listener {
 									}
 									clickedBlock.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, clickedBlock.getLocation().getX() + 0.5, clickedBlock.getLocation().getY() + 1.5, clickedBlock.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 								} else {
-									P.p.msg(player, P.p.languageReader.get("Perms_NoCauldronInsert"));
+									Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));
 								}
 							}
 						}
 						return;
 					}
 
-					if (P.use1_9 && event.getHand() != EquipmentSlot.HAND) {
+					if (Brewery.use1_9 && event.getHand() != EquipmentSlot.HAND) {
 						return;
 					}
 
@@ -221,7 +221,7 @@ public class PlayerListener implements Listener {
 					if (player.getGameMode() != GameMode.CREATIVE) {
 						brew.remove(item);
 					}
-					if (P.use1_9) {
+					if (Brewery.use1_9) {
 						if (player.getGameMode() != GameMode.CREATIVE) {
 							// replace the potion with an empty potion to avoid effects
 							event.setItem(new ItemStack(Material.POTION));
@@ -292,10 +292,10 @@ public class PlayerListener implements Listener {
 						bplayer.join(player);
 						return;
 					case 2:
-						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, P.p.languageReader.get("Player_LoginDeny"));
+						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, Brewery.breweryDriver.languageReader.get("Player_LoginDeny"));
 						return;
 					case 3:
-						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, P.p.languageReader.get("Player_LoginDenyLong"));
+						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, Brewery.breweryDriver.languageReader.get("Player_LoginDenyLong"));
 				}
 			}
 		}

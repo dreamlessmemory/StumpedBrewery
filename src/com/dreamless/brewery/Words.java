@@ -76,7 +76,7 @@ public class Words {
 							if (Character.isSpaceChar(chat.charAt(command.length()))) {
 								if (chat.toLowerCase().startsWith(command.toLowerCase())) {
 									if (log) {
-										P.p.log(P.p.languageReader.get("Player_TriedToSay", name, chat));
+										Brewery.breweryDriver.log(Brewery.breweryDriver.languageReader.get("Player_TriedToSay", name, chat));
 									}
 									String message = chat.substring(command.length() + 1);
 									message = distortMessage(message, bPlayer.getDrunkeness());
@@ -121,7 +121,7 @@ public class Words {
 			if (!words.isEmpty()) {
 				String message = event.getMessage();
 				if (log) {
-					P.p.log(P.p.languageReader.get("Player_TriedToSay", event.getPlayer().getName(), message));
+					Brewery.breweryDriver.log(Brewery.breweryDriver.languageReader.get("Player_TriedToSay", event.getPlayer().getName(), message));
 				}
 				event.setMessage(distortMessage(message, bPlayer.getDrunkeness()));
 			}

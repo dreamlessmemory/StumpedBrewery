@@ -70,7 +70,7 @@ public class Brew {
 	public static Brew get(int uid) {
 		if (uid < -1) {
 			if (!potions.containsKey(uid)) {
-				P.p.errorLog("Database failure! unable to find UID " + uid + " of a custom Potion!");
+				Brewery.breweryDriver.errorLog("Database failure! unable to find UID " + uid + " of a custom Potion!");
 				return null;// throw some exception?
 			}
 		} else {
@@ -239,10 +239,10 @@ public class Brew {
 		PotionMeta meta = (PotionMeta) item.getItemMeta();
 		if (meta.hasLore()) {
 			if (distillRuns > 0) {
-				addOrReplaceLore(meta, P.p.color("&7"), P.p.languageReader.get("Brew_Distilled"));
+				addOrReplaceLore(meta, Brewery.breweryDriver.color("&7"), Brewery.breweryDriver.languageReader.get("Brew_Distilled"));
 			}
 			if (ageTime >= 1) {
-				addOrReplaceLore(meta, P.p.color("&7"), P.p.languageReader.get("Brew_BarrelRiped"));
+				addOrReplaceLore(meta, Brewery.breweryDriver.color("&7"), Brewery.breweryDriver.languageReader.get("Brew_BarrelRiped"));
 			}
 			item.setItemMeta(meta);
 		}
@@ -365,7 +365,7 @@ public class Brew {
 
 	// Adds the Effect names to the Items description
 	public static void addOrReplaceEffects(PotionMeta meta, ArrayList<BEffect> effects, int quality) {
-		if (!P.use1_9 && effects != null) {
+		if (!Brewery.use1_9 && effects != null) {
 			for (BEffect effect : effects) {
 				if (!effect.isHidden()) {
 					effect.writeInto(meta, quality);
@@ -399,7 +399,7 @@ public class Brew {
 
 	// True if the PotionMeta has colored Lore
 	public static Boolean hasColorLore(PotionMeta meta) {
-		return meta.hasLore() && !meta.getLore().get(1).startsWith(P.p.color("&7"));
+		return meta.hasLore() && !meta.getLore().get(1).startsWith(Brewery.breweryDriver.color("&7"));
 	}
 
 	// gets the Color that represents a quality in Lore
@@ -416,7 +416,7 @@ public class Brew {
 		} else {
 			color = "&4";
 		}
-		return P.p.color(color);
+		return Brewery.breweryDriver.color(color);
 	}
 
 	// Saves all data
@@ -468,7 +468,7 @@ public class Brew {
 		BLACK(8, PotionType.WEAKNESS),
 		RED(9, PotionType.STRENGTH),
 		GREY(10, PotionType.SLOWNESS),
-		WATER(11, P.use1_9 ? PotionType.WATER_BREATHING : null),
+		WATER(11, Brewery.use1_9 ? PotionType.WATER_BREATHING : null),
 		DARK_RED(12, PotionType.INSTANT_DAMAGE),
 		BRIGHT_GREY(14, PotionType.INVISIBILITY);
 
@@ -494,7 +494,7 @@ public class Brew {
 		}
 
 		public void colorBrew(PotionMeta meta, ItemStack potion, boolean destillable) {
-			if (P.use1_9) {
+			if (Brewery.use1_9) {
 				meta.setBasePotionData(new PotionData(getType()));
 				meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 			} else {

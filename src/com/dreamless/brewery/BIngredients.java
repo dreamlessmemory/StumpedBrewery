@@ -10,6 +10,9 @@ import org.bukkit.potion.PotionEffectType;
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 public class BIngredients {
@@ -65,25 +68,63 @@ public class BIngredients {
 		//Ingredient Info
 		Ingredient info = ingredientInfo.get(ingredient.getType());
 		//Multipliers
-				
-				
-		//Aspects
-		Map<String, String> ingAspects = info.getAspects();//Get the aspects from the ingredient
-		for (String aspect : ingAspects.keySet()) {//work on each aspect
-			Aspect cAspect = aspects.get(aspect);
-			if (cAspect != null) {//aspect is found
-				cAspect.setPotency(cAspect.getPotency() + (Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount()));
-				cAspect.setSaturation(cAspect.getSaturation() + (Aspect.calculateRaritySaturation(ingAspects.get(aspect)) * ingredient.getAmount()));
-			} else {
-				Aspect nAspect = new Aspect (aspect, Aspect.calculateRarityPotency(ingAspects.get(aspect)) * ingredient.getAmount(), Aspect.calculateRaritySaturation(ingAspects.get(aspect)) * ingredient.getAmount());
-				aspects.put(aspect, nAspect);
+		
+		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
+		
+		//SQL test
+		try {
+			String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name='" + info.getType().name() + "'";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {
+				Brewery.breweryDriver.debugLog("Failed to poll SQL");
+			} else {//Successful Pull
+				//Aspect 1
+				if(results.getString("aspect1name") != null) {
+					Aspect aspect = aspects.get(results.getString("aspect1name"));
+					if (aspect != null) {//aspect is found
+						aspect.setPotency(aspect.getPotency() + (BIngredients.calculateRarityPotency(results.getInt("aspect1rating")) * ingredient.getAmount()));
+						aspect.setSaturation(aspect.getSaturation() + (BIngredients.calculateRaritySaturation(results.getInt("aspect1rating")) * ingredient.getAmount()));
+					} else {
+						Aspect nAspect = new Aspect (results.getString("aspect1name"), BIngredients.calculateRarityPotency(results.getInt("aspect1rating")) * ingredient.getAmount(), BIngredients.calculateRaritySaturation(results.getInt("aspect1rating")) * ingredient.getAmount());
+						aspects.put(results.getString("aspect1name"), nAspect);
+					}
+				}
+				//Aspect 2
+				if(results.getString("aspect2name") != null) {
+					Aspect aspect = aspects.get(results.getString("aspect2name"));
+					if (aspect != null) {//aspect is found
+						aspect.setPotency(aspect.getPotency() + (BIngredients.calculateRarityPotency(results.getInt("aspect2rating")) * ingredient.getAmount()));
+						aspect.setSaturation(aspect.getSaturation() + (BIngredients.calculateRaritySaturation(results.getInt("aspect2rating")) * ingredient.getAmount()));
+					} else {
+						Aspect nAspect = new Aspect (results.getString("aspect2name"), BIngredients.calculateRarityPotency(results.getInt("aspect2rating")) * ingredient.getAmount(), BIngredients.calculateRaritySaturation(results.getInt("aspect2rating")) * ingredient.getAmount());
+						aspects.put(results.getString("aspect2name"), nAspect);
+					}
+				}
+				//Aspect 3
+				if(results.getString("aspect3name") != null) {
+					Aspect aspect = aspects.get(results.getString("aspect3name"));
+					if (aspect != null) {//aspect is found
+						aspect.setPotency(aspect.getPotency() + (BIngredients.calculateRarityPotency(results.getInt("aspect3rating")) * ingredient.getAmount()));
+						aspect.setSaturation(aspect.getSaturation() + (BIngredients.calculateRaritySaturation(results.getInt("aspect3rating")) * ingredient.getAmount()));
+					} else {
+						Aspect nAspect = new Aspect (results.getString("aspect3name"), BIngredients.calculateRarityPotency(results.getInt("aspect3rating")) * ingredient.getAmount(), BIngredients.calculateRaritySaturation(results.getInt("aspect3rating")) * ingredient.getAmount());
+						aspects.put(results.getString("aspect3name"), nAspect);
+					}
+				}
 			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		if(P.debug) {
-			P.p.debugLog("Added: " + ingredient.toString());
+		
+		if(Brewery.debug) {
+			Brewery.breweryDriver.debugLog("Added: " + ingredient.toString());
 			Set<String> keys = aspects.keySet();
 			for (String key : keys) {
-				P.p.debugLog(aspects.get(key).toString());
+				Brewery.breweryDriver.debugLog(aspects.get(key).toString());
 			}
 		}
 	}
@@ -117,13 +158,13 @@ public class BIngredients {
 		for(String containedAspects : aspects.keySet()) {
 			Aspect aspect = aspects.get(containedAspects);
 			double fermentationBonus = Aspect.aspectStageMultipliers.get(containedAspects).getFermentationStageStep(state);
-			double typeBonus = fermentationBonus * (1 - Aspect.aspectStageMultipliers.get(type).getFermentationMultiplier());
+			double typeBonus = fermentationBonus * (Aspect.aspectStageMultipliers.get(type).getFermentationMultiplier() - 1);
 			double newPotency = aspect.getPotency() + fermentationBonus + typeBonus;
 			if(newPotency <= 0) {
 				newPotency = 0;
 			}
 			aspect.setPotency(newPotency);
-			P.p.debugLog("Update Potency of " + containedAspects + " - " + newPotency);
+			Brewery.breweryDriver.debugLog("Update Potency of " + containedAspects + " - " + newPotency);
 			aspects.put(containedAspects, aspect);
 		}
 	}
@@ -232,12 +273,46 @@ public class BIngredients {
 		//Assign a Name if found
 		if (highest != null) {
 			type = typeMap.get(highest.name());
-			P.p.debugLog("BREW IS A " + type);
+			Brewery.breweryDriver.debugLog("BREW IS A " + type);
 		}
 		
 	}
 	
 	public void startCooking() {
 		calculateType();
+	}
+	
+	public static double calculateRarityPotency(int rarity){
+		switch(rarity) {
+			case (1):
+				return 6;
+			case (2):
+				return 20;
+			case (3):
+				return 42;
+			case (4):
+				return 64;
+			case (5):
+				return 100;
+			default:
+				return 6;
+		}
+	}
+	
+	public static double calculateRaritySaturation(int rarity){
+		switch(rarity) {
+		case (1):
+			return 0.2;
+		case (2):
+			return 0.4;
+		case (3):
+			return 0.6;
+		case (4):
+			return 0.8;
+		case (5):
+			return 1.0;
+		default:
+			return 0.2;
+	}
 	}
 }

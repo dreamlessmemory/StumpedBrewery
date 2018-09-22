@@ -14,7 +14,7 @@ import com.dreamless.brewery.BIngredients;
 import com.dreamless.brewery.BPlayer;
 import com.dreamless.brewery.BRecipe;
 import com.dreamless.brewery.Brew;
-import com.dreamless.brewery.P;
+import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.Wakeup;
 
 import org.bukkit.Bukkit;
@@ -27,7 +27,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class CommandListener implements CommandExecutor {
 
-	public P p = P.p;
+	public Brewery p = Brewery.breweryDriver;
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

@@ -56,14 +56,6 @@
 			<url>http://nexus.hc.to/content/repositories/pub_releases</url>
 		</repository>
 		<repository>
-			<id>sk89q-repo</id>
-			<url>http://maven.sk89q.com/repo/</url>
-		</repository>
-		<repository>
-			<id>dre2n-rpo</id>
-			<url>http://erethon.de/repo/</url>
-		</repository>
-		<repository>
  			<id>filoghost-repo</id>
   			<url>https://ci.filoghost.me/plugin/repository/everything/</url>
 		</repository>
@@ -74,60 +66,12 @@
 	</repositories>
 	<dependencies>
 		<dependency>
-			<groupId>org.bukkit</groupId>
-			<artifactId>bukkit</artifactId>
-			<version>1.13-R0.1-SNAPSHOT<!--1.13--></version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
            <groupId>org.spigotmc</groupId>
            <artifactId>spigot-api</artifactId>
            <version>1.13-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
            <type>jar</type>
            <scope>provided</scope>
-       </dependency>
-		<dependency>
-			<groupId>net.milkbowl.vault</groupId>
-			<artifactId>VaultAPI</artifactId>
-			<version>1.6</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.sk89q</groupId>
-			<artifactId>worldguard</artifactId>
-			<version>6.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.griefcraft</groupId>
-			<artifactId>entitylwc</artifactId>
-			<version>2.0</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>me.ryanhamshire</groupId>
-			<artifactId>GriefPrevention</artifactId>
-			<version>16.8</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>de.diddiz</groupId>
-			<artifactId>logblock</artifactId>
-			<version>1.12-SNAPSHOT</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>de.diddiz</groupId>
-					<artifactId>questioner</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.gmail.filoghost.holographicdisplays</groupId>
-			<artifactId>holographicdisplays-api</artifactId>
-			<version>2.2.7-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
+        </dependency>
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
     		<groupId>commons-io</groupId>
@@ -135,9 +79,14 @@
     		<version>2.6</version>
 		</dependency>
 		<dependency>
-	    <groupId>com.github.tr7zw</groupId>
-	    <artifactId>Item-NBT-API</artifactId>
-	    <version>-SNAPSHOT</version>
-	</dependency>
+	    	<groupId>com.github.tr7zw</groupId>
+	    	<artifactId>Item-NBT-API</artifactId>
+	    	<version>-SNAPSHOT</version>
+	    </dependency>
+	    <dependency>
+  			<groupId>mysql</groupId>
+  			<artifactId>mysql-connector-java</artifactId>
+ 			<version>5.1.41</version>
+		</dependency>
 	</dependencies>
 </project>

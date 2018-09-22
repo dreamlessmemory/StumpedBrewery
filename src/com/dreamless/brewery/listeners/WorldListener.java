@@ -8,7 +8,7 @@ import org.bukkit.event.world.WorldUnloadEvent;
 
 import com.dreamless.brewery.BCauldron;
 import com.dreamless.brewery.Barrel;
-import com.dreamless.brewery.P;
+import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.filedata.DataSave;
 
 import org.bukkit.World;
@@ -20,9 +20,9 @@ public class WorldListener implements Listener {
 		World world = event.getWorld();
 
 		if (world.getName().startsWith("DXL_")) {
-			P.p.loadWorldData(P.p.getDxlName(world.getName()), world);
+			Brewery.breweryDriver.loadWorldData(Brewery.breweryDriver.getDxlName(world.getName()), world);
 		} else {
-			P.p.loadWorldData(world.getUID().toString(), world);
+			Brewery.breweryDriver.loadWorldData(world.getUID().toString(), world);
 		}
 	}
 
