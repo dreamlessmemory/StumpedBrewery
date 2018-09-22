@@ -377,8 +377,6 @@ public class Brewery extends JavaPlugin {
 
 		return true;
 		
-		//TODO: Aspects
-		
 	}
 
 	// load all Data
