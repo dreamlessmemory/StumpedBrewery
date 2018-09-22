@@ -56,8 +56,6 @@ public class BCauldron {
 				ingredients = ingredients.clone();
 				partiallyFilled = false;
 			}
-			
-			//TODO: Aspect Calculation
 			//Run aspect calculation
 			ingredients.fermentOneStep(state);
 		} else { //no fire, stop cooking

@@ -4,10 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-//import org.bukkit.potion.PotionEffect;
-//import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
@@ -18,8 +15,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class BIngredients {
-	//public static HashMap<String, String> typeMap = new HashMap<String, String>();
-	
 	private static int lastId = 0;
 
 	private int id;
@@ -123,25 +118,14 @@ public class BIngredients {
 
 	// returns an Potion item with cooked ingredients
 	public ItemStack cook(int state) {
-		//TODO: Calculate final potency for each aspect, convert it to an aspect value 
-		//TODO: Add it as NBT data
 		//TODO: recipe lookup
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
 		// cookedTime is always time in minutes, state may differ with number of ticks
 		cookedTime = state;
-
-		
-		
-		
-		
 		/** Aspect Calculation **/
-		//temporary Map
 		HashMap <String, Double> cookedAspects = new HashMap<String, Double>();
-		
-		
-		
 		//Determine overflow
 		double aspectSaturation = (aspects.size() <= 6 ? 1 : aspects.size() / 6);
 		//Add calculated aspects to the map
@@ -159,10 +143,10 @@ public class BIngredients {
 			potionMeta.addCustomEffect(effect, true);
 		}
 		
-		potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 2000, 1), true);
+		//potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 2000, 1), true);
 		potion.setItemMeta(potionMeta);
 		
-		//Custom NBT
+		//Custom NBT Setup
 		NBTItem nbti = new NBTItem(potion);
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
 		//Write NBT data
@@ -170,8 +154,7 @@ public class BIngredients {
 				breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
 		}
 		potion = nbti.getItem();
-		
-		
+
 		return potion;
 	}
 
@@ -184,10 +167,9 @@ public class BIngredients {
 			if(newPotency <= 0) {
 				newPotency = 0;
 			}
+			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspect.getPotency() + " + " + fermentationBonus + " + " + typeBonus + " -> " + newPotency);
 			aspect.setPotency(newPotency);
-			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + " - " + newPotency);
 			aspects.put(currentAspect, aspect);
-			//Brewery.breweryDriver.debugLog("SQL says bonus of " + currentAspect + " is " + Aspect.getStepBonus(state, currentAspect, "fermentation"));
 		}
 	}
 

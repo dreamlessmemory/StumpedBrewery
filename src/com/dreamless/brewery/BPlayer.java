@@ -498,12 +498,7 @@ public class BPlayer {
 	}
 
 	public static void addBrewEffects(Brew brew, Player player) {
-		ArrayList<BEffect> effects = brew.getEffects();
-		if (effects != null) {
-			for (BEffect effect : effects) {
-				//effect.apply(10, player);
-			}
-		}
+		
 	}
 
 	public void hangoverEffects(final Player player) {

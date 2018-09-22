@@ -2,12 +2,8 @@ package com.dreamless.brewery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -34,13 +30,6 @@ public class BEffect {
 	public static ArrayList<PotionEffect> calculateEffect(HashMap<String, Double> aspects){
 		ArrayList<PotionEffect> effects = new ArrayList<PotionEffect>();
 		HashMap<PotionEffectType, PotionEffect> effectMap = new HashMap<PotionEffectType, PotionEffect>();
-		//TODO: The gameplan:
-		//Map <PotionEffectType, PotionEffect>
-		//interate
-		//Check map
-		//if there's effectype already, put a new one based on name
-		//if not, add new one
-		//convert map to arraylist
 		
 		double bonusPotency = 0;
 		double bonusDuration = 0;
@@ -50,10 +39,6 @@ public class BEffect {
 		if(aspects.containsKey("RAW_DURATION")) {
 			bonusPotency = aspects.remove("RAW_DURATION");
 		}
-		/*if(aspects.size() == 0 && aspects.containsKey(null)) {
-			Brewery.breweryDriver.debugLog("Woah, empty?");
-			return effects;
-		}*/
 		
 		for(String currentAspect : aspects.keySet()) {
 			Brewery.breweryDriver.debugLog("Processing - " + currentAspect);
@@ -94,34 +79,6 @@ public class BEffect {
 				
 			}
 		}
-		
-		
-		/*Iterator<Map.Entry<String, Double>> it = aspects.entrySet().iterator();
-		while(it.hasNext()) {//TODO: be able to search for paired things w/ concurrentmodificationexception
-			Map.Entry<String, Double> entry = it.next();
-			String currentAspect = entry.getKey();
-			double potency = 1;
-			double duration = 90;
-			String trueAspect = currentAspect;
-			PotionEffectType type;
-			//Parse the PotionEffect name
-			if(currentAspect.contains("_POTENCY")) {
-				trueAspect = currentAspect.substring(0, currentAspect.length() - 8);
-			} else if (currentAspect.contains("_DURATION")) {
-				trueAspect = currentAspect.substring(0, currentAspect.length() - 10);
-			}
-			//check if really potion type
-			type = PotionEffectType.getByName(trueAspect);
-			if(type != null){
-				if(aspects.containsKey(trueAspect + "_POTENCY")) {
-					potency = calculatePotency(aspects.remove(trueAspect + "_POTENCY"), bonusPotency, (PotionEffectType.getByName(trueAspect).isInstant()));
-				}
-				if(aspects.containsKey(trueAspect + "_DURATION")) {
-				potency = calculateDuration(aspects.remove(trueAspect + "_DURATION"), bonusDuration);
-				}
-				effects.add(new PotionEffect(type, ((int) duration) * 20, (int)potency));
-			}
-		}*/
 		
 		for(PotionEffectType effectType: effectMap.keySet()) {
 			effects.add(effectMap.get(effectType));
