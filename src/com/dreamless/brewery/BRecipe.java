@@ -188,7 +188,7 @@ public class BRecipe {
 		potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect((uid * 4), 0), true);
 
 		//brew.convertLore(potionMeta, false);
-		Brew.addOrReplaceEffects(potionMeta, effects, quality);
+		//Brew.addOrReplaceEffects(potionMeta, effects, quality);
 		brew.touch();
 		
 		potion.setItemMeta(potionMeta);

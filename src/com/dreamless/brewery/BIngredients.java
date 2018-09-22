@@ -7,6 +7,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 //import org.bukkit.potion.PotionEffect;
 //import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
@@ -131,19 +132,24 @@ public class BIngredients {
 		// cookedTime is always time in minutes, state may differ with number of ticks
 		cookedTime = state;
 
-		//Custom NBT
-		NBTItem nbti = new NBTItem(potion);
-		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
+		
+		
+		
 		
 		/** Aspect Calculation **/
 		//temporary Map
 		HashMap <String, Double> cookedAspects = new HashMap<String, Double>();
+		
+		
+		
 		//Determine overflow
 		double aspectSaturation = (aspects.size() <= 6 ? 1 : aspects.size() / 6);
 		//Add calculated aspects to the map
 		for(String currentAspect: aspects.keySet()) {
 			Aspect aspect = aspects.get(currentAspect);
-			cookedAspects.put(currentAspect, (aspect.getPotency() / (aspect.getSaturation() * aspectSaturation)));
+			double calculatedPotency = aspect.getPotency();
+			double calculatedSaturation = (aspect.getSaturation() < 1 ? 1 : aspect.getSaturation());
+			cookedAspects.put(currentAspect, (calculatedPotency / (calculatedSaturation * aspectSaturation)));
 			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + cookedAspects.get(currentAspect));
 		}
 		Brewery.breweryDriver.debugLog("SIZE? " + cookedAspects.size());
@@ -153,13 +159,18 @@ public class BIngredients {
 			potionMeta.addCustomEffect(effect, true);
 		}
 		
+		potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 2000, 1), true);
+		potion.setItemMeta(potionMeta);
+		
+		//Custom NBT
+		NBTItem nbti = new NBTItem(potion);
+		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
 		//Write NBT data
 		for(String currentAspect: cookedAspects.keySet()) {
-			breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
+				breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
 		}
-		
 		potion = nbti.getItem();
-		potion.setItemMeta(potionMeta);
+		
 		
 		return potion;
 	}

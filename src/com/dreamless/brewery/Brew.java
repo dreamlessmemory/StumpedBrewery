@@ -363,17 +363,6 @@ public class Brew {
 		meta.setLore(newLore);
 	}
 
-	// Adds the Effect names to the Items description
-	public static void addOrReplaceEffects(PotionMeta meta, ArrayList<BEffect> effects, int quality) {
-		if (!Brewery.use1_9 && effects != null) {
-			for (BEffect effect : effects) {
-				if (!effect.isHidden()) {
-					effect.writeInto(meta, quality);
-				}
-			}
-		}
-	}
-
 	// Removes all effects except regeneration which stores data
 	public static void removeEffects(PotionMeta meta) {
 		if (meta.hasCustomEffects()) {

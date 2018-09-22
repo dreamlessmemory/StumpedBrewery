@@ -501,7 +501,7 @@ public class BPlayer {
 		ArrayList<BEffect> effects = brew.getEffects();
 		if (effects != null) {
 			for (BEffect effect : effects) {
-				effect.apply(10, player);
+				//effect.apply(10, player);
 			}
 		}
 	}
