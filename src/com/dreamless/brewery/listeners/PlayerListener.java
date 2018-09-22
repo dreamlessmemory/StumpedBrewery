@@ -119,7 +119,7 @@ public class PlayerListener implements Listener {
 							if (item == null) return;
 
 							// add ingredient to cauldron that meet the previous conditions
-							if (BIngredients.acceptableIngredients.contains(materialInHand)) {//TODO: Lookup if there is a row for this
+							if (BIngredients.acceptableIngredient(materialInHand)) {//TODO: Lookup if there is a row for this
 
 								if (player.hasPermission("brewery.cauldron.insert")) {
 									if (BCauldron.ingredientAdd(clickedBlock, item)) {

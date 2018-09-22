@@ -3,7 +3,6 @@ package com.dreamless.brewery;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 
 import com.google.common.collect.Range;
 
@@ -19,9 +18,6 @@ public class Aspect implements Comparable<Object> {
 	public static double superiorSaturation = 0.6;
 	public static double rareSaturation = 0.8;
 	public static double legendarySaturation = 1.0;
-	
-	//Aspect Databases
-	public static HashMap<String, AspectParameters>aspectStageMultipliers = new HashMap<String, AspectParameters>();
 	
 	//Private
 	private double potency = 0;

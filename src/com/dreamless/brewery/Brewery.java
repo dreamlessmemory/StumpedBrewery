@@ -184,7 +184,6 @@ public class Brewery extends JavaPlugin {
 		// delete Data from Ram
 		Barrel.barrels.clear();
 		BCauldron.bcauldrons.clear();
-		BIngredients.acceptableIngredients.clear();
 		BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		BPlayer.clear();
@@ -202,7 +201,6 @@ public class Brewery extends JavaPlugin {
 			reloader = sender;
 		}
 		// clear all existent config Data
-		BIngredients.acceptableIngredients.clear();
 		BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		Words.words.clear();
@@ -337,61 +335,6 @@ public class Brewery extends JavaPlugin {
 				}
 			}
 		}
-
-		// loading cooked names and possible ingredients
-		configSection = currentConfig.getConfigurationSection("cooked");
-		if (configSection != null) {
-			for (String ingredient : configSection.getKeys(false)) {
-				Material mat = Material.matchMaterial(ingredient);
-				if (mat != null) {
-					//BIngredients.cookedNames.put(mat, (configSection.getString(ingredient, null)));
-					BIngredients.acceptableIngredients.add(mat);
-				} else {
-					errorLog("Unknown Material: " + ingredient);
-				}
-			}
-		}
-		
-		/*** ingredients.yml ***/
-		currentFile = new File(breweryDriver.getDataFolder(), "ingredients.yml");
-		if(!currentFile.exists()) {
-			return false;
-		}
-		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
-		//ingredients
-		configSection = currentConfig.getConfigurationSection("ingredients");
-		if (configSection != null) {
-			for (String ingredient : configSection.getKeys(false)) {
-				Material mat = Material.matchMaterial(ingredient);
-				if (mat != null) {
-					//Add to ingredients
-					BIngredients.acceptableIngredients.add(mat);
-					
-					Map<String, String> aspects = new HashMap<String, String>();
-					List<String> aspectList = configSection.getStringList(ingredient + ".aspects");
-					if(aspectList != null) {
-						for (String aspectString : aspectList) {
-							String[] aspectSplit = aspectString.split("/");
-							if (aspectSplit.length > 1) {
-								aspects.put(aspectSplit[0], aspectSplit[1]);
-								breweryDriver.debugLog("Info: " + aspectSplit[0] + " " + aspectSplit[1]);
-							} else {
-								aspects.put(aspectSplit[0], "COMMON");
-							}
-						}
-					}
-					
-					int fermentationMultiplier = configSection.getInt(ingredient + ".fermentationMultiplier", 1);
-					int ageMultiplier = configSection.getInt(ingredient + ".ageMultiplier", 1);
-					int distillMultiplier = configSection.getInt(ingredient + ".distillnMultiplier", 1);
-					
-					BIngredients.ingredientInfo.put(mat, new Ingredient(mat, aspects, fermentationMultiplier, ageMultiplier, distillMultiplier));
-					breweryDriver.debugLog("Added " + mat.toString());
-				} else {
-					errorLog("Unknown Material: " + ingredient);
-				}
-			}
-		}
 		
 		/*** words.yml ***/
 		currentFile = new File(breweryDriver.getDataFolder(), "words.yml");
@@ -429,17 +372,6 @@ public class Brewery extends JavaPlugin {
 					debugLog("added: " + type + " makes a " + types);
 					BIngredients.typeMap.put(type, types);
 				}
-			}
-		}
-		
-		//Aspects
-		configSection = currentConfig.getConfigurationSection("aspects");
-		if(configSection != null) {
-			for (String aspect: configSection.getKeys(false)) {
-				
-				AspectParameters aspectParameters = new AspectParameters(currentConfig.getConfigurationSection("aspects." + aspect));
-				debugLog(aspectParameters.toString());
-				Aspect.aspectStageMultipliers.put(aspect, aspectParameters);
 			}
 		}
 

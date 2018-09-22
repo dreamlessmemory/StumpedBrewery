@@ -16,8 +16,8 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class BIngredients {
-	public static Set<Material> acceptableIngredients = new HashSet<Material>();
-	public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
+	//public static Set<Material> acceptableIngredients = new HashSet<Material>();
+	//public static Hashtable<Material, Ingredient> ingredientInfo = new Hashtable<Material, Ingredient>();
 	public static HashMap<String, String> typeMap = new HashMap<String, String>();
 	
 	private static int lastId = 0;
@@ -66,14 +66,14 @@ public class BIngredients {
 		}
 		
 		//Ingredient Info
-		Ingredient info = ingredientInfo.get(ingredient.getType());
+		//Ingredient info = ingredientInfo.get(ingredient.getType());
 		//Multipliers
 		
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
 		
 		//SQL test
 		try {
-			String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name='" + info.getType().name() + "'";
+			String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name='" + ingredient.getType().name() + "'";
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
 			ResultSet results;
@@ -228,39 +228,6 @@ public class BIngredients {
 		}
 		return manifest.substring(0, manifest.length() - 3);
 	}
-
-	public double calcuateFermentationMultiplier() {
-		double multiplier = 0.0;
-		int counter = 0;
-		for(ItemStack item: ingredients) {
-			Ingredient info = ingredientInfo.get(item.getType());
-			multiplier += info.getFermentationMultiplier() * item.getAmount();
-			counter += item.getAmount();
-		}
-		return multiplier/counter;
-	}
-	
-	public double calcuateAgingMultiplier() {
-		double multiplier = 0.0;
-		int counter = 0;
-		for(ItemStack item: ingredients) {
-			Ingredient info = ingredientInfo.get(item.getType());
-			multiplier += info.getAgingMultiplier() * item.getAmount();
-			counter += item.getAmount();
-		}
-		return multiplier/counter;
-	}
-	
-	public double calcuateDistillingMultiplier() {
-		double multiplier = 0.0;
-		int counter = 0;
-		for(ItemStack item: ingredients) {
-			Ingredient info = ingredientInfo.get(item.getType());
-			multiplier += info.getDistillingMultiplier() * item.getAmount();
-			counter += item.getAmount();
-		}
-		return multiplier/counter;
-	}
 	public String getType() {
 		return type;
 	}
@@ -290,5 +257,26 @@ public class BIngredients {
 	
 	public void startCooking() {
 		calculateType();
+	}
+	
+	//TODO Acceptable ingredients
+	public static boolean acceptableIngredient(Material material) {
+		try {
+			String query = "SELECT EXISTS(SELECT 1 FROM ingredients WHERE name='" + material.name() + "')";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			ResultSet results;
+			results = stmt.executeQuery();
+			results = stmt.executeQuery();
+			if (!results.next()) {
+				Brewery.breweryDriver.debugLog("Failed to poll SQL. Unacceptable item?");
+				return false;
+			} else {
+				return results.getInt(1) == 1;
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		return false;
 	}
 }
