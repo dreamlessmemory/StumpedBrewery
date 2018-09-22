@@ -355,25 +355,6 @@ public class Brewery extends JavaPlugin {
 		Words.log = currentConfig.getBoolean("logRealChat", false);
 		Words.doSigns = currentConfig.getBoolean("distortSignText", false);
 		
-		
-		/*** aspects.yml ***/
-		currentFile = new File(breweryDriver.getDataFolder(), "aspects.yml");
-		if(!currentFile.exists()) {
-			return false;
-		}
-		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
-		
-		//type map
-		configSection = currentConfig.getConfigurationSection("types");
-		if(configSection != null) {
-			for (String types: configSection.getKeys(false)) {
-				List<String> ingredient = configSection.getStringList(types);
-				for(String type : ingredient) {
-					debugLog("added: " + type + " makes a " + types);
-					BIngredients.typeMap.put(type, types);
-				}
-			}
-		}
 
 		return true;
 		

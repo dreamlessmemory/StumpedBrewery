@@ -16,11 +16,12 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class BIngredients {
-	public static HashMap<String, String> typeMap = new HashMap<String, String>();
+	//public static HashMap<String, String> typeMap = new HashMap<String, String>();
 	
 	private static int lastId = 0;
 
 	private int id;
+	
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 	private HashMap<String, Aspect> aspects = new HashMap<String, Aspect>();
 	private int cookedTime;
@@ -212,36 +213,43 @@ public class BIngredients {
 	}
 	
 	public void calculateType() {
-		Material highest = null;
+		//Material highest = null;
 		int highestCount = 0;
+		int priority = 0;
 		for (ItemStack ingredient : ingredients) {
-			if (typeMap.containsKey(ingredient.getType().name())) {
-				if(ingredient.getAmount() > highestCount) {
-					highest = ingredient.getType();
-					highestCount = ingredient.getAmount();
+			//Pull from DB
+			try {
+				String query = "SELECT * FROM brewtypes WHERE material='" + ingredient.getType().name() + "'";
+				PreparedStatement stmt;
+				stmt = Brewery.connection.prepareStatement(query);
+				ResultSet results;
+				results = stmt.executeQuery();
+				if (results.next()) {
+					if(ingredient.getAmount() > highestCount && results.getInt("priority") > priority) {
+						highestCount = ingredient.getAmount();
+						priority = results.getInt("priority");
+						type = results.getString("type");
+					}
 				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
 			}
 		}
-		//Assign a Name if found
-		if (highest != null) {
-			type = typeMap.get(highest.name());
-			Brewery.breweryDriver.debugLog("BREW IS A " + type);
+		if(highestCount == 0) {//no one is the right one
+			type = "OTHER";
 		}
-		
+		Brewery.breweryDriver.debugLog("Starting brew: " + type);
 	}
 	
 	public void startCooking() {
 		calculateType();
 	}
-	
-	//TODO Acceptable ingredients
 	public static boolean acceptableIngredient(Material material) {
 		try {
 			String query = "SELECT EXISTS(SELECT 1 FROM ingredients WHERE name='" + material.name() + "')";
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
 			ResultSet results;
-			results = stmt.executeQuery();
 			results = stmt.executeQuery();
 			if (!results.next()) {
 				Brewery.breweryDriver.debugLog("Failed to poll SQL. Unacceptable item?");
