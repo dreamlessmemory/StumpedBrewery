@@ -1,6 +1,11 @@
 package com.dreamless.brewery;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
+
+import com.google.common.collect.Range;
 
 public class Aspect implements Comparable<Object> {
 	//Static Numbers for balancing
@@ -19,16 +24,10 @@ public class Aspect implements Comparable<Object> {
 	public static HashMap<String, AspectParameters>aspectStageMultipliers = new HashMap<String, AspectParameters>();
 	
 	//Private
-	private String name;
 	private double potency = 0;
 	private double saturation = 0.0;
 	
-	public Aspect(String name) {
-		this.name = name;
-	}
-	
-	public Aspect (String name, double potency, double saturation) {
-		this.name = name;
+	public Aspect (double potency, double saturation) {
 		this.potency = potency;
 		this.saturation = saturation;
 	}
@@ -49,48 +48,78 @@ public class Aspect implements Comparable<Object> {
 		this.saturation = saturation;
 	}
 
-	public String getName() {
-		return name;
-	}
-	
 	public String toString() {
-		return "Name: " + name + " Potency: " + potency + " Saturation: " + saturation;
+		return "Potency: " + potency + " Saturation: " + saturation;
 	}
 	
-	public static double calculateRarityPotency(String rarity){
+	public static double calculateRarityPotency(int rarity){
 		switch(rarity) {
-			case ("COMMON"):
-				return commonPotency;
-			case ("UNCOMMON"):
-				return uncommonPotency;
-			case ("SUPERIOR"):
-				return superiorPotency;
-			case ("RARE"):
-				return rarePotency;
-			case ("LEGENDARY"):
-				return legendaryPotency;
+			case (1):
+				return 6;
+			case (2):
+				return 20;
+			case (3):
+				return 42;
+			case (4):
+				return 64;
+			case (5):
+				return 100;
 			default:
-				return commonPotency;
+				return 6;
 		}
 	}
 	
-	public static double calculateRaritySaturation(String rarity){
+	public static double calculateRaritySaturation(int rarity){
 		switch(rarity) {
-		case ("COMMON"):
-			return commonSaturation;
-		case ("UNCOMMON"):
-			return uncommonSaturation;
-		case ("SUPERIOR"):
-			return superiorSaturation;
-		case ("RARE"):
-			return rareSaturation;
-		case ("LEGENDARY"):
-			return legendarySaturation;
+		case (1):
+			return 0.2;
+		case (2):
+			return 0.4;
+		case (3):
+			return 0.6;
+		case (4):
+			return 0.8;
+		case (5):
+			return 1.0;
 		default:
-			return commonSaturation;
+			return 0.2;
 		}
 	}
 
+	public static double getStepBonus(int time, String aspect, String stage) {
+		try {
+			String query = "SELECT * FROM " + stage + " WHERE aspect='" + aspect + "'";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {
+				Brewery.breweryDriver.debugLog("There's no data. Likely deliberate.");
+				return 0;
+			} else {//Successful Pull
+				//get paramenters
+				int rampUpStart = results.getInt("rampupstart");
+				int rampUpEnd = results.getInt("rampupend");
+				int falloffStart = results.getInt("falloffstart");
+				int falloffEnd = results.getInt("falloffend");
+				double multiplier = results.getDouble("multiplier");
+				//check if in rampup
+				if(rampUpStart != 0 && rampUpEnd != 0 && Range.closed(rampUpStart, rampUpEnd).contains(time)) {
+					return multiplier;
+				} else if (falloffStart != 0 && falloffEnd !=0 && Range.closed(falloffStart, falloffEnd).contains(time)) {
+					return multiplier * -1;
+				} else {
+					return 0;
+				}
+			}
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return 0.0;
+	}
+	
+	
 	@Override
 	public int compareTo(Object arg0) {
 		// TODO Auto-generated method stub
