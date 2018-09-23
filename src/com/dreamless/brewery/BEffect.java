@@ -10,9 +10,9 @@ import org.bukkit.potion.PotionEffectType;
 public class BEffect {
 
 	
-	private PotionEffectType type;
-	private double potencyS = 0;
-	private double durationS = 0;
+	//private PotionEffectType type;
+	private double potency = 0;
+	private double duration = 0;
 	private boolean hidden = false;
 	private boolean randomEffect = false;
 	private boolean randomDuration = false;
@@ -22,14 +22,22 @@ public class BEffect {
 	private static final int DURATION_CAP = 600;
 	private static final int LEVEL_CAP_INSTANT = 20;
 	private static final int LEVEL_CAP_DURATION = 5;
+	private static final int DEFAULT_POTENCY = 1;
+	private static final int DEFAULT_DURATION = 90;
 	
-	public BEffect(PotionEffectType type) {
-		this.type = type;
+	public BEffect() {
+		this.potency = DEFAULT_POTENCY;
+		this.duration = DEFAULT_DURATION;
+	}
+	
+	public BEffect(double potency, double duration) {
+		this.potency = potency;
+		this.duration = duration;
 	}
 
 	public static ArrayList<PotionEffect> calculateEffect(HashMap<String, Double> aspects){
 		ArrayList<PotionEffect> effects = new ArrayList<PotionEffect>();
-		HashMap<PotionEffectType, PotionEffect> effectMap = new HashMap<PotionEffectType, PotionEffect>();
+		HashMap<PotionEffectType, BEffect> effectMap = new HashMap<PotionEffectType, BEffect>();
 		
 		double bonusPotency = 0;
 		double bonusDuration = 0;
@@ -42,9 +50,6 @@ public class BEffect {
 		
 		for(String currentAspect : aspects.keySet()) {
 			Brewery.breweryDriver.debugLog("Processing - " + currentAspect);
-			
-			double potency = 1;
-			double duration = 90;
 			boolean isPotency = false;
 			String trueAspect = currentAspect;
 			PotionEffectType type;
@@ -59,29 +64,22 @@ public class BEffect {
 			type = PotionEffectType.getByName(trueAspect);
 			if(type != null){//It really is an effect.
 				//Search for effect
-				if(effectMap.containsKey(type)) {//already have
-					if(isPotency) {//Assumes we don't have a potency aspect, but a duration
-						potency = calculatePotency(aspects.get(currentAspect), bonusPotency, (PotionEffectType.getByName(trueAspect).isInstant()));
-						effectMap.put(type, new PotionEffect(type, effectMap.get(type).getDuration(), (int)potency));
-					} else { //We are a duration
-						duration = calculateDuration(aspects.get(currentAspect), bonusDuration);
-						effectMap.put(type, new PotionEffect(type, ((int) duration) * 20, effectMap.get(type).getAmplifier()));
-					}
-				} else {// we don't have it
-					if(isPotency) {//Assumes we don't have a potency aspect, but a duration
-						potency = calculatePotency(aspects.get(currentAspect), bonusPotency, (PotionEffectType.getByName(trueAspect).isInstant()));
-						effectMap.put(type, new PotionEffect(type, ((int) duration) * 20, (int)potency));
-					} else { //We are a duration
-						duration = calculateDuration(aspects.get(currentAspect), bonusDuration);
-						effectMap.put(type, new PotionEffect(type, ((int) duration) * 20, (int)potency));
-					}
+				BEffect tempBEffect = effectMap.get(type);
+				if(tempBEffect == null) {//doesn't exist yet
+					tempBEffect = new BEffect();
 				}
-				
+				if (isPotency) {//update potency
+					tempBEffect.setPotency(calculatePotency(aspects.get(currentAspect), bonusPotency, type.isInstant()));
+				} else { //update duration
+					tempBEffect.setDuration(calculateDuration(aspects.get(currentAspect), bonusDuration));
+				}
+				effectMap.put(type, tempBEffect);
 			}
 		}
 		
 		for(PotionEffectType effectType: effectMap.keySet()) {
-			effects.add(effectMap.get(effectType));
+			BEffect effect = effectMap.get(effectType);
+			effects.add(effectType.createEffect(((int)effect.getDuration()) * 20, (int)effect.getPotency()));
 		}
 		
 		return effects;
@@ -97,5 +95,21 @@ public class BEffect {
 	
 	public boolean isHidden() {
 		return hidden;
+	}
+
+	public double getPotency() {
+		return potency;
+	}
+
+	public void setPotency(double potency) {
+		this.potency = potency;
+	}
+
+	public double getDuration() {
+		return duration;
+	}
+
+	public void setDuration(double duration) {
+		this.duration = duration;
 	}
 }
