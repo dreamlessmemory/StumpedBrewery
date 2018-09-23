@@ -13,9 +13,9 @@ import java.util.Map;
 public class BRecipe {
 	
 	//Difficulty Adjustment
-	public static float ingredientDifficultyScale = 11.0f;
-	public static float fermentationDifficultyScale = 11.0f;
-	public static float woodTypeDifficultyScale = 1.0f;
+	//public static float ingredientDifficultyScale = 11.0f;
+	//public static float fermentationDifficultyScale = 11.0f;
+	//public static float woodTypeDifficultyScale = 1.0f;
 	
 	//Static
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
@@ -57,49 +57,6 @@ public class BRecipe {
 	// check every part of the recipe for validity
 	public boolean isValid() {
 		return !(name == null || aspects.isEmpty());
-	}
-
-	// allowed deviation to the recipes count of ingredients at the given difficulty
-	public int allowedCountDiff(int count) {
-		if (count < 8) {
-			count = 8;
-		}
-		int allowedCountDiff = Math.round((float) ((ingredientDifficultyScale - difficulty) * (count / 10.0)));
-
-		if (allowedCountDiff == 0) {
-			return 1;
-		}
-		return allowedCountDiff;
-	}
-
-	// allowed deviation to the recipes cooking-time at the given difficulty
-	public int allowedTimeDiff(int time) {
-		if (time < 8) {
-			time = 8;
-		}
-		int allowedTimeDiff = Math.round((float) ((fermentationDifficultyScale - difficulty) * (time / 10.0)));
-
-		if (allowedTimeDiff == 0) {
-			return 1;
-		}
-		return allowedTimeDiff;
-	}
-
-	// difference between given and recipe-wanted woodtype
-	public float getWoodDiff(float wood) {
-		return Math.abs(wood - this.wood) * woodTypeDifficultyScale;
-	}
-
-	public boolean isCookingOnly() {
-		return age == 0 && distillruns == 0;
-	}
-
-	public boolean needsDistilling() {
-		return distillruns != 0;
-	}
-
-	public boolean needsToAge() {
-		return age != 0;
 	}
 
 	public boolean hasFlavorText(){

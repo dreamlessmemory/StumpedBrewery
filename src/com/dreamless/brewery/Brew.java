@@ -204,23 +204,7 @@ public class Brew {
 		}
 
 		if (currentRecipe != null) {
-			int alc = currentRecipe.getAlcohol();
-			if (currentRecipe.needsDistilling()) {
-				if (distillRuns == 0) {
-					return 0;
-				}
-				// bad quality can decrease alc by up to 40%
-				alc *= 1 - ((float) (10 - quality) * 0.04);
-				// distillable Potions should have half alc after one and full alc after all needed distills
-				alc /= 2;
-				alc *= 1.0F + ((float) distillRuns / currentRecipe.getDistillRuns());
-			} else {
-				// quality decides 10% - 100%
-				alc *= ((float) quality / 10.0);
-			}
-			if (alc > 0) {
-				return alc;
-			}
+			
 		}
 		return 0;
 	}
