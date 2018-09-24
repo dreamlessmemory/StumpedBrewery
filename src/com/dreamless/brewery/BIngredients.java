@@ -143,10 +143,14 @@ public class BIngredients {
 			potionMeta.addCustomEffect(effect, true);
 		}
 		
-		//potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.GLOWING, 2000, 1), true);
-		potion.setItemMeta(potionMeta);
 		
 		//TODO: get recipe
+		BRecipe recipe = BRecipe.getRecipe(type, cookedAspects, false, false);
+		potionMeta.setDisplayName(recipe.getName());
+		potionMeta.setLore(recipe.getFlavorText());
+		potionMeta.setColor(BRecipe.getColor(type));
+
+		potion.setItemMeta(potionMeta);
 		
 		//Custom NBT Setup
 		NBTItem nbti = new NBTItem(potion);

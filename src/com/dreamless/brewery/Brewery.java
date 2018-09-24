@@ -306,27 +306,6 @@ public class Brewery extends JavaPlugin {
 			}
 		}
 		
-		
-		/*** recipes.yml ***/
-		currentFile = new File(breweryDriver.getDataFolder(), "recipes.yml");
-		if(!currentFile.exists()) {
-			return false;
-		}
-		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
-		
-		// loading recipes
-		ConfigurationSection configSection = currentConfig.getConfigurationSection("recipes");
-		if (configSection != null) {
-			for (String recipeId : configSection.getKeys(false)) {
-				BRecipe recipe = new BRecipe(configSection, recipeId);
-				if (recipe.isValid()) {
-					BRecipe.recipes.add(recipe);
-				} else {
-					errorLog("Loading the Recipe with id: '" + recipeId + "' failed!");
-				}
-			}
-		}
-		
 		/*** words.yml ***/
 		currentFile = new File(breweryDriver.getDataFolder(), "words.yml");
 		if(!currentFile.exists()) {

@@ -33,7 +33,6 @@ public class Brew {
 	private BRecipe currentRecipe;
 	private boolean unlabeled;
 	private boolean persistent;
-	private boolean stat; // static potions should not be changed
 	private int lastUpdate; // last update in hours after install time
 
 	public Brew(int uid, BIngredients ingredients) {
@@ -61,7 +60,6 @@ public class Brew {
 		this.wood = wood;
 		this.unlabeled = unlabeled;
 		this.persistent = persistent;
-		this.stat = stat;
 		this.lastUpdate = lastUpdate;
 		setRecipeFromString(recipe);
 	}
@@ -170,9 +168,6 @@ public class Brew {
 		brew.distillRuns = distillRuns;
 		brew.ageTime = ageTime;
 		brew.unlabeled = unlabeled;
-		if (!brew.persistent) {
-			brew.stat = stat;
-		}
 		return brew;
 	}
 
@@ -207,15 +202,6 @@ public class Brew {
 			
 		}
 		return 0;
-	}
-
-
-	// return special effect
-	public ArrayList<BEffect> getEffects() {
-		if (currentRecipe != null && quality > 0) {
-			return currentRecipe.getEffects();
-		}
-		return null;
 	}
 
 	// Set unlabeled to true to hide the numbers in Lore
@@ -264,21 +250,6 @@ public class Brew {
 		persistent = false;
 	}
 
-	public boolean isStatic() {
-		return stat;
-	}
-
-	// Set the Static flag, so potion is unchangeable
-	public void setStatic(boolean stat, ItemStack potion) {
-		this.stat = stat;
-		if (currentRecipe != null) {
-			if (stat) {
-				PotionColor.valueOf(currentRecipe.getColor()).colorBrew(((PotionMeta) potion.getItemMeta()), potion, false);
-			} else {
-				PotionColor.valueOf(currentRecipe.getColor()).colorBrew(((PotionMeta) potion.getItemMeta()), potion, true);
-			}
-		}
-	}
 
 	public int getLastUpdate() {
 		return lastUpdate;
@@ -299,10 +270,6 @@ public class Brew {
 
 	// distill custom potion in given slot
 	public void distillSlot(ItemStack slotItem, PotionMeta potionMeta) {//TODO Update
-		if (stat) {
-			return;
-		}
-
 		distillRuns += 1;
 		touch();
 
@@ -312,9 +279,6 @@ public class Brew {
 	// Ageing Section ------------------
 
 	public void age(ItemStack item, float time, byte woodType) {//TODO: Aging calculation
-		if (stat) {
-			return;
-		}
 
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 		ageTime += time;
@@ -419,9 +383,6 @@ public class Brew {
 			}
 			if (brew.persistent) {
 				idConfig.set("persist", true);
-			}
-			if (brew.stat) {
-				idConfig.set("stat", true);
 			}
 			if (brew.lastUpdate > 0) {
 				idConfig.set("lastUpdate", brew.lastUpdate);

@@ -1,152 +1,190 @@
 package com.dreamless.brewery;
 
+import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.ChatPaginator;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 
 public class BRecipe {
 	
-	//Difficulty Adjustment
-	//public static float ingredientDifficultyScale = 11.0f;
-	//public static float fermentationDifficultyScale = 11.0f;
-	//public static float woodTypeDifficultyScale = 1.0f;
 	
 	//Static
 	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
-	//Individual recipe
-	private String name;
-	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>(); // material and amount
-	private int cookingTime; // time to cook in cauldron
-	private int distillruns; // runs through the brewer
-	private int distillTime; // time for one distill run in seconds
-	private byte wood; // type of wood the barrel has to consist of
-	private int age; // time in minecraft days for the potions to age in barrels
-	private String color; // color of the destilled/finished potion
-	private int difficulty; // difficulty to brew the potion, how exact the instruction has to be followed
-	private int alcohol; // Alcohol in perfect potion
-	private ArrayList<BEffect> effects = new ArrayList<BEffect>(); // Special Effects when drinking
-    private String flavorText;
+	
+	private String name = "TEST";
+    private ArrayList<String> flavorText = new ArrayList<String>();
+	
     
-    
-    private Map<String, Integer> aspects = new HashMap<String, Integer>();
-
-	public BRecipe(ConfigurationSection configSectionRecipes, String recipeId) {
-        //parse name
-		name = configSectionRecipes.getString(recipeId + ".name");
+	public BRecipe(String name, String flavorText) {
+		this.name = name;
+		this.flavorText.add(flavorText);
+	}
+	
+	public BRecipe(String name, ArrayList<String> flavorText) {
+		this.name = name;
+		this.flavorText = flavorText;
+	}
+	
+	public static BRecipe getRecipe(String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled) {
+		AspectComparator aspectComparator = new AspectComparator(aspects);
+		NavigableMap<String, Double> topAspects = new TreeMap<String, Double>(aspectComparator);
 		
-        //parse ingredients
-		ConfigurationSection aspectsSection = configSectionRecipes.getConfigurationSection(recipeId+ ".aspects");
-		for (String aspect: aspectsSection.getKeys(false)) {
-			aspects.put(aspect, aspectsSection.getInt(aspect));
-			Brewery.breweryDriver.debugLog(aspect + " - " + aspectsSection.getInt(aspect));
+		for(String aspect: aspects.keySet()) {
+			topAspects.put(aspect, aspects.get(aspect));
 		}
-        //parse flavorText
-		flavorText = configSectionRecipes.getString(recipeId + ".flavortext");
-        //parse the rest
-		this.color = configSectionRecipes.getString(recipeId + ".color", "AQUA");
-		this.alcohol = configSectionRecipes.getInt(recipeId+ ".alcohol", 0);
-
+		
+		//Pare out the top aspects until you have the top 6
+		while(topAspects.size() > 6) {
+			topAspects.pollLastEntry();
+		}
+		
+		//Prep the SQL
+		String starterQuery = "SELECT * FROM recipes WHERE type='" + type + "' AND isAged=" + isAged + " AND isDistilled=" + isDistilled;
+		String aspectQuery = "";
+		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect5name, aspect6name)";
+		String fullQuery = "";
+		
+		for(String aspect: topAspects.keySet()) {
+			aspectQuery = aspectQuery.concat(" AND '" + aspect + aspectColumn);
+		}
+		fullQuery = starterQuery + aspectQuery;
+		Brewery.breweryDriver.debugLog(fullQuery);
+		
+		try {
+			//boolean found = false;
+			
+			
+			//SQL Block
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(fullQuery);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {//New recipe!
+				Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
+				return generateNewRecipe();
+			} else {//Found something
+				do {//something
+					
+					Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
+					
+					if(topAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
+						Brewery.breweryDriver.debugLog("reject, insufficient aspects");
+						continue;
+					}
+					boolean allAspectsFound = true; //didn't find it
+					
+					//for(String currentAspect: topAspects.keySet()) {//iterate through the top aspects
+					for(Map.Entry<String, Double> es :topAspects.entrySet()) {
+						String currentAspect = es.getKey().trim();
+						double aspectRating = es.getValue();
+						boolean aspectFound = false;
+						
+						Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
+						
+						for(int i = 0; i < topAspects.size(); i++) {//Iterate through aspectNname columns
+							int column = 6 + (2 * i);
+							String aspectName = results.getString(column).trim();
+							Brewery.breweryDriver.debugLog("checking..." + aspectName);
+							if(aspectName.equalsIgnoreCase(currentAspect)){//So, it has the aspect
+								int recipeRating = results.getInt(6 + 1 + (2 * i));
+								//double aspectRating = topAspects.get(currentAspect); 
+								if(aspectRating >= recipeRating && aspectRating < recipeRating + 9) {//found it
+									aspectFound = true;
+									Brewery.breweryDriver.debugLog("You do!");
+									break;
+								}
+							}
+						}
+						if(!aspectFound) {//The aspect wasn't here, so not the right one. Stop looking
+							Brewery.breweryDriver.debugLog("You don't!");
+							allAspectsFound = false;
+							break;
+						}
+					}
+					if(allAspectsFound) {//We found it!
+						Brewery.breweryDriver.debugLog("Found you!");
+						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), topAspects));
+					}
+					
+				} while (results.next());
+				
+				
+				//If we get here, nothing was found. So make a new one?
+				Brewery.breweryDriver.debugLog("None found?");
+				return generateNewRecipe();
+				
+				
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		
+		return new BRecipe("Test Brew", "MemoryReborn's flavortext");
+	}
+	
+	private static BRecipe generateNewRecipe() {
+		return new BRecipe("Placeholder Brew", "MemoryReborn's placeholder flavortext");
+	}
+	
+	public static Color getColor(String type) {
+		
+		try {
+			String query = "SELECT color FROM brewtypes WHERE type='" + type + "'";
+			//SQL Block
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {//New type! Default!
+				return Color.fromRGB(8441558);
+			} else {//Found somethin
+				return Color.fromRGB(results.getInt(1));
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		return Color.fromRGB(8441558);
+	}
+	
+	private static ArrayList<String> generateLore(String inventor, String flavorText, Map<String, Double> aspects){
+		ArrayList<String> flavor = new ArrayList<String>();
+		flavor.add("Invented by: " + inventor);
+		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(flavorText, 25)));
+		
+		return flavor;
 	}
 
-	// check every part of the recipe for validity
-	public boolean isValid() {
-		return !(name == null || aspects.isEmpty());
-	}
 
 	public boolean hasFlavorText(){
         return flavorText == null;
     }
     
-    // true if given list misses an ingredient
-	public boolean isMissingIngredients(List<ItemStack> list) {
-		if (list.size() < ingredients.size()) {
-			return true;
-		}
-		for (ItemStack ingredient : ingredients) {
-			boolean matches = false;
-			for (ItemStack used : list) {
-				if (ingredientsMatch(used, ingredient)) {
-					matches = true;
-					break;
-				}
-			}
-			if (!matches) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public int countMissingIngredients(List<ItemStack> list) {
-		int count = 0;
-		//Code
-		for (ItemStack ingredient : ingredients) {
-			boolean matches = false;
-			for (ItemStack used : list) {
-				if (ingredientsMatch(used, ingredient)) {
-					matches = true;
-					break;
-				}
-			}
-			if (!matches) {
-				count++;
-			}
-		}
-		return count;
-	}
-
-	// Returns true if this ingredient cares about durability
-	public boolean hasExactData(ItemStack item) {
-		for (ItemStack ingredient : ingredients) {
-			if (ingredient.getType().equals(item.getType())) {
-				return ingredient.getDurability() != -1;
-			}
-		}
-		return true;
-	}
-
-	// Returns true if this item matches the item from a recipe
-	public static boolean ingredientsMatch(ItemStack usedItem, ItemStack recipeItem) {
-		if (!recipeItem.getType().equals(usedItem.getType())) {
-			return false;
-		}
-		return recipeItem.getDurability() == -1 || recipeItem.getDurability() == usedItem.getDurability();
-	}
 
 	// Create a Potion from this Recipe with best values. Quality can be set, but will reset to 10 if put in a barrel
 	public ItemStack create(int quality) {
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
-		int uid = Brew.generateUID();
-
-		ArrayList<ItemStack> list = new ArrayList<ItemStack>(ingredients.size());
-		for (ItemStack item : ingredients) {
-			if (item.getDurability() == -1) {
-				list.add(new ItemStack(item.getType(), item.getAmount()));
-			} else {
-				list.add(item.clone());
-			}
-		}
-
-		BIngredients bIngredients = new BIngredients(list, cookingTime);
-
-		Brew brew = new Brew(uid, bIngredients, quality, distillruns, getAge(), wood, getName(), false, false, true, 0);
-
-		Brew.PotionColor.valueOf(getColor()).colorBrew(potionMeta, potion, false);
 		potionMeta.setDisplayName(Brewery.breweryDriver.color("&f" + getName()));
 		// This effect stores the UID in its Duration
-		potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect((uid * 4), 0), true);
+		potionMeta.addCustomEffect((PotionEffectType.REGENERATION).createEffect(2000, 0), true);
 
 		//brew.convertLore(potionMeta, false);
 		//Brew.addOrReplaceEffects(potionMeta, effects, quality);
-		brew.touch();
 		
 		potion.setItemMeta(potionMeta);
 		return potion;
@@ -155,68 +193,15 @@ public class BRecipe {
 
 	// Getter
 
-	// how many of a specific ingredient in the recipe
-	public int amountOf(ItemStack item) {
-		for (ItemStack ingredient : ingredients) {
-			if (ingredientsMatch(item, ingredient)) {
-				return ingredient.getAmount();
-			}
-		}
-		return 0;
-	}
-
 	// name that fits the quality
 	public String getName() {
 		return name;
 	}
 
-    public String getFlavorText(int quality) {
+    public ArrayList<String> getFlavorText() {
     	return flavorText;
 	}
     
-	// If one of the quality names equalIgnoreCase given name
-	public boolean hasName(String name) {
-		return this.name.equalsIgnoreCase(name);
-	}
-
-	public int getCookingTime() {
-		return cookingTime;
-	}
-
-	public int getDistillRuns() {
-		return distillruns;
-	}
-
-	public int getDistillTime() {
-		return distillTime;
-	}
-
-	public String getColor() {
-		if (color != null) {
-			return color.toUpperCase();
-		}
-		return "BLUE";
-	}
-
-	// get the woodtype
-	public byte getWood() {
-		return wood;
-	}
-
-	public float getAge() {
-		return (float) age;
-	}
-
-	public int getDifficulty() {
-		return difficulty;
-	}
-
-	public int getAlcohol() {
-		return alcohol;
-	}
-
-	public ArrayList<BEffect> getEffects() {
-		return effects;
-	}
+    
 
 }
