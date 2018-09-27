@@ -2,6 +2,7 @@ package com.dreamless.brewery;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
@@ -117,7 +118,7 @@ public class BIngredients {
 
 
 	// returns an Potion item with cooked ingredients
-	public ItemStack cook(int state) {
+	public ItemStack cook(int state, Player player) {
 		//TODO: recipe lookup
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
@@ -144,8 +145,8 @@ public class BIngredients {
 		}
 		
 		
-		//TODO: get recipe
-		BRecipe recipe = BRecipe.getRecipe(type, cookedAspects, false, false);
+		//Recipe
+		BRecipe recipe = BRecipe.getRecipe(player, type, cookedAspects, false, false);
 		potionMeta.setDisplayName(recipe.getName());
 		potionMeta.setLore(recipe.getFlavorText());
 		potionMeta.setColor(BRecipe.getColor(type));

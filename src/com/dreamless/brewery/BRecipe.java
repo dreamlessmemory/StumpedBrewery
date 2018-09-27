@@ -1,31 +1,42 @@
 package com.dreamless.brewery;
 
+import org.apache.commons.io.IOUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.ChatPaginator;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
+import java.io.IOException;
+import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+import java.util.UUID;
 
 public class BRecipe {
 	
 	
 	//Static
-	public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
+	//public static ArrayList<BRecipe> recipes = new ArrayList<BRecipe>();
+	private static final int WRAP_SIZE = 30;
 	
 	private String name = "TEST";
     private ArrayList<String> flavorText = new ArrayList<String>();
-	
     
 	public BRecipe(String name, String flavorText) {
 		this.name = name;
@@ -37,7 +48,7 @@ public class BRecipe {
 		this.flavorText = flavorText;
 	}
 	
-	public static BRecipe getRecipe(String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled) {
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled) {
 		AspectComparator aspectComparator = new AspectComparator(aspects);
 		NavigableMap<String, Double> topAspects = new TreeMap<String, Double>(aspectComparator);
 		
@@ -53,7 +64,7 @@ public class BRecipe {
 		//Prep the SQL
 		String starterQuery = "SELECT * FROM recipes WHERE type='" + type + "' AND isAged=" + isAged + " AND isDistilled=" + isDistilled;
 		String aspectQuery = "";
-		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect5name, aspect6name)";
+		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect4name, aspect5name, aspect6name)";
 		String fullQuery = "";
 		
 		for(String aspect: topAspects.keySet()) {
@@ -162,13 +173,27 @@ public class BRecipe {
 	
 	private static ArrayList<String> generateLore(String inventor, String flavorText, Map<String, Double> aspects){
 		ArrayList<String> flavor = new ArrayList<String>();
-		flavor.add("Invented by: " + inventor);
-		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(flavorText, 25)));
+		
+		//Add Name
+		String inventorName;
+		Player player = Bukkit.getPlayer(UUID.fromString(BRecipe.convertUUIDString(inventor)));
+		if(player != null) {
+			inventorName = player.getDisplayName();
+		} else {
+			inventorName = "an unknown brewer";
+		}
+		flavor.add("Invented by: " + inventorName);
+		
+		//Add Aspects
+		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color(convertAspects(aspects)), WRAP_SIZE)));
+		
+		//Add flavortext
+		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color("&r" + flavorText), WRAP_SIZE)));
 		
 		return flavor;
 	}
-
-
+	
+	
 	public boolean hasFlavorText(){
         return flavorText == null;
     }
@@ -202,6 +227,74 @@ public class BRecipe {
     	return flavorText;
 	}
     
+    private static String convertAspects(Map<String, Double> aspects) {
+    	String startup = "&o&dThis brew is";
+    	String description = "";
+    	for(Map.Entry<String, Double> entry: aspects.entrySet()) {
+    		String aspect = entry.getKey();
+    		if(aspect.contains("_DURATION") || aspect.contains("_POTENCY")) {
+    			continue;
+    		}
+    		
+    		//Grab description from table
+			try {
+				String query = "SELECT description FROM aspects WHERE name='" + aspect + "'";
+				//SQL Block
+				PreparedStatement stmt;
+				stmt = Brewery.connection.prepareStatement(query);
+			
+				ResultSet results;
+				results = stmt.executeQuery();
+				if (!results.next()) {//Can't find it, move on
+					continue;
+				} else {
+				description += getDescriptor(entry.getValue()) + results.getString(1) + ",";
+				}  
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    	if(description.length() > 0) {
+    		return startup + description.substring(0, description.length() - 1) + ".";
+    	} else {
+    		return "";
+    	}
+    }
     
+    private static String getDescriptor(double rating) {
+    	if(rating < 40) {
+    		return " tiny bit ";
+    	} else if (rating >= 40 && rating < 80) {
+    		return " somewhat ";
+    	} else if (rating >= 80 && rating < 120) {
+    		return " moderately ";
+    	} else if (rating >= 120 && rating < 160) {
+    		return " somewhat ";
+    	} else if (rating >= 160 && rating < 200) {
+    		return " somewhat ";
+    	} else if (rating >= 200) {
+    		return " supremely ";
+    	} else {
+    		return " sort of ";
+    	}
+    }
+    
+    private static String color(String s){
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
+
+    private static List<String> color(List<String> lore){
+        List<String> clore = new ArrayList<>();
+        for(String s : lore){
+            clore.add(color(s));
+        }
+        return clore;
+    }
+    
+    
+    private static String convertUUIDString(String uuid) {
+    	return uuid.substring(0,  8) + "-" + uuid.substring(8,  12) + "-" + uuid.substring(12,  16) + "-" + uuid.substring(16,  20) + "-" + uuid.substring(20);
+    }
 
 }

@@ -114,7 +114,7 @@ public class BCauldron {
 				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronFill"));
 				return true;
 			}
-			ItemStack potion = bcauldron.ingredients.cook(bcauldron.state);
+			ItemStack potion = bcauldron.ingredients.cook(bcauldron.state, player);
 			
 			if (potion != null) {
 				

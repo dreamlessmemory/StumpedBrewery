@@ -122,7 +122,7 @@ public class Brew {
 
 	//returns the recipe with the given name, recalculates if not found
 	public boolean setRecipeFromString(String name) {
-		currentRecipe = null;
+		/* currentRecipe = null;
 		if (name != null && !name.equals("")) {
 			for (BRecipe recipe : BRecipe.recipes) {
 				if (recipe.getName().equalsIgnoreCase(name)) {
@@ -131,7 +131,7 @@ public class Brew {
 				}
 			}
 
-			/*if (quality > 0) {
+			if (quality > 0) {
 				currentRecipe = ingredients.getBestRecipe(wood, ageTime, distillRuns > 0);
 				if (currentRecipe != null) {
 					if (!stat) {
@@ -142,8 +142,8 @@ public class Brew {
 				} else {
 					P.p.errorLog("Brew was made from Recipe: '" + name + "' which could not be found!");
 				}
-			}*/
-		}
+			}
+		}*/
 		return false;
 	}
 

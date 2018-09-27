@@ -23,7 +23,7 @@ public class BEffect {
 	private static final int LEVEL_CAP_INSTANT = 20;
 	private static final int LEVEL_CAP_DURATION = 5;
 	private static final int DEFAULT_POTENCY = 1;
-	private static final int DEFAULT_DURATION = 90;
+	private static final int DEFAULT_DURATION = 180;
 	
 	public BEffect() {
 		this.potency = DEFAULT_POTENCY;
@@ -86,11 +86,15 @@ public class BEffect {
 	}
 
 	public static int calculateDuration(double duration, double bonusDuration) {
-		return 180;
+		double difference = DURATION_CAP - DEFAULT_DURATION;
+		double score = duration + bonusDuration;
+		double scaledScore = (score / 200) * difference;
+		return 180 + (int)scaledScore;
 	}
 	
 	public static int calculatePotency(double potency, double bonusPotency, boolean isInstant) {
-		return 2;
+		double score = (potency + bonusPotency)/200;
+		return (int) (score * (isInstant ? LEVEL_CAP_INSTANT : LEVEL_CAP_DURATION));
 	}
 	
 	public boolean isHidden() {

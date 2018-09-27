@@ -183,7 +183,7 @@ public class Brewery extends JavaPlugin {
 		// delete Data from Ram
 		Barrel.barrels.clear();
 		BCauldron.bcauldrons.clear();
-		BRecipe.recipes.clear();
+		//BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		BPlayer.clear();
 		Brew.potions.clear();
@@ -200,7 +200,7 @@ public class Brewery extends JavaPlugin {
 			reloader = sender;
 		}
 		// clear all existent config Data
-		BRecipe.recipes.clear();
+		//BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		Words.words.clear();
 		Words.ignoreText.clear();
