@@ -84,7 +84,7 @@ public class BRecipe {
 			results = stmt.executeQuery();
 			if (!results.next()) {//New recipe!
 				Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
-				return generateNewRecipe();
+				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
 			} else {//Found something
 				do {//something
 					
@@ -134,7 +134,7 @@ public class BRecipe {
 				
 				//If we get here, nothing was found. So make a new one?
 				Brewery.breweryDriver.debugLog("None found?");
-				return generateNewRecipe();
+				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
 				
 				
 			}
@@ -143,11 +143,100 @@ public class BRecipe {
 		}
 		
 		
-		return new BRecipe("Test Brew", "MemoryReborn's flavortext");
+		return new BRecipe("Unknown Brew", "A strange brew with no effects...");
 	}
 	
-	private static BRecipe generateNewRecipe() {
-		return new BRecipe("Placeholder Brew", "MemoryReborn's placeholder flavortext");
+	private static BRecipe generateNewRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled) {
+		//Variables?
+		
+		//Get variables
+		String uuid = player.getUniqueId().toString();
+		String lowercaseType = type.charAt(0) + type.substring(1).toLowerCase();
+		String flavor = "A novel " + lowercaseType + " brew by " + player.getDisplayName();
+		
+		String newName = generateNewName(player, lowercaseType);
+		ArrayList<String> newLore = generateLore(uuid, flavor, aspects);
+		
+		addRecipeToMainList(newName, uuid, type, aspects, isAged, isDistilled, flavor);
+		
+		//Announce?
+		Bukkit.broadcastMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + player.getDisplayName() + " has just invented a new " + type.toLowerCase() + " brew!");
+		
+		
+		return new BRecipe(newName, generateLore(uuid, flavor, aspects));
+	}
+	
+	private static void addRecipeToMainList(String name, String uuid, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor) {
+		//add escape
+		//name = name.replace("'", "\'");
+		
+		//Build SQL
+		String query = "INSERT INTO recipes ";
+		String mandatoryColumns = "(name, type, isAged, isDistilled, inventor, flavortext";
+		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?";	
+		String aspectColumns = "";
+		String aspectValues = "";
+		int count = 1;
+	
+		for(Map.Entry<String, Double> entry : aspects.entrySet()) {
+			String nameColumn = "aspect" + count + "name";
+			String valueColumn = "aspect" + count + "rating";
+			String ratingValue = Integer.toString((int)((entry.getValue())/10) * 10);
+			
+			aspectColumns += ", " + nameColumn + ", " + valueColumn;
+			aspectValues += ", '" + entry.getKey() + "', " + ratingValue;
+			count++;
+		}
+		
+		query += mandatoryColumns + aspectColumns + ") " + mandatoryValues + aspectValues + ")";
+		Brewery.breweryDriver.debugLog(query);
+		
+		//TODO Aspects
+		try {
+			//SQL Replacement
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			
+			//Mandatory
+			stmt.setString(1, name);
+			stmt.setString(2, type);
+			stmt.setBoolean(3, isAged);
+			stmt.setBoolean(4, isDistilled);
+			stmt.setString(5, uuid);
+			stmt.setString(6, flavor);
+			
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			
+			stmt.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	private static String generateNewName(Player player, String type) {
+		String name = "";
+		String uuid = player.getUniqueId().toString();
+		name += player.getDisplayName() + "'s " + type + " #";
+		int count = 0;
+		//SQL
+		String query = "SELECT COUNT(*) FROM recipes WHERE inventor='" + uuid + "'";
+		//TODO Aspects
+		try {
+			//SQL Block
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {//No registered recipes!
+				count = 1;
+			} else {//Found somethin
+				count = results.getInt(1) + 1;
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+	
+		return name + count;
 	}
 	
 	public static Color getColor(String type) {
@@ -159,9 +248,9 @@ public class BRecipe {
 			stmt = Brewery.connection.prepareStatement(query);
 			ResultSet results;
 			results = stmt.executeQuery();
-			if (!results.next()) {//New type! Default!
+			if (!results.next()) {//Error, so default
 				return Color.fromRGB(8441558);
-			} else {//Found somethin
+			} else {//Found something
 				return Color.fromRGB(results.getInt(1));
 			}
 		} catch (SQLException e1) {
@@ -171,12 +260,12 @@ public class BRecipe {
 		return Color.fromRGB(8441558);
 	}
 	
-	private static ArrayList<String> generateLore(String inventor, String flavorText, Map<String, Double> aspects){
+	private static ArrayList<String> generateLore(String uuid, String flavorText, Map<String, Double> aspects){
 		ArrayList<String> flavor = new ArrayList<String>();
 		
 		//Add Name
 		String inventorName;
-		Player player = Bukkit.getPlayer(UUID.fromString(BRecipe.convertUUIDString(inventor)));
+		Player player = Bukkit.getPlayer(UUID.fromString(uuid));
 		if(player != null) {
 			inventorName = player.getDisplayName();
 		} else {
@@ -188,7 +277,7 @@ public class BRecipe {
 		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color(convertAspects(aspects)), WRAP_SIZE)));
 		
 		//Add flavortext
-		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color("&r" + flavorText), WRAP_SIZE)));
+		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.RESET + flavorText, WRAP_SIZE)));
 		
 		return flavor;
 	}
@@ -264,7 +353,7 @@ public class BRecipe {
     
     private static String getDescriptor(double rating) {
     	if(rating < 40) {
-    		return " tiny bit ";
+    		return " a tiny bit ";
     	} else if (rating >= 40 && rating < 80) {
     		return " somewhat ";
     	} else if (rating >= 80 && rating < 120) {
@@ -284,13 +373,13 @@ public class BRecipe {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
-    private static List<String> color(List<String> lore){
+    /*private static List<String> color(List<String> lore){
         List<String> clore = new ArrayList<>();
         for(String s : lore){
             clore.add(color(s));
         }
         return clore;
-    }
+    }*/
     
     
     private static String convertUUIDString(String uuid) {
