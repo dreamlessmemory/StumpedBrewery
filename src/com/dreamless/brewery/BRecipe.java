@@ -62,7 +62,7 @@ public class BRecipe {
 		}
 		
 		//Prep the SQL
-		String starterQuery = "SELECT * FROM recipes WHERE type='" + type + "' AND isAged=" + isAged + " AND isDistilled=" + isDistilled;
+		String starterQuery = "SELECT * FROM recipes WHERE type=? AND isAged=? AND isDistilled=?";
 		String aspectQuery = "";
 		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect4name, aspect5name, aspect6name)";
 		String fullQuery = "";
@@ -80,6 +80,9 @@ public class BRecipe {
 			//SQL Block
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(fullQuery);
+			stmt.setString(1, type);
+			stmt.setBoolean(2, isAged);
+			stmt.setBoolean(3, isDistilled);
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {//New recipe!
@@ -158,22 +161,21 @@ public class BRecipe {
 		ArrayList<String> newLore = generateLore(uuid, flavor, aspects);
 		
 		addRecipeToMainList(newName, uuid, type, aspects, isAged, isDistilled, flavor);
+		addRecipeToClaimList(uuid, newName);
 		
 		//Announce?
 		Bukkit.broadcastMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + player.getDisplayName() + " has just invented a new " + type.toLowerCase() + " brew!");
 		
 		
-		return new BRecipe(newName, generateLore(uuid, flavor, aspects));
+		return new BRecipe(newName, newLore);
 	}
 	
 	private static void addRecipeToMainList(String name, String uuid, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor) {
-		//add escape
-		//name = name.replace("'", "\'");
-		
+	
 		//Build SQL
 		String query = "INSERT INTO recipes ";
-		String mandatoryColumns = "(name, type, isAged, isDistilled, inventor, flavortext";
-		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?";	
+		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, inventor, flavortext";
+		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?, ?";	
 		String aspectColumns = "";
 		String aspectValues = "";
 		int count = 1;
@@ -202,8 +204,32 @@ public class BRecipe {
 			stmt.setString(2, type);
 			stmt.setBoolean(3, isAged);
 			stmt.setBoolean(4, isDistilled);
-			stmt.setString(5, uuid);
-			stmt.setString(6, flavor);
+			stmt.setInt(5, aspects.size());
+			stmt.setString(6, uuid);
+			stmt.setString(7, flavor);
+			
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			
+			stmt.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	private static void addRecipeToClaimList(String uuid, String name) {
+		//Build SQL
+		String query = "INSERT INTO newrecipes (inventor, claimnumber, brewname) VALUES (?, ?, ?)";
+		int count = countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "newrecipes") + 1;
+		
+		try {
+			//SQL Replacement
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			
+			//Mandatory
+			stmt.setString(1, uuid);
+			stmt.setInt(2, count);
+			stmt.setString(3, name);
 			
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			
@@ -215,37 +241,42 @@ public class BRecipe {
 	
 	private static String generateNewName(Player player, String type) {
 		String name = "";
-		String uuid = player.getUniqueId().toString();
+		//String uuid = player.getUniqueId().toString();
 		name += player.getDisplayName() + "'s " + type + " #";
+		int count = countOwnedRecipes(player, "recipes") + 1;
+		return name + count;
+	}
+	
+	private static int countOwnedRecipes(Player player, String table) {
+		String uuid = player.getUniqueId().toString();
 		int count = 0;
 		//SQL
-		String query = "SELECT COUNT(*) FROM recipes WHERE inventor='" + uuid + "'";
+		String query = "SELECT COUNT(*) FROM " + table + " WHERE inventor=?";
 		//TODO Aspects
 		try {
 			//SQL Block
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, uuid);
 			ResultSet results;
 			results = stmt.executeQuery();
-			if (!results.next()) {//No registered recipes!
-				count = 1;
-			} else {//Found somethin
-				count = results.getInt(1) + 1;
+			if (results.next()) {
+				count = results.getInt(1);
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-	
-		return name + count;
+		return count;
 	}
 	
 	public static Color getColor(String type) {
 		
 		try {
-			String query = "SELECT color FROM brewtypes WHERE type='" + type + "'";
+			String query = "SELECT color FROM brewtypes WHERE type=?";
 			//SQL Block
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, type);
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {//Error, so default

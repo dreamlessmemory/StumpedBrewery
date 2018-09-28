@@ -2,6 +2,9 @@ package com.dreamless.brewery.listeners;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -18,6 +21,7 @@ import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.Wakeup;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -118,7 +122,15 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		} else {
+		} else if (cmd.equalsIgnoreCase("viewunclaimed")) {
+
+			if (sender.hasPermission("brewery.cmd.claim")) {
+				cmdViewUnclaimed(sender);
+			} else {
+				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
+			}
+
+		}else {
 			//p.getServer().getPlayerExact(cmd) != null
 			UUID player = null;
 			try {
@@ -225,6 +237,44 @@ public class CommandListener implements CommandExecutor {
 		return cmds;
 	}
 
+	//TODO: view claims
+	public void cmdViewUnclaimed(CommandSender sender) {
+		Player player = null;
+		if(sender instanceof Player) {
+			player = (Player) sender;
+		} else {
+			return;
+		}
+		
+		//SQL
+		try {
+			String query = "SELECT claimnumber, brewname FROM newrecipes WHERE inventor=?";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, player.getUniqueId().toString());
+			ResultSet results;
+			results = stmt.executeQuery();
+			if(!results.next()) {
+				p.msg(sender, "You don't have any brews to claim!");
+			} else {
+				ArrayList<String> list = new ArrayList<String>();
+				list.add(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Your current list of unclaimed brews");
+				do {
+					list.add(results.getInt("claimnumber") + " - " + results.getString("brewname"));
+				} while (results.next());
+				p.msg(sender, list);
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+	
+	
+	//TODO: claim brew
+	//TODO: rename brew
+	
+	
 	public void cmdWakeup(CommandSender sender, String[] args) {
 
 		if (args.length == 1) {

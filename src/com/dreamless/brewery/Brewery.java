@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -33,6 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
+import com.mysql.fabric.xmlrpc.base.Array;
 import com.mysql.jdbc.Connection;
 //import com.mysql.jdbc.PreparedStatement;
 
@@ -62,7 +64,7 @@ public class Brewery extends JavaPlugin {
 	final String url = "jdbc:mysql://mu1.mchost.pro:3306/mchost_214986"; //Enter URL w/db name
 
 	//Connection vars
-	static Connection connection; //This is the variable we will use to connect to database
+	public static Connection connection; //This is the variable we will use to connect to database
 
 	@Override
 	public void onEnable() {
@@ -239,6 +241,10 @@ public class Brewery extends JavaPlugin {
 
 	public void msg(CommandSender sender, String msg) {
 		sender.sendMessage(color("&2[Brewery] &f" + msg));
+	}
+	
+	public void msg(CommandSender sender, ArrayList<String> msg) {
+		sender.sendMessage(msg.toArray(new String[msg.size()]));
 	}
 	
 	public void msgMult(CommandSender sender, String msg) {
