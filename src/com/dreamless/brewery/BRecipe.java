@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -218,8 +220,14 @@ public class BRecipe {
 	}
 	
 	private static void addRecipeToClaimList(String uuid, String name) {
+		//Get time
+		java.util.Date dt = new java.util.Date();
+		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String currentTime = sdf.format(dt);
+
+		
 		//Build SQL
-		String query = "INSERT INTO newrecipes (inventor, claimnumber, brewname) VALUES (?, ?, ?)";
+		String query = "INSERT INTO newrecipes (inventor, claimnumber, claimdate, brewname) VALUES (?, ?, ?, ?)";
 		int count = countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "recipes") + 1;
 		
 		try {
@@ -230,7 +238,8 @@ public class BRecipe {
 			//Mandatory
 			stmt.setString(1, uuid);
 			stmt.setInt(2, count);
-			stmt.setString(3, name);
+			stmt.setString(3, currentTime);
+			stmt.setString(4, name);
 			
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			
@@ -403,6 +412,39 @@ public class BRecipe {
     
     private static String color(String s){
         return ChatColor.translateAlternateColorCodes('&', s);
+    }
+    
+    public static void periodicPurge() {
+    	Brewery.breweryDriver.debugLog("Okay, running purge...");
+    	//Get time
+    	java.util.Date dt = new java.util.Date(System.currentTimeMillis());
+    	java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    	Calendar cal = Calendar.getInstance();
+    	cal.setTime(dt);
+    	cal.add(Calendar.DATE, -7);
+    	String sevenDaysAgo = sdf.format(cal.getTime());
+    	
+    	
+    	//SQL
+    	try {
+    		String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE recipes.name=newrecipes.brewname AND claimdate < ?)";
+			String newRecipequery = "DELETE FROM newrecipes WHERE claimdate < ?";
+			PreparedStatement stmt;
+			
+			//Recipes list
+			stmt = Brewery.connection.prepareStatement(recipeQuery);
+			stmt.setString(1, sevenDaysAgo);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+			
+			//new recipes list
+			stmt = Brewery.connection.prepareStatement(newRecipequery);
+			stmt.setString(1, sevenDaysAgo);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
     }
 
     public static boolean purgeRecipes() {

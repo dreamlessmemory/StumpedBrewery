@@ -92,23 +92,6 @@ public class Brewery extends JavaPlugin {
 		    e.printStackTrace(); //prints out SQLException errors to the console (if any)
 		}
 		
-		//On enable, try to get something.
-		try {
-			String sql = "SELECT * FROM ingredients WHERE name='WHEAT_SEEDS'";
-			PreparedStatement stmt;
-			stmt = connection.prepareStatement(sql);
-			ResultSet results;
-			results = stmt.executeQuery();
-			if (!results.next()) {
-			    System.out.println("Failed");
-			} else {
-				int rating = results.getInt("aspect2rating");
-			    debugLog("Success " + rating);
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		
 
 		// load the Config
 		try {
@@ -145,6 +128,7 @@ public class Brewery extends JavaPlugin {
 		// Heartbeat
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
+		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000
 
 		if (updateCheck) {
 			breweryDriver.getServer().getScheduler().runTaskLaterAsynchronously(breweryDriver, new UpdateChecker(), 135);
@@ -778,5 +762,11 @@ public class Brewery extends JavaPlugin {
 		}
 
 	}
-
+	
+	public class RecipeRunnable implements Runnable {
+		@Override
+		public void run() {
+			BRecipe.periodicPurge();
+		}
+	}
 }
