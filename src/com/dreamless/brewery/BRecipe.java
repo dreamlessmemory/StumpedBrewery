@@ -405,17 +405,22 @@ public class BRecipe {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
-    /*private static List<String> color(List<String> lore){
-        List<String> clore = new ArrayList<>();
-        for(String s : lore){
-            clore.add(color(s));
-        }
-        return clore;
-    }*/
-    
-    
-    private static String convertUUIDString(String uuid) {
-    	return uuid.substring(0,  8) + "-" + uuid.substring(8,  12) + "-" + uuid.substring(12,  16) + "-" + uuid.substring(16,  20) + "-" + uuid.substring(20);
+    public static boolean purgeRecipes() {
+    	try {
+			String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE recipes.name=newrecipes.brewname)";
+			String newRecipeQuery = "DELETE FROM newrecipes";
+			PreparedStatement stmt;
+			
+			//Recipes list
+			stmt = Brewery.connection.prepareStatement(recipeQuery);
+			stmt.executeUpdate();
+			stmt = Brewery.connection.prepareStatement(newRecipeQuery);
+			stmt.executeUpdate();
+			return true;
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return false;
+		}
     }
 
 }

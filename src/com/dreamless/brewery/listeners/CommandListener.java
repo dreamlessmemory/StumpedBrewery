@@ -298,19 +298,10 @@ public class CommandListener implements CommandExecutor {
 	}
 	
 	public void cmdPurge(CommandSender sender) {
-		try {
-			String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT FROM newrecipes WHERE recipes.name=newrecipes.brewname)";
-			String newRecipeQuery = "DELETE FROM newrecipes";
-			PreparedStatement stmt;
-			
-			//Recipes list
-			stmt = Brewery.connection.prepareStatement(recipeQuery);
-			stmt.executeUpdate();
-			stmt = Brewery.connection.prepareStatement(newRecipeQuery);
-			stmt.executeUpdate();
+		if(BRecipe.purgeRecipes()) {
 			p.msg(sender, "Recipes purged");
-		} catch (SQLException e1) {
-			e1.printStackTrace();
+		} else {
+			p.msg(sender, "Recipe purge failed");
 		}
 		
 	}
