@@ -122,15 +122,23 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		} else if (cmd.equalsIgnoreCase("viewunclaimed")) {
+		} else if (cmd.equalsIgnoreCase("list")) {
 
 			if (sender.hasPermission("brewery.cmd.claim")) {
-				cmdViewUnclaimed(sender);
+				cmdList(sender, args);
 			} else {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		}else {
+		} else if (cmd.equalsIgnoreCase("purge")) {
+
+			if (sender.hasPermission("brewery.cmd.purge")) {
+				cmdPurge(sender);
+			} else {
+				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
+			}
+
+		} else {
 			//p.getServer().getPlayerExact(cmd) != null
 			UUID player = null;
 			try {
@@ -233,37 +241,74 @@ public class CommandListener implements CommandExecutor {
 		if (sender.hasPermission("brewery.cmd.create")) {
 			cmds.add(p.languageReader.get("Help_Create"));
 		}
-
+		//TODO view unclaimed
+		//TODO view claimed
+		//TODO claim
+		//TODO rename
 		return cmds;
 	}
-
-	//TODO: view claims
-	public void cmdViewUnclaimed(CommandSender sender) {
+	
+	public void cmdList(CommandSender sender, String[] args) {
 		Player player = null;
 		if(sender instanceof Player) {
 			player = (Player) sender;
 		} else {
 			return;
 		}
-		
-		//SQL
+		boolean claimed;
+		if (args.length < 2) {
+			claimed = true;
+		} else {
+			claimed = !(args[1].equalsIgnoreCase("unclaimed"));
+			//Brewery.breweryDriver.debugLog(args[2]);
+		}
 		try {
-			String query = "SELECT claimnumber, brewname FROM newrecipes WHERE inventor=?";
+			String query;// = "SELECT claimnumber, brewname FROM " + (claimed ? "recipes" : "newrecipes") + " WHERE inventor=?";
+			if(claimed) {
+				query = "SELECT name FROM recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE recipes.name = newrecipes.brewname)";
+			} else {
+				query = "SELECT claimnumber, brewname FROM newrecipes WHERE inventor=?";
+			}
+			//Brewery.breweryDriver.debugLog(query);
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
 			stmt.setString(1, player.getUniqueId().toString());
+			Brewery.breweryDriver.debugLog(stmt.toString());
 			ResultSet results;
 			results = stmt.executeQuery();
 			if(!results.next()) {
 				p.msg(sender, "You don't have any brews to claim!");
 			} else {
 				ArrayList<String> list = new ArrayList<String>();
-				list.add(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Your current list of unclaimed brews");
+				list.add(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Your current list of " + (claimed ? "claimed" : "unclaimed") + " brews");
+				int count = 1;
 				do {
-					list.add(results.getInt("claimnumber") + " - " + results.getString("brewname"));
+					if(claimed) {
+						list.add(count++ + " - " + results.getString("name"));
+					} else {
+						list.add(results.getInt("claimnumber") + " - " + results.getString("brewname"));
+					}
 				} while (results.next());
 				p.msg(sender, list);
 			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+	
+	public void cmdPurge(CommandSender sender) {
+		try {
+			String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT FROM newrecipes WHERE recipes.name=newrecipes.brewname)";
+			String newRecipeQuery = "DELETE FROM newrecipes";
+			PreparedStatement stmt;
+			
+			//Recipes list
+			stmt = Brewery.connection.prepareStatement(recipeQuery);
+			stmt.executeUpdate();
+			stmt = Brewery.connection.prepareStatement(newRecipeQuery);
+			stmt.executeUpdate();
+			p.msg(sender, "Recipes purged");
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}

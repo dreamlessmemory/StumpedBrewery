@@ -160,8 +160,8 @@ public class BRecipe {
 		String newName = generateNewName(player, lowercaseType);
 		ArrayList<String> newLore = generateLore(uuid, flavor, aspects);
 		
-		addRecipeToMainList(newName, uuid, type, aspects, isAged, isDistilled, flavor);
 		addRecipeToClaimList(uuid, newName);
+		addRecipeToMainList(newName, uuid, type, aspects, isAged, isDistilled, flavor);
 		
 		//Announce?
 		Bukkit.broadcastMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + player.getDisplayName() + " has just invented a new " + type.toLowerCase() + " brew!");
@@ -174,8 +174,8 @@ public class BRecipe {
 	
 		//Build SQL
 		String query = "INSERT INTO recipes ";
-		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, inventor, flavortext";
-		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?, ?";	
+		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, inventor, claimnumber, flavortext";
+		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?, ?, ?";	
 		String aspectColumns = "";
 		String aspectValues = "";
 		int count = 1;
@@ -206,7 +206,8 @@ public class BRecipe {
 			stmt.setBoolean(4, isDistilled);
 			stmt.setInt(5, aspects.size());
 			stmt.setString(6, uuid);
-			stmt.setString(7, flavor);
+			stmt.setInt(7, countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "recipes") + 1);
+			stmt.setString(8, flavor);
 			
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			
@@ -219,7 +220,7 @@ public class BRecipe {
 	private static void addRecipeToClaimList(String uuid, String name) {
 		//Build SQL
 		String query = "INSERT INTO newrecipes (inventor, claimnumber, brewname) VALUES (?, ?, ?)";
-		int count = countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "newrecipes") + 1;
+		int count = countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "recipes") + 1;
 		
 		try {
 			//SQL Replacement
@@ -358,11 +359,11 @@ public class BRecipe {
     		
     		//Grab description from table
 			try {
-				String query = "SELECT description FROM aspects WHERE name='" + aspect + "'";
+				String query = "SELECT description FROM aspects WHERE name=?";
 				//SQL Block
 				PreparedStatement stmt;
 				stmt = Brewery.connection.prepareStatement(query);
-			
+				stmt.setString(1, aspect);
 				ResultSet results;
 				results = stmt.executeQuery();
 				if (!results.next()) {//Can't find it, move on

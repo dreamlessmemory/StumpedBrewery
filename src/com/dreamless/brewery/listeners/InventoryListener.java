@@ -252,18 +252,20 @@ public class InventoryListener implements Listener {
 			}
 		}
 	}
-
+	//TODO: Convert to High
+	//We're going to do the recipe check here.
 	// convert to non colored Lore when taking out of Barrel/Brewer
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent event) {
-		if (event.getInventory().getType() == InventoryType.BREWING) {
-			if (event.getSlot() > 2) {
+		if (event.getInventory().getType() == InventoryType.BREWING) {//Check if Brewing stand
+			if (event.getSlot() > 2) {//Not a berwing stand, get out
 				return;
 			}
 		} else if (!(event.getInventory().getHolder() instanceof Barrel)) {
-			return;
+			return; //Not a barrel, get out.
 		}
 
+		//TODO: Check recipe
 		ItemStack item = event.getCurrentItem();
 		if (item != null) {
 			if (item.getType() == Material.POTION) {
