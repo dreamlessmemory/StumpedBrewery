@@ -109,12 +109,13 @@ public class BRecipe {
 						
 						Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
 						
-						for(int i = 0; i < topAspects.size(); i++) {//Iterate through aspectNname columns
-							int column = 6 + (2 * i);
-							String aspectName = results.getString(column).trim();
+						for(int i = 1; i <= topAspects.size(); i++) {//Iterate through aspectNname columns
+							String aspectNameColumn = "aspect" + i + "name";
+							String aspectRatingColumn = "aspect" + i + "rating";
+							String aspectName = results.getString(aspectNameColumn).trim();
 							Brewery.breweryDriver.debugLog("checking..." + aspectName);
 							if(aspectName.equalsIgnoreCase(currentAspect)){//So, it has the aspect
-								int recipeRating = results.getInt(6 + 1 + (2 * i));
+								int recipeRating = results.getInt(aspectRatingColumn);
 								//double aspectRating = topAspects.get(currentAspect); 
 								if(aspectRating >= recipeRating && aspectRating < recipeRating + 9) {//found it
 									aspectFound = true;
@@ -131,7 +132,10 @@ public class BRecipe {
 					}
 					if(allAspectsFound) {//We found it!
 						Brewery.breweryDriver.debugLog("Found you!");
-						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), topAspects));
+						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
+							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
+						}
+						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), player, results.getString("flavortext"), topAspects));
 					}
 					
 				} while (results.next());
@@ -160,7 +164,7 @@ public class BRecipe {
 		String flavor = "A novel " + lowercaseType + " brew by " + player.getDisplayName();
 		
 		String newName = generateNewName(player, lowercaseType);
-		ArrayList<String> newLore = generateLore(uuid, flavor, aspects);
+		ArrayList<String> newLore = generateLore(uuid, player, flavor, aspects);
 		
 		addRecipeToClaimList(uuid, newName);
 		addRecipeToMainList(newName, uuid, type, aspects, isAged, isDistilled, flavor);
@@ -195,7 +199,6 @@ public class BRecipe {
 		query += mandatoryColumns + aspectColumns + ") " + mandatoryValues + aspectValues + ")";
 		Brewery.breweryDriver.debugLog(query);
 		
-		//TODO Aspects
 		try {
 			//SQL Replacement
 			PreparedStatement stmt;
@@ -227,7 +230,7 @@ public class BRecipe {
 
 		
 		//Build SQL
-		String query = "INSERT INTO newrecipes (inventor, claimnumber, claimdate, brewname) VALUES (?, ?, ?, ?)";
+		String query = "INSERT INTO newrecipes (inventor, claimnumber, claimdate, brewname) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
 		int count = countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "recipes") + 1;
 		
 		try {
@@ -251,9 +254,23 @@ public class BRecipe {
 	
 	private static String generateNewName(Player player, String type) {
 		String name = "";
-		//String uuid = player.getUniqueId().toString();
-		name += player.getDisplayName() + "'s " + type + " #";
-		int count = countOwnedRecipes(player, "recipes") + 1;
+		//name += player.getDisplayName() + "'s " + type + " #";
+		name = type + " Brew #";
+		int count = 0;
+		//SQL
+		String query = "SELECT COUNT(*) FROM recipes";
+		try {
+			//SQL Block
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (results.next()) {
+				count = results.getInt(1);
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 		return name + count;
 	}
 	
@@ -262,7 +279,6 @@ public class BRecipe {
 		int count = 0;
 		//SQL
 		String query = "SELECT COUNT(*) FROM " + table + " WHERE inventor=?";
-		//TODO Aspects
 		try {
 			//SQL Block
 			PreparedStatement stmt;
@@ -301,18 +317,21 @@ public class BRecipe {
 		return Color.fromRGB(8441558);
 	}
 	
-	private static ArrayList<String> generateLore(String uuid, String flavorText, Map<String, Double> aspects){
+	private static ArrayList<String> generateLore(String inventorUUID, Player crafter, String flavorText, Map<String, Double> aspects){
 		ArrayList<String> flavor = new ArrayList<String>();
 		
 		//Add Name
 		String inventorName;
-		Player player = Bukkit.getPlayer(UUID.fromString(uuid));
-		if(player != null) {
-			inventorName = player.getDisplayName();
-		} else {
+		Player inventor = Bukkit.getOfflinePlayer(UUID.fromString(inventorUUID)).getPlayer();
+		Brewery.breweryDriver.debugLog("Inventor: " + inventorUUID);
+		//inventorName = NameFetcher.getName(inventorUUID);
+		if(inventor == null) {
 			inventorName = "an unknown brewer";
+		} else {
+			inventorName = inventor.getDisplayName();
 		}
-		flavor.add("Invented by: " + inventorName);
+		flavor.add("First invented by " + inventorName);
+		flavor.add("Crafted by " + crafter.getDisplayName());
 		
 		//Add Aspects
 		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color(convertAspects(aspects)), WRAP_SIZE)));
@@ -381,7 +400,6 @@ public class BRecipe {
 				description += getDescriptor(entry.getValue()) + results.getString(1) + ",";
 				}  
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
     	}
@@ -427,7 +445,7 @@ public class BRecipe {
     	
     	//SQL
     	try {
-    		String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE recipes.name=newrecipes.brewname AND claimdate < ?)";
+    		String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE isclaimed=false AND claimdate < ?)";
 			String newRecipequery = "DELETE FROM newrecipes WHERE claimdate < ?";
 			PreparedStatement stmt;
 			
@@ -449,7 +467,7 @@ public class BRecipe {
 
     public static boolean purgeRecipes() {
     	try {
-			String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE recipes.name=newrecipes.brewname)";
+			String recipeQuery = "DELETE FROM recipes WHERE isclaimed=false";
 			String newRecipeQuery = "DELETE FROM newrecipes";
 			PreparedStatement stmt;
 			

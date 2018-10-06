@@ -72,6 +72,11 @@
            <type>jar</type>
            <scope>provided</scope>
         </dependency>
+        <dependency>
+    		<groupId>org.json</groupId>
+    		<artifactId>json</artifactId>
+		    <version>20090211</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
     		<groupId>commons-io</groupId>

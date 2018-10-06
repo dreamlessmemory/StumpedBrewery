@@ -138,6 +138,14 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
+		} else if (cmd.equalsIgnoreCase("claim")) {
+
+			if (sender.hasPermission("brewery.cmd.claim")) {
+				cmdClaim(sender, args);
+			} else {
+				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
+			}
+
 		} else {
 			//p.getServer().getPlayerExact(cmd) != null
 			UUID player = null;
@@ -241,8 +249,6 @@ public class CommandListener implements CommandExecutor {
 		if (sender.hasPermission("brewery.cmd.create")) {
 			cmds.add(p.languageReader.get("Help_Create"));
 		}
-		//TODO view unclaimed
-		//TODO view claimed
 		//TODO claim
 		//TODO rename
 		return cmds;
@@ -308,6 +314,24 @@ public class CommandListener implements CommandExecutor {
 	
 	
 	//TODO: claim brew
+	
+	public void cmdClaim (CommandSender sender, String[] args) {
+		//Get Player
+		Player player = null;
+		if(sender instanceof Player) {
+			player = (Player) sender;
+		} else {
+			return;
+		}
+		int claimNumber = 0;
+		//Parse 
+		try {
+			claimNumber = Integer.parseInt(args[1]);
+		} catch (NumberFormatException | NullPointerException e) {
+			Brewery.breweryDriver.msg(sender, "You need to specify a number");
+			return;
+		}
+	}
 	//TODO: rename brew
 	
 	
