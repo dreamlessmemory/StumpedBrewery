@@ -161,7 +161,7 @@ public class BRecipe {
 		//Get variables
 		String uuid = player.getUniqueId().toString();
 		String lowercaseType = type.charAt(0) + type.substring(1).toLowerCase();
-		String flavor = "A novel " + lowercaseType + " brew by " + player.getDisplayName();
+		String flavor = "A novel " + lowercaseType + " brew";
 		
 		String newName = generateNewName(player, lowercaseType);
 		ArrayList<String> newLore = generateLore(uuid, player, flavor, aspects);
@@ -524,4 +524,81 @@ public class BRecipe {
 		}
     }
 
+    public static boolean claimRecipe(Player player, int claimnumber, String newName) {
+    	String recipeName = "";
+    	String uuid = player.getUniqueId().toString();
+    	
+    	//SQL
+    	String query;
+    	ResultSet results;
+    	
+    	//TODO:
+    	//Look up Claim
+    	//Delete others with claim in newrecipes
+    	//update main recipes
+    	
+    	//Get Claim
+    	try {
+			query = "SELECT * FROM newrecipes WHERE inventor=? AND claimnumber=?";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, uuid);
+			stmt.setInt(2, claimnumber);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			results = stmt.executeQuery();
+			if(!results.next()) {//Didn't find
+				return false;
+			} else {//Found it
+				recipeName = results.getString("brewname");
+			}
+			
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+    	
+    	//Delete all claims in newrecipes
+    	try {
+			query = "DELETE FROM newrecipes WHERE brewname=?";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, recipeName);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+    	
+    	//Update recipe table
+    	try {
+    		if(newName.isEmpty()) {
+    			query = "UPDATE recipes SET inventor=?, isclaimed=true, claimnumber=? WHERE name=?";
+    		} else {
+    			query = "UPDATE recipes SET inventor=?, isclaimed=true, claimnumber=?, name=? WHERE name=?";
+    		}
+    		
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			
+			//Prepare statement
+			stmt.setString(1, uuid);
+			stmt.setInt(2, claimnumber);
+			if(newName.isEmpty()) {
+				stmt.setString(3, recipeName);
+    		} else {
+    			stmt.setString(3, newName);
+    			stmt.setString(4, recipeName);
+    		}
+			
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			int updateResult = stmt.executeUpdate();
+			if(updateResult == 0) {
+				return false;
+			} else {
+				return true;
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+    	return false;
+    }
 }

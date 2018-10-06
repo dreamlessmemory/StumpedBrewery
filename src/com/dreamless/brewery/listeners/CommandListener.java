@@ -296,9 +296,26 @@ public class CommandListener implements CommandExecutor {
 		//Parse 
 		try {
 			claimNumber = Integer.parseInt(args[1]);
-		} catch (NumberFormatException | NullPointerException e) {
+		} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
 			Brewery.breweryDriver.msg(sender, "You need to specify a number");
 			return;
+		}
+		
+		//Parse the name
+		String newName = "";
+		for(int i = 2; i < args.length; i++) {
+			newName += args[i] + " ";
+		}
+		newName = newName.trim();
+		if(newName.contains("#")) {
+			p.msg(sender, "You cannot use # in a name!");
+			return;
+		}
+		
+		if(BRecipe.claimRecipe(player, claimNumber, newName)) {
+			p.msg(sender, newName + " has been claimed! Congratulations!");
+		} else {
+			p.msg(sender, "Failed to claim!");
 		}
 	}
 	//TODO: rename brew
