@@ -268,38 +268,7 @@ public class CommandListener implements CommandExecutor {
 			claimed = !(args[1].equalsIgnoreCase("unclaimed"));
 			//Brewery.breweryDriver.debugLog(args[2]);
 		}
-		try {
-			String query;// = "SELECT claimnumber, brewname FROM " + (claimed ? "recipes" : "newrecipes") + " WHERE inventor=?";
-			if(claimed) {
-				query = "SELECT name FROM recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE recipes.name = newrecipes.brewname)";
-			} else {
-				query = "SELECT claimnumber, brewname FROM newrecipes WHERE inventor=?";
-			}
-			//Brewery.breweryDriver.debugLog(query);
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
-			stmt.setString(1, player.getUniqueId().toString());
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			ResultSet results;
-			results = stmt.executeQuery();
-			if(!results.next()) {
-				p.msg(sender, "You don't have any brews to claim!");
-			} else {
-				ArrayList<String> list = new ArrayList<String>();
-				list.add(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Your current list of " + (claimed ? "claimed" : "unclaimed") + " brews");
-				int count = 1;
-				do {
-					if(claimed) {
-						list.add(count++ + " - " + results.getString("name"));
-					} else {
-						list.add(results.getInt("claimnumber") + " - " + results.getString("brewname"));
-					}
-				} while (results.next());
-				p.msg(sender, list);
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
+		p.msg(sender, BRecipe.listPlayerRecipes(player, claimed));
 		
 	}
 	

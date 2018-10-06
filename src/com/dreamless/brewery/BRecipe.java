@@ -482,5 +482,46 @@ public class BRecipe {
 			return false;
 		}
     }
+    
+    public static ArrayList<String> listPlayerRecipes(Player player, boolean claimed) {
+    	ArrayList<String> list = new ArrayList<String>();
+    	
+    	try {
+			String query;// = "SELECT claimnumber, brewname FROM " + (claimed ? "recipes" : "newrecipes") + " WHERE inventor=?";
+			if(claimed) {
+				query = "SELECT name FROM recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE recipes.name = newrecipes.brewname)";
+			} else {
+				query = "SELECT claimnumber, brewname FROM newrecipes WHERE inventor=?";
+			}
+			//Brewery.breweryDriver.debugLog(query);
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, player.getUniqueId().toString());
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			ResultSet results;
+			results = stmt.executeQuery();
+			if(!results.next()) {
+				list.add("You don't have any brews to claim!");
+			} else {
+				
+				list.add(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Your current list of " + (claimed ? "claimed" : "unclaimed") + " brews");
+				int count = 1;
+				do {
+					if(claimed) {
+						list.add(count++ + " - " + results.getString("name"));
+					} else {
+						list.add(results.getInt("claimnumber") + " - " + results.getString("brewname"));
+					}
+				} while (results.next());
+			}
+			
+			return list;
+			
+		} catch (SQLException e1) {
+			list.add("Error trying to get your list");
+			e1.printStackTrace();
+			return list;
+		}
+    }
 
 }
