@@ -161,27 +161,26 @@ public class BRecipe {
 		//Get variables
 		String uuid = player.getUniqueId().toString();
 		String lowercaseType = type.charAt(0) + type.substring(1).toLowerCase();
-		String flavor = "A novel " + lowercaseType + " brew";
+		String flavor = "A novel " + lowercaseType.toLowerCase() + " brew";
 		
 		String newName = generateNewName(player, lowercaseType);
-		ArrayList<String> newLore = generateLore(uuid, player, flavor, aspects);
+		ArrayList<String> newLore = generateLore(null, player, flavor, aspects);
 		
 		addRecipeToClaimList(uuid, newName);
-		addRecipeToMainList(newName, uuid, type, aspects, isAged, isDistilled, flavor);
+		addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor);
 		
 		//Announce?
-		Bukkit.broadcastMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + player.getDisplayName() + " has just invented a new " + type.toLowerCase() + " brew!");
-		
+		Bukkit.broadcastMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + player.getDisplayName() + " has just invented a new " + type.toLowerCase() + " brew!");		
 		
 		return new BRecipe(newName, newLore);
 	}
 	
-	private static void addRecipeToMainList(String name, String uuid, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor) {
+	private static void addRecipeToMainList(String name, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor) {
 	
 		//Build SQL
 		String query = "INSERT INTO recipes ";
-		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, inventor, claimnumber, flavortext";
-		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?, ?, ?";	
+		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, flavortext";
+		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?";	
 		String aspectColumns = "";
 		String aspectValues = "";
 		int count = 1;
@@ -210,9 +209,7 @@ public class BRecipe {
 			stmt.setBoolean(3, isAged);
 			stmt.setBoolean(4, isDistilled);
 			stmt.setInt(5, aspects.size());
-			stmt.setString(6, uuid);
-			stmt.setInt(7, countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "recipes") + 1);
-			stmt.setString(8, flavor);
+			stmt.setString(6, flavor);
 			
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			
@@ -321,14 +318,14 @@ public class BRecipe {
 		ArrayList<String> flavor = new ArrayList<String>();
 		
 		//Add Name
-		String inventorName;
-		Player inventor = Bukkit.getOfflinePlayer(UUID.fromString(inventorUUID)).getPlayer();
-		Brewery.breweryDriver.debugLog("Inventor: " + inventorUUID);
-		//inventorName = NameFetcher.getName(inventorUUID);
-		if(inventor == null) {
-			inventorName = "an unknown brewer";
-		} else {
-			inventorName = inventor.getDisplayName();
+		String inventorName = "an unknown brewer";;
+		if(inventorUUID != null) {
+			Player inventor = Bukkit.getOfflinePlayer(UUID.fromString(inventorUUID)).getPlayer();
+		//	Brewery.breweryDriver.debugLog("Inventor: " + inventorUUID);
+			//inventorName = NameFetcher.getName(inventorUUID);
+			if(inventor != null) {
+				inventorName = inventor.getDisplayName();
+			}
 		}
 		flavor.add("First invented by " + inventorName);
 		flavor.add("Crafted by " + crafter.getDisplayName());
@@ -532,11 +529,6 @@ public class BRecipe {
     	String query;
     	ResultSet results;
     	
-    	//TODO:
-    	//Look up Claim
-    	//Delete others with claim in newrecipes
-    	//update main recipes
-    	
     	//Get Claim
     	try {
 			query = "SELECT * FROM newrecipes WHERE inventor=? AND claimnumber=?";
@@ -601,4 +593,11 @@ public class BRecipe {
 		}
     	return false;
     }
+    
+    //TODO
+    //Relinquish
+    //Get name of recipe via claim number
+    //Remove recipe with claim number
+    //Check if there is anyone else with that claim
+    //remove from recipes list if no one else claimed it
 }
