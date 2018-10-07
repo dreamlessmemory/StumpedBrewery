@@ -51,11 +51,6 @@ public class BCauldron {
 			//Sound and particle effects
 			block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
-			//Still not sure what this does
-			if (partiallyFilled) {
-				ingredients = ingredients.clone();
-				partiallyFilled = false;
-			}
 			//Run aspect calculation
 			ingredients.fermentOneStep(state);
 		} else { //no fire, stop cooking
@@ -68,10 +63,6 @@ public class BCauldron {
 
 	// add an ingredient to the cauldron
 	public void add(ItemStack ingredient) {
-		if (partiallyFilled) {
-			ingredients = ingredients.clone();
-			partiallyFilled = false;
-		}
 		ingredient = new ItemStack(ingredient.getType(), 1, ingredient.getDurability());
 		ingredients.add(ingredient);
 		block.getWorld().playEffect(block.getLocation(), Effect.EXTINGUISH, 0);
@@ -134,8 +125,6 @@ public class BCauldron {
 				
 				if (level == 0) {
 					bcauldrons.remove(bcauldron);
-				} else {
-					//bcauldron.partiallyFilled = true;
 				}
 				giveItem(player, potion);
 				return true;

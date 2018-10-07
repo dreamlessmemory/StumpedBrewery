@@ -184,17 +184,6 @@ public class BIngredients {
 	public int getCookedTime() {
 		return cookedTime;
 	}
-	
-	// Creates a copy ingredients
-	public BIngredients clone() {
-		BIngredients copy = new BIngredients();
-		copy.ingredients.addAll(ingredients);
-		//copy.materials.putAll(materials);
-		copy.cookedTime = cookedTime;
-		copy.type = type;
-		copy.aspects.putAll(aspects);
-		return copy;
-	}
 
 	// saves data into main Ingredient section. Returns the save id
 	public int save(ConfigurationSection config) {
