@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -34,7 +31,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
-import com.mysql.fabric.xmlrpc.base.Array;
 import com.mysql.jdbc.Connection;
 //import com.mysql.jdbc.PreparedStatement;
 

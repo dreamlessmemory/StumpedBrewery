@@ -2,9 +2,6 @@ package com.dreamless.brewery.listeners;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -13,15 +10,15 @@ import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.dreamless.brewery.BIngredients;
 import com.dreamless.brewery.BPlayer;
 import com.dreamless.brewery.BRecipe;
 import com.dreamless.brewery.Brew;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.Wakeup;
 
+import de.tr7zw.itemnbtapi.NBTItem;
+
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -122,7 +119,7 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		} else if (cmd.equalsIgnoreCase("list")) {
+		} else if (cmd.equalsIgnoreCase("list") || cmd.equalsIgnoreCase("view") || cmd.equalsIgnoreCase("show")) {
 
 			if (sender.hasPermission("brewery.cmd.claim")) {
 				cmdList(sender, args);
@@ -142,6 +139,14 @@ public class CommandListener implements CommandExecutor {
 
 			if (sender.hasPermission("brewery.cmd.claim")) {
 				cmdClaim(sender, args);
+			} else {
+				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
+			}
+
+		} else if (cmd.equalsIgnoreCase("release") || cmd.equalsIgnoreCase("relinquish")) {
+
+			if (sender.hasPermission("brewery.cmd.claim")) {
+				cmdRelease(sender);
 			} else {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
@@ -249,7 +254,6 @@ public class CommandListener implements CommandExecutor {
 		if (sender.hasPermission("brewery.cmd.create")) {
 			cmds.add(p.languageReader.get("Help_Create"));
 		}
-		//TODO claim
 		//TODO rename
 		return cmds;
 	}
@@ -266,7 +270,6 @@ public class CommandListener implements CommandExecutor {
 			claimed = true;
 		} else {
 			claimed = !(args[1].equalsIgnoreCase("unclaimed"));
-			//Brewery.breweryDriver.debugLog(args[2]);
 		}
 		p.msg(sender, BRecipe.listPlayerRecipes(player, claimed));
 		
@@ -280,30 +283,10 @@ public class CommandListener implements CommandExecutor {
 		}
 		
 	}
-	
-	
-	//TODO: claim brew
-	
-	public void cmdClaim (CommandSender sender, String[] args) {
-		//Get Player
-		Player player = null;
-		if(sender instanceof Player) {
-			player = (Player) sender;
-		} else {
-			return;
-		}
-		int claimNumber = 0;
-		//Parse 
-		try {
-			claimNumber = Integer.parseInt(args[1]);
-		} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-			Brewery.breweryDriver.msg(sender, "You need to specify a number");
-			return;
-		}
-		
+		public void cmdClaim (CommandSender sender, String[] args) {
 		//Parse the name
 		String newName = "";
-		for(int i = 2; i < args.length; i++) {
+		for(int i = 1; i < args.length; i++) {
 			newName += args[i] + " ";
 		}
 		newName = newName.trim();
@@ -312,11 +295,46 @@ public class CommandListener implements CommandExecutor {
 			return;
 		}
 		
-		if(BRecipe.claimRecipe(player, claimNumber, newName)) {
-			p.msg(sender, newName + " has been claimed! Congratulations!");
+		
+		if (sender instanceof Player) {
+			Player player = (Player) sender;
+			ItemStack hand = player.getInventory().getItemInMainHand();
+			if (hand != null) {//Something in the hand
+				NBTItem nbti = new NBTItem(hand);
+				if(nbti.hasKey("brewery")) {
+					BRecipe.claimRecipe(player, newName);
+				} else {
+					p.msg(sender, p.languageReader.get("Error_ItemNotBreweryPotion"));
+				}
+			} else {
+				p.msg(sender, p.languageReader.get("Error_ItemNotPotion"));
+			}
 		} else {
-			p.msg(sender, "Failed to claim!");
+			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
 		}
+			
+		
+	}
+	
+	public void cmdRelease (CommandSender sender) {
+		if (sender instanceof Player) {
+			Player player = (Player) sender;
+			ItemStack hand = player.getInventory().getItemInMainHand();
+			if (hand != null) {//Something in the hand
+				NBTItem nbti = new NBTItem(hand);
+				if(nbti.hasKey("brewery")) {
+					BRecipe.relinquishRecipe(player);;
+				} else {
+					p.msg(sender, p.languageReader.get("Error_ItemNotBreweryPotion"));
+				}
+			} else {
+				p.msg(sender, p.languageReader.get("Error_ItemNotPotion"));
+			}
+		} else {
+			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
+		}
+			
+		
 	}
 	//TODO: rename brew
 	

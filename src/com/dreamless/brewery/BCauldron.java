@@ -135,7 +135,7 @@ public class BCauldron {
 				if (level == 0) {
 					bcauldrons.remove(bcauldron);
 				} else {
-					bcauldron.partiallyFilled = true;
+					//bcauldron.partiallyFilled = true;
 				}
 				giveItem(player, potion);
 				return true;

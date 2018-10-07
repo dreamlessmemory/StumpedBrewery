@@ -160,6 +160,7 @@ public class BIngredients {
 		for(String currentAspect: cookedAspects.keySet()) {
 				breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
 		}
+		breweryMeta.setString("type", type);
 		potion = nbti.getItem();
 
 		return potion;
@@ -190,6 +191,8 @@ public class BIngredients {
 		copy.ingredients.addAll(ingredients);
 		//copy.materials.putAll(materials);
 		copy.cookedTime = cookedTime;
+		copy.type = type;
+		copy.aspects.putAll(aspects);
 		return copy;
 	}
 

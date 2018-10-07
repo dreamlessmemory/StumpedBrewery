@@ -1,30 +1,26 @@
 package com.dreamless.brewery;
 
-import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.ChatPaginator;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
-import java.io.IOException;
-import java.net.URL;
+import de.tr7zw.itemnbtapi.NBTCompound;
+import de.tr7zw.itemnbtapi.NBTItem;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -227,8 +223,7 @@ public class BRecipe {
 
 		
 		//Build SQL
-		String query = "INSERT INTO newrecipes (inventor, claimnumber, claimdate, brewname) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
-		int count = countOwnedRecipes(Bukkit.getPlayer(UUID.fromString(uuid)), "recipes") + 1;
+		String query = "INSERT INTO newrecipes (inventor, claimdate, brewname) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
 		
 		try {
 			//SQL Replacement
@@ -237,9 +232,8 @@ public class BRecipe {
 			
 			//Mandatory
 			stmt.setString(1, uuid);
-			stmt.setInt(2, count);
-			stmt.setString(3, currentTime);
-			stmt.setString(4, name);
+			stmt.setString(2, currentTime);
+			stmt.setString(3, name);
 			
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			
@@ -269,27 +263,6 @@ public class BRecipe {
 			e1.printStackTrace();
 		}
 		return name + count;
-	}
-	
-	private static int countOwnedRecipes(Player player, String table) {
-		String uuid = player.getUniqueId().toString();
-		int count = 0;
-		//SQL
-		String query = "SELECT COUNT(*) FROM " + table + " WHERE inventor=?";
-		try {
-			//SQL Block
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
-			stmt.setString(1, uuid);
-			ResultSet results;
-			results = stmt.executeQuery();
-			if (results.next()) {
-				count = results.getInt(1);
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		return count;
 	}
 	
 	public static Color getColor(String type) {
@@ -484,11 +457,11 @@ public class BRecipe {
     	ArrayList<String> list = new ArrayList<String>();
     	
     	try {
-			String query;// = "SELECT claimnumber, brewname FROM " + (claimed ? "recipes" : "newrecipes") + " WHERE inventor=?";
+			String query;
 			if(claimed) {
 				query = "SELECT name FROM recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE recipes.name = newrecipes.brewname)";
 			} else {
-				query = "SELECT claimnumber, brewname FROM newrecipes WHERE inventor=?";
+				query = "SELECT brewname FROM newrecipes WHERE inventor=?";
 			}
 			//Brewery.breweryDriver.debugLog(query);
 			PreparedStatement stmt;
@@ -507,7 +480,7 @@ public class BRecipe {
 					if(claimed) {
 						list.add(count++ + " - " + results.getString("name"));
 					} else {
-						list.add(results.getInt("claimnumber") + " - " + results.getString("brewname"));
+						list.add(results.getString("brewname"));
 					}
 				} while (results.next());
 			}
@@ -521,9 +494,9 @@ public class BRecipe {
 		}
     }
 
-    public static boolean claimRecipe(Player player, int claimnumber, String newName) {
-    	String recipeName = "";
+    public static void claimRecipe(Player player, String newName) {
     	String uuid = player.getUniqueId().toString();
+    	String currentRecipe = player.getInventory().getItemInMainHand().getItemMeta().getDisplayName();
     	
     	//SQL
     	String query;
@@ -531,41 +504,29 @@ public class BRecipe {
     	
     	//Get Claim
     	try {
-			query = "SELECT * FROM newrecipes WHERE inventor=? AND claimnumber=?";
+			query = "SELECT * FROM newrecipes WHERE inventor=? AND brewname=?";
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
 			stmt.setString(1, uuid);
-			stmt.setInt(2, claimnumber);
+			stmt.setString(2, currentRecipe);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			results = stmt.executeQuery();
 			if(!results.next()) {//Didn't find
-				return false;
-			} else {//Found it
-				recipeName = results.getString("brewname");
-			}
-			
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You do not have any rights to claim this brew!");
+				return;
+			}			
 		} catch (SQLException e1) {
 			e1.printStackTrace();
+			return;
 		}
-    	
-    	//Delete all claims in newrecipes
-    	try {
-			query = "DELETE FROM newrecipes WHERE brewname=?";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
-			stmt.setString(1, recipeName);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			stmt.executeUpdate();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
+
     	
     	//Update recipe table
     	try {
     		if(newName.isEmpty()) {
-    			query = "UPDATE recipes SET inventor=?, isclaimed=true, claimnumber=? WHERE name=?";
+    			query = "UPDATE recipes SET inventor=?, isclaimed=true, WHERE name=?";
     		} else {
-    			query = "UPDATE recipes SET inventor=?, isclaimed=true, claimnumber=?, name=? WHERE name=?";
+    			query = "UPDATE recipes SET inventor=?, isclaimed=true, name=? WHERE name=?";
     		}
     		
 			PreparedStatement stmt;
@@ -573,31 +534,116 @@ public class BRecipe {
 			
 			//Prepare statement
 			stmt.setString(1, uuid);
-			stmt.setInt(2, claimnumber);
 			if(newName.isEmpty()) {
-				stmt.setString(3, recipeName);
+				stmt.setString(2, currentRecipe);
     		} else {
-    			stmt.setString(3, newName);
-    			stmt.setString(4, recipeName);
+    			stmt.setString(2, newName);
+    			stmt.setString(3, currentRecipe);
     		}
 			
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			int updateResult = stmt.executeUpdate();
 			if(updateResult == 0) {
-				return false;
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "No brew exists? Contant MemoryReborn!");
+				return;
+			} 
+		} catch (SQLException e1) {
+			if(e1 instanceof MySQLIntegrityConstraintViolationException) {
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "A brew with that name already exists!");
 			} else {
-				return true;
+				e1.printStackTrace();
 			}
+			return;
+		}
+    	
+    	//Delete all claims in newrecipes
+    	try {
+			query = "DELETE FROM newrecipes WHERE brewname=?";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, currentRecipe);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-    	return false;
+    	player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You've claimed " + newName + "!");
+    	
+    	//rename item
+    	ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
+    	meta.setDisplayName(newName);
+    	player.getInventory().getItemInMainHand().setItemMeta(meta);
     }
     
     //TODO
     //Relinquish
-    //Get name of recipe via claim number
-    //Remove recipe with claim number
+    //Remove recipe with name
     //Check if there is anyone else with that claim
     //remove from recipes list if no one else claimed it
+    
+    public static void relinquishRecipe(Player player) {
+    	//Potion stuff
+    	String uuid = player.getUniqueId().toString();
+    	ItemStack item = player.getInventory().getItemInMainHand();
+    	String currentRecipe = item.getItemMeta().getDisplayName();
+    	NBTItem nbti = new NBTItem(item);
+		NBTCompound breweryMeta = nbti.getCompound("brewery");
+		String type = breweryMeta.getString("type");
+    	
+    	//SQL
+    	String query;
+    	
+    	//Delete off of main list
+    	try {
+    		query = "DELETE FROM recipes WHERE name=? AND inventor=?";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, currentRecipe);
+			stmt.setString(2, uuid);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			int result = stmt.executeUpdate();
+			if(result > 0) {
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You've relinquished your rights to " + currentRecipe);
+				return; 
+				//We return here. If no one had claimed it, then inventor is null. If there's an inventor, there's nothing on the claims list.
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return;
+		} 
+    		
+    	//Delete off of claims list
+    	try {
+    		query = "DELETE FROM newrecipes WHERE brewname=? AND inventor=?";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, currentRecipe);
+			stmt.setString(2, uuid);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			int result = stmt.executeUpdate();
+			if(result == 0) {
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You do not have rights to " + currentRecipe);
+				return;
+			}
+			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You've relinquished your rights to " + currentRecipe);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return;
+		}  	
+    	
+    	//Delete off of main list if it doesn't exist in claims
+    	try {
+    		query = "DELETE FROM recipes WHERE (SELECT COUNT(1) FROM newrecipes WHERE name=?) = 0 AND name=? AND type=?";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, currentRecipe);
+			stmt.setString(2, currentRecipe);
+			stmt.setString(3, type);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return;
+		}
+    }
 }
