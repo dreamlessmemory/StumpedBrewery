@@ -151,7 +151,15 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		} else {
+		} else if (cmd.equalsIgnoreCase("rename") || cmd.equalsIgnoreCase("name")) {
+
+			if (sender.hasPermission("brewery.cmd.claim")) {
+				cmdRename(sender, args);
+			} else {
+				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
+			}
+
+		}else {
 			//p.getServer().getPlayerExact(cmd) != null
 			UUID player = null;
 			try {
@@ -254,7 +262,7 @@ public class CommandListener implements CommandExecutor {
 		if (sender.hasPermission("brewery.cmd.create")) {
 			cmds.add(p.languageReader.get("Help_Create"));
 		}
-		//TODO rename
+		//TODO purgeplayer
 		return cmds;
 	}
 	
@@ -293,9 +301,7 @@ public class CommandListener implements CommandExecutor {
 		if(newName.contains("#")) {
 			p.msg(sender, "You cannot use # in a name!");
 			return;
-		}
-		
-		
+		}	
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			ItemStack hand = player.getInventory().getItemInMainHand();
@@ -312,8 +318,6 @@ public class CommandListener implements CommandExecutor {
 		} else {
 			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
 		}
-			
-		
 	}
 	
 	public void cmdRelease (CommandSender sender) {
@@ -323,7 +327,7 @@ public class CommandListener implements CommandExecutor {
 			if (hand != null) {//Something in the hand
 				NBTItem nbti = new NBTItem(hand);
 				if(nbti.hasKey("brewery")) {
-					BRecipe.relinquishRecipe(player);;
+					BRecipe.relinquishRecipe(player);
 				} else {
 					p.msg(sender, p.languageReader.get("Error_ItemNotBreweryPotion"));
 				}
@@ -336,8 +340,36 @@ public class CommandListener implements CommandExecutor {
 			
 		
 	}
-	//TODO: rename brew
-	
+	public void cmdRename(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			//Check if given a name
+			String newName = "";
+			for(int i = 1; i < args.length; i++) {
+				newName += args[i] + " ";
+			}
+			newName = newName.trim();
+			if(newName.isEmpty()) {
+				p.msg(sender, "You must give the brew a name!");
+				return;
+			}
+			
+			//Get Potion
+			Player player = (Player) sender;
+			ItemStack hand = player.getInventory().getItemInMainHand();
+			if (hand != null) {//Something in the hand
+				NBTItem nbti = new NBTItem(hand);
+				if(nbti.hasKey("brewery")) {
+					BRecipe.renameRecipe(player, newName);
+				} else {
+					p.msg(sender, p.languageReader.get("Error_ItemNotBreweryPotion"));
+				}
+			} else {
+				p.msg(sender, p.languageReader.get("Error_ItemNotPotion"));
+			}
+		} else {
+			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
+		}
+	}
 	
 	public void cmdWakeup(CommandSender sender, String[] args) {
 
@@ -668,7 +700,7 @@ public class CommandListener implements CommandExecutor {
 		}
 	}
 	
-	private UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {
+	public UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {
         String url = "https://api.mojang.com/users/profiles/minecraft/"+name;
         try {
             String UUIDJson = IOUtils.toString(new URL(url), "US-ASCII");

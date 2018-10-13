@@ -640,4 +640,34 @@ public class BRecipe {
 			return;
 		}
     }
+    
+    public static void renameRecipe(Player player, String name) {
+    	//Potion stuff
+    	String uuid = player.getUniqueId().toString();
+    	ItemStack item = player.getInventory().getItemInMainHand();
+    	String currentRecipe = item.getItemMeta().getDisplayName();
+    	
+    	String query = "UPDATE recipes SET name=? WHERE inventor=? AND name=?";
+    	try {
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, name);
+			stmt.setString(2, uuid);
+			stmt.setString(3, currentRecipe);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			int result = stmt.executeUpdate();
+			if(result == 0) {
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Unable to rename " + currentRecipe);
+				return;
+			}
+			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "All future " + currentRecipe + " will now be called " + name);
+			//Rename Potion in confirmation
+			PotionMeta meta = (PotionMeta) item.getItemMeta();
+			meta.setDisplayName(name);
+			item.setItemMeta(meta);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return;
+		}  
+    }
 }
