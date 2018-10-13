@@ -93,21 +93,21 @@ public class Brewery extends JavaPlugin {
 		}
 		
 		//Server Check
-				try { //We use a try catch to avoid errors, hopefully we don't get any.
-				    Class.forName("com.mysql.jdbc.Driver"); //this accesses Driver in jdbc.
-				} catch (ClassNotFoundException e) {
-				    e.printStackTrace();
-				    System.err.println("jdbc driver unavailable!");
-				    return;
-				}
-				try { //Another try catch to get any SQL errors (for example connections errors)
-				    connection = (Connection) DriverManager.getConnection(url,username,password);
-				    //with the method getConnection() from DriverManager, we're trying to set
-				    //the connection's url, username, password to the variables we made earlier and
-				    //trying to get a connection at the same time. JDBC allows us to do this.
-				} catch (SQLException e) { //catching errors)
-				    e.printStackTrace(); //prints out SQLException errors to the console (if any)
-				}
+		try { //We use a try catch to avoid errors, hopefully we don't get any.
+		    Class.forName("com.mysql.jdbc.Driver"); //this accesses Driver in jdbc.
+		} catch (ClassNotFoundException e) {
+		    e.printStackTrace();
+		    System.err.println("jdbc driver unavailable!");
+		    return;
+		}
+		try { //Another try catch to get any SQL errors (for example connections errors)
+		    connection = (Connection) DriverManager.getConnection(url,username,password);
+		    //with the method getConnection() from DriverManager, we're trying to set
+		    //the connection's url, username, password to the variables we made earlier and
+		    //trying to get a connection at the same time. JDBC allows us to do this.
+		} catch (SQLException e) { //catching errors)
+		    e.printStackTrace(); //prints out SQLException errors to the console (if any)
+		}
 		
 		readData();
 
