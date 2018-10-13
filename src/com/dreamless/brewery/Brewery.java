@@ -61,9 +61,9 @@ public class Brewery extends JavaPlugin {
 	private CommandSender reloader;
 	
 	//DataBase vars.
-	final String username="mchost_214986"; //Enter in your db username
-	final String password="StumpedDB!"; //Enter your password for the db
-	final String url = "jdbc:mysql://mu1.mchost.pro:3306/mchost_214986"; //Enter URL w/db name
+	private String username; 
+	private String password; 
+	private String url;
 
 	//Connection vars
 	public static Connection connection; //This is the variable we will use to connect to database
@@ -76,23 +76,6 @@ public class Brewery extends JavaPlugin {
 		String v = Bukkit.getBukkitVersion();
 		useUUID = !v.matches("(^|.*[^\\.\\d])1\\.[0-6]([^\\d].*|$)") && !v.matches("(^|.*[^\\.\\d])1\\.7\\.[0-5]([^\\d].*|$)");
 		use1_9 = !v.matches("(^|.*[^\\.\\d])1\\.[0-8]([^\\d].*|$)");
-		
-		//Server Check
-		try { //We use a try catch to avoid errors, hopefully we don't get any.
-		    Class.forName("com.mysql.jdbc.Driver"); //this accesses Driver in jdbc.
-		} catch (ClassNotFoundException e) {
-		    e.printStackTrace();
-		    System.err.println("jdbc driver unavailable!");
-		    return;
-		}
-		try { //Another try catch to get any SQL errors (for example connections errors)
-		    connection = (Connection) DriverManager.getConnection(url,username,password);
-		    //with the method getConnection() from DriverManager, we're trying to set
-		    //the connection's url, username, password to the variables we made earlier and
-		    //trying to get a connection at the same time. JDBC allows us to do this.
-		} catch (SQLException e) { //catching errors)
-		    e.printStackTrace(); //prints out SQLException errors to the console (if any)
-		}
 		
 
 		// load the Config
@@ -108,6 +91,24 @@ public class Brewery extends JavaPlugin {
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
+		
+		//Server Check
+				try { //We use a try catch to avoid errors, hopefully we don't get any.
+				    Class.forName("com.mysql.jdbc.Driver"); //this accesses Driver in jdbc.
+				} catch (ClassNotFoundException e) {
+				    e.printStackTrace();
+				    System.err.println("jdbc driver unavailable!");
+				    return;
+				}
+				try { //Another try catch to get any SQL errors (for example connections errors)
+				    connection = (Connection) DriverManager.getConnection(url,username,password);
+				    //with the method getConnection() from DriverManager, we're trying to set
+				    //the connection's url, username, password to the variables we made earlier and
+				    //trying to get a connection at the same time. JDBC allows us to do this.
+				} catch (SQLException e) { //catching errors)
+				    e.printStackTrace(); //prints out SQLException errors to the console (if any)
+				}
+		
 		readData();
 
 		// Listeners
@@ -264,7 +265,12 @@ public class Brewery extends JavaPlugin {
 			return false;
 		}
 		FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(currentFile);
-
+		
+		//Database seetings
+		username= currentConfig.getString("username");
+		password = currentConfig.getString("password");
+		url = currentConfig.getString("url");
+		
 		// various Settings
 		DataSave.autosave = currentConfig.getInt("autosave", 3);
 		debug = currentConfig.getBoolean("debug", false);
