@@ -575,12 +575,6 @@ public class BRecipe {
     	player.getInventory().getItemInMainHand().setItemMeta(meta);
     }
     
-    //TODO
-    //Relinquish
-    //Remove recipe with name
-    //Check if there is anyone else with that claim
-    //remove from recipes list if no one else claimed it
-    
     public static void relinquishRecipe(Player player) {
     	//Potion stuff
     	String uuid = player.getUniqueId().toString();

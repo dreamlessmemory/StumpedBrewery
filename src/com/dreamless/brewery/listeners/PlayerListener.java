@@ -57,7 +57,7 @@ public class PlayerListener implements Listener {
 							BCauldron.printContents(player, clickedBlock);
 							return;
 						} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
-							if (player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
+							if (BCauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
 								if (BCauldron.fill(player, clickedBlock)) {
 									event.setCancelled(true);
 									if (player.hasPermission("brewery.cauldron.fill")) {
