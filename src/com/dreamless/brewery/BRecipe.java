@@ -666,7 +666,11 @@ public class BRecipe {
 			meta.setDisplayName(name);
 			item.setItemMeta(meta);
 		} catch (SQLException e1) {
-			e1.printStackTrace();
+			if(e1 instanceof MySQLIntegrityConstraintViolationException) {
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "A brew with that name already exists!");
+			} else {
+				e1.printStackTrace();
+			}
 			return;
 		}  
     }
