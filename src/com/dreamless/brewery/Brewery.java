@@ -5,14 +5,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.UUID;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -28,6 +32,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
@@ -728,8 +734,26 @@ public class Brewery extends JavaPlugin {
 
 	// returns the Player if online
 	public static Player getPlayerfromString(String name) {
-	return Bukkit.getPlayer(UUID.fromString(name));
+		return Bukkit.getPlayer(UUID.fromString(name));
 	}
+	
+	//get a UUID from a name
+	public UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {
+        String url = "https://api.mojang.com/users/profiles/minecraft/"+name;
+        try {
+            String UUIDJson = IOUtils.toString(new URL(url), "US-ASCII");
+            if(UUIDJson.isEmpty()) {
+            	return null;
+            }
+            JSONObject UUIDObject = (JSONObject) JSONValue.parseWithException(UUIDJson);       
+            String tempID = UUIDObject.get("id").toString();
+            tempID = tempID.substring(0,  8) + "-" + tempID.substring(8,  12) + "-" + tempID.substring(12,  16) + "-" + tempID.substring(16,  20) + "-" + tempID.substring(20);
+            return UUID.fromString(tempID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }       
+        return null;
+    }
 
 	// Runnables
 

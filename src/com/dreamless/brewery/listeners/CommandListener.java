@@ -135,6 +135,14 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
+		} else if (cmd.equalsIgnoreCase("purgeplayer")) {
+
+			if (sender.hasPermission("brewery.cmd.purge")) {
+				cmdPurgePlayer(sender, args);
+			} else {
+				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
+			}
+
 		} else if (cmd.equalsIgnoreCase("claim")) {
 
 			if (sender.hasPermission("brewery.cmd.claim")) {
@@ -291,6 +299,14 @@ public class CommandListener implements CommandExecutor {
 		}
 		
 	}
+	
+	public void cmdPurgePlayer(CommandSender sender, String[] args) {
+		if(args.length < 1) {
+			return;
+		}
+		BRecipe.purgePlayer(args[1]);
+		p.msg(sender, args[1] + "'s recipes have all been removed.");
+	}
 		public void cmdClaim (CommandSender sender, String[] args) {
 		//Parse the name
 		String newName = "";
@@ -301,7 +317,7 @@ public class CommandListener implements CommandExecutor {
 		if(newName.contains("#")) {
 			p.msg(sender, "You cannot use # in a name!");
 			return;
-		}	
+		}
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			ItemStack hand = player.getInventory().getItemInMainHand();
@@ -700,7 +716,7 @@ public class CommandListener implements CommandExecutor {
 		}
 	}
 	
-	public UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {
+	private UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {
         String url = "https://api.mojang.com/users/profiles/minecraft/"+name;
         try {
             String UUIDJson = IOUtils.toString(new URL(url), "US-ASCII");

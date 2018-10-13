@@ -18,6 +18,7 @@ import de.tr7zw.itemnbtapi.NBTItem;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -453,6 +454,46 @@ public class BRecipe {
 		}
     }
     
+    public static void purgePlayer(String name) {
+    	//Get UUID of player
+    	UUID uuid;
+    	try {
+			uuid = Brewery.breweryDriver.getUUID(name);
+		} catch (ParseException | org.json.simple.parser.ParseException e) {
+			return;
+		}
+    	
+    	if(uuid == null) {//All attempts to get player failed
+    		return;
+    	}
+    	
+    	String uuidString = uuid.toString();
+    	String query;
+    	
+    	//SQL
+    	try {
+    		PreparedStatement stmt;
+			
+    		//Claim list
+			query = "DELETE FROM newrecipes WHERE inventor=?";
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, uuidString);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+    		
+    		//Main List
+    		query = "DELETE FROM recipes WHERE inventor=? OR NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=recipes.name)";
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setString(1, uuidString);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return;
+		} 
+  
+    }
+    
     public static ArrayList<String> listPlayerRecipes(Player player, boolean claimed) {
     	ArrayList<String> list = new ArrayList<String>();
     	
@@ -497,6 +538,9 @@ public class BRecipe {
     public static void claimRecipe(Player player, String newName) {
     	String uuid = player.getUniqueId().toString();
     	String currentRecipe = player.getInventory().getItemInMainHand().getItemMeta().getDisplayName();
+    	if(newName.isEmpty()) {
+    		newName = player.getDisplayName() + "'s " + currentRecipe;
+    	}
     	
     	//SQL
     	String query;
@@ -523,23 +567,15 @@ public class BRecipe {
     	
     	//Update recipe table
     	try {
-    		if(newName.isEmpty()) {
-    			query = "UPDATE recipes SET inventor=?, isclaimed=true, WHERE name=?";
-    		} else {
-    			query = "UPDATE recipes SET inventor=?, isclaimed=true, name=? WHERE name=?";
-    		}
+    		query = "UPDATE recipes SET inventor=?, isclaimed=true, name=? WHERE name=?";
     		
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
 			
 			//Prepare statement
 			stmt.setString(1, uuid);
-			if(newName.isEmpty()) {
-				stmt.setString(2, currentRecipe);
-    		} else {
-    			stmt.setString(2, newName);
-    			stmt.setString(3, currentRecipe);
-    		}
+			stmt.setString(2, newName);
+    		stmt.setString(3, currentRecipe);
 			
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			int updateResult = stmt.executeUpdate();
