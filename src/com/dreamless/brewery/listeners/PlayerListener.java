@@ -120,12 +120,9 @@ public class PlayerListener implements Listener {
 
 							// add ingredient to cauldron that meet the previous conditions
 							if (BIngredients.acceptableIngredient(materialInHand)) {
-
 								if (player.hasPermission("brewery.cauldron.insert")) {
 									if (BCauldron.ingredientAdd(clickedBlock, item)) {
-										boolean isBucket = item.getType().equals(Material.WATER_BUCKET)
-												|| item.getType().equals(Material.LAVA_BUCKET)
-												|| item.getType().equals(Material.MILK_BUCKET);
+										boolean isBucket = item.getType().equals(Material.WATER_BUCKET) || item.getType().equals(Material.LAVA_BUCKET) || item.getType().equals(Material.MILK_BUCKET);
 										if (item.getAmount() > 1) {
 											item.setAmount(item.getAmount() - 1);
 

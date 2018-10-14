@@ -3,6 +3,9 @@ package com.dreamless.brewery;
 import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.entity.Player;
@@ -13,6 +16,12 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemStack;
+import org.json.JSONObject;
+
+import com.google.common.collect.Lists;
+import com.google.common.graph.ElementOrder.Type;
+import com.google.gson.reflect.TypeToken;
+
 import org.bukkit.Effect;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -96,6 +105,7 @@ public class BCauldron {
 				return true;
 			} else {
 				new BCauldron(block, ingredient);
+				//TODO: check if in purge list, then remove from purge list?
 				return true;
 			}
 		}
@@ -180,6 +190,7 @@ public class BCauldron {
 			BCauldron bcauldron = get(block);
 			if (bcauldron != null) {
 				bcauldrons.remove(bcauldron);
+				//TODO add cauldron to purge list
 			}
 		}
 	}
@@ -197,8 +208,9 @@ public class BCauldron {
 	public static void save(ConfigurationSection config, ConfigurationSection oldData) {
 		Brewery.breweryDriver.createWorldSections(config);
 
+		int id = 0;
 		if (!bcauldrons.isEmpty()) {
-			int id = 0;
+			
 			for (BCauldron cauldron : bcauldrons) {
 				String worldName = cauldron.block.getWorld().getName();
 				String prefix;
@@ -215,38 +227,57 @@ public class BCauldron {
 				}
 				config.set(prefix + ".ingredients", cauldron.ingredients.serializeIngredients());
 				config.set(prefix + ".cooking", cauldron.cooking);
+				
+				
+				//SQL
+				//Columns are worldname, location, ingredients, aspects, cooking
+				
+				//Location
+				String location = Brewery.gson.toJson(cauldron.block.getLocation().serialize());
+				Brewery.breweryDriver.debugLog(location);
+				
+				//Ingredients
+				String ingredients = Brewery.gson.toJson(cauldron.ingredients.serializeIngredients());
+				Brewery.breweryDriver.debugLog(ingredients);
+				
+				//Aspects
+				String aspects = Brewery.gson.toJson(cauldron.ingredients.getAspects());
+				Brewery.breweryDriver.debugLog(aspects);
+				
+				String query = "REPLACE cauldrons SET idcauldrons=?, location=?, ingredients=?, aspects=?, state=?, cooking=?";
+				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+					stmt.setInt(1, id);
+					stmt.setString(2, location);
+					stmt.setString(3, ingredients);
+					stmt.setString(4, aspects);
+					stmt.setInt(5, cauldron.state);
+					stmt.setBoolean(6, cauldron.cooking);
+					
+					Brewery.breweryDriver.debugLog(stmt.toString());
+					
+					stmt.executeUpdate();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+					return;
+				}				
 				id++;
 			}
-		}
-		// copy cauldrons that are not loaded
-		if (oldData != null){
-			for (String uuid : oldData.getKeys(false)) {
-				if (!config.contains(uuid)) {
-					config.set(uuid, oldData.get(uuid));
-				}
-			}
-		}
-		
-		//TODO: SQL here
-		//SQL
-		/*String query;
-		try {
-			//Create JSON
-			String json = Brewery.gson.toJson(bcauldrons);
 			
-			//Create blob
-			Blob blob = Brewery.connection.createBlob();
-			blob.setBytes(1, json.getBytes());
 			
-    		query = "UPDATE savadata SET savedata=? WHERE datatype=cauldron";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
-			stmt.setBlob(1, blob);
+
+			
+			
+		}
+		//clean up extras
+		String query = "DELETE FROM cauldrons WHERE idcauldrons >=?";
+		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			stmt.setInt(1, id);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
-		}*/
+			return;
+		}
 	}
 
 	// bukkit bug not updating the inventory while executing event, have to

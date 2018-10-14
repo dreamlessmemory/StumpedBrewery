@@ -271,4 +271,12 @@ public class BIngredients {
 		}
 		return false;
 	}
+
+	public HashMap<String, Aspect> getAspects() {
+		return aspects;
+	}
+
+	public void setAspects(HashMap<String, Aspect> aspects) {
+		this.aspects = aspects;
+	}
 }
