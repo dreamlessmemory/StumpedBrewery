@@ -563,8 +563,9 @@ public class BRecipe {
     	//SQL
     	String queryMainList = "DELETE FROM recipes WHERE name=? AND inventor=?";
     	String queryClaimList = "DELETE FROM newrecipes WHERE brewname=? AND inventor=?";
-    	String queryPurgeClaims = "DELETE FROM recipes WHERE (SELECT COUNT(1) FROM newrecipes WHERE name=?) = 0 AND name=? AND type=?";
-    	
+    	String queryPurgeClaims = "DELETE FROM recipes WHERE NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=?) AND name=? AND type=?";
+    	//NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=recipes.name)
+    	//"DELETE FROM recipes WHERE (SELECT COUNT(1) FROM newrecipes WHERE name=?) = 0 AND name=? AND type=?";
     	
     	//Delete off of main list
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryMainList)) {
