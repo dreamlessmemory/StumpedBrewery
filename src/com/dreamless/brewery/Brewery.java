@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import org.json.simple.JSONValue;
 import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.Connection;
 
 public class Brewery extends JavaPlugin {
@@ -147,15 +150,6 @@ public class Brewery extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		
-		// Disable Server
-	    try { //using a try catch to catch connection errors (like wrong sql password...)
-	        if (connection!=null && !connection.isClosed()){ //checking if connection isn't null to
-	            //avoid receiving a nullpointer
-	            connection.close(); //closing the connection field variable.
-	        }
-	    } catch(Exception e) {
-	        e.printStackTrace();
-	    }
 
 		// Disable listeners
 		HandlerList.unregisterAll(this);
@@ -185,6 +179,16 @@ public class Brewery extends JavaPlugin {
 		Words.ignoreText.clear();
 		Words.commands = null;
 
+		// Disable Server
+	    try { //using a try catch to catch connection errors (like wrong sql password...)
+	        if (connection!=null && !connection.isClosed()){ //checking if connection isn't null to
+	            //avoid receiving a nullpointer
+	            connection.close(); //closing the connection field variable.
+	        }
+	    } catch(Exception e) {
+	        e.printStackTrace();
+	    }
+		
 		this.log(this.getDescription().getName() + " disabled!");
 	}
 
@@ -361,7 +365,7 @@ public class Brewery extends JavaPlugin {
 					if (matSection != null) {
 						// matSection has all the materials + amount as Integers
 						ArrayList<ItemStack> ingredients = deserializeIngredients(matSection);
-						ingMap.put(id, new BIngredients(ingredients, section.getInt(id + ".cookedTime", 0)));
+						//ingMap.put(id, new BIngredients(ingredients, section.getInt(id + ".cookedTime", 0)));
 					} else {
 						errorLog("Ingredient id: '" + id + "' incomplete in data.yml");
 					}
@@ -413,6 +417,8 @@ public class Brewery extends JavaPlugin {
 				}
 			}
 
+			loadFromDB();
+			
 			for (World world : breweryDriver.getServer().getWorlds()) {
 				if (world.getName().startsWith("DXL_")) {
 					loadWorldData(getDxlName(world.getName()), world);
@@ -450,16 +456,32 @@ public class Brewery extends JavaPlugin {
 		return new BIngredients();
 	}
 
-	// loads BIngredients from an ingredient section
-	public BIngredients loadIngredients(ConfigurationSection section) {
-		if (section != null) {
-			return new BIngredients(deserializeIngredients(section), 0);
-		} else {
-			errorLog("Cauldron is missing Ingredient Section");
+	public void loadFromDB() {
+		String query = "SELECT * FROM cauldrons";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){						
+			ResultSet result = stmt.executeQuery();
+			while (result.next()) {
+				//Block
+				HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+				debugLog(locationMap.toString());
+				Block worldBlock = (Location.deserialize(locationMap).getBlock());
+				debugLog(worldBlock.toString());
+				int state = result.getInt("state");
+				//Ingredients
+				ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
+				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
+				BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
+				//State
+				//Cooked
+				boolean cooking = result.getBoolean("cooking");
+				
+				new BCauldron(worldBlock, ingredients, state, cooking);
+			} 
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-		return new BIngredients();
 	}
-
+	
 	// load Block locations of given world
 	public void loadWorldData(String uuid, World world) {
 
@@ -467,44 +489,32 @@ public class Brewery extends JavaPlugin {
 		if (file.exists()) {
 
 			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-			
-			//TODO: Convert to SQL
-			// loading BCauldron
-			if (data.contains("BCauldron." + uuid)) {
-				ConfigurationSection section = data.getConfigurationSection("BCauldron." + uuid);
-				for (String cauldron : section.getKeys(false)) {
-					// block is splitted into x/y/z
-					String block = section.getString(cauldron + ".block");
-					if (block != null) {
-						String[] splitted = block.split("/");
-						if (splitted.length == 3) {
-
-							Block worldBlock = world.getBlockAt(parseInt(splitted[0]), parseInt(splitted[1]), parseInt(splitted[2]));
-							BIngredients ingredients = loadIngredients(section.getConfigurationSection(cauldron + ".ingredients"));
-							int state = section.getInt(cauldron + ".state", 1);
-
-							new BCauldron(worldBlock, ingredients, state);
-						} else {
-							errorLog("Incomplete Block-Data in data.yml: " + section.getCurrentPath() + "." + cauldron);
-						}
-					} else {
-						errorLog("Missing Block-Data in data.yml: " + section.getCurrentPath() + "." + cauldron);
-					}
-				}
-			}
-			
+			/*
+			//TODO: Convert to SQL			
 			//Cauldron SQL
-			/*String query;
-			try {				
-	    		query = "SELECT savedata FROM savedata WHERE datatype=cauldron";
-				PreparedStatement stmt;
-				stmt = Brewery.connection.prepareStatement(query);
+			String query = "SELECT * FROM cauldrons";
+			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){						
 				ResultSet result = stmt.executeQuery();
-				if(!result.next()) {
-					errorLog("Unable to pull SQL for cauldrons?");
-				} else {
-					Blob blob = result.getBlob("savedata");
-				}
+				do {
+					//Block
+					HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+					debugLog(locationMap.toString());
+					
+					if
+					
+					Block worldBlock = world.getBlockAt(Location.deserialize(locationMap));
+					debugLog(worldBlock.toString());
+					int state = result.getInt("state");
+					//Ingredients
+					ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
+					HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
+					BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
+					//State
+					//Cooked
+					boolean cooking = result.getBoolean("cooking");
+					
+					new BCauldron(worldBlock, ingredients, state, cooking);
+				} while (!result.next());
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}*/

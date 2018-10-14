@@ -71,12 +71,13 @@ public class BRecipe {
 			aspectQuery = aspectQuery.concat(" AND '" + aspect + aspectColumn);
 		}
 		fullQuery = starterQuery + aspectQuery;
-		Brewery.breweryDriver.debugLog(fullQuery);
+		
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(fullQuery)){
 			stmt.setString(1, type);
 			stmt.setBoolean(2, isAged);
 			stmt.setBoolean(3, isDistilled);
+			Brewery.breweryDriver.debugLog(fullQuery);
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {//New recipe!

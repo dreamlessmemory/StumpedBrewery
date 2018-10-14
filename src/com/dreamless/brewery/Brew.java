@@ -388,7 +388,7 @@ public class Brew {
 				idConfig.set("lastUpdate", brew.lastUpdate);
 			}
 			// save the ingredients
-			idConfig.set("ingId", brew.ingredients.save(config.getParent()));
+			//idConfig.set("ingId", brew.ingredients.save(config.getParent()));
 		}
 	}
 

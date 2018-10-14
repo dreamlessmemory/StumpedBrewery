@@ -83,14 +83,14 @@ public class Aspect implements Comparable<Object> {
 	}
 
 	public static double getStepBonus(int time, String aspect, String stage) {
-		try {
-			String query = "SELECT * FROM " + stage + " WHERE aspect='" + aspect + "'";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+		String query = "SELECT * FROM " + stage + " WHERE aspect=?";
+		
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			stmt.setString(1, aspect);
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {
-				Brewery.breweryDriver.debugLog("There's no data. Likely deliberate.");
+				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + stage + " - " + aspect);
 				return 0;
 			} else {//Successful Pull
 				//get paramenters

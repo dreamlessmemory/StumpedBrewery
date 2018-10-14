@@ -23,6 +23,7 @@ import com.google.common.graph.ElementOrder.Type;
 import com.google.gson.reflect.TypeToken;
 
 import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class BCauldron {
@@ -212,7 +213,7 @@ public class BCauldron {
 		if (!bcauldrons.isEmpty()) {
 			
 			for (BCauldron cauldron : bcauldrons) {
-				String worldName = cauldron.block.getWorld().getName();
+				/*String worldName = cauldron.block.getWorld().getName();
 				String prefix;
 
 				if (worldName.startsWith("DXL_")) {
@@ -226,7 +227,7 @@ public class BCauldron {
 					config.set(prefix + ".state", cauldron.state);
 				}
 				config.set(prefix + ".ingredients", cauldron.ingredients.serializeIngredients());
-				config.set(prefix + ".cooking", cauldron.cooking);
+				config.set(prefix + ".cooking", cauldron.cooking);*/
 				
 				
 				//SQL
@@ -237,21 +238,22 @@ public class BCauldron {
 				Brewery.breweryDriver.debugLog(location);
 				
 				//Ingredients
-				String ingredients = Brewery.gson.toJson(cauldron.ingredients.serializeIngredients());
+				String ingredients = Brewery.gson.toJson(cauldron.ingredients.getIngredients());
 				Brewery.breweryDriver.debugLog(ingredients);
 				
 				//Aspects
 				String aspects = Brewery.gson.toJson(cauldron.ingredients.getAspects());
 				Brewery.breweryDriver.debugLog(aspects);
 				
-				String query = "REPLACE cauldrons SET idcauldrons=?, location=?, ingredients=?, aspects=?, state=?, cooking=?";
+				String query = "REPLACE cauldrons SET idcauldrons=?, location=?, ingredients=?, aspects=?, type=?, state=?, cooking=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);
 					stmt.setString(3, ingredients);
 					stmt.setString(4, aspects);
-					stmt.setInt(5, cauldron.state);
-					stmt.setBoolean(6, cauldron.cooking);
+					stmt.setString(5, cauldron.ingredients.getType());
+					stmt.setInt(6, cauldron.state);
+					stmt.setBoolean(7, cauldron.cooking);
 					
 					Brewery.breweryDriver.debugLog(stmt.toString());
 					
@@ -262,11 +264,6 @@ public class BCauldron {
 				}				
 				id++;
 			}
-			
-			
-
-			
-			
 		}
 		//clean up extras
 		String query = "DELETE FROM cauldrons WHERE idcauldrons >=?";

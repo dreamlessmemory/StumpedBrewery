@@ -16,9 +16,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class BIngredients {
-	private static int lastId = 0;
-
-	private int id;
 	
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 	private HashMap<String, Aspect> aspects = new HashMap<String, Aspect>();
@@ -28,16 +25,14 @@ public class BIngredients {
 	// Represents ingredients in Cauldron, Brew
 	// Init a new BIngredients
 	public BIngredients() {
-		this.id = lastId;
-		lastId++;
 	}
 
 	// Load from File
-	public BIngredients(ArrayList<ItemStack> ingredients, int cookedTime) {
+	public BIngredients(ArrayList<ItemStack> ingredients, HashMap<String, Aspect> aspects, int cookedTime, String type) {
 		this.ingredients = ingredients;
+		this.aspects = aspects;
 		this.cookedTime = cookedTime;
-		this.id = lastId;
-		lastId++;
+		this.type = type;
 	}
 
 	// Add an ingredient to this
@@ -185,16 +180,6 @@ public class BIngredients {
 		return cookedTime;
 	}
 
-	// saves data into main Ingredient section. Returns the save id
-	public int save(ConfigurationSection config) {
-		String path = "Ingredients." + id;
-		if (cookedTime != 0) {
-			config.set(path + ".cookedTime", cookedTime);
-		}
-		config.set(path + ".mats", serializeIngredients());
-		return id;
-	}
-
 	//convert the ingredient Material to String
 	public Map<String, Integer> serializeIngredients() {
 		Map<String, Integer> mats = new HashMap<String, Integer>();
@@ -278,5 +263,13 @@ public class BIngredients {
 
 	public void setAspects(HashMap<String, Aspect> aspects) {
 		this.aspects = aspects;
+	}
+
+	public ArrayList<ItemStack> getIngredients() {
+		return ingredients;
+	}
+
+	public void setIngredients(ArrayList<ItemStack> ingredients) {
+		this.ingredients = ingredients;
 	}
 }
