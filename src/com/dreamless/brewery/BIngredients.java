@@ -226,7 +226,9 @@ public class BIngredients {
 	}
 	
 	public void calculateType() {
-		//Material highest = null;
+		//SQL
+		PreparedStatement stmt = null;
+
 		int highestCount = 0;
 		int priority = 0;
 		for (ItemStack ingredient : ingredients) {
@@ -246,7 +248,10 @@ public class BIngredients {
 				}
 			} catch (SQLException e1) {
 				e1.printStackTrace();
-			}
+			} finally {
+				if(stmt != null)
+					stmt.close();
+				}
 		}
 		if(highestCount == 0) {//no one is the right one
 			type = "OTHER";
@@ -257,21 +262,26 @@ public class BIngredients {
 	public void startCooking() {
 		calculateType();
 	}
-	public static boolean acceptableIngredient(Material material) {
+	public static boolean acceptableIngredient(Material material) throws SQLException {
+		//SQL
+		PreparedStatement stmt = null;
 		try {
 			String query = "SELECT EXISTS(SELECT 1 FROM ingredients WHERE name='" + material.name() + "')";
-			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {
 				Brewery.breweryDriver.debugLog("Failed to poll SQL. Unacceptable item?");
+				stmt.close();
 				return false;
 			} else {
 				return results.getInt(1) == 1;
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
+		} finally {
+			if(stmt != null)
+			stmt.close();
 		}
 		return false;
 	}

@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.sql.Blob;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -37,6 +40,7 @@ import org.json.simple.JSONValue;
 
 import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
+import com.google.gson.Gson;
 import com.mysql.jdbc.Connection;
 //import com.mysql.jdbc.PreparedStatement;
 
@@ -67,6 +71,7 @@ public class Brewery extends JavaPlugin {
 
 	//Connection vars
 	public static Connection connection; //This is the variable we will use to connect to database
+	public static Gson gson;
 
 	@Override
 	public void onEnable() {
@@ -108,6 +113,9 @@ public class Brewery extends JavaPlugin {
 		} catch (SQLException e) { //catching errors)
 		    e.printStackTrace(); //prints out SQLException errors to the console (if any)
 		}
+		
+		//Load the GSON
+		gson = new Gson();
 		
 		readData();
 
@@ -463,7 +471,8 @@ public class Brewery extends JavaPlugin {
 		if (file.exists()) {
 
 			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-
+			
+			//TODO: Convert to SQL
 			// loading BCauldron
 			if (data.contains("BCauldron." + uuid)) {
 				ConfigurationSection section = data.getConfigurationSection("BCauldron." + uuid);
@@ -486,6 +495,22 @@ public class Brewery extends JavaPlugin {
 						errorLog("Missing Block-Data in data.yml: " + section.getCurrentPath() + "." + cauldron);
 					}
 				}
+			}
+			
+			//Cauldron SQL
+			String query;
+			try {				
+	    		query = "SELECT savedata FROM savedata WHERE datatype=cauldron";
+				PreparedStatement stmt;
+				stmt = Brewery.connection.prepareStatement(query);
+				ResultSet result = stmt.executeQuery();
+				if(!result.next()) {
+					errorLog("Unable to pull SQL for cauldrons?");
+				} else {
+					Blob blob = result.getBlob("savedata");
+				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
 			}
 
 			// loading Barrel

@@ -1,22 +1,20 @@
 package com.dreamless.brewery;
 
+import java.sql.Blob;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.entity.Player;
-//import org.bukkit.event.block.CauldronLevelChangeEvent;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-//import org.bukkit.block.BlockState;
-//import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.Effect;
 import org.bukkit.configuration.ConfigurationSection;
-//import org.bukkit.material.Cauldron;
-//import org.bukkit.material.MaterialData;
 
 public class BCauldron {
 	public static CopyOnWriteArrayList<BCauldron> bcauldrons = new CopyOnWriteArrayList<BCauldron>();
@@ -24,7 +22,6 @@ public class BCauldron {
 	private BIngredients ingredients = new BIngredients();
 	private Block block;
 	private int state = 1;
-	private boolean partiallyFilled = false;
 	private boolean cooking = false;
 
 	public BCauldron(Block block, ItemStack ingredient) {
@@ -40,6 +37,14 @@ public class BCauldron {
 		this.state = state;
 		this.ingredients = ingredients;
 		cooking = false;
+		bcauldrons.add(this);
+	}
+	
+	public BCauldron(Block block, BIngredients ingredients, int state, boolean cooking) {
+		this.block = block;
+		this.state = state;
+		this.ingredients = ingredients;
+		this.cooking = cooking;
 		bcauldrons.add(this);
 	}
 
@@ -220,6 +225,27 @@ public class BCauldron {
 					config.set(uuid, oldData.get(uuid));
 				}
 			}
+		}
+		
+		//TODO: SQL here
+		//SQL
+		String query;
+		try {
+			//Create JSON
+			String json = Brewery.gson.toJson(bcauldrons);
+			
+			//Create blob
+			Blob blob = Brewery.connection.createBlob();
+			blob.setBytes(1, json.getBytes());
+			
+    		query = "UPDATE savadata SET savedata=? WHERE datatype=cauldron";
+			PreparedStatement stmt;
+			stmt = Brewery.connection.prepareStatement(query);
+			stmt.setBlob(1, blob);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
 	}
 
