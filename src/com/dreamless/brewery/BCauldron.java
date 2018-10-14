@@ -67,7 +67,7 @@ public class BCauldron {
 	}
 
 	// add an ingredient to the cauldron
-	public void add(ItemStack ingredient) {
+	public void add(ItemStack ingredient){
 		ingredient = new ItemStack(ingredient.getType(), 1, ingredient.getDurability());
 		ingredients.add(ingredient);
 		block.getWorld().playEffect(block.getLocation(), Effect.EXTINGUISH, 0);
@@ -229,7 +229,7 @@ public class BCauldron {
 		
 		//TODO: SQL here
 		//SQL
-		String query;
+		/*String query;
 		try {
 			//Create JSON
 			String json = Brewery.gson.toJson(bcauldrons);
@@ -246,7 +246,7 @@ public class BCauldron {
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
-		}
+		}*/
 	}
 
 	// bukkit bug not updating the inventory while executing event, have to

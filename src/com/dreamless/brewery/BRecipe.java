@@ -47,10 +47,11 @@ public class BRecipe {
 		this.flavorText = flavorText;
 	}
 	
-	public static BRecipe getRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled) {
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled){
+		//Order the aspects
 		AspectComparator aspectComparator = new AspectComparator(aspects);
 		NavigableMap<String, Double> topAspects = new TreeMap<String, Double>(aspectComparator);
-		
+		//Add to new tree
 		for(String aspect: aspects.keySet()) {
 			topAspects.put(aspect, aspects.get(aspect));
 		}
@@ -72,13 +73,7 @@ public class BRecipe {
 		fullQuery = starterQuery + aspectQuery;
 		Brewery.breweryDriver.debugLog(fullQuery);
 		
-		try {
-			//boolean found = false;
-			
-			
-			//SQL Block
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(fullQuery);
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(fullQuery)){
 			stmt.setString(1, type);
 			stmt.setBoolean(2, isAged);
 			stmt.setBoolean(3, isDistilled);
@@ -88,17 +83,13 @@ public class BRecipe {
 				Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
 				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
 			} else {//Found something
-				do {//something
-					
+				do {
 					Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
-					
 					if(topAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
 						Brewery.breweryDriver.debugLog("reject, insufficient aspects");
 						continue;
 					}
 					boolean allAspectsFound = true; //didn't find it
-					
-					//for(String currentAspect: topAspects.keySet()) {//iterate through the top aspects
 					for(Map.Entry<String, Double> es :topAspects.entrySet()) {
 						String currentAspect = es.getKey().trim();
 						double aspectRating = es.getValue();
@@ -113,7 +104,6 @@ public class BRecipe {
 							Brewery.breweryDriver.debugLog("checking..." + aspectName);
 							if(aspectName.equalsIgnoreCase(currentAspect)){//So, it has the aspect
 								int recipeRating = results.getInt(aspectRatingColumn);
-								//double aspectRating = topAspects.get(currentAspect); 
 								if(aspectRating >= recipeRating && aspectRating < recipeRating + 9) {//found it
 									aspectFound = true;
 									Brewery.breweryDriver.debugLog("You do!");
@@ -134,25 +124,18 @@ public class BRecipe {
 						}
 						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), player, results.getString("flavortext"), topAspects));
 					}
-					
-				} while (results.next());
-				
-				
+				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
 				Brewery.breweryDriver.debugLog("None found?");
 				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
-				
-				
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
-		}
-		
-		
+		} 
 		return new BRecipe("Unknown Brew", "A strange brew with no effects...");
 	}
 	
-	private static BRecipe generateNewRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled) {
+	private static BRecipe generateNewRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled){
 		//Variables?
 		
 		//Get variables
@@ -172,7 +155,7 @@ public class BRecipe {
 		return new BRecipe(newName, newLore);
 	}
 	
-	private static void addRecipeToMainList(String name, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor) {
+	private static void addRecipeToMainList(String name, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor){
 	
 		//Build SQL
 		String query = "INSERT INTO recipes ";
@@ -195,10 +178,7 @@ public class BRecipe {
 		query += mandatoryColumns + aspectColumns + ") " + mandatoryValues + aspectValues + ")";
 		Brewery.breweryDriver.debugLog(query);
 		
-		try {
-			//SQL Replacement
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			
 			//Mandatory
 			stmt.setString(1, name);
@@ -216,22 +196,16 @@ public class BRecipe {
 		}
 	}
 	
-	private static void addRecipeToClaimList(String uuid, String name) {
+	private static void addRecipeToClaimList(String uuid, String name){
 		//Get time
 		java.util.Date dt = new java.util.Date();
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String currentTime = sdf.format(dt);
-
 		
 		//Build SQL
 		String query = "INSERT INTO newrecipes (inventor, claimdate, brewname) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
 		
-		try {
-			//SQL Replacement
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
-			
-			//Mandatory
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, uuid);
 			stmt.setString(2, currentTime);
 			stmt.setString(3, name);
@@ -244,17 +218,13 @@ public class BRecipe {
 		}
 	}
 	
-	private static String generateNewName(Player player, String type) {
+	private static String generateNewName(Player player, String type){
 		String name = "";
-		//name += player.getDisplayName() + "'s " + type + " #";
 		name = type + " Brew #";
 		int count = 0;
 		//SQL
 		String query = "SELECT COUNT(*) FROM recipes";
-		try {
-			//SQL Block
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (results.next()) {
@@ -262,7 +232,7 @@ public class BRecipe {
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
-		}
+		} 
 		return name + count;
 	}
 	
@@ -295,8 +265,6 @@ public class BRecipe {
 		String inventorName = "an unknown brewer";;
 		if(inventorUUID != null) {
 			Player inventor = Bukkit.getOfflinePlayer(UUID.fromString(inventorUUID)).getPlayer();
-		//	Brewery.breweryDriver.debugLog("Inventor: " + inventorUUID);
-			//inventorName = NameFetcher.getName(inventorUUID);
 			if(inventor != null) {
 				inventorName = inventor.getDisplayName();
 			}
@@ -335,10 +303,6 @@ public class BRecipe {
 		return potion;
 	}
 
-
-	// Getter
-
-	// name that fits the quality
 	public String getName() {
 		return name;
 	}
@@ -347,9 +311,10 @@ public class BRecipe {
     	return flavorText;
 	}
     
-    private static String convertAspects(Map<String, Double> aspects) {
+    private static String convertAspects(Map<String, Double> aspects){
     	String startup = "&o&dThis brew is";
     	String description = "";
+    	String query = "SELECT description FROM aspects WHERE name=?";
     	for(Map.Entry<String, Double> entry: aspects.entrySet()) {
     		String aspect = entry.getKey();
     		if(aspect.contains("_DURATION") || aspect.contains("_POTENCY")) {
@@ -357,22 +322,19 @@ public class BRecipe {
     		}
     		
     		//Grab description from table
-			try {
-				String query = "SELECT description FROM aspects WHERE name=?";
-				//SQL Block
-				PreparedStatement stmt;
-				stmt = Brewery.connection.prepareStatement(query);
+			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 				stmt.setString(1, aspect);
 				ResultSet results;
 				results = stmt.executeQuery();
+				
 				if (!results.next()) {//Can't find it, move on
 					continue;
 				} else {
-				description += getDescriptor(entry.getValue()) + results.getString(1) + ",";
+					description += getDescriptor(entry.getValue()) + results.getString(1) + ",";
 				}  
 			} catch (SQLException e) {
 				e.printStackTrace();
-			}
+			} 
     	}
     	if(description.length() > 0) {
     		return startup + description.substring(0, description.length() - 1) + ".";
@@ -415,19 +377,19 @@ public class BRecipe {
     	
     	
     	//SQL
-    	try {
-    		String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE isclaimed=false AND claimdate < ?)";
-			String newRecipequery = "DELETE FROM newrecipes WHERE claimdate < ?";
-			PreparedStatement stmt;
-			
-			//Recipes list
-			stmt = Brewery.connection.prepareStatement(recipeQuery);
+    	String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE isclaimed=false AND claimdate < ?)";
+    	String newRecipeQuery = "DELETE FROM newrecipes WHERE claimdate < ?";
+    	
+    	//Main Recipe List
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
 			stmt.setString(1, sevenDaysAgo);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
-			
-			//new recipes list
-			stmt = Brewery.connection.prepareStatement(newRecipequery);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+    	//Claim Recipe List
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(newRecipeQuery)){
 			stmt.setString(1, sevenDaysAgo);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
@@ -437,21 +399,17 @@ public class BRecipe {
     }
 
     public static boolean purgeRecipes() {
-    	try {
-			String recipeQuery = "DELETE FROM recipes WHERE isclaimed=false";
-			String newRecipeQuery = "DELETE FROM newrecipes";
-			PreparedStatement stmt;
-			
-			//Recipes list
-			stmt = Brewery.connection.prepareStatement(recipeQuery);
-			stmt.executeUpdate();
-			stmt = Brewery.connection.prepareStatement(newRecipeQuery);
-			stmt.executeUpdate();
+    	String recipeQuery = "DELETE FROM recipes WHERE isclaimed=false";
+		String newRecipeQuery = "DELETE FROM newrecipes";
+    	try (PreparedStatement stmtMain = Brewery.connection.prepareStatement(recipeQuery); PreparedStatement stmtClaim = Brewery.connection.prepareStatement(newRecipeQuery)){
+			stmtMain.executeUpdate();
+			stmtClaim.executeUpdate();
 			return true;
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 			return false;
 		}
+
     }
     
     public static void purgePlayer(String name) {
@@ -468,22 +426,20 @@ public class BRecipe {
     	}
     	
     	String uuidString = uuid.toString();
-    	String query;
+    	String queryClaim = "DELETE FROM newrecipes WHERE inventor=?";
+    	String queryMain = "DELETE FROM recipes WHERE inventor=? OR NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=recipes.name)";
     	
-    	//SQL
-    	try {
-    		PreparedStatement stmt;
-			
-    		//Claim list
-			query = "DELETE FROM newrecipes WHERE inventor=?";
-			stmt = Brewery.connection.prepareStatement(query);
+    	//Claim List
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryClaim)){
 			stmt.setString(1, uuidString);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
-    		
-    		//Main List
-    		query = "DELETE FROM recipes WHERE inventor=? OR NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=recipes.name)";
-			stmt = Brewery.connection.prepareStatement(query);
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return;
+		} 
+    	//Main List
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryMain)){
 			stmt.setString(1, uuidString);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
@@ -496,25 +452,21 @@ public class BRecipe {
     
     public static ArrayList<String> listPlayerRecipes(Player player, boolean claimed) {
     	ArrayList<String> list = new ArrayList<String>();
+    	String query;
+		if(claimed) {
+			query = "SELECT name FROM recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE recipes.name = newrecipes.brewname)";
+		} else {
+			query = "SELECT brewname FROM newrecipes WHERE inventor=?";
+		}
     	
-    	try {
-			String query;
-			if(claimed) {
-				query = "SELECT name FROM recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE recipes.name = newrecipes.brewname)";
-			} else {
-				query = "SELECT brewname FROM newrecipes WHERE inventor=?";
-			}
-			//Brewery.breweryDriver.debugLog(query);
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){			
 			stmt.setString(1, player.getUniqueId().toString());
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			ResultSet results;
 			results = stmt.executeQuery();
 			if(!results.next()) {
 				list.add("You don't have any brews to claim!");
-			} else {
-				
+			} else {	
 				list.add(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Your current list of " + (claimed ? "claimed" : "unclaimed") + " brews");
 				int count = 1;
 				do {
@@ -525,9 +477,7 @@ public class BRecipe {
 					}
 				} while (results.next());
 			}
-			
-			return list;
-			
+			return list;			
 		} catch (SQLException e1) {
 			list.add("Error trying to get your list");
 			e1.printStackTrace();
@@ -543,18 +493,16 @@ public class BRecipe {
     	}
     	
     	//SQL
-    	String query;
-    	ResultSet results;
+    	String queryGetClaim = "SELECT * FROM newrecipes WHERE inventor=? AND brewname=?";
+    	String queryUpdateRecipeTable = "UPDATE recipes SET inventor=?, isclaimed=true, name=? WHERE name=?";
+    	String queryDeleteClaims = "DELETE FROM newrecipes WHERE brewname=?";
     	
     	//Get Claim
-    	try {
-			query = "SELECT * FROM newrecipes WHERE inventor=? AND brewname=?";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryGetClaim)){
 			stmt.setString(1, uuid);
 			stmt.setString(2, currentRecipe);
 			Brewery.breweryDriver.debugLog(stmt.toString());
-			results = stmt.executeQuery();
+			ResultSet results = stmt.executeQuery();
 			if(!results.next()) {//Didn't find
 				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You do not have any rights to claim this brew!");
 				return;
@@ -566,12 +514,7 @@ public class BRecipe {
 
     	
     	//Update recipe table
-    	try {
-    		query = "UPDATE recipes SET inventor=?, isclaimed=true, name=? WHERE name=?";
-    		
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
-			
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryUpdateRecipeTable)){
 			//Prepare statement
 			stmt.setString(1, uuid);
 			stmt.setString(2, newName);
@@ -593,10 +536,7 @@ public class BRecipe {
 		}
     	
     	//Delete all claims in newrecipes
-    	try {
-			query = "DELETE FROM newrecipes WHERE brewname=?";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryDeleteClaims)){
 			stmt.setString(1, currentRecipe);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
@@ -621,13 +561,13 @@ public class BRecipe {
 		String type = breweryMeta.getString("type");
     	
     	//SQL
-    	String query;
+    	String queryMainList = "DELETE FROM recipes WHERE name=? AND inventor=?";
+    	String queryClaimList = "DELETE FROM newrecipes WHERE brewname=? AND inventor=?";
+    	String queryPurgeClaims = "DELETE FROM recipes WHERE (SELECT COUNT(1) FROM newrecipes WHERE name=?) = 0 AND name=? AND type=?";
+    	
     	
     	//Delete off of main list
-    	try {
-    		query = "DELETE FROM recipes WHERE name=? AND inventor=?";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryMainList)) {
 			stmt.setString(1, currentRecipe);
 			stmt.setString(2, uuid);
 			Brewery.breweryDriver.debugLog(stmt.toString());
@@ -643,11 +583,8 @@ public class BRecipe {
 		} 
     		
     	//Delete off of claims list
-    	try {
-    		query = "DELETE FROM newrecipes WHERE brewname=? AND inventor=?";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
-			stmt.setString(1, currentRecipe);
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryClaimList)) {
+    		stmt.setString(1, currentRecipe);
 			stmt.setString(2, uuid);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			int result = stmt.executeUpdate();
@@ -661,11 +598,9 @@ public class BRecipe {
 			return;
 		}  	
     	
+    	//TODO Fix bug, not finding the right one
     	//Delete off of main list if it doesn't exist in claims
-    	try {
-    		query = "DELETE FROM recipes WHERE (SELECT COUNT(1) FROM newrecipes WHERE name=?) = 0 AND name=? AND type=?";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryPurgeClaims)) {
 			stmt.setString(1, currentRecipe);
 			stmt.setString(2, currentRecipe);
 			stmt.setString(3, type);
@@ -684,9 +619,7 @@ public class BRecipe {
     	String currentRecipe = item.getItemMeta().getDisplayName();
     	
     	String query = "UPDATE recipes SET name=? WHERE inventor=? AND name=?";
-    	try {
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, name);
 			stmt.setString(2, uuid);
 			stmt.setString(3, currentRecipe);

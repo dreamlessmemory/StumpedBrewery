@@ -42,6 +42,10 @@ public class BIngredients {
 
 	// Add an ingredient to this
 	public void add(ItemStack ingredient) {
+		//SQL
+		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
+		String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name=?";
+		
 		//Add Item
 		int ingPosition = ingredients.indexOf(ingredient);
 		if(ingPosition != -1) {
@@ -50,11 +54,8 @@ public class BIngredients {
 			ingredients.add(ingredient);
 		}
 		//Aspect multipliers
-		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
-		try {
-			String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name='" + ingredient.getType().name() + "'";
-			PreparedStatement stmt;
-			stmt = Brewery.connection.prepareStatement(query);
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+			stmt.setString(1, ingredient.getType().name());
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {
@@ -119,7 +120,6 @@ public class BIngredients {
 
 	// returns an Potion item with cooked ingredients
 	public ItemStack cook(int state, Player player) {
-		//TODO: recipe lookup
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
@@ -158,7 +158,7 @@ public class BIngredients {
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
 		//Write NBT data
 		for(String currentAspect: cookedAspects.keySet()) {
-				breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
+			breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
 		}
 		breweryMeta.setString("type", type);
 		potion = nbti.getItem();
@@ -208,7 +208,6 @@ public class BIngredients {
 	public String getContents() {
 		String manifest = " ";
 		for (ItemStack item: ingredients) {
-			///System.out.println(item.getType().toString() + ": " + item.getAmount());
 			String itemName = "";
 			for(String part: item.getType().toString().split("_")) {
 				itemName = itemName.concat(part.substring(0, 1) + part.substring(1).toLowerCase()+  " ");
@@ -225,18 +224,15 @@ public class BIngredients {
 		this.type = type;
 	}
 	
-	public void calculateType() {
+	public void calculateType(){
 		//SQL
-		PreparedStatement stmt = null;
-
+		String query = "SELECT * FROM brewtypes WHERE material=?";
 		int highestCount = 0;
 		int priority = 0;
 		for (ItemStack ingredient : ingredients) {
 			//Pull from DB
-			try {
-				String query = "SELECT * FROM brewtypes WHERE material='" + ingredient.getType().name() + "'";
-				PreparedStatement stmt;
-				stmt = Brewery.connection.prepareStatement(query);
+			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+				stmt.setString(1, ingredient.getType().name());
 				ResultSet results;
 				results = stmt.executeQuery();
 				if (results.next()) {
@@ -248,10 +244,7 @@ public class BIngredients {
 				}
 			} catch (SQLException e1) {
 				e1.printStackTrace();
-			} finally {
-				if(stmt != null)
-					stmt.close();
-				}
+			}
 		}
 		if(highestCount == 0) {//no one is the right one
 			type = "OTHER";
@@ -262,26 +255,19 @@ public class BIngredients {
 	public void startCooking() {
 		calculateType();
 	}
-	public static boolean acceptableIngredient(Material material) throws SQLException {
+	public static boolean acceptableIngredient(Material material){
 		//SQL
-		PreparedStatement stmt = null;
-		try {
-			String query = "SELECT EXISTS(SELECT 1 FROM ingredients WHERE name='" + material.name() + "')";
-			stmt = Brewery.connection.prepareStatement(query);
+		String query = "SELECT EXISTS(SELECT 1 FROM ingredients WHERE name='" + material.name() + "')";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {
-				Brewery.breweryDriver.debugLog("Failed to poll SQL. Unacceptable item?");
-				stmt.close();
 				return false;
 			} else {
 				return results.getInt(1) == 1;
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
-		} finally {
-			if(stmt != null)
-			stmt.close();
 		}
 		return false;
 	}

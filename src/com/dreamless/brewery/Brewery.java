@@ -6,10 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
-import java.sql.Blob;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -42,7 +39,6 @@ import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
 import com.google.gson.Gson;
 import com.mysql.jdbc.Connection;
-//import com.mysql.jdbc.PreparedStatement;
 
 public class Brewery extends JavaPlugin {
 	public static Brewery breweryDriver;
@@ -498,7 +494,7 @@ public class Brewery extends JavaPlugin {
 			}
 			
 			//Cauldron SQL
-			String query;
+			/*String query;
 			try {				
 	    		query = "SELECT savedata FROM savedata WHERE datatype=cauldron";
 				PreparedStatement stmt;
@@ -511,7 +507,7 @@ public class Brewery extends JavaPlugin {
 				}
 			} catch (SQLException e1) {
 				e1.printStackTrace();
-			}
+			}*/
 
 			// loading Barrel
 			if (data.contains("Barrel." + uuid)) {
