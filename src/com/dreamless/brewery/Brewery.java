@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -359,41 +358,6 @@ public class Brewery extends JavaPlugin {
 			}
 			
 			ConfigurationSection section;
-			// loading Ingredients into ingMap
-			/*Map<String, BIngredients> ingMap = new HashMap<String, BIngredients>();
-			ConfigurationSection section = data.getConfigurationSection("Ingredients");
-			if (section != null) {
-				for (String id : section.getKeys(false)) {
-					ConfigurationSection matSection = section.getConfigurationSection(id + ".mats");
-					if (matSection != null) {
-						// matSection has all the materials + amount as Integers
-						ArrayList<ItemStack> ingredients = deserializeIngredients(matSection);
-						//ingMap.put(id, new BIngredients(ingredients, section.getInt(id + ".cookedTime", 0)));
-					} else {
-						errorLog("Ingredient id: '" + id + "' incomplete in data.yml");
-					}
-				}
-			}*/
-
-			// loading Brew
-			/*section = data.getConfigurationSection("Brew");
-			if (section != null) {
-				// All sections have the UID as name
-				for (String uid : section.getKeys(false)) {
-					BIngredients ingredients = getIngredients(ingMap, section.getString(uid + ".ingId"));
-					int quality = section.getInt(uid + ".quality", 0);
-					int distillRuns = section.getInt(uid + ".distillRuns", 0);
-					float ageTime = (float) section.getDouble(uid + ".ageTime", 0.0);
-					float wood = (float) section.getDouble(uid + ".wood", -1.0);
-					String recipe = section.getString(uid + ".recipe", null);
-					boolean unlabeled = section.getBoolean(uid + ".unlabeled", false);
-					boolean persistent = section.getBoolean(uid + ".persist", false);
-					boolean stat = section.getBoolean(uid + ".stat", false);
-					int lastUpdate = section.getInt("lastUpdate", 0);
-
-					new Brew(parseInt(uid), ingredients, quality, distillRuns, ageTime, wood, recipe, unlabeled, persistent, stat, lastUpdate);
-				}
-			}*/
 
 			// loading BPlayer
 			section = data.getConfigurationSection("Player");
@@ -518,19 +482,8 @@ public class Brewery extends JavaPlugin {
 				byte signoffset = result.getByte("signoffset");
 				
 				//Inventory
-				//Map<Integer, Map<String, Object>> inventory = Brewery.gson.fromJson(result.getString("inventory"), new TypeToken<Map<Integer, Map<String, Object>>>(){}.getType());
-				//Map<Integer, String> inventory = Brewery.gson.fromJson(result.getString("inventory"), new TypeToken<Map<Integer, String>>(){}.getType());
 				Inventory inventory = BreweryUtils.fromBase64(result.getString("inventory"));
-				/*Map<Integer, String> rawInventory = Brewery.gson.fromJson(result.getString("inventory"), new TypeToken<Map<Integer, String>>(){}.getType());
-				Map<Integer, Map<String, Object>> inventory = new HashMap<Integer, Map<String, Object>>();
-				for(Entry<Integer, String> item : rawInventory.entrySet()) {
-					try {
-						inventory.put(item.getKey(), gson.fromJson(item.getValue(),  new TypeToken<Map<String, Object>>(){}.getType()));
-					} catch (Exception e){
-						e.printStackTrace();
-					}
-				}*/
-				
+
 				//Time
 				float time = result.getFloat("time");
 				
@@ -539,7 +492,6 @@ public class Brewery extends JavaPlugin {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -551,41 +503,6 @@ public class Brewery extends JavaPlugin {
 		if (file.exists()) {
 
 			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-
-			// loading Barrel
-			/*if (data.contains("Barrel." + uuid)) {
-				ConfigurationSection section = data.getConfigurationSection("Barrel." + uuid);
-				for (String barrel : section.getKeys(false)) {
-					// block spigot is splitted into x/y/z
-					String spigot = section.getString(barrel + ".spigot");
-					if (spigot != null) {
-						String[] splitted = spigot.split("/");
-						if (splitted.length == 3) {
-
-							// load itemStacks from invSection
-							ConfigurationSection invSection = section.getConfigurationSection(barrel + ".inv");
-							Block block = world.getBlockAt(parseInt(splitted[0]), parseInt(splitted[1]), parseInt(splitted[2]));
-							float time = (float) section.getDouble(barrel + ".time", 0.0);
-							byte sign = (byte) section.getInt(barrel + ".sign", 0);
-							String[] st = section.getString(barrel + ".st", "").split(",");
-							String[] wo = section.getString(barrel + ".wo", "").split(",");
-
-							if (invSection != null) {
-								new Barrel(block, sign, st, wo, invSection.getValues(true), time);
-							} else {
-								// Barrel has no inventory
-								new Barrel(block, sign, st, wo, null, time);
-							}
-
-						} else {
-							errorLog("Incomplete Block-Data in data.yml: " + section.getCurrentPath() + "." + barrel);
-						}
-					} else {
-						errorLog("Missing Block-Data in data.yml: " + section.getCurrentPath() + "." + barrel);
-					}
-				}
-			}*/
-
 			// loading Wakeup
 			if (data.contains("Wakeup." + uuid)) {
 				ConfigurationSection section = data.getConfigurationSection("Wakeup." + uuid);

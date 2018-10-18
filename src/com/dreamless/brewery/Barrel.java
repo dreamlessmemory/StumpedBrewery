@@ -1,15 +1,9 @@
 package com.dreamless.brewery;
 
-import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
@@ -48,52 +42,6 @@ public class Barrel implements InventoryHolder {
 		this.spigot = spigot;
 		this.signoffset = signoffset;
 	}
-
-	// load from file
-	public Barrel(Block spigot, byte sign, String[] st, String[] wo, Map<String, Object> items, float time) {
-		this.spigot = spigot;
-		this.signoffset = sign;
-		if (isLarge()) {
-			this.inventory = org.bukkit.Bukkit.createInventory(this, 27, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
-		} else {
-			this.inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
-		}
-		if (items != null) {
-			for (String slot : items.keySet()) {
-				if (items.get(slot) instanceof ItemStack) {
-					this.inventory.setItem(Brewery.breweryDriver.parseInt(slot), (ItemStack) items.get(slot));
-				}
-			}
-		}
-		this.time = time;
-
-		int i = 0;
-		if (wo.length > 1) {
-			woodsloc = new int[wo.length];
-			for (String wos : wo) {
-				woodsloc[i] = Brewery.breweryDriver.parseInt(wos);
-				i++;
-			}
-			i = 0;
-		}
-		if (st.length > 1) {
-			stairsloc = new int[st.length];
-			for (String sts : st) {
-				stairsloc[i] = Brewery.breweryDriver.parseInt(sts);
-				i++;
-			}
-		}
-
-		if (woodsloc == null && stairsloc == null) {
-			Block broken = getBrokenBlock(true);
-			if (broken != null) {
-				remove(broken, null);
-				return;
-			}
-		}
-
-		barrels.add(this);
-	}
 	
 	public Barrel(Block spigot, byte sign, int[] woodsloc, int[] stairsloc, Inventory inventory, float time) {
 		this.spigot = spigot;
@@ -102,26 +50,6 @@ public class Barrel implements InventoryHolder {
 		this.woodsloc = woodsloc;
 		this.stairsloc = stairsloc;
 		this.inventory = inventory;
-
-		//Inventory rebuilding
-		/*if (isLarge()) {
-			this.inventory = org.bukkit.Bukkit.createInventory(this, 27, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
-		} else {
-			this.inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
-		}
-		if(inventory != null) {
-		for(Entry<Integer, String> item : inventory.entrySet()) {
-				try {
-					//this.inventory.setItem(item.getKey(), BreweryUtils.deserialize(item.getValue()));
-					this.inventory.setItem(item.getKey(), JsonItemStack.fromJson(item.getValue()));
-				} catch (IllegalArgumentException e) { 
-				//catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-					// 	TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}*/
-		
 		
 		if (woodsloc == null && stairsloc == null) {
 			Block broken = getBrokenBlock(true);
@@ -203,16 +131,6 @@ public class Barrel implements InventoryHolder {
 		}
 		// reset barreltime, potions have new age
 		time = 0;
-
-		/*if (P.p.useLB) {
-			try {
-				LogBlockBarrel.openBarrel(player, inventory, spigot.getLocation());
-			} catch (Throwable e) {
-				P.p.errorLog("Failed to Log Barrel to LogBlock!");
-				P.p.errorLog("Brewery was tested with version 1.94 of LogBlock!");
-				e.printStackTrace();
-			}
-		}*/
 		player.openInventory(inventory);
 	}
 
@@ -414,15 +332,7 @@ public class Barrel implements InventoryHolder {
 				human.closeInventory();
 			}
 			ItemStack[] items = inventory.getContents();
-			/*if (P.p.useLB && breaker != null) {
-				try {
-					LogBlockBarrel.breakBarrel(breaker.getName(), items, spigot.getLocation());
-				} catch (Throwable e) {
-					P.p.errorLog("Failed to Log Barrel-break to LogBlock!");
-					P.p.errorLog("Brewery was tested with version 1.94 of LogBlock!");
-					e.printStackTrace();
-				}
-			}*/
+
 			for (ItemStack item : items) {
 				if (item != null) {
 					Brew brew = Brew.get(item);
@@ -463,66 +373,11 @@ public class Barrel implements InventoryHolder {
 	}
 
 	// Saves all data
-	public static void save(ConfigurationSection config, ConfigurationSection oldData) {
-		Brewery.breweryDriver.createWorldSections(config);
+	public static void save() {
 		int id = 0;
 		if (!barrels.isEmpty()) {
 			
 			for (Barrel barrel : barrels) {
-
-				String worldName = barrel.spigot.getWorld().getName();
-				String prefix;
-
-				if (worldName.startsWith("DXL_")) {
-					prefix = Brewery.breweryDriver.getDxlName(worldName) + "." + id;
-				} else {
-					prefix = barrel.spigot.getWorld().getUID().toString() + "." + id;
-				}
-
-				// block: x/y/z
-				config.set(prefix + ".spigot", barrel.spigot.getX() + "/" + barrel.spigot.getY() + "/" + barrel.spigot.getZ());
-
-				if (barrel.signoffset != 0) {
-					config.set(prefix + ".sign", barrel.signoffset);
-				}
-				if (barrel.stairsloc != null && barrel.stairsloc.length > 0) {
-					StringBuilder st = new StringBuilder();
-					for (int i : barrel.stairsloc) {
-						st.append(i).append(",");
-					}
-					config.set(prefix + ".st", st.substring(0, st.length() - 1));
-				}
-				if (barrel.woodsloc != null && barrel.woodsloc.length > 0) {
-					StringBuilder wo = new StringBuilder();
-					for (int i : barrel.woodsloc) {
-						wo.append(i).append(",");
-					}
-					config.set(prefix + ".wo", wo.substring(0, wo.length() - 1));
-				}
-
-				if (barrel.inventory != null) {
-					int slot = 0;
-					ItemStack item;
-					ConfigurationSection invConfig = null;
-					while (slot < barrel.inventory.getSize()) {
-						item = barrel.inventory.getItem(slot);
-						if (item != null) {
-							if (invConfig == null) {
-								if (barrel.time != 0) {
-									config.set(prefix + ".time", barrel.time);
-								}
-								invConfig = config.createSection(prefix + ".inv");
-							}
-							// ItemStacks are configurationSerializeable, makes them
-							// really easy to save
-							invConfig.set(slot + "", item);
-						}
-
-						slot++;
-					}
-				}
-				
-				//TODO: SQL
 				Brewery.breweryDriver.debugLog("BARREL");
 				//Location
 				String location = Brewery.gson.toJson(barrel.spigot.getLocation().serialize());
@@ -545,27 +400,6 @@ public class Barrel implements InventoryHolder {
 				//inventory
 				String jsonInventory = BreweryUtils.toBase64(barrel.inventory);
 				Brewery.breweryDriver.debugLog(jsonInventory);
-				/*String inventory = null;
-				if(barrel.inventory != null) {
-					ItemStack[] contents = barrel.inventory.getContents();
-					//Map<Integer, Map<String, Object>> contentMap = new HashMap<Integer, Map<String, Object>>();
-					Map<Integer, String> contentMap = new HashMap<Integer, String>();
-					for(int i = 0; i < contents.length; i++) {
-						if(contents[i] != null) {
-							try {
-								//contentMap.put(i, BreweryUtils.serialize(contents[i]));
-								//contentMap.put(i, contents[i].serialize());
-								//contentMap.put(i, Brewery.gson.toJson(contents[i].serialize()));
-								contentMap.put(i, JsonItemStack.toJson(contents[i]));
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}
-					inventory = Brewery.gson.toJson(contentMap);
-					Brewery.breweryDriver.debugLog(inventory);
-				}*/
-				
 				
 				String query = "REPLACE barrels SET idbarrels=?, location=?, woodsloc=?, stairsloc=?, signoffset=?, checked=?, inventory=?, time=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -586,14 +420,6 @@ public class Barrel implements InventoryHolder {
 					return;
 				}				
 				id++;
-			}
-		}
-		// also save barrels that are not loaded
-		if (oldData != null){
-			for (String uuid : oldData.getKeys(false)) {
-				if (!config.contains(uuid)) {
-					config.set(uuid, oldData.get(uuid));
-				}
 			}
 		}
 		//clean up extras

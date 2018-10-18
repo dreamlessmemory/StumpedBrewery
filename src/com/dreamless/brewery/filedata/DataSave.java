@@ -37,7 +37,6 @@ public class DataSave extends BukkitRunnable {
 
 	@Override
 	public void run() {
-		FileConfiguration oldData;
 		if (read != null) {
 			if (!read.done) {
 				// Wait for async thread to load old data
@@ -48,10 +47,7 @@ public class DataSave extends BukkitRunnable {
 				}
 				return;
 			}
-			oldData = read.getData();
-		} else {
-			oldData = new YamlConfiguration();
-		}
+		} 
 		try {
 			cancel();
 		} catch (IllegalStateException ignored) {
@@ -60,32 +56,28 @@ public class DataSave extends BukkitRunnable {
 		FileConfiguration configFile = new YamlConfiguration();
 
 		configFile.set("installTime", Brew.installTime);
-
-		if (!Brew.potions.isEmpty()) {
-			Brew.save(configFile.createSection("Brew"));
+		
+		//TODO: Convert to SQL
+		if (!BCauldron.bcauldrons.isEmpty()) {
+			BCauldron.save();
 		}
 		
 		//TODO: Convert to SQL
-		if (!BCauldron.bcauldrons.isEmpty() || oldData.contains("BCauldron")) {
-			BCauldron.save(configFile.createSection("BCauldron"), oldData.getConfigurationSection("BCauldron"));
-		}
-		
-		//TODO: Convert to SQL
-		if (!Barrel.barrels.isEmpty() || oldData.contains("Barrel")) {
-			Barrel.save(configFile.createSection("Barrel"), oldData.getConfigurationSection("Barrel"));
+		if (!Barrel.barrels.isEmpty()) {
+			Barrel.save();
 		}
 		
 		//TODO: Convert to SQL
 		if (!BPlayer.isEmpty()) {
-			BPlayer.save(configFile.createSection("Player"));
+			//BPlayer.save();
 		}
 
 		//TODO: Convert to SQL
-		if (!Wakeup.wakeups.isEmpty() || oldData.contains("Wakeup")) {
-			Wakeup.save(configFile.createSection("Wakeup"), oldData.getConfigurationSection("Wakeup"));
+		if (!Wakeup.wakeups.isEmpty()) {
+			//Wakeup.save(configFile.createSection("Wakeup"), oldData.getConfigurationSection("Wakeup"));
 		}
 
-		saveWorldNames(configFile, oldData.getConfigurationSection("Worlds"));
+		//saveWorldNames(configFile, oldData.getConfigurationSection("Worlds"));
 		configFile.set("Version", dataVersion);
 
 		collected = true;

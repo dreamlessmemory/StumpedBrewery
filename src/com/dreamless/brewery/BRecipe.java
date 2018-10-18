@@ -600,7 +600,6 @@ public class BRecipe {
 			return;
 		}  	
     	
-    	//TODO Fix bug, not finding the right one
     	//Delete off of main list if it doesn't exist in claims
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryPurgeClaims)) {
 			stmt.setString(1, currentRecipe);

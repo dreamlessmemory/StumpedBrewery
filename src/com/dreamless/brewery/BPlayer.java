@@ -564,6 +564,8 @@ public class BPlayer {
 			if (bPlayer.offlineDrunk != 0) {
 				section.set("offDrunk", bPlayer.offlineDrunk);
 			}
+			
+			//TODO: SQL
 		}
 	}
 

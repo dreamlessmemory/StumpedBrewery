@@ -1,7 +1,6 @@
 package com.dreamless.brewery;
 
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -179,16 +178,6 @@ public class BIngredients {
 	public int getCookedTime() {
 		return cookedTime;
 	}
-
-	//convert the ingredient Material to String
-	/*public Map<String, Integer> serializeIngredients() {
-		Map<String, Integer> mats = new HashMap<String, Integer>();
-		for (ItemStack item : ingredients) {
-			String mat = item.getType().name() + "," + item.getDurability();
-			mats.put(mat, item.getAmount());
-		}
-		return mats;
-	}*/
 	
 	public String getContents() {
 		String manifest = " ";

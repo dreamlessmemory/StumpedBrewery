@@ -96,7 +96,6 @@ public class BCauldron {
 				return true;
 			} else {
 				new BCauldron(block, new ItemStack(ingredient.getType(), 1));
-				//TODO: check if in purge list, then remove from purge list?
 				return true;
 			}
 		}
@@ -181,7 +180,6 @@ public class BCauldron {
 			BCauldron bcauldron = get(block);
 			if (bcauldron != null) {
 				bcauldrons.remove(bcauldron);
-				//TODO add cauldron to purge list
 			}
 		}
 	}
@@ -196,9 +194,7 @@ public class BCauldron {
 		}
 	}
 
-	public static void save(ConfigurationSection config, ConfigurationSection oldData) {
-		Brewery.breweryDriver.createWorldSections(config);
-
+	public static void save() {
 		int id = 0;
 		if (!bcauldrons.isEmpty()) {
 			for (BCauldron cauldron : bcauldrons) {	
