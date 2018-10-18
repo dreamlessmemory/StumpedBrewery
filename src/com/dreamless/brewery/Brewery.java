@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -32,6 +33,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
@@ -355,9 +357,10 @@ public class Brewery extends JavaPlugin {
 					Brewery.breweryDriver.log("Data Updated to version: " + DataSave.dataVersion);
 				}
 			}
-
+			
+			ConfigurationSection section;
 			// loading Ingredients into ingMap
-			Map<String, BIngredients> ingMap = new HashMap<String, BIngredients>();
+			/*Map<String, BIngredients> ingMap = new HashMap<String, BIngredients>();
 			ConfigurationSection section = data.getConfigurationSection("Ingredients");
 			if (section != null) {
 				for (String id : section.getKeys(false)) {
@@ -370,10 +373,10 @@ public class Brewery extends JavaPlugin {
 						errorLog("Ingredient id: '" + id + "' incomplete in data.yml");
 					}
 				}
-			}
+			}*/
 
 			// loading Brew
-			section = data.getConfigurationSection("Brew");
+			/*section = data.getConfigurationSection("Brew");
 			if (section != null) {
 				// All sections have the UID as name
 				for (String uid : section.getKeys(false)) {
@@ -390,7 +393,7 @@ public class Brewery extends JavaPlugin {
 
 					new Brew(parseInt(uid), ingredients, quality, distillRuns, ageTime, wood, recipe, unlabeled, persistent, stat, lastUpdate);
 				}
-			}
+			}*/
 
 			// loading BPlayer
 			section = data.getConfigurationSection("Player");
@@ -432,7 +435,7 @@ public class Brewery extends JavaPlugin {
 		}
 	}
 
-	public ArrayList<ItemStack> deserializeIngredients(ConfigurationSection matSection) {
+	/*public ArrayList<ItemStack> deserializeIngredients(ConfigurationSection matSection) {
 		ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 		for (String mat : matSection.getKeys(false)) {
 			String[] matSplit = mat.split(",");
@@ -443,7 +446,7 @@ public class Brewery extends JavaPlugin {
 			ingredients.add(item);
 		}
 		return ingredients;
-	}
+	}*/
 
 	// returns Ingredients by id from the specified ingMap
 	public BIngredients getIngredients(Map<String, BIngredients> ingMap, String id) {
@@ -457,8 +460,9 @@ public class Brewery extends JavaPlugin {
 	}
 
 	public void loadFromDB() {
-		String query = "SELECT * FROM cauldrons";
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){						
+		//Cauldrons
+		String cauldronQuery = "SELECT * FROM cauldrons";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
 				//Block
@@ -466,12 +470,15 @@ public class Brewery extends JavaPlugin {
 				debugLog(locationMap.toString());
 				Block worldBlock = (Location.deserialize(locationMap).getBlock());
 				debugLog(worldBlock.toString());
+				
+				//State
 				int state = result.getInt("state");
+				
 				//Ingredients
 				ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
 				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
 				BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
-				//State
+				
 				//Cooked
 				boolean cooking = result.getBoolean("cooking");
 				
@@ -479,6 +486,61 @@ public class Brewery extends JavaPlugin {
 			} 
 		} catch (SQLException e1) {
 			e1.printStackTrace();
+		}
+		
+		//Barrel
+		String barrelQuery = "SELECT * FROM barrels";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
+			ResultSet result = stmt.executeQuery();
+			while (result.next()) {
+				String resultString;
+				//spigot
+				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+				debugLog(locationMap.toString());
+				Block worldBlock = (Location.deserialize(locationMap).getBlock());
+				debugLog(worldBlock.toString());
+				
+				//Wood
+				int[] woodsLoc = null;
+				resultString = result.getString("woodsloc");
+				if(resultString != null) {
+					woodsLoc = gson.fromJson(resultString, int[].class);
+				}
+				
+				//Stairs
+				int[] stairsLoc = null;
+				resultString = result.getString("stairsloc");
+				if(resultString != null) {
+					stairsLoc = gson.fromJson(resultString, int[].class);
+				}
+				
+				//Sign
+				byte signoffset = result.getByte("signoffset");
+				
+				//Inventory
+				//Map<Integer, Map<String, Object>> inventory = Brewery.gson.fromJson(result.getString("inventory"), new TypeToken<Map<Integer, Map<String, Object>>>(){}.getType());
+				//Map<Integer, String> inventory = Brewery.gson.fromJson(result.getString("inventory"), new TypeToken<Map<Integer, String>>(){}.getType());
+				Inventory inventory = BreweryUtils.fromBase64(result.getString("inventory"));
+				/*Map<Integer, String> rawInventory = Brewery.gson.fromJson(result.getString("inventory"), new TypeToken<Map<Integer, String>>(){}.getType());
+				Map<Integer, Map<String, Object>> inventory = new HashMap<Integer, Map<String, Object>>();
+				for(Entry<Integer, String> item : rawInventory.entrySet()) {
+					try {
+						inventory.put(item.getKey(), gson.fromJson(item.getValue(),  new TypeToken<Map<String, Object>>(){}.getType()));
+					} catch (Exception e){
+						e.printStackTrace();
+					}
+				}*/
+				
+				//Time
+				float time = result.getFloat("time");
+				
+				new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time);
+			} 
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -491,7 +553,7 @@ public class Brewery extends JavaPlugin {
 			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
 
 			// loading Barrel
-			if (data.contains("Barrel." + uuid)) {
+			/*if (data.contains("Barrel." + uuid)) {
 				ConfigurationSection section = data.getConfigurationSection("Barrel." + uuid);
 				for (String barrel : section.getKeys(false)) {
 					// block spigot is splitted into x/y/z
@@ -522,7 +584,7 @@ public class Brewery extends JavaPlugin {
 						errorLog("Missing Block-Data in data.yml: " + section.getCurrentPath() + "." + barrel);
 					}
 				}
-			}
+			}*/
 
 			// loading Wakeup
 			if (data.contains("Wakeup." + uuid)) {

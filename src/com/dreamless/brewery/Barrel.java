@@ -1,11 +1,14 @@
 package com.dreamless.brewery;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -37,7 +40,7 @@ public class Barrel implements InventoryHolder {
 	private int[] woodsloc = null; // location of wood Blocks
 	private int[] stairsloc = null; // location of stair Blocks
 	private byte signoffset;
-	private boolean checked;
+	private boolean checked = false;
 	private Inventory inventory;
 	private float time;
 
@@ -89,6 +92,45 @@ public class Barrel implements InventoryHolder {
 			}
 		}
 
+		barrels.add(this);
+	}
+	
+	public Barrel(Block spigot, byte sign, int[] woodsloc, int[] stairsloc, Inventory inventory, float time) {
+		this.spigot = spigot;
+		this.signoffset = sign;
+		this.time = time;
+		this.woodsloc = woodsloc;
+		this.stairsloc = stairsloc;
+		this.inventory = inventory;
+
+		//Inventory rebuilding
+		/*if (isLarge()) {
+			this.inventory = org.bukkit.Bukkit.createInventory(this, 27, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
+		} else {
+			this.inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
+		}
+		if(inventory != null) {
+		for(Entry<Integer, String> item : inventory.entrySet()) {
+				try {
+					//this.inventory.setItem(item.getKey(), BreweryUtils.deserialize(item.getValue()));
+					this.inventory.setItem(item.getKey(), JsonItemStack.fromJson(item.getValue()));
+				} catch (IllegalArgumentException e) { 
+				//catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+					// 	TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}*/
+		
+		
+		if (woodsloc == null && stairsloc == null) {
+			Block broken = getBrokenBlock(true);
+			if (broken != null) {
+				remove(broken, null);
+				return;
+			}
+		}
+		
 		barrels.add(this);
 	}
 
@@ -501,21 +543,29 @@ public class Barrel implements InventoryHolder {
 				}
 				
 				//inventory
-				ItemStack[] contents = barrel.inventory.getContents();
-				ArrayList<Map<String, Object>> contentArrayList = new ArrayList<Map<String, Object>>();
-				String inventory = null;
-				for(ItemStack item : contents) {
-					if(item != null) {
-						contentArrayList.add(BreweryUtils.serialize(item));
+				String jsonInventory = BreweryUtils.toBase64(barrel.inventory);
+				Brewery.breweryDriver.debugLog(jsonInventory);
+				/*String inventory = null;
+				if(barrel.inventory != null) {
+					ItemStack[] contents = barrel.inventory.getContents();
+					//Map<Integer, Map<String, Object>> contentMap = new HashMap<Integer, Map<String, Object>>();
+					Map<Integer, String> contentMap = new HashMap<Integer, String>();
+					for(int i = 0; i < contents.length; i++) {
+						if(contents[i] != null) {
+							try {
+								//contentMap.put(i, BreweryUtils.serialize(contents[i]));
+								//contentMap.put(i, contents[i].serialize());
+								//contentMap.put(i, Brewery.gson.toJson(contents[i].serialize()));
+								contentMap.put(i, JsonItemStack.toJson(contents[i]));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
 					}
-				}
-				inventory = Brewery.gson.toJson(contentArrayList);
-				Brewery.breweryDriver.debugLog(inventory);
-				/*if(barrel.inventory != null) {
-					//ArrayList<ItemStack> test = new ArrayList<ItemStack>(Arrays.asList(contents));
-					inventory = Brewery.gson.toJson(BreweryUtils.serializeItemStackList(contents));
+					inventory = Brewery.gson.toJson(contentMap);
 					Brewery.breweryDriver.debugLog(inventory);
 				}*/
+				
 				
 				String query = "REPLACE barrels SET idbarrels=?, location=?, woodsloc=?, stairsloc=?, signoffset=?, checked=?, inventory=?, time=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -525,7 +575,7 @@ public class Barrel implements InventoryHolder {
 					stmt.setString(4, stairsloc);
 					stmt.setByte(5, barrel.signoffset);
 					stmt.setBoolean(6, barrel.checked);
-					stmt.setString(7, inventory);
+					stmt.setString(7, jsonInventory);
 					stmt.setFloat(8, barrel.time);
 					
 					Brewery.breweryDriver.debugLog(stmt.toString());

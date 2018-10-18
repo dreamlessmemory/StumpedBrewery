@@ -62,8 +62,8 @@ public class BIngredients {
 				//Aspect 1
 				if(aspect1 != null) {
 					Aspect aspect = aspects.get(aspect1);
-					double newPotency = Aspect.calculateRarityPotency(results.getInt("aspect1rating")) * ingredient.getAmount();
-					double newSaturation = Aspect.calculateRaritySaturation(results.getInt("aspect1rating")) * ingredient.getAmount();
+					double newPotency = Aspect.calculateRarityPotency(results.getInt("aspect1rating"));
+					double newSaturation = Aspect.calculateRaritySaturation(results.getInt("aspect1rating"));
 					if (aspect != null) {//aspect is found
 						aspect.setPotency(newPotency + aspect.getPotency());
 						aspect.setSaturation(newSaturation + aspect.getSaturation());
@@ -75,8 +75,8 @@ public class BIngredients {
 				//Aspect 2
 				if(aspect2 != null) {
 					Aspect aspect = aspects.get(aspect2);
-					double newPotency = Aspect.calculateRarityPotency(results.getInt("aspect2rating")) * ingredient.getAmount();
-					double newSaturation = Aspect.calculateRaritySaturation(results.getInt("aspect2rating")) * ingredient.getAmount();
+					double newPotency = Aspect.calculateRarityPotency(results.getInt("aspect2rating"));
+					double newSaturation = Aspect.calculateRaritySaturation(results.getInt("aspect2rating"));
 					if (aspect != null) {//aspect is found
 						aspect.setPotency(newPotency + aspect.getPotency());
 						aspect.setSaturation(newSaturation + aspect.getSaturation());
@@ -88,8 +88,8 @@ public class BIngredients {
 				//Aspect 3
 				if(aspect3 != null) {
 					Aspect aspect = aspects.get(aspect3);
-					double newPotency = Aspect.calculateRarityPotency(results.getInt("aspect3rating")) * ingredient.getAmount();
-					double newSaturation = Aspect.calculateRaritySaturation(results.getInt("aspect3rating")) * ingredient.getAmount();
+					double newPotency = Aspect.calculateRarityPotency(results.getInt("aspect3rating"));
+					double newSaturation = Aspect.calculateRaritySaturation(results.getInt("aspect3rating"));
 					if (aspect != null) {//aspect is found
 						aspect.setPotency(newPotency + aspect.getPotency());
 						aspect.setSaturation(newSaturation + aspect.getSaturation());
@@ -181,14 +181,14 @@ public class BIngredients {
 	}
 
 	//convert the ingredient Material to String
-	public Map<String, Integer> serializeIngredients() {
+	/*public Map<String, Integer> serializeIngredients() {
 		Map<String, Integer> mats = new HashMap<String, Integer>();
 		for (ItemStack item : ingredients) {
 			String mat = item.getType().name() + "," + item.getDurability();
 			mats.put(mat, item.getAmount());
 		}
 		return mats;
-	}
+	}*/
 	
 	public String getContents() {
 		String manifest = " ";

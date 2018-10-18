@@ -1,11 +1,7 @@
 package com.dreamless.brewery;
 
-import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.entity.Player;
@@ -16,14 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.ItemStack;
-import org.json.JSONObject;
-
-import com.google.common.collect.Lists;
-import com.google.common.graph.ElementOrder.Type;
-import com.google.gson.reflect.TypeToken;
-
 import org.bukkit.Effect;
-import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class BCauldron {
@@ -78,7 +67,8 @@ public class BCauldron {
 
 	// add an ingredient to the cauldron
 	public void add(ItemStack ingredient){
-		ingredient = new ItemStack(ingredient.getType(), 1, ingredient.getDurability());
+		//
+		//ingredient = new ItemStack(ingredient.getType(), 1, ingredient.getDurability());
 		ingredients.add(ingredient);
 		block.getWorld().playEffect(block.getLocation(), Effect.EXTINGUISH, 0);
 		if (state > 1) {
@@ -102,10 +92,10 @@ public class BCauldron {
 		if (getFillLevel(block) != 0) {
 			BCauldron bcauldron = get(block);
 			if (bcauldron != null) {
-				bcauldron.add(ingredient);
+				bcauldron.add(new ItemStack(ingredient.getType(), 1));
 				return true;
 			} else {
-				new BCauldron(block, ingredient);
+				new BCauldron(block, new ItemStack(ingredient.getType(), 1));
 				//TODO: check if in purge list, then remove from purge list?
 				return true;
 			}
