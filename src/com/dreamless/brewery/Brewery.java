@@ -489,35 +489,6 @@ public class Brewery extends JavaPlugin {
 		if (file.exists()) {
 
 			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-			/*
-			//TODO: Convert to SQL			
-			//Cauldron SQL
-			String query = "SELECT * FROM cauldrons";
-			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){						
-				ResultSet result = stmt.executeQuery();
-				do {
-					//Block
-					HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-					debugLog(locationMap.toString());
-					
-					if
-					
-					Block worldBlock = world.getBlockAt(Location.deserialize(locationMap));
-					debugLog(worldBlock.toString());
-					int state = result.getInt("state");
-					//Ingredients
-					ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
-					HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
-					BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
-					//State
-					//Cooked
-					boolean cooking = result.getBoolean("cooking");
-					
-					new BCauldron(worldBlock, ingredients, state, cooking);
-				} while (!result.next());
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}*/
 
 			// loading Barrel
 			if (data.contains("Barrel." + uuid)) {

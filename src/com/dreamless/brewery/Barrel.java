@@ -1,6 +1,9 @@
 package com.dreamless.brewery;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Map;
 
@@ -420,9 +423,9 @@ public class Barrel implements InventoryHolder {
 	// Saves all data
 	public static void save(ConfigurationSection config, ConfigurationSection oldData) {
 		Brewery.breweryDriver.createWorldSections(config);
-
+		int id = 0;
 		if (!barrels.isEmpty()) {
-			int id = 0;
+			
 			for (Barrel barrel : barrels) {
 
 				String worldName = barrel.spigot.getWorld().getName();
@@ -476,7 +479,62 @@ public class Barrel implements InventoryHolder {
 						slot++;
 					}
 				}
-
+				
+				//TODO: SQL
+				Brewery.breweryDriver.debugLog("BARREL");
+				//Location
+				String location = Brewery.gson.toJson(barrel.spigot.getLocation().serialize());
+				Brewery.breweryDriver.debugLog(location);
+				
+				//woodloc
+				String woodsloc = null;
+				if(barrel.woodsloc != null) {
+					woodsloc = Brewery.gson.toJson(barrel.woodsloc);
+					Brewery.breweryDriver.debugLog(woodsloc + " wood");
+				}	
+				
+				//stairsloc
+				String stairsloc = null;
+				if(barrel.stairsloc != null) {
+					stairsloc = Brewery.gson.toJson(barrel.stairsloc);
+					Brewery.breweryDriver.debugLog(stairsloc + " stairs");
+				}
+				
+				//inventory
+				ItemStack[] contents = barrel.inventory.getContents();
+				ArrayList<Map<String, Object>> contentArrayList = new ArrayList<Map<String, Object>>();
+				String inventory = null;
+				for(ItemStack item : contents) {
+					if(item != null) {
+						contentArrayList.add(BreweryUtils.serialize(item));
+					}
+				}
+				inventory = Brewery.gson.toJson(contentArrayList);
+				Brewery.breweryDriver.debugLog(inventory);
+				/*if(barrel.inventory != null) {
+					//ArrayList<ItemStack> test = new ArrayList<ItemStack>(Arrays.asList(contents));
+					inventory = Brewery.gson.toJson(BreweryUtils.serializeItemStackList(contents));
+					Brewery.breweryDriver.debugLog(inventory);
+				}*/
+				
+				String query = "REPLACE barrels SET idbarrels=?, location=?, woodsloc=?, stairsloc=?, signoffset=?, checked=?, inventory=?, time=?";
+				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+					stmt.setInt(1, id);
+					stmt.setString(2, location);
+					stmt.setString(3, woodsloc);
+					stmt.setString(4, stairsloc);
+					stmt.setByte(5, barrel.signoffset);
+					stmt.setBoolean(6, barrel.checked);
+					stmt.setString(7, inventory);
+					stmt.setFloat(8, barrel.time);
+					
+					Brewery.breweryDriver.debugLog(stmt.toString());
+					
+					stmt.executeUpdate();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+					return;
+				}				
 				id++;
 			}
 		}
@@ -487,6 +545,15 @@ public class Barrel implements InventoryHolder {
 					config.set(uuid, oldData.get(uuid));
 				}
 			}
+		}
+		//clean up extras
+		String query = "DELETE FROM barrels WHERE idbarrels >=?";
+		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			stmt.setInt(1, id);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+				stmt.executeUpdate();
+		} catch (SQLException e1) {
+				e1.printStackTrace();
 		}
 	}
 

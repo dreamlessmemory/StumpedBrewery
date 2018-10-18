@@ -52,6 +52,10 @@
 			<url>http://repo.mvdw-software.be/content/groups/public/<!--https://hub.spigotmc.org/nexus/content/groups/public/--></url>
 		</repository>
 		<repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+		<repository>
 			<id>vault-repo</id>
 			<url>http://nexus.hc.to/content/repositories/pub_releases</url>
 		</repository>
@@ -68,7 +72,14 @@
 		<dependency>
            <groupId>org.spigotmc</groupId>
            <artifactId>spigot-api</artifactId>
-           <version>1.13-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
+           <version>1.13.1-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
+           <type>jar</type>
+           <scope>provided</scope>
+        </dependency>
+        <dependency>
+           <groupId>org.spigotmc</groupId>
+           <artifactId>spigot</artifactId>
+           <version>1.13.1-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
            <type>jar</type>
            <scope>provided</scope>
         </dependency>

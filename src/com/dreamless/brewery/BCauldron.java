@@ -211,28 +211,8 @@ public class BCauldron {
 
 		int id = 0;
 		if (!bcauldrons.isEmpty()) {
-			
-			for (BCauldron cauldron : bcauldrons) {
-				/*String worldName = cauldron.block.getWorld().getName();
-				String prefix;
-
-				if (worldName.startsWith("DXL_")) {
-					prefix = Brewery.breweryDriver.getDxlName(worldName) + "." + id;
-				} else {
-					prefix = cauldron.block.getWorld().getUID().toString() + "." + id;
-				}
-
-				config.set(prefix + ".block", cauldron.block.getX() + "/" + cauldron.block.getY() + "/" + cauldron.block.getZ());
-				if (cauldron.state != 1) {
-					config.set(prefix + ".state", cauldron.state);
-				}
-				config.set(prefix + ".ingredients", cauldron.ingredients.serializeIngredients());
-				config.set(prefix + ".cooking", cauldron.cooking);*/
-				
-				
-				//SQL
-				//Columns are worldname, location, ingredients, aspects, cooking
-				
+			for (BCauldron cauldron : bcauldrons) {	
+				Brewery.breweryDriver.debugLog("CAULDRON");
 				//Location
 				String location = Brewery.gson.toJson(cauldron.block.getLocation().serialize());
 				Brewery.breweryDriver.debugLog(location);
