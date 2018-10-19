@@ -398,7 +398,7 @@ public class Barrel implements InventoryHolder {
 				
 				//inventory
 				String jsonInventory = BreweryUtils.toBase64(barrel.inventory);
-				Brewery.breweryDriver.debugLog(jsonInventory);
+				//Brewery.breweryDriver.debugLog(jsonInventory);
 				
 				String query = "REPLACE barrels SET idbarrels=?, location=?, woodsloc=?, stairsloc=?, signoffset=?, checked=?, inventory=?, time=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {

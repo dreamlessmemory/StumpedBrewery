@@ -13,6 +13,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,15 +45,17 @@ public class BPlayer {
 	private int offlineDrunk = 0;// drunkeness when gone offline
 	private Vector push = new Vector(0, 0, 0);
 	private int time = 20;
+	private boolean drunkEffects = false;
 
 	public BPlayer() {
 	}
 
 	// reading from file
-	public BPlayer(String name, int quality, int drunkeness, int offlineDrunk) {
+	public BPlayer(String name, int quality, int drunkeness, int offlineDrunk, boolean drunkEffects) {
 		this.quality = quality;
 		this.drunkeness = drunkeness;
 		this.offlineDrunk = offlineDrunk;
+		this.drunkEffects = drunkEffects;
 		players.put(name, this);
 	}
 
@@ -111,18 +115,37 @@ public class BPlayer {
 	// Create a new BPlayer and add it to the list
 	public static BPlayer addPlayer(Player player) {
 		BPlayer bPlayer = new BPlayer();
-		players.put(Brewery.playerString(player), bPlayer);
+		players.put(player.getUniqueId().toString(), bPlayer);
 		return bPlayer;
 	}
 
 	public static void remove(Player player) {
 		players.remove(Brewery.playerString(player));
+		//SQL
+		String query = "INSERT INTO players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
+		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+			stmt.setString(1, player.getUniqueId().toString());
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void remove() {
 		for (Map.Entry<String, BPlayer> entry : players.entrySet()) {
 			if (entry.getValue() == this) {
 				players.remove(entry.getKey());
+				
+				//SQL
+				String query = "INSERT INTO players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
+				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+					stmt.setString(1, entry.getKey());
+					Brewery.breweryDriver.debugLog(stmt.toString());
+					stmt.executeUpdate();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
 				return;
 			}
 		}
@@ -555,17 +578,20 @@ public class BPlayer {
 	}
 
 	// save all data
-	public static void save(ConfigurationSection config) {
+	public static void save() {
 		for (Map.Entry<String, BPlayer> entry : players.entrySet()) {
-			ConfigurationSection section = config.createSection(entry.getKey());
+			String query = "REPLACE players SET uuid=?, quality=?, drunkeness=?, offlinedrunk=?, drunkeffects=?";
 			BPlayer bPlayer = entry.getValue();
-			section.set("quality", bPlayer.quality);
-			section.set("drunk", bPlayer.drunkeness);
-			if (bPlayer.offlineDrunk != 0) {
-				section.set("offDrunk", bPlayer.offlineDrunk);
+			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+				stmt.setString(1, entry.getKey());
+				stmt.setInt(2, bPlayer.quality);
+				stmt.setInt(3, bPlayer.drunkeness);
+				stmt.setInt(3, bPlayer.offlineDrunk);
+				stmt.setBoolean(4, bPlayer.drunkEffects);
+				Brewery.breweryDriver.debugLog(stmt.toString());
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-			
-			//TODO: SQL
 		}
 	}
 

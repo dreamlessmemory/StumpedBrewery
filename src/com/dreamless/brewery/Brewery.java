@@ -346,45 +346,90 @@ public class Brewery extends JavaPlugin {
 
 			Brew.installTime = data.getLong("installTime", System.currentTimeMillis());
 
-			// Check if data is the newest version
-			String version = data.getString("Version", null);
-			if (version != null) {
-				if (!version.equals(DataSave.dataVersion)) {
-					Brewery.breweryDriver.log("Data File is being updated...");
-					new DataUpdater(data, file).update(version);
-					data = YamlConfiguration.loadConfiguration(file);
-					Brewery.breweryDriver.log("Data Updated to version: " + DataSave.dataVersion);
-				}
+			//Cauldrons
+			String cauldronQuery = "SELECT * FROM cauldrons";
+			try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){						
+				ResultSet result = stmt.executeQuery();
+				while (result.next()) {
+					//Block
+					HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+					debugLog(locationMap.toString());
+					Block worldBlock = (Location.deserialize(locationMap).getBlock());
+					debugLog(worldBlock.toString());
+					
+					//State
+					int state = result.getInt("state");
+					
+					//Ingredients
+					ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
+					HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
+					BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
+					
+					//Cooked
+					boolean cooking = result.getBoolean("cooking");
+					
+					new BCauldron(worldBlock, ingredients, state, cooking);
+				} 
+			} catch (SQLException e1) {
+				e1.printStackTrace();
 			}
 			
-			ConfigurationSection section;
-
-			// loading BPlayer
-			section = data.getConfigurationSection("Player");
-			if (section != null) {
-				// keys have players name
-				for (String name : section.getKeys(false)) {
-					try {
-						//noinspection ResultOfMethodCallIgnored
-						UUID.fromString(name);
-						if (!useUUID) {
-							continue;
-						}
-					} catch (IllegalArgumentException e) {
-						if (useUUID) {
-							continue;
-						}
+			//Barrel
+			String barrelQuery = "SELECT * FROM barrels";
+			try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
+				ResultSet result = stmt.executeQuery();
+				while (result.next()) {
+					String resultString;
+					//spigot
+					HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+					debugLog(locationMap.toString());
+					Block worldBlock = (Location.deserialize(locationMap).getBlock());
+					debugLog(worldBlock.toString());
+					
+					//Wood
+					int[] woodsLoc = null;
+					resultString = result.getString("woodsloc");
+					if(resultString != null) {
+						woodsLoc = gson.fromJson(resultString, int[].class);
 					}
+					
+					//Stairs
+					int[] stairsLoc = null;
+					resultString = result.getString("stairsloc");
+					if(resultString != null) {
+						stairsLoc = gson.fromJson(resultString, int[].class);
+					}
+					
+					//Sign
+					byte signoffset = result.getByte("signoffset");
+					
+					//Inventory
+					Inventory inventory = BreweryUtils.fromBase64(result.getString("inventory"));
 
-					int quality = section.getInt(name + ".quality");
-					int drunk = section.getInt(name + ".drunk");
-					int offDrunk = section.getInt(name + ".offDrunk", 0);
-
-					new BPlayer(name, quality, drunk, offDrunk);
-				}
+					//Time
+					float time = result.getFloat("time");
+					
+					new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time);
+				} 
+			} catch (SQLException | IOException e1) {
+				e1.printStackTrace();
 			}
-
-			loadFromDB();
+			
+			//Player
+			String playerQuery = "SELECT * FROM players";
+			try (PreparedStatement stmt = Brewery.connection.prepareStatement(playerQuery)){						
+				ResultSet result = stmt.executeQuery();
+				while (result.next()) {
+					int drunkeness = result.getInt("drunkeness");
+					int offDrunk = result.getInt("offlinedrunk");
+					if(drunkeness > 0 || offDrunk > 0) {
+						new BPlayer(result.getString("uuid"), result.getInt("quality"), drunkeness, offDrunk, result.getBoolean("drunkeffects"));
+						debugLog(result.getString("uuid"));
+					}
+				} 
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
 			
 			for (World world : breweryDriver.getServer().getWorlds()) {
 				if (world.getName().startsWith("DXL_")) {
@@ -396,103 +441,6 @@ public class Brewery extends JavaPlugin {
 
 		} else {
 			errorLog("No data.yml found, will create new one!");
-		}
-	}
-
-	/*public ArrayList<ItemStack> deserializeIngredients(ConfigurationSection matSection) {
-		ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
-		for (String mat : matSection.getKeys(false)) {
-			String[] matSplit = mat.split(",");
-			ItemStack item = new ItemStack(Material.getMaterial(matSplit[0]), matSection.getInt(mat));
-			if (matSplit.length == 2) {
-				item.setDurability((short) Brewery.breweryDriver.parseInt(matSplit[1]));
-			}
-			ingredients.add(item);
-		}
-		return ingredients;
-	}*/
-
-	// returns Ingredients by id from the specified ingMap
-	public BIngredients getIngredients(Map<String, BIngredients> ingMap, String id) {
-		if (!ingMap.isEmpty()) {
-			if (ingMap.containsKey(id)) {
-				return ingMap.get(id);
-			}
-		}
-		errorLog("Ingredient id: '" + id + "' not found in data.yml");
-		return new BIngredients();
-	}
-
-	public void loadFromDB() {
-		//Cauldrons
-		String cauldronQuery = "SELECT * FROM cauldrons";
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){						
-			ResultSet result = stmt.executeQuery();
-			while (result.next()) {
-				//Block
-				HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-				debugLog(locationMap.toString());
-				Block worldBlock = (Location.deserialize(locationMap).getBlock());
-				debugLog(worldBlock.toString());
-				
-				//State
-				int state = result.getInt("state");
-				
-				//Ingredients
-				ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
-				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
-				BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
-				
-				//Cooked
-				boolean cooking = result.getBoolean("cooking");
-				
-				new BCauldron(worldBlock, ingredients, state, cooking);
-			} 
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		
-		//Barrel
-		String barrelQuery = "SELECT * FROM barrels";
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
-			ResultSet result = stmt.executeQuery();
-			while (result.next()) {
-				String resultString;
-				//spigot
-				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-				debugLog(locationMap.toString());
-				Block worldBlock = (Location.deserialize(locationMap).getBlock());
-				debugLog(worldBlock.toString());
-				
-				//Wood
-				int[] woodsLoc = null;
-				resultString = result.getString("woodsloc");
-				if(resultString != null) {
-					woodsLoc = gson.fromJson(resultString, int[].class);
-				}
-				
-				//Stairs
-				int[] stairsLoc = null;
-				resultString = result.getString("stairsloc");
-				if(resultString != null) {
-					stairsLoc = gson.fromJson(resultString, int[].class);
-				}
-				
-				//Sign
-				byte signoffset = result.getByte("signoffset");
-				
-				//Inventory
-				Inventory inventory = BreweryUtils.fromBase64(result.getString("inventory"));
-
-				//Time
-				float time = result.getFloat("time");
-				
-				new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time);
-			} 
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
