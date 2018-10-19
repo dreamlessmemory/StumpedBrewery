@@ -1,6 +1,5 @@
 package com.dreamless.brewery.listeners;
 
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -212,22 +211,8 @@ public class PlayerListener implements Listener {
 		ItemStack item = event.getItem();
 		if (item != null) {
 			if (item.getType() == Material.POTION) {
-				Brew brew = Brew.get(item);
-				if (brew != null) {
-					BPlayer.drink(brew, player);
-					if (player.getGameMode() != GameMode.CREATIVE) {
-						brew.remove(item);
-					}
-					if (Brewery.use1_9) {
-						if (player.getGameMode() != GameMode.CREATIVE) {
-							// replace the potion with an empty potion to avoid effects
-							event.setItem(new ItemStack(Material.POTION));
-						} else {
-							// Dont replace the item when keeping the potion, just cancel the event
-							event.setCancelled(true);
-						}
-					}
-				}
+				//check NBT for brewery
+				//run drink command
 			} else if (BPlayer.drainItems.containsKey(item.getType())) {
 				BPlayer bplayer = BPlayer.get(player);
 				if (bplayer != null) {
@@ -253,7 +238,7 @@ public class PlayerListener implements Listener {
 	// player walks while drunk, push him around!
 	@EventHandler(priority = EventPriority.LOW)
 	public void onPlayerMove(PlayerMoveEvent event) {
-		if (BPlayer.hasPlayer(event.getPlayer())) {
+		if (BPlayer.hasPlayer(event.getPlayer()) && BPlayer.get(event.getPlayer()).isDrunkEffects()) {
 			BPlayer.playerMove(event);
 		}
 	}

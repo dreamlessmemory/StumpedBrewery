@@ -666,11 +666,6 @@ public class Brewery extends JavaPlugin {
 			return player.getName();
 		}
 	}
-
-	// returns the Player if online
-	public static Player getPlayerfromString(String name) {
-		return Bukkit.getPlayer(UUID.fromString(name));
-	}
 	
 	//get a UUID from a name
 	public UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {

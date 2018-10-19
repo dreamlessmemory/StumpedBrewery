@@ -1,6 +1,7 @@
 package com.dreamless.brewery;
 
 import org.apache.commons.lang.mutable.MutableInt;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -540,17 +541,12 @@ public class BPlayer {
 			String name = entry.getKey();
 			BPlayer bplayer = entry.getValue();
 
-			if (bplayer.drunkeness > 30) {
-				if (bplayer.offlineDrunk == 0) {
-					Player player = Brewery.getPlayerfromString(name);
-					if (player != null) {
-
-						bplayer.drunkEffects(player);
-
-						if (enablePuke) {
-							bplayer.drunkPuke(player);
-						}
-
+			if (bplayer.drunkeness > 30 && bplayer.offlineDrunk == 0) {
+				Player player = Bukkit.getPlayer(UUID.fromString(name));
+				if (player != null && bplayer.isDrunkEffects()) {
+					bplayer.drunkEffects(player);
+					if (enablePuke) {
+						bplayer.drunkPuke(player);
 					}
 				}
 			}
@@ -570,7 +566,7 @@ public class BPlayer {
 					// Prevent 0 drunkeness
 					soberPerMin++;
 				}
-				if (bplayer.drain(Brewery.getPlayerfromString(name), soberPerMin)) {
+				if (bplayer.drain(Bukkit.getPlayer(UUID.fromString(name)), soberPerMin)) {
 					iter.remove();
 				}
 			}
@@ -633,5 +629,27 @@ public class BPlayer {
 		}
 		return -getQuality() + 11;
 	}
+	public boolean isDrunkEffects() {
+		return drunkEffects;
+	}
 
+	public void setDrunkEffects(boolean drunkEffects) {
+		this.drunkEffects = drunkEffects;
+	}
+
+	public static void toggleDrunkEffects(boolean setDrunk, String uuid) {
+		BPlayer bPlayer = players.get(uuid);
+		if(bPlayer != null) {
+			bPlayer.setDrunkEffects(setDrunk);
+		}
+		String query = "REPLACE players SET drunkeffects=?, uuid=?";
+		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+			stmt.setBoolean(1, setDrunk);
+			stmt.setString(2, uuid);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }

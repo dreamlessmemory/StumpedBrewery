@@ -167,7 +167,9 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		}else {
+		} else if (cmd.equalsIgnoreCase("toggle")) {
+				cmdToggleDrunk(sender, args);
+		} else {
 			//p.getServer().getPlayerExact(cmd) != null
 			UUID player = null;
 			try {
@@ -384,6 +386,28 @@ public class CommandListener implements CommandExecutor {
 			}
 		} else {
 			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
+		}
+	}
+	
+	public void cmdToggleDrunk(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			String toggle;
+			if(args.length < 2) {
+				toggle = "false";
+			} else {
+				toggle = args[1];
+			}
+			switch(toggle) {
+			case "true":
+				BPlayer.toggleDrunkEffects(true, ((Player) sender).getUniqueId().toString());
+				break;
+			case "false":
+				BPlayer.toggleDrunkEffects(false, ((Player) sender).getUniqueId().toString());
+				break;
+			default:
+				BPlayer.toggleDrunkEffects(false, ((Player) sender).getUniqueId().toString());
+				break;
+			}
 		}
 	}
 	
