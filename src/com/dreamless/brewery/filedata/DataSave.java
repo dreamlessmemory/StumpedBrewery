@@ -69,12 +69,12 @@ public class DataSave extends BukkitRunnable {
 		
 		//TODO: Convert to SQL
 		if (!BPlayer.isEmpty()) {
-			//BPlayer.save();
+			BPlayer.save();
 		}
 
 		//TODO: Convert to SQL
 		if (!Wakeup.wakeups.isEmpty()) {
-			//Wakeup.save(configFile.createSection("Wakeup"), oldData.getConfigurationSection("Wakeup"));
+			Wakeup.save();
 		}
 
 		//saveWorldNames(configFile, oldData.getConfigurationSection("Worlds"));

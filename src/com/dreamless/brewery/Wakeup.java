@@ -1,5 +1,7 @@
 package com.dreamless.brewery;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -227,44 +229,31 @@ public class Wakeup {
 	}
 
 
-	public static void save(ConfigurationSection section, ConfigurationSection oldData) {
-		p.createWorldSections(section);
-
+	public static void save() {
 		// loc is saved as a String in world sections with format x/y/z/pitch/yaw
 		if (!wakeups.isEmpty()) {
 
 			Iterator<Wakeup> iter = wakeups.iterator();
 			for (int id = 0; iter.hasNext(); id++) {
 				Wakeup wakeup = iter.next();
-
-				if (!wakeup.active) {
-					continue;
-				}
-
-				String worldName = wakeup.loc.getWorld().getName();
-				String prefix;
-
-				if (worldName.startsWith("DXL_")) {
-					prefix = p.getDxlName(worldName) + "." + id;
-				} else {
-					prefix = wakeup.loc.getWorld().getUID().toString() + "." + id;
-				}
-
-				section.set(prefix, wakeup.loc.getX() + "/" + wakeup.loc.getY() + "/" + wakeup.loc.getZ() + "/" + wakeup.loc.getPitch() + "/" + wakeup.loc.getYaw());
-			}
-		}
-
-		// copy Wakeups that are not loaded
-		if (oldData != null){
-			for (String uuid : oldData.getKeys(false)) {
-				if (!section.contains(uuid)) {
-					section.set(uuid, oldData.get(uuid));
+				
+				//Location
+				String location = Brewery.gson.toJson(wakeup.loc.serialize());
+				Brewery.breweryDriver.debugLog("Saving loc " + location);
+				
+				String query = "REPLACE wakeup SET idwakeup=?, location=?, active=?";
+				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+					stmt.setInt(1, id);
+					stmt.setString(2, location);
+					stmt.setBoolean(3, wakeup.active);
+					Brewery.breweryDriver.debugLog(stmt.toString());
+					stmt.executeUpdate();
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+					return;
 				}
 			}
 		}
-		
-		//SQL
-		
 	}
 
 }
