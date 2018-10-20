@@ -291,7 +291,7 @@ public class InventoryListener implements Listener {
 					}
 					break;
 				case MOVE_TO_OTHER_INVENTORY:
-					if(event.getClickedInventory().getHolder() instanceof Barrel) {
+					if(event.getClickedInventory().getHolder() instanceof Barrel || event.getClickedInventory().getHolder() instanceof BrewingStand) {
 						Brewery.breweryDriver.debugLog("MOVE");
 					}
 					break;
