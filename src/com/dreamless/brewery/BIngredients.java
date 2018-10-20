@@ -8,6 +8,8 @@ import org.bukkit.potion.PotionEffect;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
+import de.tr7zw.itemnbtapi.NBTList;
+import de.tr7zw.itemnbtapi.NBTType;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -151,10 +153,16 @@ public class BIngredients {
 		NBTItem nbti = new NBTItem(potion);
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
 		//Write NBT data
+		//Aspects
+		NBTCompound aspects = breweryMeta.addCompound("aspects");
 		for(String currentAspect: cookedAspects.keySet()) {
-			breweryMeta.setDouble(currentAspect, cookedAspects.get(currentAspect));
+			aspects.setDouble(currentAspect, cookedAspects.get(currentAspect));
 		}
+		//Type
 		breweryMeta.setString("type", type);
+		//Crafters
+		NBTCompound crafters = breweryMeta.addCompound("crafters");
+		crafters.setString(player.getDisplayName(), player.getDisplayName());
 		potion = nbti.getItem();
 
 		return potion;

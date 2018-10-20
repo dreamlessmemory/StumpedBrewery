@@ -24,10 +24,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -140,10 +138,6 @@ public class Brewery extends JavaPlugin {
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000
-
-		if (updateCheck) {
-			breweryDriver.getServer().getScheduler().runTaskLaterAsynchronously(breweryDriver, new UpdateChecker(), 135);
-		}
 
 		this.log(this.getDescription().getName() + " enabled!");
 	}
@@ -339,144 +333,104 @@ public class Brewery extends JavaPlugin {
 
 	// load all Data
 	public void readData() {
-		File file = new File(breweryDriver.getDataFolder(), "data.yml");
-		if (file.exists()) {
+		//Brew.installTime = data.getLong("installTime", System.currentTimeMillis());
 
-			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-
-			Brew.installTime = data.getLong("installTime", System.currentTimeMillis());
-
-			//Cauldrons
-			String cauldronQuery = "SELECT * FROM cauldrons";
-			try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){						
-				ResultSet result = stmt.executeQuery();
-				while (result.next()) {
-					//Block
-					HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-					debugLog(locationMap.toString());
-					Block worldBlock = (Location.deserialize(locationMap).getBlock());
-					debugLog(worldBlock.toString());
-					
-					//State
-					int state = result.getInt("state");
-					
-					//Ingredients
-					ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
-					HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
-					BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
-					
-					//Cooked
-					boolean cooking = result.getBoolean("cooking");
-					
-					new BCauldron(worldBlock, ingredients, state, cooking);
-				} 
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			
-			//Barrel
-			String barrelQuery = "SELECT * FROM barrels";
-			try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
-				ResultSet result = stmt.executeQuery();
-				while (result.next()) {
-					String resultString;
-					//spigot
-					HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-					debugLog(locationMap.toString());
-					Block worldBlock = (Location.deserialize(locationMap).getBlock());
-					debugLog(worldBlock.toString());
-					
-					//Wood
-					int[] woodsLoc = null;
-					resultString = result.getString("woodsloc");
-					if(resultString != null) {
-						woodsLoc = gson.fromJson(resultString, int[].class);
-					}
-					
-					//Stairs
-					int[] stairsLoc = null;
-					resultString = result.getString("stairsloc");
-					if(resultString != null) {
-						stairsLoc = gson.fromJson(resultString, int[].class);
-					}
-					
-					//Sign
-					byte signoffset = result.getByte("signoffset");
-					
-					//Inventory
-					Inventory inventory = BreweryUtils.fromBase64(result.getString("inventory"));
-
-					//Time
-					float time = result.getFloat("time");
-					
-					new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time);
-				} 
-			} catch (SQLException | IOException e1) {
-				e1.printStackTrace();
-			}
-			
-			//Player
-			String playerQuery = "SELECT * FROM players";
-			try (PreparedStatement stmt = Brewery.connection.prepareStatement(playerQuery)){						
-				ResultSet result = stmt.executeQuery();
-				while (result.next()) {
-					int drunkeness = result.getInt("drunkeness");
-					int offDrunk = result.getInt("offlinedrunk");
-					if(drunkeness > 0 || offDrunk > 0) {
-						new BPlayer(result.getString("uuid"), result.getInt("quality"), drunkeness, offDrunk, result.getBoolean("drunkeffects"));
-						debugLog(result.getString("uuid"));
-					}
-				} 
-			} catch (SQLException e1) {
-				e1.printStackTrace();
-			}
-			
-			for (World world : breweryDriver.getServer().getWorlds()) {
-				if (world.getName().startsWith("DXL_")) {
-					loadWorldData(getDxlName(world.getName()), world);
-				} else {
-					loadWorldData(world.getUID().toString(), world);
-				}
-			}
-
-		} else {
-			errorLog("No data.yml found, will create new one!");
+		//Cauldrons
+		String cauldronQuery = "SELECT * FROM cauldrons";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){					
+			ResultSet result = stmt.executeQuery();
+			while (result.next()) {
+				//Block
+				HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+				debugLog(locationMap.toString());
+				Block worldBlock = (Location.deserialize(locationMap).getBlock());
+				debugLog(worldBlock.toString());
+				
+				//State
+				int state = result.getInt("state");
+				
+				//Ingredients
+				ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
+				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
+				BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
+				
+				//Cooked
+				boolean cooking = result.getBoolean("cooking");
+				
+				new BCauldron(worldBlock, ingredients, state, cooking);
+			} 
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-	}
-	
-	// load Block locations of given world
-	public void loadWorldData(String uuid, World world) {
-
-		File file = new File(breweryDriver.getDataFolder(), "data.yml");
-		if (file.exists()) {
-
-			FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-			// loading Wakeup
-			if (data.contains("Wakeup." + uuid)) {
-				ConfigurationSection section = data.getConfigurationSection("Wakeup." + uuid);
-				for (String wakeup : section.getKeys(false)) {
-					// loc of wakeup is splitted into x/y/z/pitch/yaw
-					String loc = section.getString(wakeup);
-					if (loc != null) {
-						String[] splitted = loc.split("/");
-						if (splitted.length == 5) {
-
-							double x = NumberUtils.toDouble(splitted[0]);
-							double y = NumberUtils.toDouble(splitted[1]);
-							double z = NumberUtils.toDouble(splitted[2]);
-							float pitch = NumberUtils.toFloat(splitted[3]);
-							float yaw = NumberUtils.toFloat(splitted[4]);
-							Location location = new Location(world, x, y, z, yaw, pitch);
-
-							Wakeup.wakeups.add(new Wakeup(location));
-
-						} else {
-							errorLog("Incomplete Location-Data in data.yml: " + section.getCurrentPath() + "." + wakeup);
-						}
-					}
+		
+		//Barrel
+		String barrelQuery = "SELECT * FROM barrels";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
+			ResultSet result = stmt.executeQuery();
+			while (result.next()) {
+				String resultString;
+				//spigot
+				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+				debugLog(locationMap.toString());
+				Block worldBlock = (Location.deserialize(locationMap).getBlock());
+				debugLog(worldBlock.toString());
+				
+				//Wood
+				int[] woodsLoc = null;
+				resultString = result.getString("woodsloc");
+				if(resultString != null) {
+					woodsLoc = gson.fromJson(resultString, int[].class);
 				}
-			}
+				
+				//Stairs
+				int[] stairsLoc = null;
+				resultString = result.getString("stairsloc");
+				if(resultString != null) {
+					stairsLoc = gson.fromJson(resultString, int[].class);
+				}
+			
+				//Sign
+				byte signoffset = result.getByte("signoffset");
+			
+				//Inventory
+				String inventory = result.getString("inventory");
 
+				//Time
+				float time = result.getFloat("time");
+				
+				new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time);
+			} 
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+			
+		//Player
+		String playerQuery = "SELECT * FROM players";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(playerQuery)){						
+			ResultSet result = stmt.executeQuery();
+			while (result.next()) {
+				int drunkeness = result.getInt("drunkeness");
+				int offDrunk = result.getInt("offlinedrunk");
+				if(drunkeness > 0 || offDrunk > 0) {
+					new BPlayer(result.getString("uuid"), result.getInt("quality"), drunkeness, offDrunk, result.getBoolean("drunkeffects"));
+					debugLog(result.getString("uuid"));
+				}
+			} 
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		//Wakeup
+		String wakeupQuery = "SELECT location FROM wakeup";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(wakeupQuery)){						
+			ResultSet result = stmt.executeQuery();
+			while (result.next()) {
+				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
+				debugLog("Wakeup : " + locationMap.toString());
+				Wakeup.wakeups.add(new Wakeup(Location.deserialize(locationMap)));
+			} 
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
 	}
 
@@ -524,34 +478,6 @@ public class Brewery extends JavaPlugin {
 
 	public int parseInt(String string) {
 		return NumberUtils.toInt(string, 0);
-	}
-
-	// gets the Name of a DXL World
-	public String getDxlName(String worldName) {
-		File dungeonFolder = new File(worldName);
-		if (dungeonFolder.isDirectory()) {
-			for (File file : dungeonFolder.listFiles()) {
-				if (!file.isDirectory()) {
-					if (file.getName().startsWith(".id_")) {
-						return file.getName().substring(1).toLowerCase();
-					}
-				}
-			}
-		}
-		return worldName;
-	}
-
-	// create empty World save Sections
-	public void createWorldSections(ConfigurationSection section) {
-		for (World world : breweryDriver.getServer().getWorlds()) {
-			String worldName = world.getName();
-			if (worldName.startsWith("DXL_")) {
-				worldName = getDxlName(worldName);
-			} else {
-				worldName = world.getUID().toString();
-			}
-			section.createSection(worldName);
-		}
 	}
 
 	// prints a list of Strings at the specified page

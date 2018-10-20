@@ -3,22 +3,27 @@ package com.dreamless.brewery.listeners;
 //import com.dre.brewery.integration.LogBlockBarrel;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.*;
+
+import de.tr7zw.itemnbtapi.NBTItem;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -258,29 +263,44 @@ public class InventoryListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent event) {
 		if (event.getInventory().getType() == InventoryType.BREWING) {//Check if Brewing stand
-			if (event.getSlot() > 2) {//Not a berwing stand, get out
+			if (event.getSlot() > 2) {//Not a brewing stand, get out
 				return;
 			}
 		} else if (!(event.getInventory().getHolder() instanceof Barrel)) {
 			return; //Not a barrel, get out.
 		}
-
 		//TODO: Check recipe
 		ItemStack item = event.getCurrentItem();
-		if (item != null) {
-			if (item.getType() == Material.POTION) {
-				if (item.hasItemMeta()) {
-					PotionMeta meta = (PotionMeta) item.getItemMeta();
-					Brew brew = Brew.get(meta);
-					if (brew != null) {
-						if (Brew.hasColorLore(meta)) {
-							//brew.convertLore(meta, false);
-							item.setItemMeta(meta);
-						}
-					}
-				}
+		if(item == null || item.getType() == Material.AIR) {
+			Brewery.breweryDriver.debugLog("try get cursor");
+			item = event.getCursor();
+			if(item == null || item.getType() == Material.AIR) {
+				Brewery.breweryDriver.debugLog("not the cursor either");
+				return;
 			}
 		}
+		//place all and place one do work
+		NBTItem nbti = new NBTItem(item);
+		if(nbti.hasKey("brewery")) {
+			switch(event.getAction()) {
+				case PLACE_ALL:
+				case PLACE_ONE:
+				case PLACE_SOME:
+					if(event.getClickedInventory().getHolder() instanceof Player) {
+						Brewery.breweryDriver.debugLog("MOVE");
+					}
+					break;
+				case MOVE_TO_OTHER_INVENTORY:
+					if(event.getClickedInventory().getHolder() instanceof Barrel) {
+						Brewery.breweryDriver.debugLog("MOVE");
+					}
+					break;
+				default:
+					//Brewery.breweryDriver.debugLog("OTHER?");
+					break;
+			}
+		}
+		//Brewery.breweryDriver.debugLog("TEST");
 	}
 
 	// block the pickup of items where getPickupDelay is > 1000 (puke)
@@ -293,16 +313,8 @@ public class InventoryListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
-		/*if (P.p.useLB) {
-			if (event.getInventory().getHolder() instanceof Barrel) {
-				try {
-					LogBlockBarrel.closeBarrel(event.getPlayer(), event.getInventory());
-				} catch (Exception e) {
-					P.p.errorLog("Failed to Log Barrel to LogBlock!");
-					P.p.errorLog("Brewery was tested with version 1.94 of LogBlock!");
-					e.printStackTrace();
-				}
-			}
-		}*/
+		if (event.getInventory().getHolder() instanceof Barrel) {
+			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
+		}
 	}
 }

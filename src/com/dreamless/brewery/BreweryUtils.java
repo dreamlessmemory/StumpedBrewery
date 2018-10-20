@@ -50,4 +50,21 @@ public final class BreweryUtils {
             throw new IOException("Unable to decode class type.", e);
         }
     }
+    
+    public static Inventory fromBase64(String data, Barrel barrel) throws IOException {
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
+            BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+            Inventory inventory = Bukkit.getServer().createInventory(barrel, dataInput.readInt(), Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
+    
+            // Read the serialized inventory
+            for (int i = 0; i < inventory.getSize(); i++) {
+                inventory.setItem(i, (ItemStack) dataInput.readObject());
+            }
+            dataInput.close();
+            return inventory;
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Unable to decode class type.", e);
+        }
+    }
 }

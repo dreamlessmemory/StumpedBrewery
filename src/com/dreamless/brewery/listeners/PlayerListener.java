@@ -15,8 +15,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.*;
-import com.dreamless.brewery.filedata.UpdateChecker;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -281,11 +279,6 @@ public class PlayerListener implements Listener {
 				}
 			}
 		}
-	}
-
-	@EventHandler(ignoreCancelled = true)
-	public void onPlayerJoin(PlayerJoinEvent event) {
-		UpdateChecker.notify(event.getPlayer());
 	}
 
 	@EventHandler

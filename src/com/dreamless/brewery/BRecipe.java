@@ -36,6 +36,7 @@ public class BRecipe {
 	
 	private String name = "TEST";
     private ArrayList<String> flavorText = new ArrayList<String>();
+    private ArrayList<String> customFlavorText = new ArrayList<String>();
     
 	public BRecipe(String name, String flavorText) {
 		this.name = name;
@@ -282,7 +283,6 @@ public class BRecipe {
 		return flavor;
 	}
 	
-	
 	public boolean hasFlavorText(){
         return flavorText == null;
     }
@@ -309,7 +309,10 @@ public class BRecipe {
 	}
 
     public ArrayList<String> getFlavorText() {
-    	return flavorText;
+    	ArrayList<String> toReturn = new ArrayList<String>();
+    	toReturn.addAll(flavorText);
+    	toReturn.addAll(customFlavorText);
+    	return toReturn;
 	}
     
     private static String convertAspects(Map<String, Double> aspects){

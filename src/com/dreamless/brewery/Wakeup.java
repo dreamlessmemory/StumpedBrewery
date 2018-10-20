@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.command.CommandSender;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -230,7 +229,6 @@ public class Wakeup {
 
 
 	public static void save() {
-		// loc is saved as a String in world sections with format x/y/z/pitch/yaw
 		if (!wakeups.isEmpty()) {
 
 			Iterator<Wakeup> iter = wakeups.iterator();
