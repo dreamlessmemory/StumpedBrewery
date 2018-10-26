@@ -144,7 +144,9 @@ public class BIngredients {
 		//Recipe
 		BRecipe recipe = BRecipe.getRecipe(player, type, cookedAspects, false, false);
 		potionMeta.setDisplayName(recipe.getName());
-		potionMeta.setLore(recipe.getFlavorText());
+		ArrayList<String> craftersList = new ArrayList<String>();
+		craftersList.add(player.getDisplayName());
+		potionMeta.setLore(recipe.getFlavorText(craftersList));
 		potionMeta.setColor(BRecipe.getColor(type));
 
 		potion.setItemMeta(potionMeta);

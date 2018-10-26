@@ -23,6 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.*;
 
+import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
 
 import java.util.HashMap;
@@ -282,22 +283,49 @@ public class InventoryListener implements Listener {
 		//place all and place one do work
 		NBTItem nbti = new NBTItem(item);
 		if(nbti.hasKey("brewery")) {
+			NBTCompound brewery = nbti.getCompound("brewery");
+			boolean giveToPlayer = false;
+			boolean getFromPlayer = false;
+			
 			switch(event.getAction()) {
 				case PLACE_ALL:
 				case PLACE_ONE:
 				case PLACE_SOME:
 					if(event.getClickedInventory().getHolder() instanceof Player) {
 						Brewery.breweryDriver.debugLog("MOVE");
+						giveToPlayer = true;
+					} else {
+						getFromPlayer = true;
 					}
 					break;
 				case MOVE_TO_OTHER_INVENTORY:
 					if(event.getClickedInventory().getHolder() instanceof Barrel || event.getClickedInventory().getHolder() instanceof BrewingStand) {
 						Brewery.breweryDriver.debugLog("MOVE");
+						giveToPlayer = true;
+					} else {
+						getFromPlayer = true;
 					}
 					break;
 				default:
-					//Brewery.breweryDriver.debugLog("OTHER?");
 					break;
+			}
+			if(giveToPlayer) {
+				//TODO: Remove Crafter
+				//TODO: Reveal
+				
+				if(!brewery.hasKey("placedInBrewer")) {
+					String credit = brewery.getString("placedInBrewer");
+					//brewery.removeKey("placedInBrewer");
+					//If aging, add crafter
+				}
+			} else if (getFromPlayer) {
+				//TODO:List as crafter
+				if(!brewery.hasKey("placedInBrewer")) {
+					brewery.setString("placedInBrewer", ((Player)event.getWhoClicked()).getUniqueId().toString());
+					item = nbti.getItem();
+					event.setCurrentItem(item);
+					Brewery.breweryDriver.debugLog("Added crafter?");
+				}
 			}
 		}
 		//Brewery.breweryDriver.debugLog("TEST");

@@ -77,13 +77,6 @@
            <scope>provided</scope>
         </dependency>
         <dependency>
-           <groupId>org.spigotmc</groupId>
-           <artifactId>spigot</artifactId>
-           <version>1.13.2-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
-           <type>jar</type>
-           <scope>provided</scope>
-        </dependency>
-        <dependency>
     		<groupId>org.json</groupId>
     		<artifactId>json</artifactId>
 		    <version>20180813</version>

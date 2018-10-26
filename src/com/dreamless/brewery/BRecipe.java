@@ -272,7 +272,7 @@ public class BRecipe {
 			}
 		}
 		flavor.add("First invented by " + inventorName);
-		flavor.add("Crafted by " + crafter.getDisplayName());
+		//flavor.add("Crafted by " + crafter.getDisplayName());
 		
 		//Add Aspects
 		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color(convertAspects(aspects)), WRAP_SIZE)));
@@ -308,10 +308,18 @@ public class BRecipe {
 		return name;
 	}
 
-    public ArrayList<String> getFlavorText() {
+    public ArrayList<String> getFlavorText(ArrayList<String> crafters) {
     	ArrayList<String> toReturn = new ArrayList<String>();
     	toReturn.addAll(flavorText);
     	toReturn.addAll(customFlavorText);
+    	
+    	//Crafters
+    	String craftString = ChatColor.GRAY + "Crafted by ";
+    	for(String crafter : crafters) {
+    		craftString += crafter + ", ";
+    	}
+    	
+    	toReturn.addAll(Arrays.asList(ChatPaginator.wordWrap(craftString.substring(0, craftString.length()-2), WRAP_SIZE)));
     	return toReturn;
 	}
     

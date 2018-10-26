@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -15,12 +18,14 @@ import org.bukkit.block.data.Bisected;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
+import de.tr7zw.itemnbtapi.NBTType;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -70,11 +75,14 @@ public class Barrel implements InventoryHolder {
 
 
 	public static void onUpdate() {//UPDATE THE POTION TODO
+		Brewery.breweryDriver.debugLog("Update Barrel");
 		for (Barrel barrel : barrels) {
 			// Minecraft day is 20 min, so add 1/20 to the time every minute
 			//barrel.time += (1.0 / 20.0);
 			barrel.time += (1.0 / minutesPerYear);
+			Brewery.breweryDriver.debugLog("Age Start?");
 			barrel.ageContents((1.0 / minutesPerYear));
+			Brewery.breweryDriver.debugLog("Age end?");
 		}
 		if (check == 0 && barrels.size() > 0) {
 			Barrel random = barrels.get((int) Math.floor(Math.random() * barrels.size()));
@@ -88,7 +96,10 @@ public class Barrel implements InventoryHolder {
 	}
 	
 	private void ageContents(double time) {
-		for(ItemStack item : inventory.getContents()) {
+		ItemStack[] contents = inventory.getContents(); 
+		for(int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			//Brewery.breweryDriver.debugLog("Pull item");
 			if(item == null) {
 				continue;
 			}
@@ -97,39 +108,87 @@ public class Barrel implements InventoryHolder {
 			if(!nbti.hasKey("brewery")) {
 				continue;//Not brewery, skip
 			}
-			
+			//Brewery.breweryDriver.debugLog("Get item?");
 			NBTCompound brewery = nbti.getCompound("brewery");
 			
-			double age = brewery.hasKey("age") ? brewery.getDouble("age") : 0; 
+			NBTCompound aging = brewery.hasKey("aging") ? brewery.getCompound("aging") : brewery.addCompound("aging");
+			double age = aging.hasKey("age") ? aging.getDouble("age") : 0; 
 			double newAge = age + time;
 			
 			//Assign age now
-			brewery.setDouble("age", newAge);
+			aging.setDouble("age", newAge);
 			item = nbti.getItem();
-			
+			Brewery.breweryDriver.debugLog("Age is " + newAge);
 			//Check new Age
 			if(Math.floor(newAge) > Math.floor(age)) {//Logic - round down, then compare. Precondition, time =<1.0
-				ageOneYear(item, getWood());
+				item = ageOneYear(item, getWood());
 			}
 			//Update NBT
 			
+			
+			//Update Inventory
+			inventory.setItem(i, item);
 		}
 	}
 	
-	public void ageOneYear(ItemStack item, byte woodType) {//TODO: Aging calculation
+	public ItemStack ageOneYear(ItemStack item, byte woodType) {//TODO: Aging calculation
 	
-		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-		item.setItemMeta(potionMeta);
-		
 		Brewery.breweryDriver.debugLog("AGING 1 YEAR : " + item.toString());
 		
 		//Pull NBT
+		NBTItem nbti = new NBTItem(item);
+		NBTCompound brewery = nbti.getCompound("brewery");
+		NBTCompound aging = brewery.getCompound("aging");
+		
 		
 		//Pull aspects
+		NBTCompound aspectList = brewery.getCompound("aspects");
+		Set<String> aspects = aspectList.getKeys();
+		
 		
 		//Calculate new aspects
+		int age = (int) Math.floor(aging.getDouble("age"));
+		for(String currentAspect : aspects) {
+			double aspectPotency = aspectList.getDouble(currentAspect);
+			double agingBonus = Aspect.getStepBonus(age, currentAspect, "aging");
+			double typeBonus = agingBonus * (Aspect.getStepBonus(age, brewery.getString("type"), "aging")/100);
+			double newPotency = aspectPotency + agingBonus + typeBonus;
+			if(newPotency <= 0) {
+				newPotency = 0;
+			}
+			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " + " + agingBonus + " + " + typeBonus + " -> " + newPotency);
+			//Update NBT
+			aspectList.setDouble(currentAspect, newPotency);
+		}
 		
-		//Update NBT
+		item = nbti.getItem();
+		
+		if(!aging.hasKey("isAging")) {
+			aging.setBoolean("isAging", true);
+			item = nbti.getItem();
+			
+			//TODO:Need to alter the potion meta here
+			PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+			potionMeta.setDisplayName("Aging Brew");
+			ArrayList<String> agedFlavorText = new ArrayList<String>();
+			agedFlavorText.add("An aging " +  brewery.getString("type").toLowerCase() + " brew.");
+			agedFlavorText.add("This brew has aged for " + age + (age > 1 ? " years" : " year"));
+			potionMeta.setLore(agedFlavorText);
+			potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+			
+			//Return the Meta
+			item.setItemMeta(potionMeta);
+		} else {
+			//Update flavor text
+			PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+			potionMeta.setDisplayName("Aging Brew");
+			List<String> flavorText = potionMeta.getLore();
+			flavorText.set(2, "This brew has aged for " + age + " years");
+			potionMeta.setLore(flavorText);
+			potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		}
+		
+		return item;
 		
 	}
 
@@ -376,16 +435,7 @@ public class Barrel implements InventoryHolder {
 
 			for (ItemStack item : items) {
 				if (item != null) {
-					Brew brew = Brew.get(item);
-					if (brew != null) {
-						// Brew before throwing
-						brew.age(item, time, getWood());
-						PotionMeta meta = (PotionMeta) item.getItemMeta();
-						if (Brew.hasColorLore(meta)) {
-							//brew.convertLore(meta, false);
-							item.setItemMeta(meta);
-						}
-					}
+					//TODO: Remove who placed in barre?
 					// "broken" is the block that destroyed, throw them there!
 					if (broken != null) {
 						broken.getWorld().dropItem(broken.getLocation(), item);
@@ -422,20 +472,20 @@ public class Barrel implements InventoryHolder {
 				Brewery.breweryDriver.debugLog("BARREL");
 				//Location
 				String location = Brewery.gson.toJson(barrel.spigot.getLocation().serialize());
-				Brewery.breweryDriver.debugLog(location);
+				//Brewery.breweryDriver.debugLog(location);
 				
 				//woodloc
 				String woodsloc = null;
 				if(barrel.woodsloc != null) {
 					woodsloc = Brewery.gson.toJson(barrel.woodsloc);
-					Brewery.breweryDriver.debugLog(woodsloc + " wood");
+					//Brewery.breweryDriver.debugLog(woodsloc + " wood");
 				}	
 				
 				//stairsloc
 				String stairsloc = null;
 				if(barrel.stairsloc != null) {
 					stairsloc = Brewery.gson.toJson(barrel.stairsloc);
-					Brewery.breweryDriver.debugLog(stairsloc + " stairs");
+					//Brewery.breweryDriver.debugLog(stairsloc + " stairs");
 				}
 				
 				//inventory
@@ -453,7 +503,7 @@ public class Barrel implements InventoryHolder {
 					stmt.setString(7, jsonInventory);
 					stmt.setFloat(8, barrel.time);
 					
-					Brewery.breweryDriver.debugLog(stmt.toString());
+					//Brewery.breweryDriver.debugLog(stmt.toString());
 					
 					stmt.executeUpdate();
 				} catch (SQLException e1) {

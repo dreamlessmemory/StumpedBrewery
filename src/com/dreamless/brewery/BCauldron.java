@@ -19,7 +19,7 @@ public class BCauldron {
 
 	private BIngredients ingredients = new BIngredients();
 	private Block block;
-	private int state = 1;
+	private int state = 0;
 	private boolean cooking = false;
 
 	public BCauldron(Block block, ItemStack ingredient) {
@@ -155,9 +155,11 @@ public class BCauldron {
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (bcauldron.state > 1) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo1", "" + bcauldron.state));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo2", "" + bcauldron.state));
+			} else if (bcauldron.state == 1) {
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo1"));
 			} else {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo2"));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo0"));
 			}
 		}
 	}

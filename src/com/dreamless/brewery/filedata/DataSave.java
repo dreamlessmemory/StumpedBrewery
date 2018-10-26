@@ -31,19 +31,19 @@ public class DataSave extends BukkitRunnable {
 		if (!BCauldron.bcauldrons.isEmpty()) {
 			BCauldron.save();
 		}
-		Brewery.breweryDriver.debugLog("CAUL SAVE");
+		//Brewery.breweryDriver.debugLog("CAUL SAVE");
 		if (!Barrel.barrels.isEmpty()) {
 			Barrel.save();
 		}
-		Brewery.breweryDriver.debugLog("BAR SAVE");
+		//Brewery.breweryDriver.debugLog("BAR SAVE");
 		if (!BPlayer.isEmpty()) {
 			BPlayer.save();
 		}
-		Brewery.breweryDriver.debugLog("P SAVE");
+		//Brewery.breweryDriver.debugLog("P SAVE");
 		if (!Wakeup.wakeups.isEmpty()) {
 			Wakeup.save();
 		}
-		Brewery.breweryDriver.debugLog("W SAVE");
+		//Brewery.breweryDriver.debugLog("W SAVE");
 	}
 
 	// Finish the collection of data immediately
