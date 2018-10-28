@@ -15,9 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.*;
@@ -204,7 +202,7 @@ public class InventoryListener implements Listener {
 	//If it contains a brew, return true
 	private boolean runDistill(BrewerInventory inv) {
 		if (containsDistillable(inv)) {
-			Brew.distillAll(inv);
+			Distiller.distillAll(inv);
 			return true;
 		}
 		return false;

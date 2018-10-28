@@ -167,7 +167,6 @@ public class Brewery extends JavaPlugin {
 		//BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		BPlayer.clear();
-		Brew.potions.clear();
 		Wakeup.wakeups.clear();
 		Words.words.clear();
 		Words.ignoreText.clear();
@@ -274,8 +273,6 @@ public class Brewery extends JavaPlugin {
 		BPlayer.enablePuke = currentConfig.getBoolean("enablePuke", false);
 		BPlayer.pukeDespawntime = currentConfig.getInt("pukeDespawntime", 60) * 20;
 		BPlayer.homeType = currentConfig.getString("homeType", null);
-		Brew.colorInBarrels = currentConfig.getBoolean("colorInBarrels", false);
-		Brew.colorInBrewer = currentConfig.getBoolean("colorInBrewer", false);
 		PlayerListener.openEverywhere = currentConfig.getBoolean("openLargeBarrelEverywhere", false);
 		
 		//difficulty settings

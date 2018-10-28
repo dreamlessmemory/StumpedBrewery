@@ -12,14 +12,13 @@ import org.json.simple.JSONValue;
 
 import com.dreamless.brewery.BPlayer;
 import com.dreamless.brewery.BRecipe;
-import com.dreamless.brewery.Brew;
+import com.dreamless.brewery.Distiller;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.Wakeup;
 
 import de.tr7zw.itemnbtapi.NBTItem;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

@@ -156,7 +156,7 @@ public class BPlayer {
 	}
 
 	// Drink a brew and apply effects, etc.
-	public static void drink(Brew brew, Player player) {
+	public static void drink(Distiller brew, Player player) {
 		int brewAlc = 10;//placeholder
 		if (brewAlc == 0) {
 			//no alcohol so we dont need to add a BPlayer
