@@ -160,7 +160,8 @@ public class CommandListener implements CommandExecutor {
 
 			}
 		}
-
+		//TODO purgeplayer
+		//TODO flavortext
 		return true;
 	}
 
@@ -234,7 +235,6 @@ public class CommandListener implements CommandExecutor {
 		if (sender.hasPermission("brewery.cmd.create")) {
 			cmds.add(p.languageReader.get("Help_Create"));
 		}
-		//TODO purgeplayer
 		return cmds;
 	}
 	

@@ -109,7 +109,6 @@ public class Aspect implements Comparable<Object> {
 				}
 			}
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		return 0.0;
@@ -118,7 +117,6 @@ public class Aspect implements Comparable<Object> {
 	
 	@Override
 	public int compareTo(Object arg0) {
-		// TODO Auto-generated method stub
 		double difference = this.potency - ((Aspect)arg0).getPotency();
 		if(difference > 0) {
 			return 1; 

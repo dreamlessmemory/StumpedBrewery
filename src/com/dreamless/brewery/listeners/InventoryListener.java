@@ -280,7 +280,11 @@ public class InventoryListener implements Listener {
 				
 				if(brewery.hasKey("placedInBrewer")) {
 					Brewery.breweryDriver.debugLog("ya reveal");
-					event.setCurrentItem(Barrel.revealAgedBrew(item));
+					if(event.getInventory().getType() == InventoryType.BREWING) {
+						
+					} else if (event.getInventory().getHolder() instanceof Barrel) {
+						event.setCurrentItem(Barrel.revealAgedBrew(item));
+					}
 				}
 			} else if (getFromPlayer) {
 				if(!brewery.hasKey("placedInBrewer")) {
