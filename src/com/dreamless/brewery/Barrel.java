@@ -163,7 +163,7 @@ public class Barrel implements InventoryHolder {
 		
 		//Mask as Aging Brew
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-		potionMeta.setDisplayName("Aging Brew");
+		potionMeta.setDisplayName("#Aging Brew");
 		ArrayList<String> agedFlavorText = new ArrayList<String>();
 		if(!aging.hasKey("isAging") && aging.getBoolean("isAging") != true) {
 			aging.setBoolean("isAging", true);
@@ -186,68 +186,6 @@ public class Barrel implements InventoryHolder {
 		
 	}
 	
-	public static ItemStack revealAgedBrew(ItemStack item) {
-		//Get PotionMeta
-		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-		
-		//Pull NBT
-		NBTItem nbti = new NBTItem(item);
-		NBTCompound brewery = nbti.getCompound("brewery");
-		NBTCompound aging = brewery.getCompound("aging");
-		
-		//Remove isAging tag
-		aging.setBoolean("isAging", false);
-				
-				
-		//Pull aspects
-		NBTCompound aspectList = brewery.getCompound("aspects");
-		Set<String> aspects = aspectList.getKeys();
-		HashMap <String, Double> agedAspects = new HashMap<String, Double>();
-		for(String currentAspect : aspects) {
-			agedAspects.put(currentAspect, aspectList.getDouble(currentAspect));
-		}
-		
-		//Set new effects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects);
-		potionMeta.clearCustomEffects();
-		for (PotionEffect effect: effects) {
-			potionMeta.addCustomEffect(effect, true);
-		}
-		potionMeta.removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-		
-		//Get Recipe
-		Player player = null;
-		if(brewery.hasKey("placedInBrewer")) {
-			player = Bukkit.getPlayer(UUID.fromString(brewery.getString("placedInBrewer")));
-			brewery.setString("placedInBrewer", null);
-		}
-		String crafterName = player.getDisplayName();
-		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, true, brewery.hasKey("distilling"));
-		
-		//Name
-		potionMeta.setDisplayName(recipe.getName());
-		
-		//Handle crafter list
-		ArrayList<String> craftersList = new ArrayList<String>();
-		NBTCompound crafterTags = brewery.getCompound("crafters");
-		for(String crafters : crafterTags.getKeys()) {
-			craftersList.add(crafters);
-		}
-		if(player!= null && !crafterTags.hasKey(crafterName)) {
-			craftersList.add(crafterName);
-			crafterTags.setString(crafterName, crafterName);
-		}
-		
-		//FlavorText
-		potionMeta.setLore(recipe.getFlavorText(craftersList));
-
-		//assign meta/nbt
-		item = nbti.getItem();
-		item.setItemMeta(potionMeta);
-		
-		return item;
-	}
-
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
 		if (isLarge()) {
 			if (!player.hasPermission("brewery.openbarrel.big")) {
@@ -260,9 +198,6 @@ public class Barrel implements InventoryHolder {
 				return false;
 			}
 		}
-
-
-
 		return true;
 	}
 

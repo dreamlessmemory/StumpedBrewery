@@ -5,9 +5,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.ChatPaginator;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
@@ -22,8 +24,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -380,6 +384,74 @@ public class BRecipe {
     private static String color(String s){
         return ChatColor.translateAlternateColorCodes('&', s);
     }
+    
+    public static ItemStack revealMaskedBrew(ItemStack item) {
+		//Get PotionMeta
+		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+		
+		//Pull NBT
+		NBTItem nbti = new NBTItem(item);
+		NBTCompound brewery = nbti.getCompound("brewery");
+		NBTCompound aging = brewery.getCompound("aging");
+		NBTCompound distilling = brewery.getCompound("distilling");
+		
+		//Remove isAging and isDistilling tags
+		if(aging != null) {
+			aging.setBoolean("isAging", false);
+		}
+		if(distilling != null) {
+			distilling.setBoolean("isDistilling", false);
+		}
+				
+				
+		//Pull aspects
+		NBTCompound aspectList = brewery.getCompound("aspects");
+		Set<String> aspects = aspectList.getKeys();
+		HashMap <String, Double> agedAspects = new HashMap<String, Double>();
+		for(String currentAspect : aspects) {
+			agedAspects.put(currentAspect, aspectList.getDouble(currentAspect));
+		}
+		
+		//Set new effects
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects);
+		potionMeta.clearCustomEffects();
+		for (PotionEffect effect: effects) {
+			potionMeta.addCustomEffect(effect, true);
+		}
+		potionMeta.removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		
+		//Get Recipe
+		Player player = null;
+		if(brewery.hasKey("placedInBrewer")) {
+			player = Bukkit.getPlayer(UUID.fromString(brewery.getString("placedInBrewer")));
+			brewery.setString("placedInBrewer", null);
+		}
+		String crafterName = player.getDisplayName();
+		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, aging != null, distilling != null);
+		
+		//Name
+		potionMeta.setDisplayName(recipe.getName());
+		
+		//Handle crafter list
+		ArrayList<String> craftersList = new ArrayList<String>();
+		NBTCompound crafterTags = brewery.getCompound("crafters");
+		for(String crafters : crafterTags.getKeys()) {
+			craftersList.add(crafters);
+		}
+		if(player!= null && !crafterTags.hasKey(crafterName)) {
+			craftersList.add(crafterName);
+			crafterTags.setString(crafterName, crafterName);
+		}
+		
+		//FlavorText
+		potionMeta.setLore(recipe.getFlavorText(craftersList));
+
+		//assign meta/nbt
+		item = nbti.getItem();
+		item.setItemMeta(potionMeta);
+		
+		return item;
+	}
     
     public static void periodicPurge() {
     	Brewery.breweryDriver.debugLog("Okay, running purge...");

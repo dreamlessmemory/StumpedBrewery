@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.*;
@@ -238,6 +239,7 @@ public class InventoryListener implements Listener {
 			return; //Not a barrel, get out.
 		}
 		ItemStack item = event.getCurrentItem();
+		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 		if(item == null || item.getType() == Material.AIR) {
 			Brewery.breweryDriver.debugLog("try get cursor");
 			item = event.getCursor();
@@ -278,13 +280,9 @@ public class InventoryListener implements Listener {
 			if(giveToPlayer) {
 				Brewery.breweryDriver.debugLog("really reveal?");
 				
-				if(brewery.hasKey("placedInBrewer")) {
+				if(brewery.hasKey("placedInBrewer") && potionMeta.getDisplayName().contains("#")) {
 					Brewery.breweryDriver.debugLog("ya reveal");
-					if(event.getInventory().getType() == InventoryType.BREWING) {
-						
-					} else if (event.getInventory().getHolder() instanceof Barrel) {
-						event.setCurrentItem(Barrel.revealAgedBrew(item));
-					}
+					event.setCurrentItem(BRecipe.revealMaskedBrew(item));
 				}
 			} else if (getFromPlayer) {
 				if(!brewery.hasKey("placedInBrewer")) {
