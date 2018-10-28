@@ -229,7 +229,7 @@ public class InventoryListener implements Listener {
 
 	//We're going to do the recipe check here.
 	// convert to non colored Lore when taking out of Barrel/Brewer
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent event) {
 		if (event.getInventory().getType() == InventoryType.BREWING) {//Check if Brewing stand
 			if (event.getSlot() > 2) {//Not a brewing stand, get out
@@ -239,7 +239,7 @@ public class InventoryListener implements Listener {
 			return; //Not a barrel, get out.
 		}
 		ItemStack item = event.getCurrentItem();
-		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+		//PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 		if(item == null || item.getType() == Material.AIR) {
 			Brewery.breweryDriver.debugLog("try get cursor");
 			item = event.getCursor();
@@ -280,7 +280,8 @@ public class InventoryListener implements Listener {
 			if(giveToPlayer) {
 				Brewery.breweryDriver.debugLog("really reveal?");
 				
-				if(brewery.hasKey("placedInBrewer") && potionMeta.getDisplayName().contains("#")) {
+				if(brewery.hasKey("placedInBrewer")) {
+					if(item.getItemMeta().getDisplayName().contains("#Aging") || item.getItemMeta().getDisplayName().contains("#Distilling"))
 					Brewery.breweryDriver.debugLog("ya reveal");
 					event.setCurrentItem(BRecipe.revealMaskedBrew(item));
 				}
