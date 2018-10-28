@@ -728,12 +728,7 @@ public class CommandListener implements CommandExecutor {
 				return;
 			}
 
-			BRecipe recipe = null;
-			if (recipe != null) {
-				player.getInventory().addItem(recipe.create(quality));
-			} else {
-				p.msg(sender, p.languageReader.get("Error_NoBrewName", name));
-			}
+			p.msg(sender, p.languageReader.get("Error_NoBrewName", name));
 
 		} else {
 			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));

@@ -8,9 +8,6 @@ import org.bukkit.potion.PotionEffect;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
-import de.tr7zw.itemnbtapi.NBTList;
-import de.tr7zw.itemnbtapi.NBTType;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

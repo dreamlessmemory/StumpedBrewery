@@ -14,9 +14,6 @@ public class BEffect {
 	private double potency = 0;
 	private double duration = 0;
 	private boolean hidden = false;
-	private boolean randomEffect = false;
-	private boolean randomDuration = false;
-	private boolean randomLevel= false;
 	Random rand = new Random();
 	
 	private static final int DURATION_CAP = 600;

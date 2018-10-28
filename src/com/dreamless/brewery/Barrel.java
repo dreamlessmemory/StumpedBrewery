@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -30,8 +29,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
-import de.tr7zw.itemnbtapi.NBTType;
-
 import org.apache.commons.lang.ArrayUtils;
 
 public class Barrel implements InventoryHolder {
@@ -79,7 +76,7 @@ public class Barrel implements InventoryHolder {
 	}
 
 
-	public static void onUpdate() {//UPDATE THE POTION TODO
+	public static void onUpdate() {
 		Brewery.breweryDriver.debugLog("Update Barrel");
 		for (Barrel barrel : barrels) {
 			// Minecraft day is 20 min, so add 1/20 to the time every minute
@@ -128,15 +125,13 @@ public class Barrel implements InventoryHolder {
 			if(Math.floor(newAge) > Math.floor(age)) {//Logic - round down, then compare. Precondition, time =<1.0
 				item = ageOneYear(item, getWood());
 			}
-			//Update NBT
-			
-			
+
 			//Update Inventory
 			inventory.setItem(i, item);
 		}
 	}
 	
-	public ItemStack ageOneYear(ItemStack item, byte woodType) {//TODO: Aging calculation
+	public ItemStack ageOneYear(ItemStack item, byte woodType) {
 	
 		Brewery.breweryDriver.debugLog("AGING 1 YEAR : " + item.toString());
 		
@@ -145,11 +140,9 @@ public class Barrel implements InventoryHolder {
 		NBTCompound brewery = nbti.getCompound("brewery");
 		NBTCompound aging = brewery.getCompound("aging");
 		
-		
 		//Pull aspects
 		NBTCompound aspectList = brewery.getCompound("aspects");
 		Set<String> aspects = aspectList.getKeys();
-		
 		
 		//Calculate new aspects
 		int age = (int) Math.floor(aging.getDouble("age"));
@@ -168,33 +161,26 @@ public class Barrel implements InventoryHolder {
 		
 		item = nbti.getItem();
 		
+		//Mask as Aging Brew
+		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+		potionMeta.setDisplayName("Aging Brew");
+		ArrayList<String> agedFlavorText = new ArrayList<String>();
 		if(!aging.hasKey("isAging") && aging.getBoolean("isAging") != true) {
 			aging.setBoolean("isAging", true);
 			item = nbti.getItem();
-			
-			//TODO:Need to alter the potion meta here
-			PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-			potionMeta.setDisplayName("Aging Brew");
-			ArrayList<String> agedFlavorText = new ArrayList<String>();
+
 			agedFlavorText.add("An aging " +  brewery.getString("type").toLowerCase() + " brew.");
 			agedFlavorText.add("This brew has aged for " + age + (age > 1 ? " years" : " year"));
-			potionMeta.setLore(agedFlavorText);
-			potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-			
-			//Return the Meta
-			item.setItemMeta(potionMeta);
 		} else {
 			//Update flavor text
-			PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-			potionMeta.setDisplayName("Aging Brew");
 			List<String> flavorText = potionMeta.getLore();
-			ArrayList<String> agedFlavorText = new ArrayList<String>();
 			agedFlavorText.add(flavorText.get(0));
 			agedFlavorText.add("This brew has aged for " + age + " years");
-			potionMeta.setLore(agedFlavorText);
-			potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-			item.setItemMeta(potionMeta);
 		}
+		
+		potionMeta.setLore(agedFlavorText);
+		potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		item.setItemMeta(potionMeta);
 		
 		return item;
 		
@@ -203,7 +189,6 @@ public class Barrel implements InventoryHolder {
 	public static ItemStack revealAgedBrew(ItemStack item) {
 		//Get PotionMeta
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-		
 		
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
@@ -230,7 +215,7 @@ public class Barrel implements InventoryHolder {
 		}
 		potionMeta.removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 		
-		//Recipe
+		//Get Recipe
 		Player player = null;
 		if(brewery.hasKey("placedInBrewer")) {
 			player = Bukkit.getPlayer(UUID.fromString(brewery.getString("placedInBrewer")));
@@ -238,9 +223,11 @@ public class Barrel implements InventoryHolder {
 		}
 		String crafterName = player.getDisplayName();
 		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, true, brewery.hasKey("distilling"));
+		
 		//Name
 		potionMeta.setDisplayName(recipe.getName());
-		//Handle Crafters
+		
+		//Handle crafter list
 		ArrayList<String> craftersList = new ArrayList<String>();
 		NBTCompound crafterTags = brewery.getCompound("crafters");
 		for(String crafters : crafterTags.getKeys()) {
@@ -250,12 +237,11 @@ public class Barrel implements InventoryHolder {
 			craftersList.add(crafterName);
 			crafterTags.setString(crafterName, crafterName);
 		}
+		
 		//FlavorText
 		potionMeta.setLore(recipe.getFlavorText(craftersList));
-		//Color?
-//		potionMeta.setColor(BRecipe.getColor(type));
 
-		
+		//assign meta/nbt
 		item = nbti.getItem();
 		item.setItemMeta(potionMeta);
 		
@@ -505,7 +491,6 @@ public class Barrel implements InventoryHolder {
 
 			for (ItemStack item : items) {
 				if (item != null) {
-					//TODO: Remove who placed in barre?
 					// "broken" is the block that destroyed, throw them there!
 					if (broken != null) {
 						broken.getWorld().dropItem(broken.getLocation(), item);

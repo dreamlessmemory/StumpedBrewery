@@ -24,7 +24,6 @@ public class Brew {
 	private int quality;
 	private int distillRuns;
 	private float ageTime;
-	private float wood;
 	private BRecipe currentRecipe;
 	private boolean unlabeled;
 	private boolean persistent;
@@ -52,7 +51,6 @@ public class Brew {
 		this.quality = quality;
 		this.distillRuns = distillRuns;
 		this.ageTime = ageTime;
-		this.wood = wood;
 		this.unlabeled = unlabeled;
 		this.persistent = persistent;
 		this.lastUpdate = lastUpdate;

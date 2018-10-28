@@ -15,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -258,7 +257,6 @@ public class InventoryListener implements Listener {
 			}
 		}
 	}
-	//TODO: Convert to High
 	//We're going to do the recipe check here.
 	// convert to non colored Lore when taking out of Barrel/Brewer
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -270,7 +268,6 @@ public class InventoryListener implements Listener {
 		} else if (!(event.getInventory().getHolder() instanceof Barrel)) {
 			return; //Not a barrel, get out.
 		}
-		//TODO: Check recipe
 		ItemStack item = event.getCurrentItem();
 		if(item == null || item.getType() == Material.AIR) {
 			Brewery.breweryDriver.debugLog("try get cursor");
@@ -310,8 +307,6 @@ public class InventoryListener implements Listener {
 					break;
 			}
 			if(giveToPlayer) {
-				//TODO: Remove Crafter
-				//TODO: Reveal
 				Brewery.breweryDriver.debugLog("really reveal?");
 				
 				if(brewery.hasKey("placedInBrewer")) {
@@ -319,7 +314,6 @@ public class InventoryListener implements Listener {
 					event.setCurrentItem(Barrel.revealAgedBrew(item));
 				}
 			} else if (getFromPlayer) {
-				//TODO:List as crafter
 				if(!brewery.hasKey("placedInBrewer")) {
 					brewery.setString("placedInBrewer", ((Player)event.getWhoClicked()).getUniqueId().toString());
 					item = nbti.getItem();
