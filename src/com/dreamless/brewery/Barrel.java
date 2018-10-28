@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
@@ -21,6 +25,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
@@ -163,7 +168,7 @@ public class Barrel implements InventoryHolder {
 		
 		item = nbti.getItem();
 		
-		if(!aging.hasKey("isAging")) {
+		if(!aging.hasKey("isAging") && aging.getBoolean("isAging") != true) {
 			aging.setBoolean("isAging", true);
 			item = nbti.getItem();
 			
@@ -183,13 +188,78 @@ public class Barrel implements InventoryHolder {
 			PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 			potionMeta.setDisplayName("Aging Brew");
 			List<String> flavorText = potionMeta.getLore();
-			flavorText.set(2, "This brew has aged for " + age + " years");
-			potionMeta.setLore(flavorText);
+			ArrayList<String> agedFlavorText = new ArrayList<String>();
+			agedFlavorText.add(flavorText.get(0));
+			agedFlavorText.add("This brew has aged for " + age + " years");
+			potionMeta.setLore(agedFlavorText);
 			potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+			item.setItemMeta(potionMeta);
 		}
 		
 		return item;
 		
+	}
+	
+	public static ItemStack revealAgedBrew(ItemStack item) {
+		//Get PotionMeta
+		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+		
+		
+		//Pull NBT
+		NBTItem nbti = new NBTItem(item);
+		NBTCompound brewery = nbti.getCompound("brewery");
+		NBTCompound aging = brewery.getCompound("aging");
+		
+		//Remove isAging tag
+		aging.setBoolean("isAging", false);
+				
+				
+		//Pull aspects
+		NBTCompound aspectList = brewery.getCompound("aspects");
+		Set<String> aspects = aspectList.getKeys();
+		HashMap <String, Double> agedAspects = new HashMap<String, Double>();
+		for(String currentAspect : aspects) {
+			agedAspects.put(currentAspect, aspectList.getDouble(currentAspect));
+		}
+		
+		//Set new effects
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects);
+		potionMeta.clearCustomEffects();
+		for (PotionEffect effect: effects) {
+			potionMeta.addCustomEffect(effect, true);
+		}
+		potionMeta.removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		
+		//Recipe
+		Player player = null;
+		if(brewery.hasKey("placedInBrewer")) {
+			player = Bukkit.getPlayer(UUID.fromString(brewery.getString("placedInBrewer")));
+			brewery.setString("placedInBrewer", null);
+		}
+		String crafterName = player.getDisplayName();
+		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, true, brewery.hasKey("distilling"));
+		//Name
+		potionMeta.setDisplayName(recipe.getName());
+		//Handle Crafters
+		ArrayList<String> craftersList = new ArrayList<String>();
+		NBTCompound crafterTags = brewery.getCompound("crafters");
+		for(String crafters : crafterTags.getKeys()) {
+			craftersList.add(crafters);
+		}
+		if(player!= null && !crafterTags.hasKey(crafterName)) {
+			craftersList.add(crafterName);
+			crafterTags.setString(crafterName, crafterName);
+		}
+		//FlavorText
+		potionMeta.setLore(recipe.getFlavorText(craftersList));
+		//Color?
+//		potionMeta.setColor(BRecipe.getColor(type));
+
+		
+		item = nbti.getItem();
+		item.setItemMeta(potionMeta);
+		
+		return item;
 	}
 
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {

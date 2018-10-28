@@ -312,11 +312,11 @@ public class InventoryListener implements Listener {
 			if(giveToPlayer) {
 				//TODO: Remove Crafter
 				//TODO: Reveal
+				Brewery.breweryDriver.debugLog("really reveal?");
 				
-				if(!brewery.hasKey("placedInBrewer")) {
-					String credit = brewery.getString("placedInBrewer");
-					//brewery.removeKey("placedInBrewer");
-					//If aging, add crafter
+				if(brewery.hasKey("placedInBrewer")) {
+					Brewery.breweryDriver.debugLog("ya reveal");
+					event.setCurrentItem(Barrel.revealAgedBrew(item));
 				}
 			} else if (getFromPlayer) {
 				//TODO:List as crafter

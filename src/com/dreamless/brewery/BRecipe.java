@@ -36,7 +36,7 @@ public class BRecipe {
 	
 	private String name = "TEST";
     private ArrayList<String> flavorText = new ArrayList<String>();
-    private ArrayList<String> customFlavorText = new ArrayList<String>();
+    //private ArrayList<String> customFlavorText = new ArrayList<String>();
     
 	public BRecipe(String name, String flavorText) {
 		this.name = name;
@@ -124,7 +124,7 @@ public class BRecipe {
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
 						}
-						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), player, results.getString("flavortext"), topAspects));
+						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), results.getString("customtext"), topAspects));
 					}
 				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
@@ -146,7 +146,7 @@ public class BRecipe {
 		String flavor = "A novel " + lowercaseType.toLowerCase() + " brew";
 		
 		String newName = generateNewName(player, lowercaseType);
-		ArrayList<String> newLore = generateLore(null, player, flavor, aspects);
+		ArrayList<String> newLore = generateLore(null, flavor, null, aspects);
 		
 		addRecipeToClaimList(uuid, newName);
 		addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor);
@@ -260,7 +260,7 @@ public class BRecipe {
 		return Color.fromRGB(8441558);
 	}
 	
-	private static ArrayList<String> generateLore(String inventorUUID, Player crafter, String flavorText, Map<String, Double> aspects){
+	private static ArrayList<String> generateLore(String inventorUUID, String flavorText, String playerFlavorText, Map<String, Double> aspects){
 		ArrayList<String> flavor = new ArrayList<String>();
 		
 		//Add Name
@@ -272,13 +272,17 @@ public class BRecipe {
 			}
 		}
 		flavor.add("First invented by " + inventorName);
-		//flavor.add("Crafted by " + crafter.getDisplayName());
 		
 		//Add Aspects
 		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color(convertAspects(aspects)), WRAP_SIZE)));
 		
 		//Add flavortext
 		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.RESET + flavorText, WRAP_SIZE)));
+		
+		//Add player's flavortext
+		if(playerFlavorText != null) {
+			flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.RESET + playerFlavorText, WRAP_SIZE)));
+		}
 		
 		return flavor;
 	}
@@ -311,7 +315,7 @@ public class BRecipe {
     public ArrayList<String> getFlavorText(ArrayList<String> crafters) {
     	ArrayList<String> toReturn = new ArrayList<String>();
     	toReturn.addAll(flavorText);
-    	toReturn.addAll(customFlavorText);
+    	//toReturn.addAll(customFlavorText);
     	
     	//Crafters
     	String craftString = ChatColor.GRAY + "Crafted by ";

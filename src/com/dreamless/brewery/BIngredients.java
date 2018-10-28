@@ -135,7 +135,7 @@ public class BIngredients {
 		}
 		Brewery.breweryDriver.debugLog("SIZE? " + cookedAspects.size());
 		//Add effects based on aspects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(cookedAspects));
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(cookedAspects);
 		for (PotionEffect effect: effects) {
 			potionMeta.addCustomEffect(effect, true);
 		}
