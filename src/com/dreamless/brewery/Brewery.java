@@ -215,16 +215,6 @@ public class Brewery extends JavaPlugin {
 		languageReader.save();
 		languageReader = new LanguageReader(new File(breweryDriver.getDataFolder(), "languages/" + language + ".yml"));
 
-		// Reload Recipes
-		Boolean successful = true;
-		for (Brew brew : Brew.potions.values()) {
-			if (!brew.reloadRecipe()) {
-				successful = false;
-			}
-		}
-		if (!successful) {
-			msg(sender, breweryDriver.languageReader.get("Error_Recipeload"));
-		}
 		reloader = null;
 	}
 

@@ -174,58 +174,52 @@ public class InventoryListener implements Listener {
 		}.runTaskTimer(Brewery.breweryDriver, 2L, 1L).getTaskId());
 	}
 
-	// Returns a Brew or null for every Slot in the BrewerInventory
-	private Brew[] getDistillContents(BrewerInventory inv) {
-		ItemStack item;
-		Brew[] contents = new Brew[3];
-		for (int slot = 0; slot < 3; slot++) {
-			item = inv.getItem(slot);
-			if (item != null) {
-				contents[slot] = Brew.get(item);
-			}
-		}
-		return contents;
-	}
 
 	private byte hasCustom(BrewerInventory brewer) {
 		ItemStack item = brewer.getItem(3); // ingredient
 		boolean glowstone = (item != null && Material.GLOWSTONE_DUST == item.getType()); // need dust in the top slot.
 		byte customFound = 0;
-		for (Brew brew : getDistillContents(brewer)) {
-			if (brew != null) {
-				if (!glowstone) {
-					return 1;
-				} else {
-					customFound = 1;
-				}
+		if(containsDistillable(brewer)) {
+			if(glowstone) {
+				customFound = 2;
+			} else {
+				customFound = 1;
 			}
 		}
+		
+		//Does not contain distillable = 0
+		//Contains distillable,  has glowstone = 2
+		//Contains distillable, no glowstone = 1
 		return customFound;
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBrew(BrewEvent event) {
-		if (Brewery.use1_9) {
-			if (hasCustom(event.getContents()) != 0) {
-				event.setCancelled(true);
-			}
-			return;
-		}
-		if (runDistill(event.getContents())) {
+		if (hasCustom(event.getContents()) != 0) {
 			event.setCancelled(true);
 		}
 	}
 
+	//Check if it contains a brew, then distill it.
+	//If it contains a brew, return true
 	private boolean runDistill(BrewerInventory inv) {
-		boolean custom = false;
-		Brew[] contents = getDistillContents(inv);
-		for (int slot = 0; slot < 3; slot++) {
-			if (contents[slot] == null) continue;
-			custom = true;
-		}
-		if (custom) {
-			Brew.distillAll(inv, contents);
+		if (containsDistillable(inv)) {
+			Brew.distillAll(inv);
 			return true;
+		}
+		return false;
+	}
+	
+	private boolean containsDistillable(BrewerInventory inv) {
+		ItemStack item;
+		for(int i = 0; i < 3; i++) {
+			item = inv.getItem(i);
+			if(item != null) {
+				NBTItem nbti = new NBTItem(item);
+				if(nbti.hasKey("brewery")) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -234,29 +228,6 @@ public class InventoryListener implements Listener {
 		return 800;
 	}
 
-	// Clicked a Brew somewhere, do some updating
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = false)
-	public void onInventoryClickLow(InventoryClickEvent event) {
-		if (event.getCurrentItem() != null && event.getCurrentItem().getType().equals(Material.POTION)) {
-			ItemStack item = event.getCurrentItem();
-			if (item.hasItemMeta()) {
-				PotionMeta potion = ((PotionMeta) item.getItemMeta());
-				Brew brew = Brew.get(potion);
-				if (brew != null) {
-					// convert potions from 1.8 to 1.9 for color and to remove effect descriptions
-					if (Brewery.use1_9 && !potion.hasItemFlag(ItemFlag.HIDE_POTION_EFFECTS)) {
-						BRecipe recipe = brew.getCurrentRecipe();
-						if (recipe != null) {
-							Brew.removeEffects(potion);
-							//Brew.PotionColor.valueOf(recipe.getColor()).colorBrew(potion, item, brew.canDistill());
-							item.setItemMeta(potion);
-						}
-					}
-					brew.touch();
-				}
-			}
-		}
-	}
 	//We're going to do the recipe check here.
 	// convert to non colored Lore when taking out of Barrel/Brewer
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

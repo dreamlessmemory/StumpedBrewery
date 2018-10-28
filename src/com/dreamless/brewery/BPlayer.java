@@ -157,10 +157,9 @@ public class BPlayer {
 
 	// Drink a brew and apply effects, etc.
 	public static void drink(Brew brew, Player player) {
-		int brewAlc = brew.calcAlcohol();
+		int brewAlc = 10;//placeholder
 		if (brewAlc == 0) {
 			//no alcohol so we dont need to add a BPlayer
-			addBrewEffects(brew, player);
 			return;
 		}
 		BPlayer bPlayer = get(player);
@@ -170,9 +169,6 @@ public class BPlayer {
 		bPlayer.drunkeness += brewAlc;
 
 		if (bPlayer.drunkeness <= 100) {
-
-			addBrewEffects(brew, player);
-			//addQualityEffects(brew.getQuality(), brewAlc, player);
 
 		} else {
 			bPlayer.drinkCap(player);
@@ -518,10 +514,6 @@ public class BPlayer {
 			}
 			PotionEffectType.BLINDNESS.createEffect(duration, 0).apply(player);
 		}
-	}
-
-	public static void addBrewEffects(Brew brew, Player player) {
-		
 	}
 
 	public void hangoverEffects(final Player player) {
