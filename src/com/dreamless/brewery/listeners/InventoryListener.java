@@ -15,6 +15,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -80,6 +82,8 @@ public class InventoryListener implements Listener {
 		// Workaround the Drag event when only clicking a slot
 		if (event.getInventory() instanceof BrewerInventory) {
 			onBrewerClick(new InventoryClickEvent(event.getView(), InventoryType.SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PLACE_ALL));
+		} else if (event.getInventory().getHolder() instanceof Barrel) {
+			onTransferToBrewer(new InventoryClickEvent(event.getView(), InventoryType.SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PLACE_ALL));
 		}
 	}
 
@@ -226,11 +230,110 @@ public class InventoryListener implements Listener {
 	private int getLongestDistillTime(BrewerInventory inv) {
 		return 800;
 	}
+	
+	//Check if a brew is transferred into a brewing stand or barrel
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void onTransferToBrewer(InventoryClickEvent event) {
+		ItemStack item = null;
+		//Check if we're dealing with a barrel or a brewing stand
+		InventoryView invView = event.getView();
+		Inventory topInventory = invView.getTopInventory();
+		InventoryHolder topHolder = topInventory.getHolder();
+		if(!(topHolder instanceof Barrel) && !(topHolder instanceof BrewingStand)) {
+			Brewery.breweryDriver.debugLog("Ignoring, neither barrel nor brewing stand.");
+			Brewery.breweryDriver.debugLog(topHolder.toString());
+			return;//Not those two types, then ignore.
+		}
+		
+		//Check action, leave if not the correct action to place into a brewing equipment
+		InventoryAction action = event.getAction();
+		if(action == InventoryAction.PLACE_ALL || action ==InventoryAction.PLACE_ONE) {
+			if(event.getClickedInventory() != topInventory) return;
+			else if ((topHolder instanceof BrewingStand) && event.getSlotType() != InventoryType.SlotType.CRAFTING) return;
+			item = event.getCursor();
+		} else if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+			if(event.getClickedInventory() == topInventory)	return;
+			item = event.getCurrentItem();
+		} else return;
+		
+		if(item.getType() != Material.POTION) {
+			return;
+		}
+		//Brewery.breweryDriver.debugLog("Clear to proceed");
+		NBTItem nbti = new NBTItem(item);
+		if(nbti.hasKey("brewery")) {
+			Brewery.breweryDriver.debugLog("Brew placed in Brewing Equipment");
+			NBTCompound brewery = nbti.getCompound("brewery");
+			if(!brewery.hasKey("placedInBrewer")) {
+				brewery.setString("placedInBrewer", ((Player)event.getWhoClicked()).getUniqueId().toString());
+				item = nbti.getItem();
+				
+				//Event.setCurrentItem causes duplicates
+				//event.setCancelled(true);
+				event.setCurrentItem(item);
+				invView.setCursor(null);
+				//topInventory.setItem(event.getRawSlot(), item);
+				Brewery.breweryDriver.debugLog("Brew has been tagged");
+				return;
+			}
+		}
+	}
+	
+	
+	//Check if a brew is transferred into a brewing stand or barrel
+		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+		public void onTransferFromBrewer(InventoryClickEvent event) {
+			ItemStack item = null;
+			
+			//Check if we're dealing with a barrel or a brewing stand
+			InventoryView invView = event.getView();
+			Inventory topInventory = invView.getTopInventory();
+			InventoryHolder topHolder = topInventory.getHolder();
+			if(!(topHolder instanceof Barrel) && !(topHolder instanceof BrewingStand)) {
+				Brewery.breweryDriver.debugLog("Ignoring, neither barrel nor brewing stand.");
+				Brewery.breweryDriver.debugLog(topHolder.toString());
+				return;//Not those two types, then ignore.
+			}
+			
+			//Check action, leave if not the correct action to place into a brewing equipment
+			InventoryAction action = event.getAction();
+			if(action == InventoryAction.PLACE_ALL || action ==InventoryAction.PLACE_ONE || action == InventoryAction.SWAP_WITH_CURSOR) {
+				if(event.getClickedInventory() != invView.getBottomInventory()) return;
+				item = event.getCursor();
+			} else if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+				if(event.getClickedInventory() == invView.getBottomInventory())	return;
+				item = event.getCurrentItem();
+			} else return;
+			
+			if(item.getType() != Material.POTION) {
+				return;
+			}
+			//Brewery.breweryDriver.debugLog("Clear to proceed");
+			NBTItem nbti = new NBTItem(item);
+			if(nbti.hasKey("brewery")) {
+				NBTCompound brewery = nbti.getCompound("brewery");
+				Brewery.breweryDriver.debugLog("Transferred back");
+				if(brewery.hasKey("placedInBrewer")) {
+					Brewery.breweryDriver.debugLog("And it has the tag");
+					//if(item.getItemMeta().getDisplayName().contains("#Aging") || item.getItemMeta().getDisplayName().contains("#Distilling"))
+					//Brewery.breweryDriver.debugLog("ya reveal");
+					//event.setCurrentItem(BRecipe.revealMaskedBrew(item));
+				}
+			}
+		}
 
 	//We're going to do the recipe check here.
 	// convert to non colored Lore when taking out of Barrel/Brewer
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent event) {
+		/*//Check if we're dealing with a barrel or a brewing stand
+		InventoryView invView = event.getView();
+		InventoryHolder topHolder = invView.getTopInventory().getHolder();
+		if(!(topHolder instanceof Barrel) || !(topHolder instanceof BrewingStand)) {
+			return;//Not those two types, then ignore.
+		}
+		
+
 		if (event.getInventory().getType() == InventoryType.BREWING) {//Check if Brewing stand
 			if (event.getSlot() > 2) {//Not a brewing stand, get out
 				return;
@@ -258,7 +361,6 @@ public class InventoryListener implements Listener {
 			switch(event.getAction()) {
 				case PLACE_ALL:
 				case PLACE_ONE:
-				case PLACE_SOME:
 					if(event.getClickedInventory().getHolder() instanceof Player) {
 						Brewery.breweryDriver.debugLog("MOVE");
 						giveToPlayer = true;
@@ -294,7 +396,7 @@ public class InventoryListener implements Listener {
 				}
 			}
 		}
-		//Brewery.breweryDriver.debugLog("TEST");
+		//Brewery.breweryDriver.debugLog("TEST");*/
 	}
 
 	// block the pickup of items where getPickupDelay is > 1000 (puke)

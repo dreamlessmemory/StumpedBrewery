@@ -98,6 +98,9 @@ public class Barrel implements InventoryHolder {
 	}
 	
 	private void ageContents(double time) {
+		if(inventory == null) {
+			return;
+		}
 		ItemStack[] contents = inventory.getContents(); 
 		for(int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
