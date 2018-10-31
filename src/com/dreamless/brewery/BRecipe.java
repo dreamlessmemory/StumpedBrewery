@@ -40,7 +40,6 @@ public class BRecipe {
 	
 	private String name = "TEST";
     private ArrayList<String> flavorText = new ArrayList<String>();
-    //private ArrayList<String> customFlavorText = new ArrayList<String>();
     
 	public BRecipe(String name, String flavorText) {
 		this.name = name;
@@ -150,7 +149,7 @@ public class BRecipe {
 		String flavor = "A novel " + lowercaseType.toLowerCase() + " brew";
 		
 		String newName = generateNewName(player, lowercaseType);
-		ArrayList<String> newLore = generateLore(null, flavor, null, aspects);
+		ArrayList<String> newLore = generateLore(null, flavor, aspects);
 		
 		addRecipeToClaimList(uuid, newName);
 		addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor);
@@ -723,6 +722,30 @@ public class BRecipe {
 			} else {
 				e1.printStackTrace();
 			}
+			return;
+		}  
+    }
+    
+    public static void giveRecipeFlavorText(Player player, String flavortext) {
+    	//Potion stuff
+    	String uuid = player.getUniqueId().toString();
+    	ItemStack item = player.getInventory().getItemInMainHand();
+    	String currentRecipe = item.getItemMeta().getDisplayName();
+    	
+    	String query = "UPDATE recipes SET flavortext=? WHERE inventor=? AND name=?";
+    	try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+			stmt.setString(1, flavortext);
+			stmt.setString(2, uuid);
+			stmt.setString(3, currentRecipe);
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			int result = stmt.executeUpdate();
+			if(result == 0) {
+				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Unable to add flavor text to " + currentRecipe);
+				return;
+			}
+			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Flavor text for " + currentRecipe + " has been added!");
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 			return;
 		}  
     }

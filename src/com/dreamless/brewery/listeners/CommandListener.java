@@ -129,7 +129,15 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		} else if (cmd.equalsIgnoreCase("toggle")) {
+		} else if (cmd.equalsIgnoreCase("flavor") || cmd.equalsIgnoreCase("flavortext")) {
+
+			if (sender.hasPermission("brewery.cmd.claim")) {
+				cmdFlavorText(sender, args);
+			} else {
+				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
+			}
+
+		}else if (cmd.equalsIgnoreCase("toggle")) {
 				cmdToggleDrunk(sender, args);
 		} else {
 			//p.getServer().getPlayerExact(cmd) != null
@@ -343,6 +351,41 @@ public class CommandListener implements CommandExecutor {
 						p.msg(sender, "You cannot name brews that are aging or distilling.");
 					} else {
 					BRecipe.renameRecipe(player, newName);
+					}
+				} else {
+					p.msg(sender, p.languageReader.get("Error_ItemNotBreweryPotion"));
+				}
+			} else {
+				p.msg(sender, p.languageReader.get("Error_ItemNotPotion"));
+			}
+		} else {
+			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
+		}
+	}
+	
+	public void cmdFlavorText(CommandSender sender, String[] args) {
+		if (sender instanceof Player) {
+			//Check if given a name
+			String newFlavorText = "";
+			for(int i = 1; i < args.length; i++) {
+				newFlavorText += args[i] + " ";
+			}
+			newFlavorText = newFlavorText.trim();
+			if(newFlavorText.isEmpty()) {
+				p.msg(sender, "You must supply new flavor text!");
+				return;
+			}
+			
+			//Get Potion
+			Player player = (Player) sender;
+			ItemStack hand = player.getInventory().getItemInMainHand();
+			if (hand != null) {//Something in the hand
+				NBTItem nbti = new NBTItem(hand);
+				if(nbti.hasKey("brewery")) {
+					if(nbti.hasKey("placedInBrewer")) {
+						p.msg(sender, "You cannot give flavor text to brews that are aging or distilling.");
+					} else {
+					BRecipe.giveRecipeFlavorText(player, newFlavorText);
 					}
 				} else {
 					p.msg(sender, p.languageReader.get("Error_ItemNotBreweryPotion"));
