@@ -119,27 +119,51 @@ public class BIngredients {
 		// cookedTime is always time in minutes, state may differ with number of ticks
 		cookedTime = state;
 		/** Aspect Calculation **/
-		HashMap <String, Double> cookedAspects = new HashMap<String, Double>();
-		//Determine overflow
-		double aspectSaturation = (aspects.size() <= 6 ? 1 : aspects.size() / 6);
-		//Add calculated aspects to the map
+		//Split Aspects
+		HashMap<String, Aspect> effectAspects = new HashMap<String, Aspect>();
+		HashMap<String, Aspect> flavorAspects = new HashMap<String, Aspect>();
+		
 		for(String currentAspect: aspects.keySet()) {
-			Aspect aspect = aspects.get(currentAspect);
+			if(currentAspect.contains("_DURATION") || currentAspect.contains("_POTENCY")) effectAspects.put(currentAspect, aspects.get(currentAspect));
+			else flavorAspects.put(currentAspect, aspects.get(currentAspect));
+		}
+		
+		HashMap <String, Double> effectAspectValues = new HashMap<String, Double>();
+		HashMap <String, Double> flavorAspectValues = new HashMap<String, Double>();
+		
+		//Calculate Effect Values
+		double effectAspectSaturation = (effectAspects.size() <= 3 ? 1 : effectAspects.size() / 3);
+		//Add calculated aspects to the map
+		for(String currentAspect: effectAspects.keySet()) {
+			Aspect aspect = effectAspects.get(currentAspect);
 			double calculatedPotency = aspect.getPotency();
 			double calculatedSaturation = (aspect.getSaturation() < 1 ? 1 : aspect.getSaturation());
-			cookedAspects.put(currentAspect, (calculatedPotency / (calculatedSaturation * aspectSaturation)));
-			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + cookedAspects.get(currentAspect));
+			effectAspectValues.put(currentAspect, (calculatedPotency / (calculatedSaturation * effectAspectSaturation)));
+			//Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + effectAspectValues.get(currentAspect));
 		}
-		Brewery.breweryDriver.debugLog("SIZE? " + cookedAspects.size());
-		//Add effects based on aspects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(cookedAspects);
+		
+		//Calculate Flavor Values
+		double flavorAspectSaturation = (flavorAspects.size() <= 6 ? 1 : flavorAspects.size() / 6);
+		//Add calculated aspects to the map
+		for(String currentAspect: flavorAspects.keySet()) {
+			Aspect aspect = flavorAspects.get(currentAspect);
+			double calculatedPotency = aspect.getPotency();
+			double calculatedSaturation = (aspect.getSaturation() < 1 ? 1 : aspect.getSaturation());
+			flavorAspectValues.put(currentAspect, (calculatedPotency / (calculatedSaturation * flavorAspectSaturation)));
+			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + flavorAspectValues.get(currentAspect));
+		}
+		//Brewery.breweryDriver.debugLog("SIZE? " + effectAspectValues.size());
+		
+		
+		//Add custom potion effects based on effect aspects
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(effectAspectValues);
 		for (PotionEffect effect: effects) {
 			potionMeta.addCustomEffect(effect, true);
 		}
 		
 		
 		//Recipe
-		BRecipe recipe = BRecipe.getRecipe(player, type, cookedAspects, false, false);
+		BRecipe recipe = BRecipe.getRecipe(player, type, effectAspectValues, flavorAspectValues, false, false);
 		potionMeta.setDisplayName(recipe.getName());
 		ArrayList<String> craftersList = new ArrayList<String>();
 		craftersList.add(player.getDisplayName());
@@ -153,9 +177,12 @@ public class BIngredients {
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
 		//Write NBT data
 		//Aspects
-		NBTCompound aspects = breweryMeta.addCompound("aspects");
-		for(String currentAspect: cookedAspects.keySet()) {
-			aspects.setDouble(currentAspect, cookedAspects.get(currentAspect));
+		NBTCompound aspectTagList = breweryMeta.addCompound("aspects");
+		for(String currentAspect: effectAspectValues.keySet()) {
+			aspectTagList.setDouble(currentAspect, effectAspectValues.get(currentAspect));
+		}
+		for(String currentAspect: flavorAspectValues.keySet()) {
+			aspectTagList.setDouble(currentAspect, flavorAspectValues.get(currentAspect));
 		}
 		//Type
 		breweryMeta.setString("type", type);

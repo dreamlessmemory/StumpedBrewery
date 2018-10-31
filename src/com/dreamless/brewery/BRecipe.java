@@ -51,27 +51,43 @@ public class BRecipe {
 		this.flavorText = flavorText;
 	}
 	
-	public static BRecipe getRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled){
-		//Order the aspects
-		AspectComparator aspectComparator = new AspectComparator(aspects);
-		NavigableMap<String, Double> topAspects = new TreeMap<String, Double>(aspectComparator);
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> effectAspects, Map<String, Double> flavorAspects, boolean isAged, boolean isDistilled){
+		//Get Top 3 Effect Aspects
+		AspectComparator effecAspectComparator = new AspectComparator(effectAspects);
+		NavigableMap<String, Double> topEffectAspects = new TreeMap<String, Double>(effecAspectComparator);
+		for(String aspect: effectAspects.keySet()) {
+			topEffectAspects.put(aspect, effectAspects.get(aspect));
+		}
+		while(topEffectAspects.size() > 3) {
+			topEffectAspects.pollLastEntry();
+		}
+		//Get top 6 Flavor Aspects
+		AspectComparator flavorAspectComparator = new AspectComparator(flavorAspects);
+		NavigableMap<String, Double> topFlavorAspects = new TreeMap<String, Double>(flavorAspectComparator);
 		//Add to new tree
-		for(String aspect: aspects.keySet()) {
-			topAspects.put(aspect, aspects.get(aspect));
+		for(String aspect: flavorAspects.keySet()) {
+			topFlavorAspects.put(aspect, flavorAspects.get(aspect));
+		}
+		while(topFlavorAspects.size() > 6) {
+			topFlavorAspects.pollLastEntry();
 		}
 		
-		//Pare out the top aspects until you have the top 6
-		while(topAspects.size() > 6) {
-			topAspects.pollLastEntry();
-		}
+		//Combine
+		HashMap<String, Double> combinedAspects = new HashMap<String, Double>();
+		combinedAspects.putAll(topFlavorAspects);
+		combinedAspects.putAll(topEffectAspects);
 		
+		return getRecipe(player, type, combinedAspects, isAged, isDistilled); 
+	}
+	
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> combinedAspects, boolean isAged, boolean isDistilled){	
 		//Prep the SQL
 		String starterQuery = "SELECT * FROM recipes WHERE type=? AND isAged=? AND isDistilled=?";
 		String aspectQuery = "";
-		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect4name, aspect5name, aspect6name)";
+		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect4name, aspect5name, aspect6name, aspect7name, aspect8name, aspect9name)";
 		String fullQuery = "";
 		
-		for(String aspect: topAspects.keySet()) {
+		for(String aspect: combinedAspects.keySet()) {
 			aspectQuery = aspectQuery.concat(" AND '" + aspect + aspectColumn);
 		}
 		fullQuery = starterQuery + aspectQuery;
@@ -86,23 +102,23 @@ public class BRecipe {
 			results = stmt.executeQuery();
 			if (!results.next()) {//New recipe!
 				Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
-				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
+				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);
 			} else {//Found something
 				do {
 					//Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
-					if(topAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
+					if(combinedAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
 						//Brewery.breweryDriver.debugLog("reject, insufficient aspects");
 						continue;
 					}
 					boolean allAspectsFound = true; //didn't find it
-					for(Map.Entry<String, Double> es :topAspects.entrySet()) {
+					for(Map.Entry<String, Double> es :combinedAspects.entrySet()) {
 						String currentAspect = es.getKey().trim();
 						double aspectRating = es.getValue();
 						boolean aspectFound = false;
 						
 						//Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
 						
-						for(int i = 1; i <= topAspects.size(); i++) {//Iterate through aspectNname columns
+						for(int i = 1; i <= combinedAspects.size(); i++) {//Iterate through aspectNname columns
 							String aspectNameColumn = "aspect" + i + "name";
 							String aspectRatingColumn = "aspect" + i + "rating";
 							String aspectName = results.getString(aspectNameColumn).trim();
@@ -127,12 +143,12 @@ public class BRecipe {
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
 						}
-						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), topAspects));
+						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), combinedAspects));
 					}
 				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
 				//Brewery.breweryDriver.debugLog("None found?");
-				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
+				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
