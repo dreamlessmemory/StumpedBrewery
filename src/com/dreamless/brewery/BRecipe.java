@@ -128,7 +128,7 @@ public class BRecipe {
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
 						}
-						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), results.getString("customtext"), topAspects));
+						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), topAspects));
 					}
 				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
@@ -264,7 +264,7 @@ public class BRecipe {
 		return Color.fromRGB(8441558);
 	}
 	
-	private static ArrayList<String> generateLore(String inventorUUID, String flavorText, String playerFlavorText, Map<String, Double> aspects){
+	private static ArrayList<String> generateLore(String inventorUUID, String flavorText, Map<String, Double> aspects){
 		ArrayList<String> flavor = new ArrayList<String>();
 		
 		//Add Name
@@ -282,11 +282,6 @@ public class BRecipe {
 		
 		//Add flavortext
 		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.RESET + flavorText, WRAP_SIZE)));
-		
-		//Add player's flavortext
-		if(playerFlavorText != null) {
-			flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.RESET + playerFlavorText, WRAP_SIZE)));
-		}
 		
 		return flavor;
 	}
@@ -322,7 +317,7 @@ public class BRecipe {
     	//toReturn.addAll(customFlavorText);
     	
     	//Crafters
-    	String craftString = ChatColor.GRAY + "Crafted by ";
+    	String craftString = ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Crafted by ";
     	for(String crafter : crafters) {
     		craftString += crafter + ", ";
     	}

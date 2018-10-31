@@ -339,7 +339,11 @@ public class CommandListener implements CommandExecutor {
 			if (hand != null) {//Something in the hand
 				NBTItem nbti = new NBTItem(hand);
 				if(nbti.hasKey("brewery")) {
+					if(nbti.hasKey("placedInBrewer")) {
+						p.msg(sender, "You cannot name brews that are aging or distilling.");
+					} else {
 					BRecipe.renameRecipe(player, newName);
+					}
 				} else {
 					p.msg(sender, p.languageReader.get("Error_ItemNotBreweryPotion"));
 				}
