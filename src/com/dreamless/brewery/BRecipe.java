@@ -280,7 +280,7 @@ public class BRecipe {
 		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(color(convertAspects(aspects)), WRAP_SIZE)));
 		
 		//Add flavortext
-		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.RESET + flavorText, WRAP_SIZE)));
+		flavor.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY + flavorText, WRAP_SIZE)));
 		
 		return flavor;
 	}
