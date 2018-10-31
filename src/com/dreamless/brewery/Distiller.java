@@ -29,7 +29,7 @@ public class Distiller {
 					//Assign age now
 					distilling.setInteger("cycles", ++cycles);
 					item = nbti.getItem();
-					Brewery.breweryDriver.debugLog("Cycles is " + cycles);
+					//Brewery.breweryDriver.debugLog("Cycles is " + cycles);
 					item = distillSlot(item);
 					
 					inv.setItem(i, item);
@@ -61,7 +61,7 @@ public class Distiller {
 			if(newPotency <= 0) {
 				newPotency = 0;
 			}
-			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " + " + agingBonus + " + " + typeBonus + " -> " + newPotency);
+			//Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " + " + agingBonus + " + " + typeBonus + " -> " + newPotency);
 			//Update NBT
 			aspectList.setDouble(currentAspect, newPotency);
 		}

@@ -77,14 +77,14 @@ public class Barrel implements InventoryHolder {
 
 
 	public static void onUpdate() {
-		Brewery.breweryDriver.debugLog("Update Barrel");
+		//Brewery.breweryDriver.debugLog("Update Barrel");
 		for (Barrel barrel : barrels) {
 			// Minecraft day is 20 min, so add 1/20 to the time every minute
 			//barrel.time += (1.0 / 20.0);
 			barrel.time += (1.0 / minutesPerYear);
-			Brewery.breweryDriver.debugLog("Age Start?");
+			//Brewery.breweryDriver.debugLog("Age Start?");
 			barrel.ageContents((1.0 / minutesPerYear));
-			Brewery.breweryDriver.debugLog("Age end?");
+			//Brewery.breweryDriver.debugLog("Age end?");
 		}
 		if (check == 0 && barrels.size() > 0) {
 			Barrel random = barrels.get((int) Math.floor(Math.random() * barrels.size()));
@@ -462,7 +462,7 @@ public class Barrel implements InventoryHolder {
 		if (!barrels.isEmpty()) {
 			
 			for (Barrel barrel : barrels) {
-				Brewery.breweryDriver.debugLog("BARREL");
+				//Brewery.breweryDriver.debugLog("BARREL");
 				//Location
 				String location = Brewery.gson.toJson(barrel.spigot.getLocation().serialize());
 				//Brewery.breweryDriver.debugLog(location);
@@ -510,10 +510,10 @@ public class Barrel implements InventoryHolder {
 		String query = "DELETE FROM barrels WHERE idbarrels >=?";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setInt(1, id);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-				stmt.executeUpdate();
+			//Brewery.breweryDriver.debugLog(stmt.toString());
+			stmt.executeUpdate();
 		} catch (SQLException e1) {
-				e1.printStackTrace();
+			e1.printStackTrace();
 		}
 	}
 

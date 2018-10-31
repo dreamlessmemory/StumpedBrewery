@@ -237,14 +237,14 @@ public class Wakeup {
 				
 				//Location
 				String location = Brewery.gson.toJson(wakeup.loc.serialize());
-				Brewery.breweryDriver.debugLog("Saving loc " + location);
+				//Brewery.breweryDriver.debugLog("Saving loc " + location);
 				
 				String query = "REPLACE wakeup SET idwakeup=?, location=?, active=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);
 					stmt.setBoolean(3, wakeup.active);
-					Brewery.breweryDriver.debugLog(stmt.toString());
+					//Brewery.breweryDriver.debugLog(stmt.toString());
 					stmt.executeUpdate();
 				} catch (SQLException e1) {
 					e1.printStackTrace();

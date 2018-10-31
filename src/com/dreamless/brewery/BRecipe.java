@@ -89,9 +89,9 @@ public class BRecipe {
 				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
 			} else {//Found something
 				do {
-					Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
+					//Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
 					if(topAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
-						Brewery.breweryDriver.debugLog("reject, insufficient aspects");
+						//Brewery.breweryDriver.debugLog("reject, insufficient aspects");
 						continue;
 					}
 					boolean allAspectsFound = true; //didn't find it
@@ -100,30 +100,30 @@ public class BRecipe {
 						double aspectRating = es.getValue();
 						boolean aspectFound = false;
 						
-						Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
+						//Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
 						
 						for(int i = 1; i <= topAspects.size(); i++) {//Iterate through aspectNname columns
 							String aspectNameColumn = "aspect" + i + "name";
 							String aspectRatingColumn = "aspect" + i + "rating";
 							String aspectName = results.getString(aspectNameColumn).trim();
-							Brewery.breweryDriver.debugLog("checking..." + aspectName);
+							//Brewery.breweryDriver.debugLog("checking..." + aspectName);
 							if(aspectName.equalsIgnoreCase(currentAspect)){//So, it has the aspect
 								int recipeRating = results.getInt(aspectRatingColumn);
 								if(aspectRating >= recipeRating && aspectRating < recipeRating + 9) {//found it
 									aspectFound = true;
-									Brewery.breweryDriver.debugLog("You do!");
+									//Brewery.breweryDriver.debugLog("You do!");
 									break;
 								}
 							}
 						}
 						if(!aspectFound) {//The aspect wasn't here, so not the right one. Stop looking
-							Brewery.breweryDriver.debugLog("You don't!");
+							//Brewery.breweryDriver.debugLog("You don't!");
 							allAspectsFound = false;
 							break;
 						}
 					}
 					if(allAspectsFound) {//We found it!
-						Brewery.breweryDriver.debugLog("Found you!");
+						//Brewery.breweryDriver.debugLog("Found you!");
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
 						}
@@ -131,7 +131,7 @@ public class BRecipe {
 					}
 				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
-				Brewery.breweryDriver.debugLog("None found?");
+				//Brewery.breweryDriver.debugLog("None found?");
 				return generateNewRecipe(player, type, aspects, isAged, isDistilled);
 			}
 		} catch (SQLException e1) {
@@ -465,7 +465,7 @@ public class BRecipe {
     	//Main Recipe List
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
 			stmt.setString(1, sevenDaysAgo);
-			Brewery.breweryDriver.debugLog(stmt.toString());
+			//Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
@@ -473,7 +473,7 @@ public class BRecipe {
     	//Claim Recipe List
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(newRecipeQuery)){
 			stmt.setString(1, sevenDaysAgo);
-			Brewery.breweryDriver.debugLog(stmt.toString());
+			//Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();

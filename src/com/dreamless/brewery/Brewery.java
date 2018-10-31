@@ -357,9 +357,9 @@ public class Brewery extends JavaPlugin {
 				String resultString;
 				//spigot
 				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-				debugLog(locationMap.toString());
+				//debugLog(locationMap.toString());
 				Block worldBlock = (Location.deserialize(locationMap).getBlock());
-				debugLog(worldBlock.toString());
+				//debugLog(worldBlock.toString());
 				
 				//Wood
 				int[] woodsLoc = null;
@@ -399,7 +399,7 @@ public class Brewery extends JavaPlugin {
 				int offDrunk = result.getInt("offlinedrunk");
 				if(drunkeness > 0 || offDrunk > 0) {
 					new BPlayer(result.getString("uuid"), result.getInt("quality"), drunkeness, offDrunk, result.getBoolean("drunkeffects"));
-					debugLog(result.getString("uuid"));
+					//debugLog(result.getString("uuid"));
 				}
 			} 
 		} catch (SQLException e1) {
@@ -412,7 +412,7 @@ public class Brewery extends JavaPlugin {
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
 				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-				debugLog("Wakeup : " + locationMap.toString());
+				//debugLog("Wakeup : " + locationMap.toString());
 				Wakeup.wakeups.add(new Wakeup(Location.deserialize(locationMap)));
 			} 
 		} catch (SQLException e1) {
