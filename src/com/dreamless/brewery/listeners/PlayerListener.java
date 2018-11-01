@@ -15,6 +15,9 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.*;
+
+import de.tr7zw.itemnbtapi.NBTItem;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -209,8 +212,10 @@ public class PlayerListener implements Listener {
 		ItemStack item = event.getItem();
 		if (item != null) {
 			if (item.getType() == Material.POTION) {
-				//check NBT for brewery
-				//run drink command
+				NBTItem nbti = new NBTItem(item);
+				if(nbti.hasKey("brewery")) {
+					BPlayer.drink(player, item);
+				}
 			} else if (BPlayer.drainItems.containsKey(item.getType())) {
 				BPlayer bplayer = BPlayer.get(player);
 				if (bplayer != null) {

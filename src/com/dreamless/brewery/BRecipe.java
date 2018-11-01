@@ -765,4 +765,26 @@ public class BRecipe {
 			return;
 		}  
     }
+    
+    public static int getAlcohol(ItemStack item) {
+		NBTItem nbti = new NBTItem(item);
+		NBTCompound brewery = nbti.getCompound("brewery");
+    	
+    	String query = "SELECT * FROM brewflags WHERE type=?";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+			stmt.setString(1, brewery.getString("type"));
+			//Brewery.breweryDriver.debugLog(stmt.toString());
+			ResultSet results = stmt.executeQuery();
+			if(!results.next()) {
+				return 0; //Get out, by default people don't want to be drunk
+			} else {
+				int calcAlc = results.getInt("alcoholmin") + (brewery.getCompound("aspects").getKeys().size() * results.getInt("alcoholstep"));
+				calcAlc = Math.min(calcAlc, results.getInt("alcoholmax"));
+				return calcAlc;
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+    	return 0;
+    }
 }

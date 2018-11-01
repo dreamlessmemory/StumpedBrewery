@@ -13,7 +13,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import de.tr7zw.itemnbtapi.NBTCompound;
+import de.tr7zw.itemnbtapi.NBTItem;
+
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -125,7 +129,7 @@ public class BPlayer {
 		String query = "INSERT INTO players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, player.getUniqueId().toString());
-			Brewery.breweryDriver.debugLog(stmt.toString());
+			//Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -156,28 +160,37 @@ public class BPlayer {
 	}
 
 	// Drink a brew and apply effects, etc.
-	public static void drink(Distiller brew, Player player) {
-		int brewAlc = 10;//placeholder
-		if (brewAlc == 0) {
-			//no alcohol so we dont need to add a BPlayer
-			return;
-		}
-		BPlayer bPlayer = get(player);
-		if (bPlayer == null) {
-			bPlayer = addPlayer(player);
-		}
-		bPlayer.drunkeness += brewAlc;
-
-		if (bPlayer.drunkeness <= 100) {
-
-		} else {
-			bPlayer.drinkCap(player);
+	public static void drink(Player player, ItemStack item) {
+		//Get if player wants to be drunk.
+		String query = "SELECT * FROM players WHERE uuid=?";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
+			stmt.setString(1, player.getUniqueId().toString());
+			//Brewery.breweryDriver.debugLog(stmt.toString());
+			ResultSet results = stmt.executeQuery();
+			if(!results.next()) {
+				return; //Get out, by default people don't want to be drunk
+			} else {
+				if(!results.getBoolean("drunkeffects")) {
+					return;//Player does not want to be drunk
+				}
+				//Player Management
+				BPlayer bPlayer = get(player);
+				if (bPlayer == null) {
+					bPlayer = addPlayer(player);
+				}
+				bPlayer.drunkeness += BRecipe.getAlcohol(item);
+				bPlayer.drunkEffects = true;
+				
+				if(bPlayer.drunkeness > 100) bPlayer.drinkCap(player);
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
 	}
 
 	// Player has drunken too much
 	public void drinkCap(Player player) {
-		quality = getQuality() * 100;
+		//quality = getQuality() * 100;
 		drunkeness = 100;
 		if (overdrinkKick && !player.hasPermission("brewery.bypass.overdrink")) {
 			passOut(player);
@@ -575,7 +588,7 @@ public class BPlayer {
 				stmt.setInt(3, bPlayer.drunkeness);
 				stmt.setInt(3, bPlayer.offlineDrunk);
 				stmt.setBoolean(4, bPlayer.drunkEffects);
-				Brewery.breweryDriver.debugLog(stmt.toString());
+				//Brewery.breweryDriver.debugLog(stmt.toString());
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -637,7 +650,7 @@ public class BPlayer {
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setBoolean(1, setDrunk);
 			stmt.setString(2, uuid);
-			Brewery.breweryDriver.debugLog(stmt.toString());
+			//Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -240,7 +240,7 @@ public class InventoryListener implements Listener {
 		InventoryHolder topHolder = topInventory.getHolder();
 		if(!(topHolder instanceof Barrel) && !(topHolder instanceof BrewingStand)) {
 			//Brewery.breweryDriver.debugLog("Ignoring, neither barrel nor brewing stand.");
-			Brewery.breweryDriver.debugLog(topHolder.toString());
+			//Brewery.breweryDriver.debugLog(topHolder.toString());
 			return;//Not those two types, then ignore.
 		}
 		
@@ -279,7 +279,7 @@ public class InventoryListener implements Listener {
 					topInventory.addItem(item);
 					event.setCurrentItem(new ItemStack(Material.AIR));
 				}
-				Brewery.breweryDriver.debugLog("Brew has been tagged");
+				//Brewery.breweryDriver.debugLog("Brew has been tagged");
 			}
 		}
 	}
@@ -297,7 +297,7 @@ public class InventoryListener implements Listener {
 			InventoryHolder topHolder = topInventory.getHolder();
 			if(!(topHolder instanceof Barrel) && !(topHolder instanceof BrewingStand)) {
 				//Brewery.breweryDriver.debugLog("Ignoring, neither barrel nor brewing stand.");
-				Brewery.breweryDriver.debugLog(topHolder.toString());
+				//Brewery.breweryDriver.debugLog(topHolder.toString());
 				return;//Not those two types, then ignore.
 			}
 			
@@ -318,9 +318,9 @@ public class InventoryListener implements Listener {
 			NBTItem nbti = new NBTItem(item);
 			if(nbti.hasKey("brewery")) {
 				NBTCompound brewery = nbti.getCompound("brewery");
-				Brewery.breweryDriver.debugLog("Transferred back");
+				//Brewery.breweryDriver.debugLog("Transferred back");
 				if(brewery.hasKey("placedInBrewer")) {
-					Brewery.breweryDriver.debugLog("And it has the tag");
+					//Brewery.breweryDriver.debugLog("And it has the tag");
 					if(item.getItemMeta().getDisplayName().contains("#Aging") || item.getItemMeta().getDisplayName().contains("#Distilling")) {
 						event.setCancelled(true);
 						item = BRecipe.revealMaskedBrew(item);
