@@ -13,9 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import de.tr7zw.itemnbtapi.NBTCompound;
-import de.tr7zw.itemnbtapi.NBTItem;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
