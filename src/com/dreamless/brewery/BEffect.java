@@ -16,15 +16,15 @@ public class BEffect {
 	private boolean hidden = false;
 	Random rand = new Random();
 	
-	private static final int DURATION_CAP = 600;
+	private static final int DURATION_CAP = 1800;
 	private static final int LEVEL_CAP_INSTANT = 20;
 	private static final int LEVEL_CAP_DURATION = 5;
 	private static final int DEFAULT_POTENCY = 1;
-	private static final int DEFAULT_DURATION = 180;
+	private static final int MINUMUM_DURATION = 45;
 	
 	public BEffect() {
 		this.potency = DEFAULT_POTENCY;
-		this.duration = DEFAULT_DURATION;
+		this.duration = MINUMUM_DURATION;
 	}
 	
 	public BEffect(double potency, double duration) {
@@ -83,14 +83,14 @@ public class BEffect {
 	}
 
 	public static int calculateDuration(double duration, double bonusDuration) {
-		double difference = DURATION_CAP - DEFAULT_DURATION;
+		double difference = DURATION_CAP - MINUMUM_DURATION;
 		double score = duration + bonusDuration;
-		double scaledScore = (score / 200) * difference;
-		return 180 + (int)scaledScore;
+		double scaledScore = (score / 160) * difference;
+		return MINUMUM_DURATION + (int)scaledScore;
 	}
 	
 	public static int calculatePotency(double potency, double bonusPotency, boolean isInstant) {
-		double score = (potency + bonusPotency)/200;
+		double score = (potency + bonusPotency)/160;
 		return (int) (score * (isInstant ? LEVEL_CAP_INSTANT : LEVEL_CAP_DURATION));
 	}
 	
