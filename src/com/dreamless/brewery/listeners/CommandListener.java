@@ -516,7 +516,7 @@ public class CommandListener implements CommandExecutor {
 		if (drunkeness == 0) {
 			bPlayer.remove();
 		} else {
-			bPlayer.setData(drunkeness, quality);
+			bPlayer.setData(drunkeness);
 		}
 
 		if (drunkeness > 100) {
@@ -524,11 +524,11 @@ public class CommandListener implements CommandExecutor {
 				bPlayer.drinkCap(player);
 			} else {
 				if (!BPlayer.overdrinkKick) {
-					bPlayer.setData(100, 0);
+					bPlayer.setData(100);
 				}
 			}
 		}
-		p.msg(sender, p.languageReader.get("CMD_Player", playerName, "" + drunkeness, "" + bPlayer.getQuality()));
+		p.msg(sender, p.languageReader.get("CMD_Player", playerName, "" + drunkeness	));
 
 	}
 
@@ -560,7 +560,7 @@ public class CommandListener implements CommandExecutor {
 		if (bPlayer == null) {
 			p.msg(sender, p.languageReader.get("CMD_Info_NotDrunk", playerName));
 		} else {
-			p.msg(sender, p.languageReader.get("CMD_Info_Drunk", playerName, "" + bPlayer.getDrunkeness(), "" + bPlayer.getQuality()));
+			p.msg(sender, p.languageReader.get("CMD_Info_Drunk", playerName, "" + bPlayer.getDrunkeness()));
 		}
 
 	}

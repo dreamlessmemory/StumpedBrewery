@@ -44,7 +44,7 @@ public class BPlayer {
 	public static boolean enablePuke;
 	public static String homeType;
 
-	private int quality = 0;// = quality of drunkeness * drunkeness
+	//private int quality = 0;// = quality of drunkeness * drunkeness
 	private int drunkeness = 0;// = amount of drunkeness
 	private int offlineDrunk = 0;// drunkeness when gone offline
 	private Vector push = new Vector(0, 0, 0);
@@ -55,8 +55,7 @@ public class BPlayer {
 	}
 
 	// reading from file
-	public BPlayer(String name, int quality, int drunkeness, int offlineDrunk, boolean drunkEffects) {
-		this.quality = quality;
+	public BPlayer(String name, int drunkeness, int offlineDrunk, boolean drunkEffects) {
 		this.drunkeness = drunkeness;
 		this.offlineDrunk = offlineDrunk;
 		this.drunkEffects = drunkEffects;
@@ -218,9 +217,6 @@ public class BPlayer {
 
 	// drain the drunkeness by amount, returns true when player has to be removed
 	public boolean drain(Player player, int amount) {
-		if (drunkeness > 0) {
-			quality -= getQuality() * amount;
-		}
 		drunkeness -= amount;
 		if (drunkeness > 0) {
 			if (offlineDrunk == 0) {
@@ -232,7 +228,6 @@ public class BPlayer {
 			if (offlineDrunk == 0) {
 				return true;
 			}
-			quality = getQuality();
 			if (drunkeness <= -offlineDrunk) {
 				if (drunkeness <= -hangoverTime) {
 					return true;
@@ -388,11 +383,11 @@ public class BPlayer {
 	public void drunkPuke(Player player) {
 		if (drunkeness >= 80) {
 			if (drunkeness >= 90) {
-				if (Math.random() < 0.15 - (getQuality() / 100)) {
+				if (Math.random() < 0.15 - (drunkeness / 100)) {
 					addPuke(player, 20 + (int) (Math.random() * 40));
 				}
 			} else {
-				if (Math.random() < 0.08 - (getQuality() / 100)) {
+				if (Math.random() < 0.08 - (drunkeness / 100)) {
 					addPuke(player, 10 + (int) (Math.random() * 30));
 				}
 			}
@@ -490,7 +485,7 @@ public class BPlayer {
 	// #### Effects ####
 
 	public void drunkEffects(Player player) {
-		int duration = 10 - getQuality();
+		int duration = 10;
 		duration += drunkeness / 2;
 		duration *= 20;
 		if (duration > 960) {
@@ -530,8 +525,8 @@ public class BPlayer {
 	}
 
 	public void hangoverEffects(final Player player) {
-		int duration = offlineDrunk * 50 * getHangoverQuality();
-		int amplifier = getHangoverQuality() / 3;
+		int duration = offlineDrunk * 1000;
+		int amplifier = offlineDrunk / 30;
 
 		PotionEffectType.SLOW.createEffect(duration, amplifier).apply(player);
 		PotionEffectType.HUNGER.createEffect(duration, amplifier).apply(player);
@@ -580,12 +575,11 @@ public class BPlayer {
 	// save all data
 	public static void save() {
 		for (Map.Entry<String, BPlayer> entry : players.entrySet()) {
-			String query = "REPLACE players SET uuid=?, quality=?, drunkeness=?, offlinedrunk=?, drunkeffects=?";
+			String query = "REPLACE players SET uuid=?, drunkeness=?, offlinedrunk=?, drunkeffects=?";
 			BPlayer bPlayer = entry.getValue();
 			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 				stmt.setString(1, entry.getKey());
-				stmt.setInt(2, bPlayer.quality);
-				stmt.setInt(3, bPlayer.drunkeness);
+				stmt.setInt(2, bPlayer.drunkeness);
 				stmt.setInt(3, bPlayer.offlineDrunk);
 				stmt.setBoolean(4, bPlayer.drunkEffects);
 				//Brewery.breweryDriver.debugLog(stmt.toString());
@@ -602,37 +596,10 @@ public class BPlayer {
 		return drunkeness;
 	}
 
-	public void setData(int drunkeness, int quality) {
-		if (quality > 0) {
-			this.quality = quality * drunkeness;
-		} else {
-			if (this.quality == 0) {
-				this.quality = 5 * drunkeness;
-			} else {
-				this.quality = getQuality() * drunkeness;
-			}
-		}
+	public void setData(int drunkeness) {
 		this.drunkeness = drunkeness;
 	}
 
-	public int getQuality() {
-		if (drunkeness == 0) {
-			Brewery.breweryDriver.errorLog("drunkeness should not be 0!");
-			return quality;
-		}
-		if (drunkeness < 0) {
-			return quality;
-		}
-		return Math.round(quality / drunkeness);
-	}
-
-	// opposite of quality
-	public int getHangoverQuality() {
-		if (drunkeness < 0) {
-			return quality + 11;
-		}
-		return -getQuality() + 11;
-	}
 	public boolean isDrunkEffects() {
 		return drunkEffects;
 	}

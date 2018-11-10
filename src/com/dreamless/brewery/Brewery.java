@@ -398,7 +398,7 @@ public class Brewery extends JavaPlugin {
 				int drunkeness = result.getInt("drunkeness");
 				int offDrunk = result.getInt("offlinedrunk");
 				if(drunkeness > 0 || offDrunk > 0) {
-					new BPlayer(result.getString("uuid"), result.getInt("quality"), drunkeness, offDrunk, result.getBoolean("drunkeffects"));
+					new BPlayer(result.getString("uuid"), drunkeness, offDrunk, result.getBoolean("drunkeffects"));
 					//debugLog(result.getString("uuid"));
 				}
 			} 

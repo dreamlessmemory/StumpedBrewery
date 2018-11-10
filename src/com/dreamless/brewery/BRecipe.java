@@ -141,6 +141,7 @@ public class BRecipe {
 					if(allAspectsFound) {//We found it!
 						//Brewery.breweryDriver.debugLog("Found you!");
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
+							player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "you have come across a novel " + type.toLowerCase() + " brew!");
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
 						}
 						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), combinedAspects));
@@ -148,6 +149,7 @@ public class BRecipe {
 				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
 				//Brewery.breweryDriver.debugLog("None found?");
+				player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "you have come across a novel " + type.toLowerCase() + " brew!");		
 				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);
 			}
 		} catch (SQLException e1) {
@@ -169,9 +171,6 @@ public class BRecipe {
 		
 		addRecipeToClaimList(uuid, newName);
 		addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor);
-		
-		//Announce?
-		Bukkit.broadcastMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + player.getDisplayName() + " has just invented a new " + type.toLowerCase() + " brew!");		
 		
 		return new BRecipe(newName, newLore);
 	}
