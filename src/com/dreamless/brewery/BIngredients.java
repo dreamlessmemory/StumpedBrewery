@@ -132,24 +132,24 @@ public class BIngredients {
 		HashMap <String, Double> flavorAspectValues = new HashMap<String, Double>();
 		
 		//Calculate Effect Values
-		double effectAspectSaturation = (effectAspects.size() <= 3 ? 1 : effectAspects.size() / 3);
+		//double effectAspectSaturation = (effectAspects.size() <= 3 ? 1 : effectAspects.size() / 3);
 		//Add calculated aspects to the map
 		for(String currentAspect: effectAspects.keySet()) {
 			Aspect aspect = effectAspects.get(currentAspect);
 			double calculatedPotency = aspect.getPotency();
 			double calculatedSaturation = (aspect.getSaturation() < 1 ? 1 : aspect.getSaturation());
-			effectAspectValues.put(currentAspect, (calculatedPotency / (calculatedSaturation * effectAspectSaturation)));
+			effectAspectValues.put(currentAspect, calculatedPotency / calculatedSaturation);
 			//Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + effectAspectValues.get(currentAspect));
 		}
 		
 		//Calculate Flavor Values
-		double flavorAspectSaturation = (flavorAspects.size() <= 6 ? 1 : flavorAspects.size() / 6);
+		//double flavorAspectSaturation = (flavorAspects.size() <= 6 ? 1 : flavorAspects.size() / 6);
 		//Add calculated aspects to the map
 		for(String currentAspect: flavorAspects.keySet()) {
 			Aspect aspect = flavorAspects.get(currentAspect);
 			double calculatedPotency = aspect.getPotency();
 			double calculatedSaturation = (aspect.getSaturation() < 1 ? 1 : aspect.getSaturation());
-			flavorAspectValues.put(currentAspect, (calculatedPotency / (calculatedSaturation * flavorAspectSaturation)));
+			flavorAspectValues.put(currentAspect, calculatedPotency /calculatedSaturation);
 			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + flavorAspectValues.get(currentAspect));
 		}
 		//Brewery.breweryDriver.debugLog("SIZE? " + effectAspectValues.size());
