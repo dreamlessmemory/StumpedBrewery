@@ -152,13 +152,13 @@ public class Barrel implements InventoryHolder {
 		int age = (int) Math.floor(aging.getDouble("age"));
 		for(String currentAspect : aspects) {
 			double aspectPotency = aspectList.getDouble(currentAspect);
-			double agingBonus = Aspect.getStepBonus(age, currentAspect, "aging");
-			double typeBonus = agingBonus * (Aspect.getStepBonus(age, brewery.getString("type"), "aging")/100);
-			double newPotency = aspectPotency + agingBonus + typeBonus;
+			double agingBonus = woodModifier(Aspect.getStepBonus(age, currentAspect, "aging"), woodType, currentAspect.contains("_POTENCY"));
+			//double typeBonus = agingBonus * (Aspect.getStepBonus(age, brewery.getString("type"), "aging")/100);
+			double newPotency = aspectPotency + agingBonus;
 			if(newPotency <= 0) {
 				newPotency = 0;
 			}
-			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " + " + agingBonus + " + " + typeBonus + " -> " + newPotency);
+			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " + " + agingBonus+  " -> " + newPotency);
 			//Update NBT
 			aspectList.setDouble(currentAspect, newPotency);
 		}
@@ -188,6 +188,59 @@ public class Barrel implements InventoryHolder {
 		
 		return item;
 		
+	}
+	
+	private double woodModifier(double bonus, byte wood, boolean isPotency) {
+		switch(wood) {
+			case 1://birch
+				if(isPotency) {
+					if (bonus < 0)
+						bonus = 0;
+					else
+						bonus /= 2;
+				}
+				break;
+			case 2:	//Oak
+				break;
+			case 3: //Jungle
+				if(isPotency && bonus > 0) {
+					bonus *= 2;
+				} else {
+					if(bonus > 0)
+						bonus *= -1;
+					else 
+						bonus *= 2;
+				}
+				break;
+			case 4: //Spruce
+				if(!isPotency) {
+					if (bonus < 0)
+						bonus = 0;
+					else
+						bonus /= 2;
+				}
+				break;
+			case 5: //Acacia
+				if(!isPotency && bonus > 0) {
+					bonus *= 2;
+				} else {
+					if(bonus > 0)
+						bonus *= -1;
+					else 
+						bonus *= 2;
+				}
+				break;
+			case 6: //Dark Oak
+				if(bonus > 0)
+					bonus *= 1.5;
+				else
+					bonus *= 2;
+				break;
+			default:
+				break;
+		}
+		
+		return bonus;
 	}
 	
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
