@@ -16,11 +16,11 @@ public class BEffect {
 	private boolean hidden = false;
 	Random rand = new Random();
 	
-	private static final int DURATION_CAP = 1200;
+	private static final int DURATION_CAP = 1245;
 	private static final int LEVEL_CAP_INSTANT = 5;
 	private static final int LEVEL_CAP_DURATION = 3;
 	private static final int DEFAULT_POTENCY = 1;
-	private static final int MINUMUM_DURATION = 0;
+	private static final int MINUMUM_DURATION = 45;
 	private static final int MAX_SCORE = 100;
 	private static final double CONTROL = 0.8;
 	
