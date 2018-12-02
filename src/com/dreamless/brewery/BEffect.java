@@ -16,11 +16,13 @@ public class BEffect {
 	private boolean hidden = false;
 	Random rand = new Random();
 	
-	private static final int DURATION_CAP = 1800;
-	private static final int LEVEL_CAP_INSTANT = 20;
-	private static final int LEVEL_CAP_DURATION = 5;
+	private static final int DURATION_CAP = 1200;
+	private static final int LEVEL_CAP_INSTANT = 5;
+	private static final int LEVEL_CAP_DURATION = 3;
 	private static final int DEFAULT_POTENCY = 1;
-	private static final int MINUMUM_DURATION = 45;
+	private static final int MINUMUM_DURATION = 0;
+	private static final int MAX_SCORE = 100;
+	private static final double CONTROL = 0.8;
 	
 	public BEffect() {
 		this.potency = DEFAULT_POTENCY;
@@ -85,13 +87,14 @@ public class BEffect {
 	public static int calculateDuration(double duration, double bonusDuration) {
 		double difference = DURATION_CAP - MINUMUM_DURATION;
 		double score = duration + bonusDuration;
-		double scaledScore = (score / 160) * difference;
+		double scaledScore = Math.ceil(Math.atan(score / MAX_SCORE * CONTROL) * difference);
 		return MINUMUM_DURATION + (int)scaledScore;
 	}
 	
 	public static int calculatePotency(double potency, double bonusPotency, boolean isInstant) {
-		double score = (potency + bonusPotency)/160;
-		return (int) (score * (isInstant ? LEVEL_CAP_INSTANT : LEVEL_CAP_DURATION));
+		double score = (potency + bonusPotency)/MAX_SCORE;
+		int calculatedScore = (int)Math.ceil(Math.atan(CONTROL * score) * (isInstant ? LEVEL_CAP_INSTANT : LEVEL_CAP_DURATION));
+		return calculatedScore;
 	}
 	
 	public boolean isHidden() {

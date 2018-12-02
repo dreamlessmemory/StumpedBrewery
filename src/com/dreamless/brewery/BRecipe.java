@@ -374,17 +374,15 @@ public class BRecipe {
     }
     
     private static String getDescriptor(double rating) {
-    	if(rating < 40) {
+    	if(rating < 20) {
     		return " a tiny bit ";
-    	} else if (rating >= 40 && rating < 80) {
+    	} else if (rating >= 20 && rating < 40) {
     		return " somewhat ";
-    	} else if (rating >= 80 && rating < 120) {
+    	} else if (rating >= 40 && rating < 60) {
     		return " moderately ";
-    	} else if (rating >= 120 && rating < 160) {
-    		return " somewhat ";
-    	} else if (rating >= 160 && rating < 200) {
-    		return " somewhat ";
-    	} else if (rating >= 200) {
+    	} else if (rating >= 60 && rating < 80) {
+    		return " very  ";
+    	} else if (rating >= 80) {
     		return " supremely ";
     	} else {
     		return " sort of ";

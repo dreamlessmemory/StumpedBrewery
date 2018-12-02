@@ -8,15 +8,11 @@ import com.google.common.collect.Range;
 
 public class Aspect implements Comparable<Object> {
 	//Static Numbers for balancing
-	public static double commonPotency = 6;
-	public static double uncommonPotency = 20;
-	public static double superiorPotency = 42;
-	public static double rarePotency = 64;
-	public static double legendaryPotency = 100;
+	public static double commonPotency = 4;
+	public static double rarePotency = 24;
+	public static double legendaryPotency = 60;
 	public static double commonSaturation = 0.2;
-	public static double uncommonSaturation = 0.4;
-	public static double superiorSaturation = 0.6;
-	public static double rareSaturation = 0.8;
+	public static double rareSaturation = 0.6;
 	public static double legendarySaturation = 1.0;
 	
 	//Private
@@ -51,17 +47,13 @@ public class Aspect implements Comparable<Object> {
 	public static double calculateRarityPotency(int rarity){
 		switch(rarity) {
 			case (1):
-				return 6;
+				return 4;
 			case (2):
-				return 20;
+				return 24;
 			case (3):
-				return 42;
-			case (4):
-				return 64;
-			case (5):
-				return 100;
+				return 60;
 			default:
-				return 6;
+				return 4;
 		}
 	}
 	
@@ -70,12 +62,8 @@ public class Aspect implements Comparable<Object> {
 		case (1):
 			return 0.2;
 		case (2):
-			return 0.4;
-		case (3):
 			return 0.6;
-		case (4):
-			return 0.8;
-		case (5):
+		case (3):
 			return 1.0;
 		default:
 			return 0.2;
