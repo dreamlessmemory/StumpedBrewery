@@ -1,9 +1,8 @@
 name: Brewery
-version: 2.0.0
+version: 3.0.0
 main: com.dreamless.brewery.Brewery
 api-version: 1.13
 authors: [Milan Albrecht, Frank Baumann, ProgrammerDan, Sumire Kobayashi]
-softdepend: [LWC, LogBlock, WorldGuard, GriefPrevention, Vault, HolographicDisplays]
 commands:
   brewery:
     description: Command for Administration

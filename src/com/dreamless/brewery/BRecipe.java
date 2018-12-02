@@ -102,12 +102,13 @@ public class BRecipe {
 			results = stmt.executeQuery();
 			if (!results.next()) {//New recipe!
 				Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
-				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);
+				player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");	
+				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);				
 			} else {//Found something
 				do {
-					//Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
+					Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
 					if(combinedAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
-						//Brewery.breweryDriver.debugLog("reject, insufficient aspects");
+						Brewery.breweryDriver.debugLog("reject, insufficient aspects");
 						continue;
 					}
 					boolean allAspectsFound = true; //didn't find it
@@ -116,32 +117,32 @@ public class BRecipe {
 						double aspectRating = es.getValue();
 						boolean aspectFound = false;
 						
-						//Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
+						Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
 						
 						for(int i = 1; i <= combinedAspects.size(); i++) {//Iterate through aspectNname columns
 							String aspectNameColumn = "aspect" + i + "name";
 							String aspectRatingColumn = "aspect" + i + "rating";
 							String aspectName = results.getString(aspectNameColumn).trim();
-							//Brewery.breweryDriver.debugLog("checking..." + aspectName);
+							Brewery.breweryDriver.debugLog("checking..." + aspectName);
 							if(aspectName.equalsIgnoreCase(currentAspect)){//So, it has the aspect
 								int recipeRating = results.getInt(aspectRatingColumn);
 								if(aspectRating >= recipeRating && aspectRating < recipeRating + 9) {//found it
 									aspectFound = true;
-									//Brewery.breweryDriver.debugLog("You do!");
+									Brewery.breweryDriver.debugLog("You do!");
 									break;
 								}
 							}
 						}
 						if(!aspectFound) {//The aspect wasn't here, so not the right one. Stop looking
-							//Brewery.breweryDriver.debugLog("You don't!");
+							Brewery.breweryDriver.debugLog("You don't!");
 							allAspectsFound = false;
 							break;
 						}
 					}
 					if(allAspectsFound) {//We found it!
-						//Brewery.breweryDriver.debugLog("Found you!");
+						Brewery.breweryDriver.debugLog("Found you!");
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
-							player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "you have come across a novel " + type.toLowerCase() + " brew!");
+							player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
 						}
 						return new BRecipe(results.getString("name"), generateLore(results.getString("inventor"), results.getString("flavortext"), combinedAspects));
@@ -149,7 +150,7 @@ public class BRecipe {
 				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
 				//Brewery.breweryDriver.debugLog("None found?");
-				player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "you have come across a novel " + type.toLowerCase() + " brew!");		
+				player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");		
 				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);
 			}
 		} catch (SQLException e1) {
@@ -562,7 +563,7 @@ public class BRecipe {
 			ResultSet results;
 			results = stmt.executeQuery();
 			if(!results.next()) {
-				list.add("You don't have any brews to claim!");
+				list.add("You have no brews to your name!");
 			} else {	
 				list.add(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Your current list of " + (claimed ? "claimed" : "unclaimed") + " brews");
 				int count = 1;

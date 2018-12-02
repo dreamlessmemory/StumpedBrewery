@@ -27,7 +27,7 @@ public class PlayerListener implements Listener {
 	public static boolean openEverywhere;
 	private static Set<UUID> interacted = new HashSet<UUID>();
 
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Block clickedBlock = event.getClickedBlock();
 
@@ -44,7 +44,6 @@ public class PlayerListener implements Listener {
 
 						if (materialInHand == null || materialInHand == Material.BUCKET) {
 							return;
-
 						} else if (materialInHand == Material.CLOCK) {
 							if(BCauldron.isCooking(clickedBlock)) {
 								BCauldron.printTime(player, clickedBlock);
@@ -72,7 +71,6 @@ public class PlayerListener implements Listener {
 								event.setCancelled(true);
 							}
 							return;
-
 							// reset cauldron when refilling to prevent unlimited source of potions
 						} else if (materialInHand == Material.WATER_BUCKET) {
 							if (BCauldron.getFillLevel(clickedBlock) != 0 && BCauldron.getFillLevel(clickedBlock) < 2) {
@@ -80,7 +78,6 @@ public class PlayerListener implements Listener {
 								BCauldron.remove(clickedBlock);
 							}
 							return;
-
 						}
 
 						// Check if fire alive below cauldron when adding ingredients

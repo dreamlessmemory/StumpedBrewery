@@ -156,7 +156,7 @@ public class BIngredients {
 		
 		
 		//Add custom potion effects based on effect aspects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(effectAspectValues);
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(effectAspectValues));
 		for (PotionEffect effect: effects) {
 			potionMeta.addCustomEffect(effect, true);
 		}
