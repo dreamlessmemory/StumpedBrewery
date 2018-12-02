@@ -263,6 +263,16 @@ public class InventoryListener implements Listener {
 		if(nbti.hasKey("brewery")) {
 			//Brewery.breweryDriver.debugLog("Brew placed in Brewing Equipment");
 			NBTCompound brewery = nbti.getCompound("brewery");
+			
+			//Ignore if already finished
+			if(brewery.hasKey("finishedAging") && topHolder instanceof Barrel) {
+				return;
+			}
+			//Ignore if already finished
+			if(brewery.hasKey("finishedDistilling") && topHolder instanceof BrewingStand) {
+				return;
+			}
+			
 			if(!brewery.hasKey("placedInBrewer")) {
 				//Cancel event
 				event.setCancelled(true);
@@ -289,13 +299,18 @@ public class InventoryListener implements Listener {
 		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 		public void onTransferFromBrewer(InventoryClickEvent event) {
 			ItemStack item = null;
+			String equipmentType = "none";
 			
 			//Check if we're dealing with a barrel or a brewing stand
 			InventoryView invView = event.getView();
 			Inventory topInventory = invView.getTopInventory();
 			Inventory bottomInventory = invView.getBottomInventory();
 			InventoryHolder topHolder = topInventory.getHolder();
-			if(!(topHolder instanceof Barrel) && !(topHolder instanceof BrewingStand)) {
+			if(topHolder instanceof Barrel) {
+				equipmentType = "Barrel";
+			} else if(topHolder instanceof BrewingStand) {
+				equipmentType = "BrewingStand";
+			} else {
 				//Brewery.breweryDriver.debugLog("Ignoring, neither barrel nor brewing stand.");
 				//Brewery.breweryDriver.debugLog(topHolder.toString());
 				return;//Not those two types, then ignore.
@@ -323,7 +338,7 @@ public class InventoryListener implements Listener {
 					//Brewery.breweryDriver.debugLog("And it has the tag");
 					if(item.getItemMeta().getDisplayName().contains("#Aging") || item.getItemMeta().getDisplayName().contains("#Distilling")) {
 						event.setCancelled(true);
-						item = BRecipe.revealMaskedBrew(item);
+						item = BRecipe.revealMaskedBrew(item, equipmentType);
 						//Set the item, based on action used
 						if(action == InventoryAction.PLACE_ALL || action ==InventoryAction.PLACE_ONE || action == InventoryAction.SWAP_WITH_CURSOR) {
 							event.getWhoClicked().setItemOnCursor(action == InventoryAction.SWAP_WITH_CURSOR? event.getCurrentItem() : new ItemStack(Material.AIR));

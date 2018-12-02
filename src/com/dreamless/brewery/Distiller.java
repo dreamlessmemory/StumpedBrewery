@@ -22,6 +22,9 @@ public class Distiller {
 				NBTItem nbti = new NBTItem(item);
 				if(nbti.hasKey("brewery")) {
 					NBTCompound brewery = nbti.getCompound("brewery");
+					if(brewery.hasKey("finishedDistilling")) {
+						continue;
+					}
 					
 					NBTCompound distilling = brewery.hasKey("distilling") ? brewery.getCompound("distilling") : brewery.addCompound("distilling");
 					int cycles = distilling.hasKey("cycles") ? distilling.getInteger("cycles") : 0; 

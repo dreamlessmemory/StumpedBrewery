@@ -393,10 +393,7 @@ public class BRecipe {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
     
-    public static ItemStack revealMaskedBrew(ItemStack item) {
-		//Get PotionMeta
-		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-		
+    public static ItemStack revealMaskedBrew(ItemStack item, String equipmentType) {
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
 		NBTCompound brewery = nbti.getCompound("brewery");
@@ -404,11 +401,15 @@ public class BRecipe {
 		NBTCompound distilling = brewery.getCompound("distilling");
 		
 		//Remove isAging and isDistilling tags
-		if(aging != null) {
-			aging.setBoolean("isAging", false);
+		if(aging != null && equipmentType.equalsIgnoreCase("Barrel")) {
+			aging.removeKey("isAging");
+			brewery.setBoolean("finishedAging", true);
+			Brewery.breweryDriver.debugLog("Removed Aging Tag");
 		}
-		if(distilling != null) {
-			distilling.setBoolean("isDistilling", false);
+		if(distilling != null && equipmentType.equalsIgnoreCase("BrewingStand")) {
+			distilling.removeKey("isDistilling");
+			brewery.setBoolean("finishedDistilling", true);
+			Brewery.breweryDriver.debugLog("Removed Distilling Tag");
 		}
 				
 				
@@ -420,25 +421,15 @@ public class BRecipe {
 			agedAspects.put(currentAspect, aspectList.getDouble(currentAspect));
 		}
 		
-		//Set new effects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects);
-		potionMeta.clearCustomEffects();
-		for (PotionEffect effect: effects) {
-			potionMeta.addCustomEffect(effect, true);
-		}
-		potionMeta.removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-		
 		//Get Recipe
 		Player player = null;
 		if(brewery.hasKey("placedInBrewer")) {
 			player = Bukkit.getPlayer(UUID.fromString(brewery.getString("placedInBrewer")));
-			brewery.setString("placedInBrewer", null);
+			brewery.removeKey("placedInBrewer");
+			Brewery.breweryDriver.debugLog("Removed Player");
 		}
 		String crafterName = player.getDisplayName();
 		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, aging != null, distilling != null);
-		
-		//Name
-		potionMeta.setDisplayName(recipe.getName());
 		
 		//Handle crafter list
 		ArrayList<String> craftersList = new ArrayList<String>();
@@ -451,11 +442,27 @@ public class BRecipe {
 			crafterTags.setString(crafterName, crafterName);
 		}
 		
+		item = nbti.getItem();
+		
+		
+		//Get PotionMeta
+		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+		
+		//Set new effects
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects);
+		potionMeta.clearCustomEffects();
+		for (PotionEffect effect: effects) {
+			potionMeta.addCustomEffect(effect, true);
+		}
+		potionMeta.removeItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		
+		//Name
+		potionMeta.setDisplayName(recipe.getName());
+		
 		//FlavorText
 		potionMeta.setLore(recipe.getFlavorText(craftersList));
 
-		//assign meta/nbt
-		item = nbti.getItem();
+		//assign meta
 		item.setItemMeta(potionMeta);
 		
 		return item;

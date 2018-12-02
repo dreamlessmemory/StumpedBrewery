@@ -112,6 +112,11 @@ public class Barrel implements InventoryHolder {
 			//Brewery.breweryDriver.debugLog("Get item?");
 			NBTCompound brewery = nbti.getCompound("brewery");
 			
+			if(brewery.hasKey("finishedAging")) {
+				Brewery.breweryDriver.debugLog("Skipping aging");
+				continue;
+			}
+			
 			NBTCompound aging = brewery.hasKey("aging") ? brewery.getCompound("aging") : brewery.addCompound("aging");
 			double age = aging.hasKey("age") ? aging.getDouble("age") : 0; 
 			double newAge = age + time;
