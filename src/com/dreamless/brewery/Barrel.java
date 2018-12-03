@@ -198,7 +198,8 @@ public class Barrel implements InventoryHolder {
 						bonus = 0;
 					else
 						bonus /= 2;
-				}
+				} else 
+					bonus = 0;
 				break;
 			case 2:	//Oak
 				break;
@@ -218,7 +219,8 @@ public class Barrel implements InventoryHolder {
 						bonus = 0;
 					else
 						bonus /= 2;
-				}
+				} else 
+					bonus = 0;
 				break;
 			case 5: //Acacia
 				if(!isPotency && bonus > 0) {

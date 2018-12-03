@@ -128,42 +128,46 @@ public class BIngredients {
 			else flavorAspects.put(currentAspect, aspects.get(currentAspect));
 		}
 		
-		HashMap <String, Double> effectAspectValues = new HashMap<String, Double>();
-		HashMap <String, Double> flavorAspectValues = new HashMap<String, Double>();
+		HashMap <String, Double> effectAspectActivation = new HashMap<String, Double>();
+		HashMap <String, Double> flavorAspectActivation = new HashMap<String, Double>();
+		HashMap <String, Double> effectAspectEffectivePotency = new HashMap<String, Double>();
+		HashMap <String, Double> flavorAspectEffectivePotency = new HashMap<String, Double>();
 		
 		//Calculate Effect Values
-		//double effectAspectSaturation = (effectAspects.size() <= 3 ? 1 : effectAspects.size() / 3);
 		//Add calculated aspects to the map
 		for(String currentAspect: effectAspects.keySet()) {
 			Aspect aspect = effectAspects.get(currentAspect);
 			double calculatedPotency = aspect.getPotency();
 			double calculatedSaturation = (aspect.getSaturation() < 1 ? 1 : aspect.getSaturation());
-			effectAspectValues.put(currentAspect, calculatedPotency / calculatedSaturation);
-			//Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + effectAspectValues.get(currentAspect));
+			double effectiveActivation = Aspect.getEffectiveActivation(currentAspect, aspect.getActivation(), type);
+			effectAspectActivation.put(currentAspect, effectiveActivation);
+			effectAspectEffectivePotency.put(currentAspect, calculatedPotency / calculatedSaturation * effectiveActivation);
+			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + effectAspectActivation.get(currentAspect));
 		}
 		
 		//Calculate Flavor Values
-		//double flavorAspectSaturation = (flavorAspects.size() <= 6 ? 1 : flavorAspects.size() / 6);
 		//Add calculated aspects to the map
 		for(String currentAspect: flavorAspects.keySet()) {
 			Aspect aspect = flavorAspects.get(currentAspect);
 			double calculatedPotency = aspect.getPotency();
 			double calculatedSaturation = (aspect.getSaturation() < 1 ? 1 : aspect.getSaturation());
-			flavorAspectValues.put(currentAspect, calculatedPotency /calculatedSaturation);
-			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + flavorAspectValues.get(currentAspect));
+			double effectiveActivation = Aspect.getEffectiveActivation(currentAspect, aspect.getActivation(), type);
+			flavorAspectActivation.put(currentAspect, effectiveActivation);
+			flavorAspectEffectivePotency.put(currentAspect, calculatedPotency /calculatedSaturation * effectiveActivation);
+			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + flavorAspectActivation.get(currentAspect));
 		}
 		//Brewery.breweryDriver.debugLog("SIZE? " + effectAspectValues.size());
 		
 		
 		//Add custom potion effects based on effect aspects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(effectAspectValues));
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(effectAspectEffectivePotency));
 		for (PotionEffect effect: effects) {
 			potionMeta.addCustomEffect(effect, true);
 		}
 		
 		
 		//Recipe
-		BRecipe recipe = BRecipe.getRecipe(player, type, effectAspectValues, flavorAspectValues, false, false);
+		BRecipe recipe = BRecipe.getRecipe(player, type, effectAspectEffectivePotency, flavorAspectEffectivePotency, false, false);
 		potionMeta.setDisplayName(recipe.getName());
 		ArrayList<String> craftersList = new ArrayList<String>();
 		craftersList.add(player.getDisplayName());
@@ -176,14 +180,30 @@ public class BIngredients {
 		NBTItem nbti = new NBTItem(potion);
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); //All brewery NBT gets set here.
 		//Write NBT data
-		//Aspects
-		NBTCompound aspectTagList = breweryMeta.addCompound("aspects");
-		for(String currentAspect: effectAspectValues.keySet()) {
-			aspectTagList.setDouble(currentAspect, effectAspectValues.get(currentAspect));
+		//Aspect Base Potency
+		NBTCompound aspectTagList = breweryMeta.addCompound("aspectsBase");
+		for(String currentAspect: effectAspects.keySet()) {
+			Aspect aspect = effectAspects.get(currentAspect);
+			aspectTagList.setDouble(currentAspect, aspect.getPotency()/aspect.getSaturation());
 		}
-		for(String currentAspect: flavorAspectValues.keySet()) {
-			aspectTagList.setDouble(currentAspect, flavorAspectValues.get(currentAspect));
+		for(String currentAspect: flavorAspects.keySet()) {
+			Aspect aspect = flavorAspects.get(currentAspect);
+			aspectTagList.setDouble(currentAspect, aspect.getPotency()/aspect.getSaturation());
 		}
+		
+		//Aspect Activation
+		NBTCompound aspectActList = breweryMeta.addCompound("aspectsActivation");
+		for(String currentAspect: effectAspectActivation.keySet()) {
+			aspectActList.setDouble(currentAspect, effectAspectActivation.get(currentAspect));
+		}
+		for(String currentAspect: flavorAspectActivation.keySet()) {
+			aspectActList.setDouble(currentAspect, flavorAspectActivation.get(currentAspect));
+		}
+		//Multipliers
+		breweryMeta.setDouble("potency", 1.0);
+		breweryMeta.setDouble("duration", 1.0);
+		
+		
 		//Type
 		breweryMeta.setString("type", type);
 		//Crafters
@@ -197,14 +217,11 @@ public class BIngredients {
 	public void fermentOneStep(int state) {
 		for(String currentAspect : aspects.keySet()) {
 			Aspect aspect = aspects.get(currentAspect);
-			double fermentationBonus = Aspect.getStepBonus(state, currentAspect, "fermentation");
-			double typeBonus = fermentationBonus * (Aspect.getStepBonus(state, type, "fermentation")/100);
-			double newPotency = aspect.getPotency() + fermentationBonus + typeBonus;
-			if(newPotency <= 0) {
-				newPotency = 0;
-			}
-			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspect.getPotency() + " + " + fermentationBonus + " + " + typeBonus + " -> " + newPotency);
-			aspect.setPotency(newPotency);
+			
+			double activationIncrease = Aspect.getStepBonus(state, currentAspect, type);
+			double newActivation = aspect.getActivation()+ activationIncrease;
+			Brewery.breweryDriver.debugLog("Update Activation of " + currentAspect + ": " + aspect.getActivation() + " + " + activationIncrease + " -> " + newActivation);
+			aspect.setActivation(newActivation);
 			aspects.put(currentAspect, aspect);
 		}
 	}

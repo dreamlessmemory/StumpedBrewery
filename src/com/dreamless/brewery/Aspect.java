@@ -4,8 +4,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.google.common.collect.Range;
-
 public class Aspect implements Comparable<Object> {
 	//Static Numbers for balancing
 	public static double commonPotency = 4;
@@ -18,10 +16,19 @@ public class Aspect implements Comparable<Object> {
 	//Private
 	private double potency = 0;
 	private double saturation = 0.0;
+	private double activation = 0.0;
 	
 	public Aspect (double potency, double saturation) {
 		this.potency = potency;
 		this.saturation = saturation;
+	}
+
+	public double getActivation() {
+		return activation;
+	}
+
+	public void setActivation(double activation) {
+		this.activation = activation;
 	}
 
 	public double getPotency() {
@@ -70,35 +77,62 @@ public class Aspect implements Comparable<Object> {
 		}
 	}
 
-	public static double getStepBonus(int time, String aspect, String stage) {
-		String query = "SELECT * FROM " + stage + " WHERE aspect=?";
+	public static double getStepBonus(int time, String aspect, String type) {
+		String query = "SELECT * FROM fermentation WHERE aspect=?";
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, aspect);
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {
-				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + stage + " - " + aspect);
+				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + aspect);
 				return 0;
 			} else {//Successful Pull
-				//get paramenters
-				int rampUpStart = results.getInt("rampupstart");
-				int rampUpEnd = results.getInt("rampupend");
-				int falloffStart = results.getInt("falloffstart");
-				int falloffEnd = results.getInt("falloffend");
-				double multiplier = results.getDouble("multiplier");
-				//check if in rampup
-				if(rampUpStart != 0 && rampUpEnd != 0 && Range.closed(rampUpStart, rampUpEnd).contains(time)) {
-					return multiplier;
-				} else if (falloffStart != 0 && falloffEnd !=0 && Range.closed(falloffStart, falloffEnd).contains(time)) {
-					return multiplier * -1;
-				} else {
-					return 0;
+				
+				int inertia = getInertia(results.getInt("inertia"), type);
+				if(inertia > time) { //Not yet ready, so return zero
+					return 0.0;
 				}
+				double multiplier = getReactivityMultiplier(type);
+				return results.getInt("reactivity") * multiplier;
+				
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		return 0.0;
+	}
+	
+	//Returns a double multiplier
+	public static double getEffectiveActivation(String aspect, double activation, String type) {
+		String query = "SELECT * FROM fermentation WHERE aspect=?";
+		
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			stmt.setString(1, aspect);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {
+				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + aspect);
+				return 0;
+			} else {//Successful Pull
+				int stability = getStability(results.getInt("stability"), type);
+				int saturation = getSaturation(results.getInt("saturation"), type);
+				int integrity = getIntegrity(results.getInt("integrity"), type);
+				
+				if(activation > stability) {//overdone
+					double difference = activation - stability;
+					difference *= (double)integrity/100;
+					return Math.max(0, ((double) saturation - difference)/100);
+				} else if (activation > saturation) {
+					return (double) saturation/100;
+				} else {
+					return activation/100;
+				}					
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
 		return 0.0;
 	}
 	
@@ -112,6 +146,64 @@ public class Aspect implements Comparable<Object> {
 			return -1;
 		} else {
 			return 0;
+		}
+	}
+	
+	private static int getInertia(int inertia, String type) {
+		switch(type) {
+			case "CHOCOLATE":
+				inertia = Math.max(0, inertia - 3);
+				break;
+			case "CIDER":
+				inertia = Math.max(0,  inertia -2);
+				break;
+		}
+		return inertia;
+	}
+	
+	private static double getReactivityMultiplier(String type) {
+		switch(type) {
+			case "NETHER":
+				return 1.5;
+			case "WINE":
+			case "CIDER":
+				return 1.25;
+			case "END":
+				return 0.75;
+			default:
+				return 1.0;
+		}
+	}
+	
+	private static int getStability(int stability, String type) {
+		switch(type) {
+			case "WINE":
+				return stability + 50;
+			case "BEER":
+			case "RUM":
+				return stability + 25;
+			default:
+				return stability;
+		}
+	}
+	
+	private static int getIntegrity(int integrity, String type) {
+		switch(type) {
+			case "NETHER":
+				return Math.min(75, integrity + 10);
+			case "TEA":
+				return Math.max(0, integrity - 35);
+			default:
+				return integrity;
+		}
+	}
+	
+	private static int getSaturation(int saturation, String type) {
+		switch(type) {
+			case "TEA":
+				return saturation + 25;
+			default:
+				return saturation;
 		}
 	}
 }
