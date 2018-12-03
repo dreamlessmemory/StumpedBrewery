@@ -101,13 +101,13 @@ public class BIngredients {
 			e1.printStackTrace();
 		}
 		
-		if(Brewery.debug) {
+		/*if(Brewery.debug) {
 			Brewery.breweryDriver.debugLog("Added: " + ingredient.toString());
 			Set<String> keys = aspects.keySet();
 			for (String key : keys) {
 				Brewery.breweryDriver.debugLog(aspects.get(key).toString());
 			}
-		}
+		}*/
 	}
 
 

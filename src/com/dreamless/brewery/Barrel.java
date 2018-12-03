@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Material;
@@ -126,7 +125,7 @@ public class Barrel implements InventoryHolder {
 			item = nbti.getItem();
 			Brewery.breweryDriver.debugLog("Age is " + newAge);
 			//Check new Age
-			if(Math.floor(newAge) > Math.floor(age)) {//Logic - round down, then compare. Precondition, time =<1.0
+			if(Math.floor(newAge) > Math.floor(age) && newAge <= 10) {//Logic - round down, then compare. Precondition, time =<1.0
 				item = ageOneYear(item, getWood());
 			}
 
@@ -144,28 +143,42 @@ public class Barrel implements InventoryHolder {
 		NBTCompound brewery = nbti.getCompound("brewery");
 		NBTCompound aging = brewery.getCompound("aging");
 		
-		//Pull aspects
-		NBTCompound aspectList = brewery.getCompound("aspects");
-		Set<String> aspects = aspectList.getKeys();
+		//Adjust multipliers
 		
-		//Calculate new aspects
-		int age = (int) Math.floor(aging.getDouble("age"));
-		for(String currentAspect : aspects) {
-			double aspectPotency = aspectList.getDouble(currentAspect);
-			double agingBonus = woodModifier(Aspect.getStepBonus(age, currentAspect, "aging"), woodType, currentAspect.contains("_POTENCY"));
-			//double typeBonus = agingBonus * (Aspect.getStepBonus(age, brewery.getString("type"), "aging")/100);
-			double newPotency = aspectPotency + agingBonus;
-			if(newPotency <= 0) {
-				newPotency = 0;
-			}
-			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " + " + agingBonus+  " -> " + newPotency);
-			//Update NBT
-			aspectList.setDouble(currentAspect, newPotency);
+		switch(woodType) {
+		case 1://birch
+			brewery.setDouble("potency", brewery.getDouble("potency") - 0.05);
+			brewery.setDouble("duration", brewery.getDouble("duration") + 0.05);
+			break;
+		case 2:	//Oak
+			brewery.setDouble("potency", brewery.getDouble("potency") + 0.05);
+			brewery.setDouble("duration", brewery.getDouble("duration") -0.05); //- 0.05
+			break;
+		case 3: //Jungle
+			brewery.setDouble("potency", brewery.getDouble("potency") + 0.075);
+			brewery.setDouble("duration", brewery.getDouble("duration") - 0.075);
+			break;
+		case 4: //Spruce
+			brewery.setDouble("potency", brewery.getDouble("potency") + 0.065);
+			brewery.setDouble("duration", brewery.getDouble("duration") - 0.065);
+			break;
+		case 5: //Acacia
+			brewery.setDouble("potency", brewery.getDouble("potency") - 0.075);
+			brewery.setDouble("duration", brewery.getDouble("duration") + 0.075);
+			break;
+		case 6: //Dark Oak
+			brewery.setDouble("potency", brewery.getDouble("potency") + 0.065);
+			brewery.setDouble("duration", brewery.getDouble("duration") - 0.065);
+			break;
+		default:
+			break;
 		}
+		
 		
 		item = nbti.getItem();
 		
 		//Mask as Aging Brew
+		int age = (int) Math.floor(aging.getDouble("age"));
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 		potionMeta.setDisplayName("#Aging Brew");
 		ArrayList<String> agedFlavorText = new ArrayList<String>();
@@ -188,61 +201,6 @@ public class Barrel implements InventoryHolder {
 		
 		return item;
 		
-	}
-	
-	private double woodModifier(double bonus, byte wood, boolean isPotency) {
-		switch(wood) {
-			case 1://birch
-				if(isPotency) {
-					if (bonus < 0)
-						bonus = 0;
-					else
-						bonus /= 2;
-				} else 
-					bonus = 0;
-				break;
-			case 2:	//Oak
-				break;
-			case 3: //Jungle
-				if(isPotency && bonus > 0) {
-					bonus *= 2;
-				} else {
-					if(bonus > 0)
-						bonus *= -1;
-					else 
-						bonus *= 2;
-				}
-				break;
-			case 4: //Spruce
-				if(!isPotency) {
-					if (bonus < 0)
-						bonus = 0;
-					else
-						bonus /= 2;
-				} else 
-					bonus = 0;
-				break;
-			case 5: //Acacia
-				if(!isPotency && bonus > 0) {
-					bonus *= 2;
-				} else {
-					if(bonus > 0)
-						bonus *= -1;
-					else 
-						bonus *= 2;
-				}
-				break;
-			case 6: //Dark Oak
-				if(bonus > 0)
-					bonus *= 1.5;
-				else
-					bonus *= 2;
-				break;
-			default:
-				break;
-		}
-		
-		return bonus;
 	}
 	
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {

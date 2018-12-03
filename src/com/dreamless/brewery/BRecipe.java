@@ -97,18 +97,18 @@ public class BRecipe {
 			stmt.setString(1, type);
 			stmt.setBoolean(2, isAged);
 			stmt.setBoolean(3, isDistilled);
-			Brewery.breweryDriver.debugLog(fullQuery);
+			//Brewery.breweryDriver.debugLog(fullQuery);
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {//New recipe!
-				Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
+				//Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
 				player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");	
 				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);				
 			} else {//Found something
 				do {
-					Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
+					//Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
 					if(combinedAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
-						Brewery.breweryDriver.debugLog("reject, insufficient aspects");
+						//Brewery.breweryDriver.debugLog("reject, insufficient aspects");
 						continue;
 					}
 					boolean allAspectsFound = true; //didn't find it
@@ -117,30 +117,30 @@ public class BRecipe {
 						double aspectRating = es.getValue();
 						boolean aspectFound = false;
 						
-						Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
+						//Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
 						
 						for(int i = 1; i <= combinedAspects.size(); i++) {//Iterate through aspectNname columns
 							String aspectNameColumn = "aspect" + i + "name";
 							String aspectRatingColumn = "aspect" + i + "rating";
 							String aspectName = results.getString(aspectNameColumn).trim();
-							Brewery.breweryDriver.debugLog("checking..." + aspectName);
+							//Brewery.breweryDriver.debugLog("checking..." + aspectName);
 							if(aspectName.equalsIgnoreCase(currentAspect)){//So, it has the aspect
 								int recipeRating = results.getInt(aspectRatingColumn);
 								if(aspectRating >= recipeRating && aspectRating < recipeRating + 9) {//found it
 									aspectFound = true;
-									Brewery.breweryDriver.debugLog("You do!");
+									//Brewery.breweryDriver.debugLog("You do!");
 									break;
 								}
 							}
 						}
 						if(!aspectFound) {//The aspect wasn't here, so not the right one. Stop looking
-							Brewery.breweryDriver.debugLog("You don't!");
+							//Brewery.breweryDriver.debugLog("You don't!");
 							allAspectsFound = false;
 							break;
 						}
 					}
 					if(allAspectsFound) {//We found it!
-						Brewery.breweryDriver.debugLog("Found you!");
+						//Brewery.breweryDriver.debugLog("Found you!");
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
 							player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
@@ -209,7 +209,7 @@ public class BRecipe {
 			stmt.setInt(5, aspects.size());
 			stmt.setString(6, flavor);
 			
-			Brewery.breweryDriver.debugLog(stmt.toString());
+			//Brewery.breweryDriver.debugLog(stmt.toString());
 			
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
@@ -231,7 +231,7 @@ public class BRecipe {
 			stmt.setString(2, currentTime);
 			stmt.setString(3, name);
 			
-			Brewery.breweryDriver.debugLog(stmt.toString());
+			//Brewery.breweryDriver.debugLog(stmt.toString());
 			
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
@@ -414,11 +414,19 @@ public class BRecipe {
 				
 				
 		//Pull aspects
-		NBTCompound aspectList = brewery.getCompound("aspects");
-		Set<String> aspects = aspectList.getKeys();
+		NBTCompound aspectBaseList = brewery.getCompound("aspectsBase");
+		NBTCompound aspectActivationList = brewery.getCompound("aspectsActivation");
+		Set<String> aspects = aspectBaseList.getKeys();
 		HashMap <String, Double> agedAspects = new HashMap<String, Double>();
 		for(String currentAspect : aspects) {
-			agedAspects.put(currentAspect, aspectList.getDouble(currentAspect));
+			double effectiveRating = aspectBaseList.getDouble(currentAspect) * aspectActivationList.getDouble(currentAspect);
+			if(currentAspect.contains("_POTENCY")) {
+				effectiveRating *= brewery.getDouble("potency");
+			} else if (currentAspect.contains("_DURATION")) {
+				effectiveRating *= brewery.getDouble("duration");
+			}
+			agedAspects.put(currentAspect, effectiveRating);
+			Brewery.breweryDriver.debugLog("Unmasked aspect " + currentAspect + " rating: " + effectiveRating);
 		}
 		
 		//Get Recipe

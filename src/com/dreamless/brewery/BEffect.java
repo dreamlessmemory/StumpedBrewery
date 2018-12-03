@@ -19,7 +19,7 @@ public class BEffect {
 	private static final int DURATION_CAP = 1245;
 	private static final int LEVEL_CAP_INSTANT = 5;
 	private static final int LEVEL_CAP_DURATION = 3;
-	private static final int DEFAULT_POTENCY = 1;
+	private static final int DEFAULT_POTENCY = 0;
 	private static final int MINUMUM_DURATION = 45;
 	private static final int MAX_SCORE = 100;
 	private static final double CONTROL = 0.8;
@@ -48,7 +48,7 @@ public class BEffect {
 		}
 		
 		for(String currentAspect : aspects.keySet()) {
-			Brewery.breweryDriver.debugLog("Processing - " + currentAspect);
+			//Brewery.breweryDriver.debugLog("Processing - " + currentAspect);
 			boolean isPotency = false;
 			String trueAspect = currentAspect;
 			PotionEffectType type;
@@ -57,7 +57,7 @@ public class BEffect {
 				trueAspect = currentAspect.substring(0, currentAspect.length() - 8);
 				isPotency = true;
 			} else if (currentAspect.contains("_DURATION")) {
-				trueAspect = currentAspect.substring(0, currentAspect.length() - 10);
+				trueAspect = currentAspect.substring(0, currentAspect.length() - 9);
 				isPotency = false;
 			}
 			type = PotionEffectType.getByName(trueAspect);
@@ -65,11 +65,14 @@ public class BEffect {
 				//Search for effect
 				BEffect tempBEffect = effectMap.get(type);
 				if(tempBEffect == null) {//doesn't exist yet
+					//Brewery.breweryDriver.debugLog("Making new effect for " + currentAspect);
 					tempBEffect = new BEffect();
 				}
 				if (isPotency) {//update potency
+					//Brewery.breweryDriver.debugLog("Updating potency for " + currentAspect);
 					tempBEffect.setPotency(calculatePotency(aspects.get(currentAspect), bonusPotency, type.isInstant()));
 				} else { //update duration
+					//Brewery.breweryDriver.debugLog("Updating duration for " + currentAspect);
 					tempBEffect.setDuration(calculateDuration(aspects.get(currentAspect), bonusDuration));
 				}
 				effectMap.put(type, tempBEffect);
@@ -94,7 +97,7 @@ public class BEffect {
 	public static int calculatePotency(double potency, double bonusPotency, boolean isInstant) {
 		double score = (potency + bonusPotency)/MAX_SCORE;
 		int calculatedScore = (int)Math.ceil(Math.atan(CONTROL * score) * (isInstant ? LEVEL_CAP_INSTANT : LEVEL_CAP_DURATION));
-		return calculatedScore;
+		return Math.max(0, calculatedScore - 1);
 	}
 	
 	public boolean isHidden() {
