@@ -22,13 +22,14 @@ public class Distiller {
 				NBTItem nbti = new NBTItem(item);
 				if(nbti.hasKey("brewery")) {
 					NBTCompound brewery = nbti.getCompound("brewery");
-					if(brewery.hasKey("finishedDistilling")) {
+					/*if(brewery.hasKey("finishedDistilling")) {
 						continue;
-					}
+					}*/
 					
 					NBTCompound distilling = brewery.hasKey("distilling") ? brewery.getCompound("distilling") : brewery.addCompound("distilling");
 					int cycles = distilling.hasKey("cycles") ? distilling.getInteger("cycles") : 0; 
-					
+					if(cycles > 10) //You only get 10 cycles
+						continue;
 					//Assign age now
 					distilling.setInteger("cycles", ++cycles);
 					item = nbti.getItem();
