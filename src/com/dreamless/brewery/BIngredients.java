@@ -218,7 +218,7 @@ public class BIngredients {
 		for(String currentAspect : aspects.keySet()) {
 			Aspect aspect = aspects.get(currentAspect);
 			
-			double activationIncrease = Aspect.getStepBonus(state, currentAspect, type);
+			double activationIncrease = Aspect.getFermentationIncrease(state, currentAspect, type);
 			double newActivation = aspect.getActivation()+ activationIncrease;
 			Brewery.breweryDriver.debugLog("Update Activation of " + currentAspect + ": " + aspect.getActivation() + " + " + activationIncrease + " -> " + newActivation);
 			aspect.setActivation(newActivation);

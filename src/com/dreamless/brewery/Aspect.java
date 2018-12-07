@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.bukkit.Material;
+
 public class Aspect implements Comparable<Object> {
 	//Static Numbers for balancing
 	public static double commonPotency = 4;
@@ -77,8 +79,8 @@ public class Aspect implements Comparable<Object> {
 		}
 	}
 
-	public static double getStepBonus(int time, String aspect, String type) {
-		String query = "SELECT * FROM fermentation WHERE aspect=?";
+	public static double getFermentationIncrease(int time, String aspect, String type) {
+		String query = "SELECT reactivity, inertia FROM aspects WHERE aspect=?";
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, aspect);
@@ -105,7 +107,7 @@ public class Aspect implements Comparable<Object> {
 	
 	//Returns a double multiplier
 	public static double getEffectiveActivation(String aspect, double activation, String type) {
-		String query = "SELECT * FROM fermentation WHERE aspect=?";
+		String query = "SELECT stability, saturation, integrity FROM aspects WHERE aspect=?";
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, aspect);
@@ -206,4 +208,46 @@ public class Aspect implements Comparable<Object> {
 				return saturation;
 		}
 	}
+	
+	public static double processFilter(String aspect, String type, double activation, Material filter) {
+		String query = "SELECT stability, saturation, reactivity FROM aspects WHERE aspect=?";
+		
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			stmt.setString(1, aspect);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (!results.next()) {
+				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + aspect);
+				return 0;
+			} else {//Successful Pull
+				double stability = getStability(results.getInt("stability"), type) / 100;
+				double saturation = getSaturation(results.getInt("saturation"), type) / 100;
+				double reactivity = results.getInt("reactivity") * getReactivityMultiplier(type) /100;
+				
+				switch(filter) {
+					case GLOWSTONE_DUST:
+						return glowstoneFilter(activation, reactivity);
+					default:
+						return activation;
+				}
+							
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			return activation;
+		}
+	}
+	
+	private static double glowstoneFilter(double activation, double reactivity) {
+		if(activation < 1.0) {
+			return Math.min(activation + reactivity/2 , 1.0);
+		} else return activation;
+	}
+	
+	//Glowstone
+	//Redstone
+	//Quartz
+	//Lapis
+	
+	
 }

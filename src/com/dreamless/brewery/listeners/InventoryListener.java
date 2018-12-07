@@ -178,11 +178,11 @@ public class InventoryListener implements Listener {
 
 
 	private byte hasCustom(BrewerInventory brewer) {
-		ItemStack item = brewer.getItem(3); // ingredient
-		boolean glowstone = (item != null && Material.GLOWSTONE_DUST == item.getType()); // need dust in the top slot.
+		ItemStack item = brewer.getIngredient(); // ingredient
+		boolean hasFilter = hasFilter(item); // need dust in the top slot.
 		byte customFound = 0;
 		if(containsDistillable(brewer)) {
-			if(glowstone) {
+			if(hasFilter) {
 				customFound = 2;
 			} else {
 				customFound = 1;
@@ -193,6 +193,15 @@ public class InventoryListener implements Listener {
 		//Contains distillable,  has glowstone = 2
 		//Contains distillable, no glowstone = 1
 		return customFound;
+	}
+	
+	private boolean hasFilter(ItemStack item) {
+		switch(item.getType()) {
+			case GLOWSTONE_DUST:
+			//case REDSTONE_DUST:
+				return true;
+				default: return false;
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
@@ -269,9 +278,9 @@ public class InventoryListener implements Listener {
 				return;
 			}
 			//Ignore if already finished
-			if(brewery.hasKey("finishedDistilling") && topHolder instanceof BrewingStand) {
+			/*if(brewery.hasKey("finishedDistilling") && topHolder instanceof BrewingStand) {
 				return;
-			}
+			}*/
 			
 			if(!brewery.hasKey("placedInBrewer")) {
 				//Cancel event
@@ -348,6 +357,8 @@ public class InventoryListener implements Listener {
 							bottomInventory.addItem(item);
 							event.setCurrentItem(new ItemStack(Material.AIR));
 						}
+					} else {
+						brewery.removeKey("placedInBrewer");
 					}
 				}
 			}

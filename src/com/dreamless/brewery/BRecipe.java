@@ -344,7 +344,7 @@ public class BRecipe {
     private static String convertAspects(Map<String, Double> aspects){
     	String startup = "&o&dThis brew is";
     	String description = "";
-    	String query = "SELECT description FROM aspects WHERE name=?";
+    	String query = "SELECT description FROM aspects WHERE aspect=?";
     	for(Map.Entry<String, Double> entry: aspects.entrySet()) {
     		String aspect = entry.getKey();
     		if(aspect.contains("_DURATION") || aspect.contains("_POTENCY")) {
@@ -419,7 +419,7 @@ public class BRecipe {
 		Set<String> aspects = aspectBaseList.getKeys();
 		HashMap <String, Double> agedAspects = new HashMap<String, Double>();
 		for(String currentAspect : aspects) {
-			double effectiveRating = aspectBaseList.getDouble(currentAspect) * aspectActivationList.getDouble(currentAspect);
+			double effectiveRating = aspectBaseList.getDouble(currentAspect) * Aspect.getEffectiveActivation(currentAspect, aspectActivationList.getDouble(currentAspect) * 100, brewery.getString("type"));
 			if(currentAspect.contains("_POTENCY")) {
 				effectiveRating *= brewery.getDouble("potency");
 			} else if (currentAspect.contains("_DURATION")) {

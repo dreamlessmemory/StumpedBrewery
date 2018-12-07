@@ -28,13 +28,15 @@ public class Distiller {
 					
 					NBTCompound distilling = brewery.hasKey("distilling") ? brewery.getCompound("distilling") : brewery.addCompound("distilling");
 					int cycles = distilling.hasKey("cycles") ? distilling.getInteger("cycles") : 0; 
-					if(cycles > 10) //You only get 10 cycles
+					if(cycles >= 10) { //You only get 10 cycles
+						//TODO Add effects?
 						continue;
+					}
 					//Assign age now
 					distilling.setInteger("cycles", ++cycles);
 					item = nbti.getItem();
 					//Brewery.breweryDriver.debugLog("Cycles is " + cycles);
-					item = distillSlot(item);
+					item = distillSlot(item, inv.getIngredient());
 					
 					inv.setItem(i, item);
 				}
@@ -43,8 +45,8 @@ public class Distiller {
 	}
 
 	// distill custom potion in given slot
-	public static ItemStack distillSlot(ItemStack item) {//TODO Update
-		Brewery.breweryDriver.debugLog("DISTILLING 1 CYCLE : " + item.toString());
+	public static ItemStack distillSlot(ItemStack item, ItemStack filter) {//TODO Update
+		Brewery.breweryDriver.debugLog("DISTILLING 1 CYCLE : " + item.toString() + " FILTER: " + filter.toString());
 		
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
@@ -52,20 +54,15 @@ public class Distiller {
 		NBTCompound distilling = brewery.getCompound("distilling");
 		
 		//Pull aspects
-		NBTCompound aspectList = brewery.getCompound("aspects");
+		NBTCompound aspectList = brewery.getCompound("aspectsActivation");
 		Set<String> aspects = aspectList.getKeys();
 		
 		//Calculate new aspects
 		int cycles = distilling.getInteger("cycles");
 		for(String currentAspect : aspects) {
 			double aspectPotency = aspectList.getDouble(currentAspect);
-			double agingBonus = Aspect.getStepBonus(cycles, currentAspect, "distilling");
-			double typeBonus = agingBonus * (Aspect.getStepBonus(cycles, brewery.getString("type"), "distilling")/100);
-			double newPotency = aspectPotency + agingBonus + typeBonus;
-			if(newPotency <= 0) {
-				newPotency = 0;
-			}
-			//Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " + " + agingBonus + " + " + typeBonus + " -> " + newPotency);
+			double newPotency = Aspect.processFilter(currentAspect, brewery.getString("type"), aspectPotency, filter.getType());
+			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " -> " + newPotency);
 			//Update NBT
 			aspectList.setDouble(currentAspect, newPotency);
 		}
