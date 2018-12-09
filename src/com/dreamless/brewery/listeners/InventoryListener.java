@@ -190,17 +190,19 @@ public class InventoryListener implements Listener {
 		}
 		
 		//Does not contain distillable = 0
-		//Contains distillable,  has glowstone = 2
-		//Contains distillable, no glowstone = 1
+		//Contains distillable,  has filter = 2
+		//Contains distillable, no filter = 1
 		return customFound;
 	}
 	
 	private boolean hasFilter(ItemStack item) {
 		switch(item.getType()) {
 			case GLOWSTONE_DUST:
-			//case REDSTONE_DUST:
+			case REDSTONE:
+			case LAPIS_LAZULI:
+			case QUARTZ:
 				return true;
-				default: return false;
+			default: return false;
 		}
 	}
 

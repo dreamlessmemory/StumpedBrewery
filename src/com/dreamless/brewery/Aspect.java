@@ -221,12 +221,18 @@ public class Aspect implements Comparable<Object> {
 				return 0;
 			} else {//Successful Pull
 				double stability = getStability(results.getInt("stability"), type) / 100;
-				double saturation = getSaturation(results.getInt("saturation"), type) / 100;
+				//double saturation = getSaturation(results.getInt("saturation"), type) / 100;
 				double reactivity = results.getInt("reactivity") * getReactivityMultiplier(type) /100;
 				
 				switch(filter) {
 					case GLOWSTONE_DUST:
 						return glowstoneFilter(activation, reactivity);
+					case REDSTONE:
+						return redstoneFilter(activation, reactivity);
+					case LAPIS_LAZULI:
+						return lapisFilter(activation, reactivity);
+					case QUARTZ:
+						return quartzFilter(activation, reactivity, stability);
 					default:
 						return activation;
 				}
@@ -237,17 +243,27 @@ public class Aspect implements Comparable<Object> {
 			return activation;
 		}
 	}
-	
+	//Increases everything under 100% to 100% by one half-step
 	private static double glowstoneFilter(double activation, double reactivity) {
 		if(activation < 1.0) {
 			return Math.min(activation + reactivity/2 , 1.0);
 		} else return activation;
 	}
-	
-	//Glowstone
-	//Redstone
-	//Quartz
-	//Lapis
-	
+	//Decreases everything by one step
+	private static double redstoneFilter(double activation, double reactivity) {
+		return Math.max(activation - reactivity , 0);
+	}
+	//Increases everything above 100% by one half-step
+	private static double lapisFilter(double activation, double reactivity) {
+		if(activation >= 1.0) {
+			return activation + reactivity/2;
+		} else return activation;
+	}
+	//Decreases everything over stability by one half step
+	private static double quartzFilter(double activation, double reactivity, double stability) {
+		if(activation > stability) {
+			return Math.max(activation - reactivity/2, stability);
+		} else return activation;
+	}
 	
 }
