@@ -25,6 +25,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -331,7 +332,10 @@ public class Brewery extends JavaPlugin {
 				debugLog(locationMap.toString());
 				Block worldBlock = (Location.deserialize(locationMap).getBlock());
 				debugLog(worldBlock.toString());
-				
+				if(((Levelled)worldBlock.getBlockData()).getLevel() < 1) {
+					debugLog("Skipping loading, empty");
+					continue;
+				}
 				//State
 				int state = result.getInt("state");
 				

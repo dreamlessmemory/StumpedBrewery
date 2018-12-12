@@ -196,11 +196,12 @@ public class InventoryListener implements Listener {
 	}
 	
 	private boolean hasFilter(ItemStack item) {
+		if(item == null) return false;
 		switch(item.getType()) {
 			case GLOWSTONE_DUST:
 			case REDSTONE:
-			case LAPIS_LAZULI:
-			case QUARTZ:
+			case SUGAR:
+			case GUNPOWDER:
 				return true;
 			default: return false;
 		}
@@ -272,7 +273,7 @@ public class InventoryListener implements Listener {
 		//Brewery.breweryDriver.debugLog("Clear to proceed");
 		NBTItem nbti = new NBTItem(item);
 		if(nbti.hasKey("brewery")) {
-			//Brewery.breweryDriver.debugLog("Brew placed in Brewing Equipment");
+			Brewery.breweryDriver.debugLog("Brew placed in Brewing Equipment");
 			NBTCompound brewery = nbti.getCompound("brewery");
 			
 			//Ignore if already finished
@@ -300,7 +301,7 @@ public class InventoryListener implements Listener {
 					topInventory.addItem(item);
 					event.setCurrentItem(new ItemStack(Material.AIR));
 				}
-				//Brewery.breweryDriver.debugLog("Brew has been tagged");
+				Brewery.breweryDriver.debugLog("Brew has been tagged");
 			}
 		}
 	}
@@ -344,24 +345,28 @@ public class InventoryListener implements Listener {
 			NBTItem nbti = new NBTItem(item);
 			if(nbti.hasKey("brewery")) {
 				NBTCompound brewery = nbti.getCompound("brewery");
-				//Brewery.breweryDriver.debugLog("Transferred back");
+				Brewery.breweryDriver.debugLog("Transferred back");
 				if(brewery.hasKey("placedInBrewer")) {
-					//Brewery.breweryDriver.debugLog("And it has the tag");
+					Brewery.breweryDriver.debugLog("And it has the tag");
 					if(item.getItemMeta().getDisplayName().contains("#Aging") || item.getItemMeta().getDisplayName().contains("#Distilling")) {
 						event.setCancelled(true);
 						item = BRecipe.revealMaskedBrew(item, equipmentType);
 						//Set the item, based on action used
-						if(action == InventoryAction.PLACE_ALL || action ==InventoryAction.PLACE_ONE || action == InventoryAction.SWAP_WITH_CURSOR) {
-							event.getWhoClicked().setItemOnCursor(action == InventoryAction.SWAP_WITH_CURSOR? event.getCurrentItem() : new ItemStack(Material.AIR));
-							//event.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
-							event.setCurrentItem(item);
-						} else if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-							bottomInventory.addItem(item);
-							event.setCurrentItem(new ItemStack(Material.AIR));
-						}
 					} else {
+						Brewery.breweryDriver.debugLog("Tag removed - no distillation happened");
 						brewery.removeKey("placedInBrewer");
+						item = nbti.getItem();
 					}
+					
+					if(action == InventoryAction.PLACE_ALL || action ==InventoryAction.PLACE_ONE || action == InventoryAction.SWAP_WITH_CURSOR) {
+						event.getWhoClicked().setItemOnCursor(action == InventoryAction.SWAP_WITH_CURSOR? event.getCurrentItem() : new ItemStack(Material.AIR));
+						//event.getWhoClicked().setItemOnCursor(new ItemStack(Material.AIR));
+						event.setCurrentItem(item);
+					} else if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+						bottomInventory.addItem(item);
+						event.setCurrentItem(new ItemStack(Material.AIR));
+					}
+					((Player)event.getWhoClicked()).updateInventory();
 				}
 			}
 		}

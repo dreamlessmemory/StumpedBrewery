@@ -128,10 +128,10 @@ public class BIngredients {
 			else flavorAspects.put(currentAspect, aspects.get(currentAspect));
 		}
 		
-		HashMap <String, Double> effectAspectActivation = new HashMap<String, Double>();
-		HashMap <String, Double> flavorAspectActivation = new HashMap<String, Double>();
-		HashMap <String, Double> effectAspectEffectivePotency = new HashMap<String, Double>();
-		HashMap <String, Double> flavorAspectEffectivePotency = new HashMap<String, Double>();
+		TreeMap <String, Double> effectAspectActivation = new TreeMap<String, Double>();
+		TreeMap <String, Double> flavorAspectActivation = new TreeMap<String, Double>();
+		TreeMap <String, Double> effectAspectEffectivePotency = new TreeMap<String, Double>();
+		TreeMap <String, Double> flavorAspectEffectivePotency = new TreeMap<String, Double>();
 		
 		//Calculate Effect Values
 		//Add calculated aspects to the map
@@ -143,6 +143,14 @@ public class BIngredients {
 			effectAspectActivation.put(currentAspect, effectiveActivation);
 			effectAspectEffectivePotency.put(currentAspect, calculatedPotency / calculatedSaturation * effectiveActivation);
 			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + effectAspectActivation.get(currentAspect));
+		}
+		
+		//Remove until 3 effects
+		while(effectAspectEffectivePotency.size() > 3) {
+			Map.Entry<String, Double> entry = effectAspectEffectivePotency.pollFirstEntry();
+			effectAspectActivation.remove(entry.getKey());
+			effectAspects.remove(entry.getKey());
+			Brewery.breweryDriver.debugLog("KNOCKOUT " + entry.getKey());
 		}
 		
 		//Calculate Flavor Values
@@ -157,6 +165,14 @@ public class BIngredients {
 			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + flavorAspectActivation.get(currentAspect));
 		}
 		//Brewery.breweryDriver.debugLog("SIZE? " + effectAspectValues.size());
+		
+		//Remove until 6 flavors
+		while(flavorAspectEffectivePotency.size() > 6) {
+			Map.Entry<String, Double> entry = flavorAspectEffectivePotency.pollFirstEntry();
+			flavorAspectActivation.remove(entry.getKey());
+			flavorAspects.remove(entry.getKey());
+			Brewery.breweryDriver.debugLog("KNOCKOUT " + entry.getKey());
+		}
 		
 		
 		//Add custom potion effects based on effect aspects

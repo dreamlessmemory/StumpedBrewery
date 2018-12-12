@@ -5,6 +5,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -47,8 +48,9 @@ public class PlayerListener implements Listener {
 						} else if (materialInHand == Material.CLOCK) {
 							if(BCauldron.isCooking(clickedBlock)) {
 								BCauldron.printTime(player, clickedBlock);
-							} else {
+							} else if(((Levelled)clickedBlock.getBlockData()).getLevel() > 0){
 								BCauldron.setCooking(clickedBlock, true);
+								Brewery.breweryDriver.msg(player, "This cauldron has started boiling!");
 								clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
 							}	
 							return;

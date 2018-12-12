@@ -226,13 +226,13 @@ public class Aspect implements Comparable<Object> {
 				
 				switch(filter) {
 					case GLOWSTONE_DUST:
-						return glowstoneFilter(activation, reactivity);
+						return glowstoneFilter(activation, reactivity, type.equalsIgnoreCase("VODKA"));
 					case REDSTONE:
-						return redstoneFilter(activation, reactivity);
-					case LAPIS_LAZULI:
-						return lapisFilter(activation, reactivity);
-					case QUARTZ:
-						return quartzFilter(activation, reactivity, stability);
+						return redstoneFilter(activation, reactivity, type.equalsIgnoreCase("VODKA"));
+					case GUNPOWDER:
+						return gunpowderFilter(activation, reactivity, type.equalsIgnoreCase("VODKA"));
+					case SUGAR:
+						return sugarFilter(activation, reactivity, stability, type.equalsIgnoreCase("VODKA"));
 					default:
 						return activation;
 				}
@@ -244,25 +244,25 @@ public class Aspect implements Comparable<Object> {
 		}
 	}
 	//Increases everything under 100% to 100% by one half-step
-	private static double glowstoneFilter(double activation, double reactivity) {
+	private static double glowstoneFilter(double activation, double reactivity, boolean boost) {
 		if(activation < 1.0) {
-			return Math.min(activation + reactivity/2 , 1.0);
+			return Math.min(activation + reactivity/(boost? 1 : 2) , 1.0);
 		} else return activation;
 	}
 	//Decreases everything by one step
-	private static double redstoneFilter(double activation, double reactivity) {
-		return Math.max(activation - reactivity , 0);
+	private static double redstoneFilter(double activation, double reactivity, boolean boost) {
+		return Math.max(activation - reactivity * (boost? 2: 1) , 0);
 	}
 	//Increases everything above 100% by one half-step
-	private static double lapisFilter(double activation, double reactivity) {
+	private static double gunpowderFilter(double activation, double reactivity, boolean boost) {
 		if(activation >= 1.0) {
-			return activation + reactivity/2;
+			return activation + reactivity/(boost? 1 : 2);
 		} else return activation;
 	}
 	//Decreases everything over stability by one half step
-	private static double quartzFilter(double activation, double reactivity, double stability) {
+	private static double sugarFilter(double activation, double reactivity, double stability, boolean boost) {
 		if(activation > stability) {
-			return Math.max(activation - reactivity/2, stability);
+			return Math.max(activation - reactivity/(boost? 1: 2), stability);
 		} else return activation;
 	}
 	
