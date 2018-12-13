@@ -49,6 +49,12 @@ public class BCauldron {
 	public void onUpdate() {//UPDATE THE POTION
 		// Check if fire still alive
 		if ((!block.getChunk().isLoaded() || fireActive()) && cooking) {
+			
+			if(getFillLevel(block) == 0) {//remove yourself if empty
+				remove(block);
+				return;
+			}
+			
 			// add a minute to cooking time
 			state++;
 			//Sound and particle effects
