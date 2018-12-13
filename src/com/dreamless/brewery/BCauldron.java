@@ -177,12 +177,9 @@ public class BCauldron {
 	
 	// reset to normal cauldron
 	public static void remove(Block block) {
-		if (getFillLevel(block) != 0) {
-			BCauldron bcauldron = get(block);
-			if (bcauldron != null) {
-				bcauldrons.remove(bcauldron);
-			}
-		}
+		BCauldron bcauldron = get(block);
+		if (bcauldron != null) 
+			bcauldrons.remove(bcauldron);
 	}
 
 	// unloads cauldrons that are in a unloading world
