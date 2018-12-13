@@ -268,9 +268,10 @@ public class InventoryListener implements Listener {
 			item = event.getCurrentItem();
 		} else return;
 		
-		event.setCancelled(true);
-		
-		if(item.getType() != Material.POTION) {
+		if(item.getType() != Material.POTION && topHolder instanceof Barrel) {
+			event.setCancelled(true);
+			return;
+		} else if (hasFilter(item)) {
 			return;
 		}
 		//Brewery.breweryDriver.debugLog("Clear to proceed");
@@ -331,7 +332,7 @@ public class InventoryListener implements Listener {
 				return;//Not those two types, then ignore.
 			}
 			
-			//Check action, leave if not the correct action to place into a brewing equipment
+			//Check action, leave if not the correct action to remove from a brewing equipment
 			InventoryAction action = event.getAction();
 			if(action == InventoryAction.PLACE_ALL || action ==InventoryAction.PLACE_ONE || action == InventoryAction.SWAP_WITH_CURSOR) {
 				if(event.getClickedInventory() != bottomInventory) return;
@@ -341,11 +342,14 @@ public class InventoryListener implements Listener {
 				item = event.getCurrentItem();
 			} else return;
 			
-			event.setCancelled(true);
-			
-			if(item.getType() != Material.POTION) {//Not a potion, cancel
+			/*
+			if(item.getType() != Material.POTION && topHolder instanceof Barrel) {
+				event.setCancelled(true);
 				return;
-			}
+			} else if (hasFilter(item)) {
+				return;
+			}*/
+			
 			//Brewery.breweryDriver.debugLog("Clear to proceed");
 			NBTItem nbti = new NBTItem(item);
 			if(nbti.hasKey("brewery")) {
