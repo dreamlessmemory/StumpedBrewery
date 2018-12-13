@@ -156,7 +156,7 @@ public class InventoryListener implements Listener {
 
 					if (brewTime <= 1) { // Done!
 						BrewerInventory brewer = stand.getInventory();
-						stand.getBlock().getWorld().playSound(stand.getBlock().getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
+						stand.getBlock().getWorld().playSound(stand.getBlock().getLocation(), Sound.BLOCK_BREWING_STAND_BREW, 2.0f, 1.0f);
 						if (!runDistill(brewer)) {
 							this.cancel();
 							trackedBrewers.remove(brewery);
