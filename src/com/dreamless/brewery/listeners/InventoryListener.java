@@ -141,12 +141,12 @@ public class InventoryListener implements Listener {
 								// No custom potion, cancel and ignore
 								this.cancel();
 								trackedBrewers.remove(brewery);
-								//Brewery.breweryDriver.debugLog("nothing to distill");
+								Brewery.breweryDriver.debugLog("nothing to distill");
 								return;
 							default:
 								runTime = getLongestDistillTime(stand.getInventory());
 								brewTime = runTime;
-								//Brewery.breweryDriver.debugLog("using brewtime: " + runTime);
+								Brewery.breweryDriver.debugLog("using brewtime: " + runTime);
 
 						}
 					}
@@ -156,6 +156,7 @@ public class InventoryListener implements Listener {
 
 					if (brewTime <= 1) { // Done!
 						BrewerInventory brewer = stand.getInventory();
+						stand.getBlock().getWorld().playSound(stand.getBlock().getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE, 2.0f, 1.0f);
 						if (!runDistill(brewer)) {
 							this.cancel();
 							trackedBrewers.remove(brewery);
