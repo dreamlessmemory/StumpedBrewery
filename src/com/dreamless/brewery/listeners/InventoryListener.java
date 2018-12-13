@@ -267,6 +267,8 @@ public class InventoryListener implements Listener {
 			item = event.getCurrentItem();
 		} else return;
 		
+		event.setCancelled(true);
+		
 		if(item.getType() != Material.POTION) {
 			return;
 		}
@@ -302,13 +304,13 @@ public class InventoryListener implements Listener {
 					event.setCurrentItem(new ItemStack(Material.AIR));
 				}
 				Brewery.breweryDriver.debugLog("Brew has been tagged");
-			}
+			} 
 		}
 	}
 	
 	
 	//Check if a brew is transferred into a brewing stand or barrel
-		@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+		@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 		public void onTransferFromBrewer(InventoryClickEvent event) {
 			ItemStack item = null;
 			String equipmentType = "none";
@@ -338,7 +340,9 @@ public class InventoryListener implements Listener {
 				item = event.getCurrentItem();
 			} else return;
 			
-			if(item.getType() != Material.POTION) {
+			event.setCancelled(true);
+			
+			if(item.getType() != Material.POTION) {//Not a potion, cancel
 				return;
 			}
 			//Brewery.breweryDriver.debugLog("Clear to proceed");
