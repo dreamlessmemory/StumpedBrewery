@@ -213,7 +213,7 @@ public class Brewery extends JavaPlugin {
 
 		// save and load LanguageReader
 		languageReader.save();
-		languageReader = new LanguageReader(new File(breweryDriver.getDataFolder(), "languages/" + language + ".yml"));
+		languageReader = new LanguageReader(new File(breweryDriver.getDataFolder(), "en.yml"));
 
 		reloader = null;
 	}

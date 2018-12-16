@@ -136,7 +136,7 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, p.languageReader.get("Error_NoPermissions"));
 			}
 
-		}else if (cmd.equalsIgnoreCase("toggle")) {
+		}else if (cmd.equalsIgnoreCase("drunkenness") || cmd.equalsIgnoreCase("toggle")) {
 				cmdToggleDrunk(sender, args);
 		} else {
 			//p.getServer().getPlayerExact(cmd) != null
@@ -407,9 +407,11 @@ public class CommandListener implements CommandExecutor {
 			}
 			switch(toggle) {
 			case "true":
+			case "enable":
 				BPlayer.toggleDrunkEffects(true, ((Player) sender).getUniqueId().toString());
 				break;
 			case "false":
+			case "disable":
 				BPlayer.toggleDrunkEffects(false, ((Player) sender).getUniqueId().toString());
 				break;
 			default:

@@ -161,7 +161,7 @@ public class BCauldron {
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (bcauldron.state > 1) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo2", "" + bcauldron.state));
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo2", Integer.toString(bcauldron.state)));
 			} else if (bcauldron.state == 1) {
 				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo1"));
 			} else {
@@ -271,14 +271,16 @@ public class BCauldron {
 		}
 	}
 
-	public static void setCooking(Block block, boolean cooking) {
+	public static boolean setCooking(Block block, boolean cooking) {
 		BCauldron bcauldron = get(block);
 		if(bcauldron!= null) {
 			bcauldron.cooking = cooking;
 			if(cooking) {
 				bcauldron.ingredients.startCooking();
+				return true;
 			}
 		}
+		return cooking;
 	}
 	
 	public void startCooking() {

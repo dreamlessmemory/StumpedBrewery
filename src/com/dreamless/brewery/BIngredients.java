@@ -288,7 +288,7 @@ public class BIngredients {
 			}
 		}
 		if(highestCount == 0) {//no one is the right one
-			type = "OTHER";
+			type = "ELIXIR";
 		}
 		Brewery.breweryDriver.debugLog("Starting brew: " + type);
 	}
