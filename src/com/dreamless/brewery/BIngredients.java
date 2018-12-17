@@ -40,7 +40,7 @@ public class BIngredients {
 		String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name=?";
 		
 		//Add Item
-		int ingPosition = ingredients.indexOf(ingredient);
+		int ingPosition = getIndexOf(ingredient);
 		if(ingPosition != -1) {
 			ingredients.get(ingPosition).setAmount(ingredients.get(ingPosition).getAmount() + ingredient.getAmount());
 		} else {
@@ -327,5 +327,14 @@ public class BIngredients {
 
 	public void setIngredients(ArrayList<ItemStack> ingredients) {
 		this.ingredients = ingredients;
+	}
+	
+	private int getIndexOf(ItemStack item) {
+		for(ItemStack i: ingredients) {
+			if(item.isSimilar(i)) {
+				return ingredients.indexOf(i);
+			}
+		}
+		return -1;
 	}
 }
