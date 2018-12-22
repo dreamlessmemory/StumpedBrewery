@@ -349,7 +349,7 @@ public class Brewery extends JavaPlugin {
 				
 				new BCauldron(worldBlock, ingredients, state, cooking);
 			} 
-		} catch (SQLException e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		
@@ -390,7 +390,7 @@ public class Brewery extends JavaPlugin {
 				
 				new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time);
 			} 
-		} catch (SQLException e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 			
@@ -406,7 +406,7 @@ public class Brewery extends JavaPlugin {
 					//debugLog(result.getString("uuid"));
 				}
 			} 
-		} catch (SQLException e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		
@@ -419,7 +419,7 @@ public class Brewery extends JavaPlugin {
 				//debugLog("Wakeup : " + locationMap.toString());
 				Wakeup.wakeups.add(new Wakeup(Location.deserialize(locationMap)));
 			} 
-		} catch (SQLException e1) {
+		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 	}

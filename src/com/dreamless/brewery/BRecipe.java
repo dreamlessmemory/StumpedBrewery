@@ -50,8 +50,8 @@ public class BRecipe {
 		this.name = name;
 		this.flavorText = flavorText;
 	}
-	
-	public static BRecipe getRecipe(Player player, String type, Map<String, Double> effectAspects, Map<String, Double> flavorAspects, boolean isAged, boolean isDistilled){
+	//TODO: add potmult/durmult
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> effectAspects, Map<String, Double> flavorAspects, boolean isAged, boolean isDistilled, double potencyMultiplier, double durationMultiplier){
 		//Get Top 3 Effect Aspects
 		AspectComparator effecAspectComparator = new AspectComparator(effectAspects);
 		NavigableMap<String, Double> topEffectAspects = new TreeMap<String, Double>(effecAspectComparator);
@@ -77,12 +77,12 @@ public class BRecipe {
 		combinedAspects.putAll(topFlavorAspects);
 		combinedAspects.putAll(topEffectAspects);
 		
-		return getRecipe(player, type, combinedAspects, isAged, isDistilled); 
+		return getRecipe(player, type, combinedAspects, isAged, isDistilled, potencyMultiplier, durationMultiplier); 
 	}
-	
-	public static BRecipe getRecipe(Player player, String type, Map<String, Double> combinedAspects, boolean isAged, boolean isDistilled){	
+	//TODO: add potmult/durmult
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> combinedAspects, boolean isAged, boolean isDistilled, double potencyMultiplier, double durationMultiplier){	
 		//Prep the SQL
-		String starterQuery = "SELECT * FROM recipes WHERE type=? AND isAged=? AND isDistilled=?";
+		String starterQuery = "SELECT * FROM recipes WHERE type=? AND isAged=? AND isDistilled=? AND potencymult=? AND durationmult=?";
 		String aspectQuery = "";
 		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect4name, aspect5name, aspect6name, aspect7name, aspect8name, aspect9name)";
 		String fullQuery = "";
@@ -97,6 +97,8 @@ public class BRecipe {
 			stmt.setString(1, type);
 			stmt.setBoolean(2, isAged);
 			stmt.setBoolean(3, isDistilled);
+			stmt.setDouble(4, potencyMultiplier);
+			stmt.setDouble(5, durationMultiplier);
 			//Brewery.breweryDriver.debugLog(fullQuery);
 			ResultSet results;
 			results = stmt.executeQuery();
@@ -392,7 +394,7 @@ public class BRecipe {
     private static String color(String s){
         return ChatColor.translateAlternateColorCodes('&', s);
     }
-    
+  //TODO: add potmult/durmult
     public static ItemStack revealMaskedBrew(ItemStack item, String equipmentType) {
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
@@ -437,7 +439,7 @@ public class BRecipe {
 			Brewery.breweryDriver.debugLog("Removed Player");
 		}
 		String crafterName = player.getDisplayName();
-		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, aging != null, distilling != null);
+		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, aging != null, distilling != null, brewery.getDouble("potency"), brewery.getDouble("duration"));
 		
 		//Handle crafter list
 		ArrayList<String> craftersList = new ArrayList<String>();

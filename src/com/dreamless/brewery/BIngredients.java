@@ -181,9 +181,9 @@ public class BIngredients {
 			potionMeta.addCustomEffect(effect, true);
 		}
 		
-		
+		//TODO: add potmult/durmult
 		//Recipe
-		BRecipe recipe = BRecipe.getRecipe(player, type, effectAspectEffectivePotency, flavorAspectEffectivePotency, false, false);
+		BRecipe recipe = BRecipe.getRecipe(player, type, effectAspectEffectivePotency, flavorAspectEffectivePotency, false, false, 1.0, 1.0);
 		potionMeta.setDisplayName(recipe.getName());
 		ArrayList<String> craftersList = new ArrayList<String>();
 		craftersList.add(player.getDisplayName());
