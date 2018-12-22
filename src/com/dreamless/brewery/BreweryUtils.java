@@ -14,6 +14,8 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 public final class BreweryUtils {
     
     public static String toBase64(Inventory inventory) {
+    	if(inventory == null)
+        	return "";
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);

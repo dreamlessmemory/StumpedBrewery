@@ -56,6 +56,8 @@ public class Barrel implements InventoryHolder {
 		try {
 			this.inventory = BreweryUtils.fromBase64(inventory, this);
 		} catch (IOException e) {
+			inventory = null;
+			Brewery.breweryDriver.debugLog("Error creating inventory for a barrel");
 			e.printStackTrace();
 		}
 		
@@ -74,12 +76,12 @@ public class Barrel implements InventoryHolder {
 	public static void onUpdate() {
 		//Brewery.breweryDriver.debugLog("Update Barrel");
 		for (Barrel barrel : barrels) {
-			// Minecraft day is 20 min, so add 1/20 to the time every minute
-			//barrel.time += (1.0 / 20.0);
 			barrel.time += (1.0 / minutesPerYear);
-			//Brewery.breweryDriver.debugLog("Age Start?");
-			barrel.ageContents((1.0 / minutesPerYear));
-			//Brewery.breweryDriver.debugLog("Age end?");
+			if(barrel.ageContents((1.0 / minutesPerYear))) {
+				barrel.time += (1.0 / minutesPerYear);	
+			} else {
+				barrel.time = 0;
+			}
 		}
 		if (check == 0 && barrels.size() > 0) {
 			Barrel random = barrels.get((int) Math.floor(Math.random() * barrels.size()));
@@ -92,10 +94,11 @@ public class Barrel implements InventoryHolder {
 		}
 	}
 	
-	private void ageContents(double time) {
+	private boolean ageContents(double time) {
 		if(inventory == null) {
-			return;
+			return false;
 		}
+		boolean containsBrew = false;
 		ItemStack[] contents = inventory.getContents(); 
 		for(int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
@@ -126,12 +129,14 @@ public class Barrel implements InventoryHolder {
 			Brewery.breweryDriver.debugLog("Age is " + newAge);
 			//Check new Age
 			if(Math.floor(newAge) > Math.floor(age) && newAge <= 10) {//Logic - round down, then compare. Precondition, time =<1.0
+				containsBrew = true;
 				item = ageOneYear(item, getWood());
 			}
 
 			//Update Inventory
 			inventory.setItem(i, item);
 		}
+		return containsBrew;
 	}
 	
 	public ItemStack ageOneYear(ItemStack item, byte woodType) {
@@ -227,18 +232,7 @@ public class Barrel implements InventoryHolder {
 			} else {
 				inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
 			}
-		} else {
-			if (time > 0) {
-				// if nobody has the inventory opened
-				if (inventory.getViewers().isEmpty()) {
-					// if inventory contains potions
-					if (inventory.contains(Material.POTION)) {
-					}
-				}
-			}
 		}
-		// reset barreltime, potions have new age
-		time = 0;
 		player.openInventory(inventory);
 	}
 
@@ -476,28 +470,33 @@ public class Barrel implements InventoryHolder {
 		if (!barrels.isEmpty()) {
 			
 			for (Barrel barrel : barrels) {
-				//Brewery.breweryDriver.debugLog("BARREL");
+				Brewery.breweryDriver.debugLog("BARREL");
 				//Location
 				String location = Brewery.gson.toJson(barrel.spigot.getLocation().serialize());
-				//Brewery.breweryDriver.debugLog(location);
+				Brewery.breweryDriver.debugLog(location);
 				
 				//woodloc
 				String woodsloc = null;
 				if(barrel.woodsloc != null) {
 					woodsloc = Brewery.gson.toJson(barrel.woodsloc);
-					//Brewery.breweryDriver.debugLog(woodsloc + " wood");
+					Brewery.breweryDriver.debugLog(woodsloc + " wood");
 				}	
 				
 				//stairsloc
 				String stairsloc = null;
 				if(barrel.stairsloc != null) {
 					stairsloc = Brewery.gson.toJson(barrel.stairsloc);
-					//Brewery.breweryDriver.debugLog(stairsloc + " stairs");
+					Brewery.breweryDriver.debugLog(stairsloc + " stairs");
 				}
 				
+				String jsonInventory = null;
 				//inventory
-				String jsonInventory = BreweryUtils.toBase64(barrel.inventory);
-				//Brewery.breweryDriver.debugLog(jsonInventory);
+				try {
+					jsonInventory = BreweryUtils.toBase64(barrel.inventory);
+					Brewery.breweryDriver.debugLog(jsonInventory);
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				}
 				
 				String query = "REPLACE barrels SET idbarrels=?, location=?, woodsloc=?, stairsloc=?, signoffset=?, checked=?, inventory=?, time=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -510,7 +509,7 @@ public class Barrel implements InventoryHolder {
 					stmt.setString(7, jsonInventory);
 					stmt.setFloat(8, barrel.time);
 					
-					//Brewery.breweryDriver.debugLog(stmt.toString());
+					Brewery.breweryDriver.debugLog(stmt.toString());
 					
 					stmt.executeUpdate();
 				} catch (SQLException e1) {
@@ -524,7 +523,7 @@ public class Barrel implements InventoryHolder {
 		String query = "DELETE FROM barrels WHERE idbarrels >=?";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setInt(1, id);
-			//Brewery.breweryDriver.debugLog(stmt.toString());
+			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();

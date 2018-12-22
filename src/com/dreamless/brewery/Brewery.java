@@ -361,9 +361,9 @@ public class Brewery extends JavaPlugin {
 				String resultString;
 				//spigot
 				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-				//debugLog(locationMap.toString());
+				debugLog(locationMap.toString());
 				Block worldBlock = (Location.deserialize(locationMap).getBlock());
-				//debugLog(worldBlock.toString());
+				debugLog(worldBlock.toString());
 				
 				//Wood
 				int[] woodsLoc = null;
