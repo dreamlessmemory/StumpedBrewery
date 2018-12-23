@@ -18,11 +18,11 @@ public class BEffect {
 	
 	private static final int DURATION_CAP = 1245;
 	private static final int LEVEL_CAP_INSTANT = 5;
-	private static final int LEVEL_CAP_DURATION = 3;
+	private static final int LEVEL_CAP_DURATION = 4;
 	private static final int DEFAULT_POTENCY = 0;
 	private static final int MINUMUM_DURATION = 45;
 	private static final int MAX_SCORE = 100;
-	private static final double CONTROL = 0.8;
+	private static final double CONTROL = 1.0;
 	
 	public BEffect() {
 		this.potency = DEFAULT_POTENCY;
@@ -34,7 +34,7 @@ public class BEffect {
 		this.duration = duration;
 	}
 
-	public static ArrayList<PotionEffect> calculateEffect(HashMap<String, Double> aspects){
+	public static ArrayList<PotionEffect> calculateEffect(HashMap<String, Double> aspects, int potencyMultiplier, int durationMultiplier){
 		ArrayList<PotionEffect> effects = new ArrayList<PotionEffect>();
 		HashMap<PotionEffectType, BEffect> effectMap = new HashMap<PotionEffectType, BEffect>();
 		
@@ -70,10 +70,10 @@ public class BEffect {
 				}
 				if (isPotency) {//update potency
 					//Brewery.breweryDriver.debugLog("Updating potency for " + currentAspect);
-					tempBEffect.setPotency(calculatePotency(aspects.get(currentAspect), bonusPotency, type.isInstant()));
+					tempBEffect.setPotency(calculatePotency(aspects.get(currentAspect), bonusPotency, type.isInstant(), potencyMultiplier));
 				} else { //update duration
 					//Brewery.breweryDriver.debugLog("Updating duration for " + currentAspect);
-					tempBEffect.setDuration(calculateDuration(aspects.get(currentAspect), bonusDuration));
+					tempBEffect.setDuration(calculateDuration(aspects.get(currentAspect), bonusDuration, durationMultiplier));
 				}
 				effectMap.put(type, tempBEffect);
 			}
@@ -87,15 +87,17 @@ public class BEffect {
 		return effects;
 	}
 
-	public static int calculateDuration(double duration, double bonusDuration) {
+	public static int calculateDuration(double duration, double bonusDuration, int durationMultiplier) {
 		double difference = DURATION_CAP - MINUMUM_DURATION;
-		double score = duration + bonusDuration;
-		double scaledScore = Math.ceil(Math.atan(score / MAX_SCORE * CONTROL) * difference);
+		double score = (duration + bonusDuration);
+		score = (score * durationMultiplier) / 100;
+		double scaledScore = Math.ceil(Math.atan((score /MAX_SCORE) * CONTROL) * difference);
 		return MINUMUM_DURATION + (int)scaledScore;
 	}
 	
-	public static int calculatePotency(double potency, double bonusPotency, boolean isInstant) {
-		double score = (potency + bonusPotency)/MAX_SCORE;
+	public static int calculatePotency(double potency, double bonusPotency, boolean isInstant, int potencyMultiplier) {
+		double score = (potency + bonusPotency);
+		score = (score* potencyMultiplier) / (MAX_SCORE * 100);
 		int calculatedScore = (int)Math.ceil(Math.atan(CONTROL * score) * (isInstant ? LEVEL_CAP_INSTANT : LEVEL_CAP_DURATION));
 		return Math.max(0, calculatedScore - 1);
 	}

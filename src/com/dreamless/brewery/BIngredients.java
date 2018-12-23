@@ -176,14 +176,14 @@ public class BIngredients {
 		
 		
 		//Add custom potion effects based on effect aspects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(effectAspectEffectivePotency));
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(effectAspectEffectivePotency), 100, 100);
 		for (PotionEffect effect: effects) {
 			potionMeta.addCustomEffect(effect, true);
 		}
 		
 		//TODO: add potmult/durmult
 		//Recipe
-		BRecipe recipe = BRecipe.getRecipe(player, type, effectAspectEffectivePotency, flavorAspectEffectivePotency, false, false, 1.0, 1.0);
+		BRecipe recipe = BRecipe.getRecipe(player, type, effectAspectEffectivePotency, flavorAspectEffectivePotency, false, false, 100, 100);
 		potionMeta.setDisplayName(recipe.getName());
 		ArrayList<String> craftersList = new ArrayList<String>();
 		craftersList.add(player.getDisplayName());
@@ -216,8 +216,8 @@ public class BIngredients {
 			aspectActList.setDouble(currentAspect, flavorAspectActivation.get(currentAspect));
 		}
 		//Multipliers
-		breweryMeta.setDouble("potency", 1.0);
-		breweryMeta.setDouble("duration", 1.0);
+		breweryMeta.setInteger("potency", 100);
+		breweryMeta.setInteger("duration", 100);
 		
 		
 		//Type

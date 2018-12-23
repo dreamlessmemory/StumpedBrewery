@@ -128,7 +128,7 @@ public class Barrel implements InventoryHolder {
 			item = nbti.getItem();
 			Brewery.breweryDriver.debugLog("Age is " + newAge);
 			//Check new Age
-			if(Math.floor(newAge) > Math.floor(age) && newAge <= 10) {//Logic - round down, then compare. Precondition, time =<1.0
+			if(Math.floor(newAge) > Math.floor(age) && newAge < 11) {//Logic - round down, then compare. Precondition, time =<1.0
 				containsBrew = true;
 				item = ageOneYear(item, getWood());
 			}
@@ -152,28 +152,28 @@ public class Barrel implements InventoryHolder {
 		
 		switch(woodType) {
 		case 1://birch
-			brewery.setDouble("potency", brewery.getDouble("potency") - 0.05);
-			brewery.setDouble("duration", brewery.getDouble("duration") + 0.05);
+			brewery.setInteger("potency", brewery.getInteger("potency") - 4);
+			brewery.setInteger("duration", brewery.getInteger("duration") + 4);
 			break;
 		case 2:	//Oak
-			brewery.setDouble("potency", brewery.getDouble("potency") + 0.05);
-			brewery.setDouble("duration", brewery.getDouble("duration") -0.05); //- 0.05
+			brewery.setInteger("potency", brewery.getInteger("potency") + 4);
+			brewery.setInteger("duration", brewery.getInteger("duration") - 4); //- 0.05
 			break;
 		case 3: //Jungle
-			brewery.setDouble("potency", brewery.getDouble("potency") + 0.075);
-			brewery.setDouble("duration", brewery.getDouble("duration") - 0.075);
+			brewery.setInteger("potency", brewery.getInteger("potency") + 8);
+			brewery.setInteger("duration", brewery.getInteger("duration") - 8);
 			break;
 		case 4: //Spruce
-			brewery.setDouble("potency", brewery.getDouble("potency") + 0.065);
-			brewery.setDouble("duration", brewery.getDouble("duration") - 0.065);
+			brewery.setInteger("potency", brewery.getInteger("potency") + 6);
+			brewery.setInteger("duration", brewery.getInteger("duration") - 6);
 			break;
 		case 5: //Acacia
-			brewery.setDouble("potency", brewery.getDouble("potency") - 0.075);
-			brewery.setDouble("duration", brewery.getDouble("duration") + 0.075);
+			brewery.setInteger("potency", brewery.getInteger("potency") - 8);
+			brewery.setInteger("duration", brewery.getInteger("duration") + 8);
 			break;
 		case 6: //Dark Oak
-			brewery.setDouble("potency", brewery.getDouble("potency") + 0.065);
-			brewery.setDouble("duration", brewery.getDouble("duration") - 0.065);
+			brewery.setInteger("potency", brewery.getInteger("potency") + 6);
+			brewery.setInteger("duration", brewery.getInteger("duration") - 6);
 			break;
 		default:
 			break;

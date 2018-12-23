@@ -51,7 +51,7 @@ public class BRecipe {
 		this.flavorText = flavorText;
 	}
 	//TODO: add potmult/durmult
-	public static BRecipe getRecipe(Player player, String type, Map<String, Double> effectAspects, Map<String, Double> flavorAspects, boolean isAged, boolean isDistilled, double potencyMultiplier, double durationMultiplier){
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> effectAspects, Map<String, Double> flavorAspects, boolean isAged, boolean isDistilled, int potencyMultiplier, int durationMultiplier){
 		//Get Top 3 Effect Aspects
 		AspectComparator effecAspectComparator = new AspectComparator(effectAspects);
 		NavigableMap<String, Double> topEffectAspects = new TreeMap<String, Double>(effecAspectComparator);
@@ -80,7 +80,7 @@ public class BRecipe {
 		return getRecipe(player, type, combinedAspects, isAged, isDistilled, potencyMultiplier, durationMultiplier); 
 	}
 	//TODO: add potmult/durmult
-	public static BRecipe getRecipe(Player player, String type, Map<String, Double> combinedAspects, boolean isAged, boolean isDistilled, double potencyMultiplier, double durationMultiplier){	
+	public static BRecipe getRecipe(Player player, String type, Map<String, Double> combinedAspects, boolean isAged, boolean isDistilled, int potencyMultiplier, int durationMultiplier){	
 		//Prep the SQL
 		String starterQuery = "SELECT * FROM recipes WHERE type=? AND isAged=? AND isDistilled=? AND potencymult=? AND durationmult=?";
 		String aspectQuery = "";
@@ -97,20 +97,20 @@ public class BRecipe {
 			stmt.setString(1, type);
 			stmt.setBoolean(2, isAged);
 			stmt.setBoolean(3, isDistilled);
-			stmt.setDouble(4, potencyMultiplier);
-			stmt.setDouble(5, durationMultiplier);
-			//Brewery.breweryDriver.debugLog(fullQuery);
+			stmt.setInt(4, potencyMultiplier);
+			stmt.setInt(5, durationMultiplier);
+			Brewery.breweryDriver.debugLog(stmt.toString());
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (!results.next()) {//New recipe!
-				//Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
+				Brewery.breweryDriver.debugLog("Nothing returned? New recipe!");
 				player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");	
-				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);				
+				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled, potencyMultiplier, durationMultiplier);				
 			} else {//Found something
 				do {
-					//Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
+					Brewery.breweryDriver.debugLog("Checking recipe: - " + results.getString("name"));
 					if(combinedAspects.size() != results.getInt("aspectCount")) {//Not the right number of aspects
-						//Brewery.breweryDriver.debugLog("reject, insufficient aspects");
+						Brewery.breweryDriver.debugLog("reject, insufficient aspects");
 						continue;
 					}
 					boolean allAspectsFound = true; //didn't find it
@@ -119,30 +119,31 @@ public class BRecipe {
 						double aspectRating = es.getValue();
 						boolean aspectFound = false;
 						
-						//Brewery.breweryDriver.debugLog("Do you have a " + currentAspect);
+						Brewery.breweryDriver.debugLog("Do you have a " + currentAspect + " @ " + aspectRating);
 						
 						for(int i = 1; i <= combinedAspects.size(); i++) {//Iterate through aspectNname columns
 							String aspectNameColumn = "aspect" + i + "name";
 							String aspectRatingColumn = "aspect" + i + "rating";
 							String aspectName = results.getString(aspectNameColumn).trim();
-							//Brewery.breweryDriver.debugLog("checking..." + aspectName);
+							Brewery.breweryDriver.debugLog("checking..." + aspectName);
 							if(aspectName.equalsIgnoreCase(currentAspect)){//So, it has the aspect
 								int recipeRating = results.getInt(aspectRatingColumn);
-								if(aspectRating >= recipeRating && aspectRating < recipeRating + 9) {//found it
+								if(aspectRating >= recipeRating && aspectRating < recipeRating + 10) {//found it
 									aspectFound = true;
-									//Brewery.breweryDriver.debugLog("You do!");
+									Brewery.breweryDriver.debugLog("You do! And correct rating");
 									break;
 								}
+								Brewery.breweryDriver.debugLog("You do...but wrong rating. - This recipe is rated " + recipeRating);
 							}
 						}
 						if(!aspectFound) {//The aspect wasn't here, so not the right one. Stop looking
-							//Brewery.breweryDriver.debugLog("You don't!");
+							Brewery.breweryDriver.debugLog("You don't!");
 							allAspectsFound = false;
 							break;
 						}
 					}
 					if(allAspectsFound) {//We found it!
-						//Brewery.breweryDriver.debugLog("Found you!");
+						Brewery.breweryDriver.debugLog("Found you!");
 						if(!results.getBoolean("isclaimed")){//Exists, but not claimed
 							player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");
 							addRecipeToClaimList(player.getUniqueId().toString(), results.getString("name"));
@@ -151,9 +152,9 @@ public class BRecipe {
 					}
 				} while (results.next());			
 				//If we get here, nothing was found. So make a new one?
-				//Brewery.breweryDriver.debugLog("None found?");
+				Brewery.breweryDriver.debugLog("None found?");
 				player.sendMessage(ChatColor.GREEN + "[Brewery] " + ChatColor.RESET + "You have come across a novel " + type.toLowerCase() + " brew!");		
-				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled);
+				return generateNewRecipe(player, type, combinedAspects, isAged, isDistilled, potencyMultiplier, durationMultiplier);
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
@@ -161,7 +162,7 @@ public class BRecipe {
 		return new BRecipe("Unknown Brew", "A strange brew with no effects...");
 	}
 	
-	private static BRecipe generateNewRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled){
+	private static BRecipe generateNewRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, double potencyMultiplier, double durationMultiplier){
 		//Variables?
 		
 		//Get variables
@@ -173,17 +174,17 @@ public class BRecipe {
 		ArrayList<String> newLore = generateLore(null, flavor, aspects);
 		
 		addRecipeToClaimList(uuid, newName);
-		addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor);
+		addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor, potencyMultiplier, durationMultiplier);
 		
 		return new BRecipe(newName, newLore);
 	}
 	
-	private static void addRecipeToMainList(String name, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor){
+	private static void addRecipeToMainList(String name, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor, double potencyMultiplier, double durationMultiplier){
 	
 		//Build SQL
 		String query = "INSERT INTO recipes ";
-		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, flavortext";
-		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?";	
+		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, flavortext, potencymult, durationmult";
+		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?, ?, ?";	
 		String aspectColumns = "";
 		String aspectValues = "";
 		int count = 1;
@@ -199,7 +200,7 @@ public class BRecipe {
 		}
 		
 		query += mandatoryColumns + aspectColumns + ") " + mandatoryValues + aspectValues + ")";
-		Brewery.breweryDriver.debugLog(query);
+		//Brewery.breweryDriver.debugLog(query);
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			
@@ -210,8 +211,10 @@ public class BRecipe {
 			stmt.setBoolean(4, isDistilled);
 			stmt.setInt(5, aspects.size());
 			stmt.setString(6, flavor);
+			stmt.setDouble(7, potencyMultiplier);
+			stmt.setDouble(8, durationMultiplier);
 			
-			//Brewery.breweryDriver.debugLog(stmt.toString());
+			Brewery.breweryDriver.debugLog(stmt.toString());
 			
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
@@ -439,7 +442,7 @@ public class BRecipe {
 			Brewery.breweryDriver.debugLog("Removed Player");
 		}
 		String crafterName = player.getDisplayName();
-		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, aging != null, distilling != null, brewery.getDouble("potency"), brewery.getDouble("duration"));
+		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, brewery.hasKey("aging"), brewery.hasKey("distilling"), brewery.getInteger("potency"), brewery.getInteger("duration"));
 		
 		//Handle crafter list
 		ArrayList<String> craftersList = new ArrayList<String>();
@@ -459,7 +462,7 @@ public class BRecipe {
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 		
 		//Set new effects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects);
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects, brewery.getInteger("potency"), brewery.getInteger("duration"));
 		potionMeta.clearCustomEffects();
 		for (PotionEffect effect: effects) {
 			potionMeta.addCustomEffect(effect, true);
