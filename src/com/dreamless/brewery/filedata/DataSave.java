@@ -51,7 +51,14 @@ public class DataSave extends BukkitRunnable {
 
 
 	// Save all data. Takes a boolean whether all data should be collected in instantly
-	public static void save(boolean collectInstant) {
+	public static void save() {
+		
+		//Do not save if in dev mode
+		if(Brewery.development) {
+			Brewery.breweryDriver.debugLog("Saving disabled in development mode");
+			return;
+		}
+		
 		long time = System.nanoTime();
 		if (running != null) {
 			Brewery.breweryDriver.log("Another Save was started while a Save was in Progress");
@@ -68,7 +75,7 @@ public class DataSave extends BukkitRunnable {
 
 	public static void autoSave() {
 		if (lastSave >= autosave) {
-			save(false);// save all data
+			save();// save all data
 		} else {
 			lastSave++;
 		}

@@ -45,6 +45,7 @@ import com.mysql.jdbc.Connection;
 public class Brewery extends JavaPlugin {
 	public static Brewery breweryDriver;
 	public static boolean debug;
+	public static boolean development;
 	public static boolean useUUID;
 	public static boolean use1_9;
 	public static boolean updateCheck;
@@ -115,7 +116,12 @@ public class Brewery extends JavaPlugin {
 		//Load the GSON
 		gson = new Gson();
 		
-		readData();
+		//Do not load anything if in dev mode
+		if(!development) {
+			readData();
+		} else {
+			Brewery.breweryDriver.debugLog("Loading disabled in development mode");
+		}
 
 		// Listeners
 		blockListener = new BlockListener();
@@ -157,7 +163,7 @@ public class Brewery extends JavaPlugin {
 		}
 
 		// save Data to Disk
-		DataSave.save(true);
+		DataSave.save();
 
 		// save LanguageReader
 		languageReader.save();
@@ -266,6 +272,7 @@ public class Brewery extends JavaPlugin {
 		// various Settings
 		DataSave.autosave = currentConfig.getInt("autosave", 3);
 		debug = currentConfig.getBoolean("debug", false);
+		development = currentConfig.getBoolean("development", false);
 		BPlayer.pukeItem = Material.matchMaterial(currentConfig.getString("pukeItem", "SOUL_SAND"));
 		BPlayer.hangoverTime = currentConfig.getInt("hangoverDays", 0) * 24 * 60;
 		BPlayer.overdrinkKick = currentConfig.getBoolean("enableKickOnOverdrink", false);
@@ -277,7 +284,7 @@ public class Brewery extends JavaPlugin {
 		PlayerListener.openEverywhere = currentConfig.getBoolean("openLargeBarrelEverywhere", false);
 		
 		//difficulty settings
-		Barrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 20.0);
+		Barrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
 		
 		// loading drainItems
 		List<String> drainList = currentConfig.getStringList("drainItems");
