@@ -26,9 +26,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NavigableMap;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 
 public class BRecipe {
@@ -50,36 +48,7 @@ public class BRecipe {
 		this.name = name;
 		this.flavorText = flavorText;
 	}
-	//TODO: add potmult/durmult
-	public static BRecipe getRecipe(Player player, String type, Map<String, Double> effectAspects, Map<String, Double> flavorAspects, boolean isAged, boolean isDistilled, int potencyMultiplier, int durationMultiplier){
-		//Get Top 3 Effect Aspects
-		AspectComparator effecAspectComparator = new AspectComparator(effectAspects);
-		NavigableMap<String, Double> topEffectAspects = new TreeMap<String, Double>(effecAspectComparator);
-		for(String aspect: effectAspects.keySet()) {
-			topEffectAspects.put(aspect, effectAspects.get(aspect));
-		}
-		while(topEffectAspects.size() > 3) {
-			topEffectAspects.pollLastEntry();
-		}
-		//Get top 6 Flavor Aspects
-		AspectComparator flavorAspectComparator = new AspectComparator(flavorAspects);
-		NavigableMap<String, Double> topFlavorAspects = new TreeMap<String, Double>(flavorAspectComparator);
-		//Add to new tree
-		for(String aspect: flavorAspects.keySet()) {
-			topFlavorAspects.put(aspect, flavorAspects.get(aspect));
-		}
-		while(topFlavorAspects.size() > 6) {
-			topFlavorAspects.pollLastEntry();
-		}
-		
-		//Combine
-		HashMap<String, Double> combinedAspects = new HashMap<String, Double>();
-		combinedAspects.putAll(topFlavorAspects);
-		combinedAspects.putAll(topEffectAspects);
-		
-		return getRecipe(player, type, combinedAspects, isAged, isDistilled, potencyMultiplier, durationMultiplier); 
-	}
-	//TODO: add potmult/durmult
+
 	public static BRecipe getRecipe(Player player, String type, Map<String, Double> combinedAspects, boolean isAged, boolean isDistilled, int potencyMultiplier, int durationMultiplier){	
 		//Prep the SQL
 		String starterQuery = "SELECT * FROM recipes WHERE type=? AND isAged=? AND isDistilled=? AND potencymult=? AND durationmult=?";
@@ -163,7 +132,8 @@ public class BRecipe {
 	}
 	
 	private static BRecipe generateNewRecipe(Player player, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, double potencyMultiplier, double durationMultiplier){
-		//Variables?
+		
+		
 		
 		//Get variables
 		String uuid = player.getUniqueId().toString();
@@ -173,8 +143,11 @@ public class BRecipe {
 		String newName = generateNewName(player, lowercaseType);
 		ArrayList<String> newLore = generateLore(null, flavor, aspects);
 		
-		addRecipeToClaimList(uuid, newName);
-		addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor, potencyMultiplier, durationMultiplier);
+		//Ignore if in dev mode
+		if(!Brewery.development) {
+			addRecipeToClaimList(uuid, newName);
+			addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor, potencyMultiplier, durationMultiplier);	
+		}
 		
 		return new BRecipe(newName, newLore);
 	}
@@ -397,7 +370,7 @@ public class BRecipe {
     private static String color(String s){
         return ChatColor.translateAlternateColorCodes('&', s);
     }
-  //TODO: add potmult/durmult
+
     public static ItemStack revealMaskedBrew(ItemStack item, String equipmentType) {
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
@@ -422,7 +395,7 @@ public class BRecipe {
 		NBTCompound aspectBaseList = brewery.getCompound("aspectsBase");
 		NBTCompound aspectActivationList = brewery.getCompound("aspectsActivation");
 		Set<String> aspects = aspectBaseList.getKeys();
-		HashMap <String, Double> agedAspects = new HashMap<String, Double>();
+		HashMap <String, Double> maskedAspects = new HashMap<String, Double>();
 		for(String currentAspect : aspects) {
 			double effectiveRating = aspectBaseList.getDouble(currentAspect) * Aspect.getEffectiveActivation(currentAspect, aspectActivationList.getDouble(currentAspect) * 100, brewery.getString("type"));
 			if(currentAspect.contains("_POTENCY")) {
@@ -430,7 +403,7 @@ public class BRecipe {
 			} else if (currentAspect.contains("_DURATION")) {
 				effectiveRating *= (brewery.getDouble("duration")/100);
 			}
-			agedAspects.put(currentAspect, effectiveRating);
+			maskedAspects.put(currentAspect, effectiveRating);
 			Brewery.breweryDriver.debugLog("Unmasked aspect " + currentAspect + " rating: " + effectiveRating);
 		}
 		
@@ -444,7 +417,7 @@ public class BRecipe {
 			crafterName = player.getDisplayName();
 		}
 		
-		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, brewery.hasKey("aging"), brewery.hasKey("distilling"), brewery.getInteger("potency"), brewery.getInteger("duration"));
+		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), maskedAspects, brewery.hasKey("aging"), brewery.hasKey("distilling"), brewery.getInteger("potency"), brewery.getInteger("duration"));
 		
 		//Handle crafter list
 		ArrayList<String> craftersList = new ArrayList<String>();
@@ -464,7 +437,7 @@ public class BRecipe {
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 		
 		//Set new effects
-		ArrayList<PotionEffect> effects = BEffect.calculateEffect(agedAspects, brewery.getInteger("potency"), brewery.getInteger("duration"));
+		ArrayList<PotionEffect> effects = BEffect.calculateEffect(maskedAspects, brewery.getInteger("potency"), brewery.getInteger("duration"));
 		potionMeta.clearCustomEffects();
 		for (PotionEffect effect: effects) {
 			potionMeta.addCustomEffect(effect, true);

@@ -59,20 +59,22 @@ public class BEffect {
 			} else if (currentAspect.contains("_DURATION")) {
 				trueAspect = currentAspect.substring(0, currentAspect.length() - 9);
 				isPotency = false;
+			} else { //neither
+				Brewery.breweryDriver.debugLog("Skipping effect processing - " + trueAspect);
 			}
 			type = PotionEffectType.getByName(trueAspect);
 			if(type != null){//It really is an effect.
 				//Search for effect
 				BEffect tempBEffect = effectMap.get(type);
 				if(tempBEffect == null) {//doesn't exist yet
-					//Brewery.breweryDriver.debugLog("Making new effect for " + currentAspect);
+					Brewery.breweryDriver.debugLog("Making new effect for " + currentAspect);
 					tempBEffect = new BEffect();
 				}
 				if (isPotency) {//update potency
-					//Brewery.breweryDriver.debugLog("Updating potency for " + currentAspect);
+					Brewery.breweryDriver.debugLog("Updating potency for " + currentAspect);
 					tempBEffect.setPotency(calculatePotency(aspects.get(currentAspect), bonusPotency, type.isInstant(), potencyMultiplier));
-				} else { //update duration
-					//Brewery.breweryDriver.debugLog("Updating duration for " + currentAspect);
+				} else {//update duration
+					Brewery.breweryDriver.debugLog("Updating duration for " + currentAspect);
 					tempBEffect.setDuration(calculateDuration(aspects.get(currentAspect), bonusDuration, durationMultiplier));
 				}
 				effectMap.put(type, tempBEffect);

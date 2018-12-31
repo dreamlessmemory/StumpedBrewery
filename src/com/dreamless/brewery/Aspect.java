@@ -48,6 +48,15 @@ public class Aspect implements Comparable<Object> {
 	public void setSaturation(double saturation) {
 		this.saturation = saturation;
 	}
+	
+	public void setValues(double potency, double saturation) {
+		this.potency = potency;
+		this.saturation = saturation;
+	}
+	
+	public double getCookedBase() {
+		return potency/Math.max(saturation, 1);
+	}
 
 	public String toString() {
 		return "Potency: " + potency + " Saturation: " + saturation;
@@ -68,14 +77,27 @@ public class Aspect implements Comparable<Object> {
 	
 	public static double calculateRaritySaturation(int rarity){
 		switch(rarity) {
+			case (1):
+				return 0.2;
+			case (2):
+				return 0.6;
+			case (3):
+				return 1.0;
+			default:
+				return 0.2;
+		}
+	}
+	
+	public static double[] getRarityValues(int rarity) {
+		switch(rarity) {
 		case (1):
-			return 0.2;
+			return new double[] {4, 0.2};
 		case (2):
-			return 0.6;
+			return new double[] {24, 0.6};
 		case (3):
-			return 1.0;
+			return new double[] {60, 1.0};
 		default:
-			return 0.2;
+			return new double[] {4, 0.2};
 		}
 	}
 
