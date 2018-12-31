@@ -56,7 +56,7 @@ public class Barrel implements InventoryHolder {
 		try {
 			this.inventory = BreweryUtils.fromBase64(inventory, this);
 		} catch (IOException e) {
-			inventory = null;
+			this.inventory = null;
 			Brewery.breweryDriver.debugLog("Error creating inventory for a barrel");
 			e.printStackTrace();
 		}

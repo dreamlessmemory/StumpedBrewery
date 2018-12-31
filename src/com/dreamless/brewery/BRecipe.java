@@ -426,9 +426,9 @@ public class BRecipe {
 		for(String currentAspect : aspects) {
 			double effectiveRating = aspectBaseList.getDouble(currentAspect) * Aspect.getEffectiveActivation(currentAspect, aspectActivationList.getDouble(currentAspect) * 100, brewery.getString("type"));
 			if(currentAspect.contains("_POTENCY")) {
-				effectiveRating *= brewery.getDouble("potency");
+				effectiveRating *= (brewery.getDouble("potency")/100);
 			} else if (currentAspect.contains("_DURATION")) {
-				effectiveRating *= brewery.getDouble("duration");
+				effectiveRating *= (brewery.getDouble("duration")/100);
 			}
 			agedAspects.put(currentAspect, effectiveRating);
 			Brewery.breweryDriver.debugLog("Unmasked aspect " + currentAspect + " rating: " + effectiveRating);
@@ -436,12 +436,14 @@ public class BRecipe {
 		
 		//Get Recipe
 		Player player = null;
+		String crafterName = "unknown";
 		if(brewery.hasKey("placedInBrewer")) {
 			player = Bukkit.getPlayer(UUID.fromString(brewery.getString("placedInBrewer")));
 			brewery.removeKey("placedInBrewer");
 			Brewery.breweryDriver.debugLog("Removed Player");
+			crafterName = player.getDisplayName();
 		}
-		String crafterName = player.getDisplayName();
+		
 		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), agedAspects, brewery.hasKey("aging"), brewery.hasKey("distilling"), brewery.getInteger("potency"), brewery.getInteger("duration"));
 		
 		//Handle crafter list
