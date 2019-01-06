@@ -399,9 +399,9 @@ public class BRecipe {
 		for(String currentAspect : aspects) {
 			double effectiveRating = aspectBaseList.getDouble(currentAspect) * Aspect.getEffectiveActivation(currentAspect, aspectActivationList.getDouble(currentAspect) * 100, brewery.getString("type"));
 			if(currentAspect.contains("_POTENCY")) {
-				effectiveRating *= (brewery.getDouble("potency")/100);
+				effectiveRating *= (brewery.getInteger("potency")/100);
 			} else if (currentAspect.contains("_DURATION")) {
-				effectiveRating *= (brewery.getDouble("duration")/100);
+				effectiveRating *= (brewery.getInteger("duration")/100);
 			}
 			maskedAspects.put(currentAspect, effectiveRating);
 			Brewery.breweryDriver.debugLog("Unmasked aspect " + currentAspect + " rating: " + effectiveRating);

@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 public class BIngredients {
 
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
-	private HashMap<String, Aspect> aspects = new HashMap<String, Aspect>();
+	private HashMap<String, Aspect> potency = new HashMap<String, Aspect>();
 	private int cookedTime;
 	private String type;
 
@@ -30,7 +30,7 @@ public class BIngredients {
 	public BIngredients(ArrayList<ItemStack> ingredients, HashMap<String, Aspect> aspects, int cookedTime,
 			String type) {
 		this.ingredients = ingredients;
-		this.aspects = aspects;
+		this.potency = aspects;
 		this.cookedTime = cookedTime;
 		this.type = type;
 	}
@@ -60,12 +60,12 @@ public class BIngredients {
 				for(int i = 1; i <=3; i++) {
 					String name = results.getString("aspect"+i+"name");
 					if(name == null) continue;
-					Aspect aspect = aspects.get(name);
+					Aspect aspect = potency.get(name);
 					double[] values = Aspect.getRarityValues(results.getInt("aspect"+i+"rating"));
 					if (aspect != null) {// aspect is found
 						aspect.setValues(values[0] + aspect.getPotency(), values[1] + aspect.getSaturation());
 					} else {
-						aspects.put(name, new Aspect(values[0], values[1]));
+						potency.put(name, new Aspect(values[0], values[1]));
 					}
 				}
 			}
@@ -84,10 +84,8 @@ public class BIngredients {
 
 		// Calculate activation and effective potency
 		HashMap<String, Double> calculatedActivation = calculateActivation();
-		HashMap<String, Double> calculatedEffectivePotency = new HashMap<String, Double>();
-		for(Entry<String, Double> entry: calculatedActivation.entrySet()) {
-			calculatedEffectivePotency.put(entry.getKey(), aspects.get(entry.getKey()).getCookedBase() * entry.getValue());
-		}
+		HashMap<String, Double> calculatedEffectivePotency = calculateEffectivePotency(calculatedActivation);
+		selectAspects(calculatedActivation, calculatedEffectivePotency);
 		
 		// Add custom potion effects based on effect aspects
 		ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(calculatedEffectivePotency), 100, 100);
@@ -113,7 +111,7 @@ public class BIngredients {
 		NBTCompound aspectTagList = breweryMeta.addCompound("aspectsBase");
 		NBTCompound aspectActList = breweryMeta.addCompound("aspectsActivation");
 		for(Entry<String, Double> entry: calculatedActivation.entrySet()) {
-			aspectTagList.setDouble(entry.getKey(), aspects.get(entry.getKey()).getCookedBase());
+			aspectTagList.setDouble(entry.getKey(), potency.get(entry.getKey()).getCookedBase());
 			aspectActList.setDouble(entry.getKey(), entry.getValue());
 		}
 
@@ -133,17 +131,68 @@ public class BIngredients {
 
 		return potion;
 	}
+	
+	private HashMap<String, Double> calculateActivation() {
+		HashMap<String, Double> activation = new HashMap<String, Double>();
+		// Add calculated aspects to the map
+		for (String currentAspect : potency.keySet()) {
+			Aspect aspect = potency.get(currentAspect);
+			double effectiveActivation = Aspect.getEffectiveActivation(currentAspect, aspect.getActivation(), type);
+			activation.put(currentAspect, effectiveActivation);
+			Brewery.breweryDriver.debugLog("PUT EFFECTIVE ACTIVATION" + currentAspect + " " + effectiveActivation);
+		}
+		return activation;
+	}
+	
+	private HashMap<String, Double> calculateEffectivePotency(HashMap<String, Double> activation) {
+		HashMap<String, Double> effective = new HashMap<String, Double>();
+		for(Entry<String, Double> entry: activation.entrySet()) {
+			effective.put(entry.getKey(), potency.get(entry.getKey()).getCookedBase() * entry.getValue());
+		}
+		return effective;
+	}
+
+	private void selectAspects(HashMap<String, Double> activation, HashMap<String, Double> potency) {
+		TreeMap<String, Double> potionActivation = new TreeMap<String, Double>();
+		TreeMap<String, Double> flavorActivation = new TreeMap<String, Double>();
+		
+		// Add calculated aspects to the map
+		for (String currentAspect : potency.keySet()) {		
+			double rating = potency.get(currentAspect);			
+			if (currentAspect.contains("_DURATION") || currentAspect.contains("_POTENCY")) {
+				potionActivation.put(currentAspect, rating);
+			} else {
+				flavorActivation.put(currentAspect, rating);
+			}
+		}
+	
+		// Remove lowest effects
+		while (potionActivation.size() > 3) {
+			String victim = potionActivation.lastKey();
+			potionActivation.remove(victim);
+			activation.remove(victim);
+			potency.remove(victim);
+			Brewery.breweryDriver.debugLog("KNOCKOUT " + victim);
+		}
+		while (flavorActivation.size() > 6) {
+			String victim = flavorActivation.lastKey();
+			flavorActivation.remove(victim);
+			activation.remove(victim);
+			potency.remove(victim);
+			Brewery.breweryDriver.debugLog("KNOCKOUT " + victim);
+		}
+	}
 
 	public void fermentOneStep(int state) {
-		for (String currentAspect : aspects.keySet()) {
-			Aspect aspect = aspects.get(currentAspect);
+		for (String currentAspect : potency.keySet()) {
+			Aspect aspect = potency.get(currentAspect);
 
 			double activationIncrease = Aspect.getFermentationIncrease(state, currentAspect, type);
 			double newActivation = aspect.getActivation() + activationIncrease;
 			Brewery.breweryDriver.debugLog("Update Activation of " + currentAspect + ": " + aspect.getActivation()
 					+ " + " + activationIncrease + " -> " + newActivation);
 			aspect.setActivation(newActivation);
-			aspects.put(currentAspect, aspect);
+			potency.put(currentAspect, aspect);
 		}
 	}
 
@@ -221,11 +270,11 @@ public class BIngredients {
 	}
 
 	public HashMap<String, Aspect> getAspects() {
-		return aspects;
+		return potency;
 	}
 
 	public void setAspects(HashMap<String, Aspect> aspects) {
-		this.aspects = aspects;
+		this.potency = aspects;
 	}
 
 	public ArrayList<ItemStack> getIngredients() {
@@ -243,43 +292,5 @@ public class BIngredients {
 			}
 		}
 		return -1;
-	}
-
-	private HashMap<String, Double> calculateActivation() {
-		TreeMap<String, Double> potionActivation = new TreeMap<String, Double>();
-		TreeMap<String, Double> flavorActivation = new TreeMap<String, Double>();
-		
-		// Add calculated aspects to the map
-		for (String currentAspect : aspects.keySet()) {
-			
-			Aspect aspect = aspects.get(currentAspect);
-			double effectiveActivation = Aspect.getEffectiveActivation(currentAspect, aspect.getActivation(), type);
-			
-			if (currentAspect.contains("_DURATION") || currentAspect.contains("_POTENCY")) {
-				potionActivation.put(currentAspect, effectiveActivation);
-			} else {
-				flavorActivation.put(currentAspect, effectiveActivation);
-			}
-			Brewery.breweryDriver.debugLog("PUT " + currentAspect + " " + effectiveActivation);
-		}
-
-		// Remove lowest effects
-		while (potionActivation.size() > 3) {
-			String victim = potionActivation.firstKey();
-			potionActivation.remove(victim);
-			Brewery.breweryDriver.debugLog("KNOCKOUT " + victim);
-		}
-		
-		while (flavorActivation.size() > 6) {
-			String victim = flavorActivation.firstKey();
-			flavorActivation.remove(victim);
-			Brewery.breweryDriver.debugLog("KNOCKOUT " + victim);
-		}
-		
-		HashMap<String, Double> combined = new HashMap<String, Double>();
-		combined.putAll(flavorActivation);
-		combined.putAll(potionActivation);
-
-		return combined;
 	}
 }
