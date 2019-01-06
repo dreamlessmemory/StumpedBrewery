@@ -102,7 +102,7 @@ public class Aspect implements Comparable<Object> {
 	}
 
 	public static double getFermentationIncrease(int time, String aspect, String type) {
-		String query = "SELECT reactivity, inertia FROM aspects WHERE aspect=?";
+		String query = "SELECT reactivity, inertia FROM " + Brewery.database + "aspects WHERE aspect=?";
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, aspect);
@@ -129,7 +129,7 @@ public class Aspect implements Comparable<Object> {
 	
 	//Returns a double multiplier
 	public static double getEffectiveActivation(String aspect, double activation, String type) {
-		String query = "SELECT stability, saturation, integrity FROM aspects WHERE aspect=?";
+		String query = "SELECT stability, saturation, integrity FROM " + Brewery.database + "aspects WHERE aspect=?";
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, aspect);
@@ -232,7 +232,7 @@ public class Aspect implements Comparable<Object> {
 	}
 	
 	public static double processFilter(String aspect, String type, double activation, Material filter) {
-		String query = "SELECT stability, saturation, reactivity FROM aspects WHERE aspect=?";
+		String query = "SELECT stability, saturation, reactivity FROM " + Brewery.database + "aspects WHERE aspect=?";
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, aspect);

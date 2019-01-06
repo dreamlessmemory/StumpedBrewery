@@ -39,7 +39,7 @@ public class BIngredients {
 	public void add(ItemStack ingredient) {
 		// SQL
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
-		String query = "SELECT " + aspectQuery + " FROM ingredients WHERE name=?";
+		String query = "SELECT " + aspectQuery + " FROM " + Brewery.database + "ingredients WHERE name=?";
 
 		// Add Item
 		int ingPosition = getIndexOf(ingredient);
@@ -222,7 +222,7 @@ public class BIngredients {
 
 	public void calculateType() {
 		// SQL
-		String query = "SELECT * FROM brewtypes WHERE material=?";
+		String query = "SELECT * FROM " + Brewery.database + "brewtypes WHERE material=?";
 		int highestCount = 0;
 		int priority = 0;
 		for (ItemStack ingredient : ingredients) {
@@ -254,7 +254,7 @@ public class BIngredients {
 
 	public static boolean acceptableIngredient(Material material) {
 		// SQL
-		String query = "SELECT EXISTS(SELECT 1 FROM ingredients WHERE name='" + material.name() + "')";
+		String query = "SELECT EXISTS(SELECT 1 FROM " + Brewery.database + "ingredients WHERE name='" + material.name() + "')";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			ResultSet results;
 			results = stmt.executeQuery();

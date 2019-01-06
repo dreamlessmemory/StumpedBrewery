@@ -67,6 +67,7 @@ public class Brewery extends JavaPlugin {
 	private String username; 
 	private String password; 
 	private String url;
+	public static String database;
 
 	//Connection vars
 	public static Connection connection; //This is the variable we will use to connect to database
@@ -268,7 +269,8 @@ public class Brewery extends JavaPlugin {
 		username= currentConfig.getString("username");
 		password = currentConfig.getString("password");
 		url = currentConfig.getString("url");
-		
+		database = currentConfig.getString("prefix");
+
 		// various Settings
 		DataSave.autosave = currentConfig.getInt("autosave", 3);
 		debug = currentConfig.getBoolean("debug", false);
@@ -330,7 +332,7 @@ public class Brewery extends JavaPlugin {
 		//Brew.installTime = data.getLong("installTime", System.currentTimeMillis());
 
 		//Cauldrons
-		String cauldronQuery = "SELECT * FROM cauldrons";
+		String cauldronQuery = "SELECT * FROM " + Brewery.database + "cauldrons";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){					
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -361,7 +363,7 @@ public class Brewery extends JavaPlugin {
 		}
 		
 		//Barrel
-		String barrelQuery = "SELECT * FROM barrels";
+		String barrelQuery = "SELECT * FROM " + Brewery.database + "barrels";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -402,7 +404,7 @@ public class Brewery extends JavaPlugin {
 		}
 			
 		//Player
-		String playerQuery = "SELECT * FROM players";
+		String playerQuery = "SELECT * FROM " + Brewery.database + "players";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(playerQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -418,7 +420,7 @@ public class Brewery extends JavaPlugin {
 		}
 		
 		//Wakeup
-		String wakeupQuery = "SELECT location FROM wakeup";
+		String wakeupQuery = "SELECT location FROM " + Brewery.database + "wakeup";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(wakeupQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {

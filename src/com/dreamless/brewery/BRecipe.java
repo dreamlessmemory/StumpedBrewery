@@ -51,7 +51,7 @@ public class BRecipe {
 
 	public static BRecipe getRecipe(Player player, String type, Map<String, Double> combinedAspects, boolean isAged, boolean isDistilled, int potencyMultiplier, int durationMultiplier){	
 		//Prep the SQL
-		String starterQuery = "SELECT * FROM recipes WHERE type=? AND isAged=? AND isDistilled=? AND potencymult=? AND durationmult=?";
+		String starterQuery = "SELECT * FROM " + Brewery.database + "recipes WHERE type=? AND isAged=? AND isDistilled=? AND potencymult=? AND durationmult=?";
 		String aspectQuery = "";
 		String aspectColumn = "' IN (aspect1name, aspect1name, aspect2name, aspect3name, aspect4name, aspect5name, aspect6name, aspect7name, aspect8name, aspect9name)";
 		String fullQuery = "";
@@ -155,7 +155,7 @@ public class BRecipe {
 	private static void addRecipeToMainList(String name, String type, Map<String, Double> aspects, boolean isAged, boolean isDistilled, String flavor, double potencyMultiplier, double durationMultiplier){
 	
 		//Build SQL
-		String query = "INSERT INTO recipes ";
+		String query = "INSERT INTO " + Brewery.database + "recipes ";
 		String mandatoryColumns = "(name, type, isAged, isDistilled, aspectCount, flavortext, potencymult, durationmult";
 		String mandatoryValues = "VALUES (?, ?, ?, ?, ?, ?, ?, ?";	
 		String aspectColumns = "";
@@ -202,7 +202,7 @@ public class BRecipe {
 		String currentTime = sdf.format(dt);
 		
 		//Build SQL
-		String query = "INSERT INTO newrecipes (inventor, claimdate, brewname) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
+		String query = "INSERT INTO " + Brewery.database + "newrecipes (inventor, claimdate, brewname) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
 		
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, uuid);
@@ -222,7 +222,7 @@ public class BRecipe {
 		name = type + " Brew #";
 		int count = 0;
 		//SQL
-		String query = "SELECT COUNT(*) FROM recipes";
+		String query = "SELECT COUNT(*) FROM " + Brewery.database + "recipes";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			ResultSet results;
 			results = stmt.executeQuery();
@@ -238,7 +238,7 @@ public class BRecipe {
 	public static Color getColor(String type) {
 		
 		try {
-			String query = "SELECT color FROM brewtypes WHERE type=?";
+			String query = "SELECT color FROM " + Brewery.database + "brewtypes WHERE type=?";
 			//SQL Block
 			PreparedStatement stmt;
 			stmt = Brewery.connection.prepareStatement(query);
@@ -322,7 +322,7 @@ public class BRecipe {
     private static String convertAspects(Map<String, Double> aspects){
     	String startup = "&o&dThis brew is";
     	String description = "";
-    	String query = "SELECT description FROM aspects WHERE aspect=?";
+    	String query = "SELECT description FROM " + Brewery.database + "aspects WHERE aspect=?";
     	for(Map.Entry<String, Double> entry: aspects.entrySet()) {
     		String aspect = entry.getKey();
     		if(aspect.contains("_DURATION") || aspect.contains("_POTENCY")) {
@@ -468,8 +468,8 @@ public class BRecipe {
     	
     	
     	//SQL
-    	String recipeQuery = "DELETE FROM recipes WHERE EXISTS (SELECT * FROM newrecipes WHERE isclaimed=false AND claimdate < ?)";
-    	String newRecipeQuery = "DELETE FROM newrecipes WHERE claimdate < ?";
+    	String recipeQuery = "DELETE FROM " + Brewery.database + "recipes WHERE EXISTS (SELECT * FROM " + Brewery.database + "newrecipes WHERE isclaimed=false AND claimdate < ?)";
+    	String newRecipeQuery = "DELETE FROM " + Brewery.database + "newrecipes WHERE claimdate < ?";
     	
     	//Main Recipe List
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
@@ -517,8 +517,8 @@ public class BRecipe {
     	}
     	
     	String uuidString = uuid.toString();
-    	String queryClaim = "DELETE FROM newrecipes WHERE inventor=?";
-    	String queryMain = "DELETE FROM recipes WHERE inventor=? OR NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=recipes.name)";
+    	String queryClaim = "DELETE FROM " + Brewery.database + "newrecipes WHERE inventor=?";
+    	String queryMain = "DELETE FROM " + Brewery.database + "recipes WHERE inventor=? OR NOT EXISTS (SELECT 1 FROM " + Brewery.database + "newrecipes WHERE " + Brewery.database + "newrecipes.brewname=recipes.name)";
     	
     	//Claim List
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryClaim)){
@@ -545,9 +545,9 @@ public class BRecipe {
     	ArrayList<String> list = new ArrayList<String>();
     	String query;
 		if(claimed) {
-			query = "SELECT name FROM recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE recipes.name = newrecipes.brewname)";
+			query = "SELECT name FROM " + Brewery.database + "recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE " + Brewery.database + " recipes.name = " + Brewery.database + "newrecipes.brewname)";
 		} else {
-			query = "SELECT brewname FROM newrecipes WHERE inventor=?";
+			query = "SELECT brewname FROM " + Brewery.database + "newrecipes WHERE inventor=?";
 		}
     	
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){			
@@ -584,9 +584,9 @@ public class BRecipe {
     	}
     	
     	//SQL
-    	String queryGetClaim = "SELECT * FROM newrecipes WHERE inventor=? AND brewname=?";
-    	String queryUpdateRecipeTable = "UPDATE recipes SET inventor=?, isclaimed=true, name=? WHERE name=?";
-    	String queryDeleteClaims = "DELETE FROM newrecipes WHERE brewname=?";
+    	String queryGetClaim = "SELECT * FROM " + Brewery.database + "newrecipes WHERE inventor=? AND brewname=?";
+    	String queryUpdateRecipeTable = "UPDATE " + Brewery.database + "recipes SET inventor=?, isclaimed=true, name=? WHERE name=?";
+    	String queryDeleteClaims = "DELETE FROM " + Brewery.database + "newrecipes WHERE brewname=?";
     	
     	//Get Claim
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryGetClaim)){
@@ -652,9 +652,9 @@ public class BRecipe {
 		String type = breweryMeta.getString("type");
     	
     	//SQL
-    	String queryMainList = "DELETE FROM recipes WHERE name=? AND inventor=?";
-    	String queryClaimList = "DELETE FROM newrecipes WHERE brewname=? AND inventor=?";
-    	String queryPurgeClaims = "DELETE FROM recipes WHERE NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=?) AND name=? AND type=?";
+    	String queryMainList = "DELETE FROM " + Brewery.database + "recipes WHERE name=? AND inventor=?";
+    	String queryClaimList = "DELETE FROM " + Brewery.database + "newrecipes WHERE brewname=? AND inventor=?";
+    	String queryPurgeClaims = "DELETE FROM " + Brewery.database + "recipes WHERE NOT EXISTS (SELECT 1 FROM " + Brewery.database + "newrecipes WHERE " + Brewery.database + "newrecipes.brewname=?) AND name=? AND type=?";
     	//NOT EXISTS (SELECT 1 FROM newrecipes WHERE newrecipes.brewname=recipes.name)
     	//"DELETE FROM recipes WHERE (SELECT COUNT(1) FROM newrecipes WHERE name=?) = 0 AND name=? AND type=?";
     	
@@ -709,7 +709,7 @@ public class BRecipe {
     	ItemStack item = player.getInventory().getItemInMainHand();
     	String currentRecipe = item.getItemMeta().getDisplayName();
     	
-    	String query = "UPDATE recipes SET name=? WHERE inventor=? AND name=?";
+    	String query = "UPDATE " + Brewery.database + "recipes SET name=? WHERE inventor=? AND name=?";
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, name);
 			stmt.setString(2, uuid);
@@ -741,7 +741,7 @@ public class BRecipe {
     	ItemStack item = player.getInventory().getItemInMainHand();
     	String currentRecipe = item.getItemMeta().getDisplayName();
     	
-    	String query = "UPDATE recipes SET flavortext=? WHERE inventor=? AND name=?";
+    	String query = "UPDATE " + Brewery.database + "recipes SET flavortext=? WHERE inventor=? AND name=?";
     	try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, flavortext);
 			stmt.setString(2, uuid);
@@ -763,7 +763,7 @@ public class BRecipe {
 		NBTItem nbti = new NBTItem(item);
 		NBTCompound brewery = nbti.getCompound("brewery");
     	
-    	String query = "SELECT * FROM brewflags WHERE type=?";
+    	String query = "SELECT * FROM " + Brewery.database + "brewflags WHERE type=?";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, brewery.getString("type"));
 			//Brewery.breweryDriver.debugLog(stmt.toString());
