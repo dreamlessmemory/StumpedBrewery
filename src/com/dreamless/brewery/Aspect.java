@@ -3,7 +3,6 @@ package com.dreamless.brewery;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import org.bukkit.Material;
 
 public class Aspect implements Comparable<Object> {
@@ -102,62 +101,35 @@ public class Aspect implements Comparable<Object> {
 	}
 
 	public static double getFermentationIncrease(int time, String aspect, String type) {
-		String query = "SELECT reactivity, inertia FROM " + Brewery.database + "aspects WHERE aspect=?";
+		typeBonuses aspectBonuses = getTypeBonus(aspect, true);
+		typeBonuses brewBonus = getTypeBonus(type, false);
 		
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
-			stmt.setString(1, aspect);
-			ResultSet results;
-			results = stmt.executeQuery();
-			if (!results.next()) {
-				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + aspect);
-				return 0;
-			} else {//Successful Pull
-				
-				int inertia = getInertia(results.getInt("inertia"), type);
-				if(inertia > time) { //Not yet ready, so return zero
-					return 0.0;
-				}
-				double multiplier = getReactivityMultiplier(type);
-				return results.getInt("reactivity") * multiplier;
-				
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
+		int inertia = aspectBonuses.getInertia() + brewBonus.getInertia();
+		if(inertia > time) { //Not yet ready, so return zero
+			return 0.0;
 		}
-		return 0.0;
+		double multiplier = (double)brewBonus.getReactivity()/100 ;
+		return aspectBonuses.getReactivity() * multiplier;		
 	}
 	
 	//Returns a double multiplier
 	public static double getEffectiveActivation(String aspect, double activation, String type) {
-		String query = "SELECT stability, saturation, integrity FROM " + Brewery.database + "aspects WHERE aspect=?";
+		typeBonuses aspectBonuses = getTypeBonus(aspect, true);
+		typeBonuses brewBonus = getTypeBonus(type, false);
 		
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
-			stmt.setString(1, aspect);
-			ResultSet results;
-			results = stmt.executeQuery();
-			if (!results.next()) {
-				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + aspect);
-				return 0;
-			} else {//Successful Pull
-				int stability = getStability(results.getInt("stability"), type);
-				int saturation = getSaturation(results.getInt("saturation"), type);
-				int integrity = getIntegrity(results.getInt("integrity"), type);
-				
-				if(activation > stability) {//overdone
-					double difference = activation - stability;
-					difference *= (double)integrity/100;
-					return Math.max(0, ((double) saturation - difference)/100);
-				} else if (activation > saturation) {
-					return (double) saturation/100;
-				} else {
-					return activation/100;
-				}					
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
+		int stability = aspectBonuses.getStability() + brewBonus.getStability();
+		int saturation = aspectBonuses.getSaturation() + brewBonus.getSaturation();
+		int integrity = aspectBonuses.getIntegrity() + brewBonus.getIntegrity();
+		
+		if(activation > stability) {//overdone
+			double difference = activation - stability;
+			difference *= (double)integrity/100;
+			return Math.max(0, ((double) saturation - difference)/100);
+		} else if (activation > saturation) { //Saturated but stable
+			return (double) saturation/100;
+		} else {//Undersaturated
+			return (double)activation/100;
 		}
-		
-		return 0.0;
 	}
 	
 	
@@ -173,119 +145,114 @@ public class Aspect implements Comparable<Object> {
 		}
 	}
 	
-	private static int getInertia(int inertia, String type) {
-		switch(type) {
-			case "CHOCOLATE":
-				inertia = Math.max(0, inertia - 3);
-				break;
-			case "CIDER":
-				inertia = Math.max(0,  inertia -2);
-				break;
-		}
-		return inertia;
-	}
-	
-	private static double getReactivityMultiplier(String type) {
-		switch(type) {
-			case "NETHER":
-				return 1.5;
-			case "WINE":
-			case "CIDER":
-				return 1.25;
-			case "END":
-				return 0.75;
-			default:
-				return 1.0;
-		}
-	}
-	
-	private static int getStability(int stability, String type) {
-		switch(type) {
-			case "WINE":
-				return stability + 50;
-			case "BEER":
-			case "RUM":
-				return stability + 25;
-			default:
-				return stability;
-		}
-	}
-	
-	private static int getIntegrity(int integrity, String type) {
-		switch(type) {
-			case "NETHER":
-				return Math.min(75, integrity + 10);
-			case "TEA":
-				return Math.max(0, integrity - 35);
-			default:
-				return integrity;
-		}
-	}
-	
-	private static int getSaturation(int saturation, String type) {
-		switch(type) {
-			case "TEA":
-				return saturation + 25;
-			default:
-				return saturation;
+	private static typeBonuses getTypeBonus(String type, boolean aspect) {
+		String query = "SELECT * FROM " + Brewery.database + (aspect? "aspects" : "typebonuses") + " WHERE " + (aspect? "aspect" : "type")+ "=?";
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			stmt.setString(1, type);
+			ResultSet results;
+			results = stmt.executeQuery();
+			if(!results.next()) {
+				return new typeBonuses(0, 0, 0, 0, 0, 0);
+			}
+			
+			int inertia = results.getInt("inertia");
+			int reactivity = results.getInt("reactivity");
+			int saturation = results.getInt("saturation");
+			int stability = results.getInt("stability");
+			int integrity = results.getInt("integrity");
+			int distillation = (aspect? 100 :results.getInt("distillation"));
+			
+			return new typeBonuses(inertia, reactivity, saturation, stability, integrity, distillation);
+			
+		}  catch(SQLException e1) {
+			e1.printStackTrace();
+			return new typeBonuses(0, 0, 0, 0, 0, 0);
 		}
 	}
 	
 	public static double processFilter(String aspect, String type, double activation, Material filter) {
-		String query = "SELECT stability, saturation, reactivity FROM " + Brewery.database + "aspects WHERE aspect=?";
 		
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
-			stmt.setString(1, aspect);
-			ResultSet results;
-			results = stmt.executeQuery();
-			if (!results.next()) {
-				Brewery.breweryDriver.debugLog("There's no Aspect data. Please add for " + aspect);
-				return 0;
-			} else {//Successful Pull
-				double stability = getStability(results.getInt("stability"), type) / 100;
-				//double saturation = getSaturation(results.getInt("saturation"), type) / 100;
-				double reactivity = results.getInt("reactivity") * getReactivityMultiplier(type) /100;
-				
-				switch(filter) {
-					case GLOWSTONE_DUST:
-						return glowstoneFilter(activation, reactivity, type.equalsIgnoreCase("VODKA"));
-					case REDSTONE:
-						return redstoneFilter(activation, reactivity, type.equalsIgnoreCase("VODKA"));
-					case GUNPOWDER:
-						return gunpowderFilter(activation, reactivity, type.equalsIgnoreCase("VODKA"));
-					case SUGAR:
-						return sugarFilter(activation, reactivity, stability, type.equalsIgnoreCase("VODKA"));
-					default:
-						return activation;
-				}
-							
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			return activation;
+		typeBonuses aspectBonuses = getTypeBonus(aspect, true);
+		typeBonuses brewBonus = getTypeBonus(type, false);
+		
+		double stability = (double)(aspectBonuses.getStability() + brewBonus.getStability())/100;
+		double reactivity =  (double)(aspectBonuses.getReactivity() * brewBonus.getReactivity()) /100;
+		
+		switch(filter) {
+			case GLOWSTONE_DUST:
+				return glowstoneFilter(activation, reactivity, brewBonus.getDistillation());
+			case REDSTONE:
+				return redstoneFilter(activation, reactivity, brewBonus.getDistillation());
+			case GUNPOWDER:
+				return gunpowderFilter(activation, reactivity, brewBonus.getDistillation());
+			case SUGAR:
+				return sugarFilter(activation, reactivity, stability, brewBonus.getDistillation());
+			default:
+				return activation;
 		}
 	}
 	//Increases everything under 100% to 100% by one half-step
-	private static double glowstoneFilter(double activation, double reactivity, boolean boost) {
+	private static double glowstoneFilter(double activation, double reactivity, int multiplier) {
 		if(activation < 1.0) {
-			return Math.min(activation + reactivity/(boost? 1 : 2) , 1.0);
+			return Math.min(activation + reactivity/((double)multiplier/100) , 1.0);
 		} else return activation;
 	}
 	//Decreases everything by one step
-	private static double redstoneFilter(double activation, double reactivity, boolean boost) {
-		return Math.max(activation - reactivity * (boost? 2: 1) , 0);
+	private static double redstoneFilter(double activation, double reactivity, int multiplier) {
+		return Math.max(activation - reactivity * ((double)multiplier/100) , 0);
 	}
 	//Increases everything above 100% by one half-step
-	private static double gunpowderFilter(double activation, double reactivity, boolean boost) {
+	private static double gunpowderFilter(double activation, double reactivity, int multiplier) {
 		if(activation >= 1.0) {
-			return activation + reactivity/(boost? 1 : 2);
+			return activation + reactivity/((double)multiplier/100);
 		} else return activation;
 	}
 	//Decreases everything over stability by one half step
-	private static double sugarFilter(double activation, double reactivity, double stability, boolean boost) {
-		if(activation > stability) {
-			return Math.max(activation - reactivity/(boost? 1: 2), stability);
+	private static double sugarFilter(double activation, double reactivity, double stability, int multiplier) {
+		if(activation * 100 > stability) {
+			return Math.max(activation - reactivity/((double)multiplier/100), stability);
 		} else return activation;
 	}
 	
+	private static class typeBonuses{
+		private final int inertia;
+		private final int reactivity;
+		private final int saturation;
+		private final int stability;
+		private final int integrity;
+		private final int distillation;
+		
+		public typeBonuses (int inertia, int reactivity, int saturation, int stability, int integrity, int distillation) {
+			this.inertia = inertia;
+			this.reactivity = reactivity;
+			this.saturation = saturation;
+			this.stability = stability;
+			this.integrity = integrity;
+			this.distillation = distillation;
+		}
+
+		public int getInertia() {
+			return inertia;
+		}
+
+		public int getReactivity() {
+			return reactivity;
+		}
+
+		public int getSaturation() {
+			return saturation;
+		}
+
+		public int getStability() {
+			return stability;
+		}
+
+		public int getIntegrity() {
+			return integrity;
+		}
+
+		public int getDistillation() {
+			return distillation;
+		}
+	}
 }
