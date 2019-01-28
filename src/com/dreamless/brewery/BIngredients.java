@@ -1,10 +1,18 @@
 package com.dreamless.brewery;
 
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
+
+import com.dreamless.brewery.Aspect.AspectRarity;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
@@ -14,29 +22,35 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class BIngredients {
+public class BIngredients implements InventoryHolder{
 
+	private Inventory inventory;
 	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
-	private HashMap<String, Aspect> potency = new HashMap<String, Aspect>();
-	private int cookedTime;
+	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
 	private String type;
-
+	private boolean cooking = false;
 	// Represents ingredients in Cauldron, Brew
 	// Init a new BIngredients
 	public BIngredients() {
+		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
 	}
 
 	// Load from File
-	public BIngredients(ArrayList<ItemStack> ingredients, HashMap<String, Aspect> aspects, int cookedTime,
-			String type) {
+	public BIngredients(ArrayList<ItemStack> ingredients, HashMap<String, Aspect> aspects, String type) {
 		this.ingredients = ingredients;
-		this.potency = aspects;
-		this.cookedTime = cookedTime;
+		this.aspectMap = aspects;
 		this.type = type;
+				
+		//Initialize Inventory
+		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
+		for(ItemStack item: ingredients) {
+			inventory.addItem(item);
+		}
 	}
 
 	// Add an ingredient to this
-	public void add(ItemStack ingredient) {
+	public boolean add(ItemStack ingredient) {
+		boolean duplicate = false;
 		// SQL
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
 		String query = "SELECT " + aspectQuery + " FROM " + Brewery.database + "ingredients WHERE name=?";
@@ -45,6 +59,7 @@ public class BIngredients {
 		int ingPosition = getIndexOf(ingredient);
 		if (ingPosition != -1) {
 			ingredients.get(ingPosition).setAmount(ingredients.get(ingPosition).getAmount() + ingredient.getAmount());
+			duplicate = true;
 		} else {
 			ingredients.add(ingredient);
 		}
@@ -60,18 +75,21 @@ public class BIngredients {
 				for(int i = 1; i <=3; i++) {
 					String name = results.getString("aspect"+i+"name");
 					if(name == null) continue;
-					Aspect aspect = potency.get(name);
-					double[] values = Aspect.getRarityValues(results.getInt("aspect"+i+"rating"));
+					Aspect aspect = aspectMap.get(name);
+					int multiplier = ingredient.getAmount();
+					AspectRarity values = Aspect.getRarityValues(results.getInt("aspect"+i+"rating"));
 					if (aspect != null) {// aspect is found
-						aspect.setValues(values[0] + aspect.getPotency(), values[1] + aspect.getSaturation());
+						aspect.setValues(values.getPotency() * multiplier + aspect.getPotency(), values.getSaturation() * multiplier + aspect.getSaturation());
 					} else {
-						potency.put(name, new Aspect(values[0], values[1]));
+						aspectMap.put(name, new Aspect(values.getPotency() * multiplier, values.getSaturation() * multiplier));
 					}
 				}
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		
+		return duplicate;
 	}
 
 	// returns an Potion item with cooked ingredients
@@ -80,7 +98,7 @@ public class BIngredients {
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
 		// cookedTime is always time in minutes, state may differ with number of ticks
-		cookedTime = state;
+		//cookedTime = state;
 
 		// Calculate activation and effective potency
 		HashMap<String, Double> calculatedActivation = calculateActivation();
@@ -111,7 +129,7 @@ public class BIngredients {
 		NBTCompound aspectTagList = breweryMeta.addCompound("aspectsBase");
 		NBTCompound aspectActList = breweryMeta.addCompound("aspectsActivation");
 		for(Entry<String, Double> entry: calculatedActivation.entrySet()) {
-			aspectTagList.setDouble(entry.getKey(), potency.get(entry.getKey()).getCookedBase());
+			aspectTagList.setDouble(entry.getKey(), aspectMap.get(entry.getKey()).getCookedBase());
 			aspectActList.setDouble(entry.getKey(), entry.getValue());
 		}
 
@@ -135,8 +153,8 @@ public class BIngredients {
 	private HashMap<String, Double> calculateActivation() {
 		HashMap<String, Double> activation = new HashMap<String, Double>();
 		// Add calculated aspects to the map
-		for (String currentAspect : potency.keySet()) {
-			Aspect aspect = potency.get(currentAspect);
+		for (String currentAspect : aspectMap.keySet()) {
+			Aspect aspect = aspectMap.get(currentAspect);
 			double effectiveActivation = Aspect.getEffectiveActivation(currentAspect, aspect.getActivation(), type);
 			activation.put(currentAspect, effectiveActivation);
 			Brewery.breweryDriver.debugLog("PUT EFFECTIVE ACTIVATION" + currentAspect + " " + effectiveActivation);
@@ -147,7 +165,7 @@ public class BIngredients {
 	private HashMap<String, Double> calculateEffectivePotency(HashMap<String, Double> activation) {
 		HashMap<String, Double> effective = new HashMap<String, Double>();
 		for(Entry<String, Double> entry: activation.entrySet()) {
-			effective.put(entry.getKey(), potency.get(entry.getKey()).getCookedBase() * entry.getValue());
+			effective.put(entry.getKey(), aspectMap.get(entry.getKey()).getCookedBase() * entry.getValue());
 		}
 		return effective;
 	}
@@ -184,23 +202,22 @@ public class BIngredients {
 	}
 
 	public void fermentOneStep(int state) {
-		for (String currentAspect : potency.keySet()) {
-			Aspect aspect = potency.get(currentAspect);
+		for (String currentAspect : aspectMap.keySet()) {
+			Aspect aspect = aspectMap.get(currentAspect);
 
 			double activationIncrease = Aspect.getFermentationIncrease(state, currentAspect, type);
 			double newActivation = aspect.getActivation() + activationIncrease;
 			Brewery.breweryDriver.debugLog("Update Activation of " + currentAspect + ": " + aspect.getActivation()
 					+ " + " + activationIncrease + " -> " + newActivation);
 			aspect.setActivation(newActivation);
-			potency.put(currentAspect, aspect);
+			aspectMap.put(currentAspect, aspect);
 		}
 	}
 
-	public int getCookedTime() {
-		return cookedTime;
-	}
-
 	public String getContents() {
+		if(ingredients.isEmpty()) {
+			return "nothing.";
+		}
 		String manifest = " ";
 		for (ItemStack item : ingredients) {
 			String itemName = "";
@@ -248,8 +265,31 @@ public class BIngredients {
 		Brewery.breweryDriver.debugLog("Starting brew: " + type);
 	}
 
-	public void startCooking() {
+	public boolean startCooking(Block block) {
+		for(ItemStack item : inventory.getContents())	{
+		    if(item != null) {
+		    	if(BIngredients.acceptableIngredient(item.getType())) {
+		    		if(usesBucket(item)) {
+		    			block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), new ItemStack(Material.BUCKET));
+		    			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+		    		}
+		    		if(add(item)) {
+		    			inventory.remove(item);
+		    		}
+		    	} else {//eject
+		    		block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), item);
+		    		block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+		    		inventory.remove(item);
+		    	}
+		    }
+		}
+		if(ingredients.isEmpty()) {
+			return false;
+		}
+		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		setCooking(true);
 		calculateType();
+		return true;
 	}
 
 	public static boolean acceptableIngredient(Material material) {
@@ -270,11 +310,11 @@ public class BIngredients {
 	}
 
 	public HashMap<String, Aspect> getAspects() {
-		return potency;
+		return aspectMap;
 	}
 
 	public void setAspects(HashMap<String, Aspect> aspects) {
-		this.potency = aspects;
+		this.aspectMap = aspects;
 	}
 
 	public ArrayList<ItemStack> getIngredients() {
@@ -285,6 +325,35 @@ public class BIngredients {
 		this.ingredients = ingredients;
 	}
 
+	@Override
+	public Inventory getInventory() {
+		return inventory;
+	}
+	
+	public void dumpContents(Block block) {
+		for(ItemStack item : inventory.getContents())	{
+		    if(item != null) {
+		    	block.getWorld().dropItem(block.getLocation(), item);
+		    	inventory.remove(item);
+		    }
+		}
+	}
+	
+	public boolean isEmpty() {
+		for(ItemStack it : inventory.getContents())	{
+		    if(it != null) return false;
+		}
+		return true;
+	}
+
+	public boolean isCooking() {
+		return cooking;
+	}
+
+	public void setCooking(boolean cooking) {
+		this.cooking = cooking;
+	}
+	
 	private int getIndexOf(ItemStack item) {
 		for (ItemStack i : ingredients) {
 			if (item.isSimilar(i)) {
@@ -292,5 +361,15 @@ public class BIngredients {
 			}
 		}
 		return -1;
+	}
+	private boolean usesBucket(ItemStack item) {
+		switch(item.getType()) {
+		case LAVA_BUCKET:
+		case MILK_BUCKET:
+		case WATER_BUCKET:
+			return true;
+		default:
+			return false;
+		}
 	}
 }

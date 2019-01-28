@@ -61,42 +61,16 @@ public class Aspect implements Comparable<Object> {
 		return "Potency: " + potency + " Saturation: " + saturation;
 	}
 	
-	public static double calculateRarityPotency(int rarity){
-		switch(rarity) {
-			case (1):
-				return 4;
-			case (2):
-				return 24;
-			case (3):
-				return 60;
-			default:
-				return 4;
-		}
-	}
-	
-	public static double calculateRaritySaturation(int rarity){
-		switch(rarity) {
-			case (1):
-				return 0.2;
-			case (2):
-				return 0.6;
-			case (3):
-				return 1.0;
-			default:
-				return 0.2;
-		}
-	}
-	
-	public static double[] getRarityValues(int rarity) {
+	public static AspectRarity getRarityValues(int rarity) {
 		switch(rarity) {
 		case (1):
-			return new double[] {4, 0.2};
+			return new AspectRarity(4, 0.2);
 		case (2):
-			return new double[] {24, 0.6};
+			return new AspectRarity(24, 0.6);
 		case (3):
-			return new double[] {60, 1.0};
+			return new AspectRarity(60, 1.0);
 		default:
-			return new double[] {4, 0.2};
+			return new AspectRarity(4, 0.2);
 		}
 	}
 
@@ -253,6 +227,21 @@ public class Aspect implements Comparable<Object> {
 
 		public int getDistillation() {
 			return distillation;
+		}
+	}
+	
+	public static class AspectRarity{
+		private final double potency;
+		private final double saturation;
+		public AspectRarity(double potency, double saturation) {
+			this.potency = potency;
+			this.saturation = saturation;
+		}
+		public double getSaturation() {
+			return saturation;
+		}
+		public double getPotency() {
+			return potency;
 		}
 	}
 }

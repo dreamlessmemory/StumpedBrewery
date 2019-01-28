@@ -9,6 +9,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.BrewingStand;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -379,7 +380,35 @@ public class InventoryListener implements Listener {
 				}
 			}
 		}
-
+		
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
+	public void onBreweryCauldronOpen(InventoryClickEvent event) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof BIngredients)) {
+			return;
+		}
+		Brewery.breweryDriver.debugLog("Cauldron click open");
+		BIngredients ingredients = (BIngredients) event.getView().getTopInventory().getHolder();
+		if(ingredients.isCooking()) {
+			if(event.isShiftClick() || (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof BIngredients)) {
+				event.setCancelled(true);
+				event.setResult(Result.DENY);
+				Brewery.breweryDriver.debugLog("Cauldron cancelled interaction");
+			}
+		}
+	}
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
+	public void onBreweryCauldronDrag(InventoryDragEvent event) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof BIngredients)) {
+			return;
+		}
+		Brewery.breweryDriver.debugLog("Cauldron drag open");
+		BIngredients ingredients = (BIngredients) event.getView().getTopInventory().getHolder();
+		if(ingredients.isCooking()) {
+			event.setCancelled(true);
+			event.setResult(Result.DENY);
+			Brewery.breweryDriver.debugLog("Cauldron cancelled interaction");
+		}
+	}
 
 	// block the pickup of items where getPickupDelay is > 1000 (puke)
 	@EventHandler(ignoreCancelled = true)

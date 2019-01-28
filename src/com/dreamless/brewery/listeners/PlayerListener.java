@@ -1,10 +1,8 @@
 package com.dreamless.brewery.listeners;
 
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,15 +17,9 @@ import com.dreamless.brewery.*;
 
 import de.tr7zw.itemnbtapi.NBTItem;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 
 public class PlayerListener implements Listener {
 	public static boolean openEverywhere;
-	private static Set<UUID> interacted = new HashSet<UUID>();
-
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		Block clickedBlock = event.getClickedBlock();
@@ -46,17 +38,25 @@ public class PlayerListener implements Listener {
 						if (materialInHand == null || materialInHand == Material.BUCKET) {
 							return;
 						} else if (materialInHand == Material.CLOCK) {
-							if(BCauldron.isCooking(clickedBlock)) {
+							if(BCauldron.isCooking(clickedBlock)) {//Print time if cooking
 								BCauldron.printTime(player, clickedBlock);
 							} else if(((Levelled)clickedBlock.getBlockData()).getLevel() > 0){
-								if(BCauldron.setCooking(clickedBlock, true)) {
+								if(BCauldron.setCooking(clickedBlock, true)) {//Start cooking
 									Brewery.breweryDriver.msg(player, "The caudron has started boiling and the brew is fermenting!");
 									clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
 								}
 							}	
 							return;
-						} else if (materialInHand == Material.IRON_SHOVEL) {
-							BCauldron.printContents(player, clickedBlock);
+						} else if (materialInHand == Material.IRON_SHOVEL) {//Interact with inventory
+							if (player.hasPermission("brewery.cauldron.insert")) {
+								player.openInventory(BCauldron.getInventory(clickedBlock));
+								if(Brewery.debug) {
+									BCauldron.printContents(player, clickedBlock);
+								}
+							} else {
+								Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));
+							}
+							player.openInventory(BCauldron.getInventory(clickedBlock));
 							return;
 						} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
 							if (BCauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
@@ -81,67 +81,6 @@ public class PlayerListener implements Listener {
 								BCauldron.remove(clickedBlock);
 							}
 							return;
-						}
-
-						// Check if fire alive below cauldron when adding ingredients
-						Block down = clickedBlock.getRelative(BlockFace.DOWN);
-						if ((down.getType() == Material.FIRE || down.getType() == Material.MAGMA_BLOCK || down.getType() == Material.LAVA) && !BCauldron.isCooking(clickedBlock)) {
-
-							event.setCancelled(true);
-							boolean handSwap = false;
-
-							// Interact event is called twice!!!?? in 1.9, once for each hand.
-							// Certain Items in Hand cause one of them to be cancelled or not called at all sometimes.
-							// We mark if a player had the event for the main hand
-							// If not, we handle the main hand in the event for the off hand
-							if (Brewery.use1_9) {
-								if (event.getHand() == EquipmentSlot.HAND) {
-									final UUID id = player.getUniqueId();
-									interacted.add(id);
-									Brewery.breweryDriver.getServer().getScheduler().runTask(Brewery.breweryDriver, new Runnable() {
-										@Override
-										public void run() {
-											interacted.remove(id);
-										}
-									});
-								} else if (event.getHand() == EquipmentSlot.OFF_HAND) {
-									if (!interacted.remove(player.getUniqueId())) {
-										item = player.getInventory().getItemInMainHand();
-										if (item != null && item.getType() != Material.AIR) {
-											materialInHand = item.getType();
-											handSwap = true;
-										} else {
-											item = event.getItem();
-										}
-									}
-								}
-							}
-							if (item == null) return;
-
-							// add ingredient to cauldron that meet the previous conditions
-							if (BIngredients.acceptableIngredient(materialInHand)) {
-								if (player.hasPermission("brewery.cauldron.insert")) {
-									if (BCauldron.ingredientAdd(clickedBlock, item)) {
-										boolean isBucket = item.getType().equals(Material.WATER_BUCKET) || item.getType().equals(Material.LAVA_BUCKET) || item.getType().equals(Material.MILK_BUCKET);
-										if (item.getAmount() > 1) {
-											item.setAmount(item.getAmount() - 1);
-
-											if (isBucket) {
-												BCauldron.giveItem(player, new ItemStack(Material.BUCKET));
-											}
-										} else {
-											if (isBucket) {
-												setItemInHand(event, Material.BUCKET, handSwap);
-											} else {
-												setItemInHand(event, Material.AIR, handSwap);
-											}
-										}
-									}
-									clickedBlock.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, clickedBlock.getLocation().getX() + 0.5, clickedBlock.getLocation().getY() + 1.5, clickedBlock.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-								} else {
-									Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));
-								}
-							}
 						}
 						return;
 					}
@@ -171,11 +110,9 @@ public class PlayerListener implements Listener {
 
 					if (barrel != null) {
 						event.setCancelled(true);
-
 						if (!barrel.hasPermsOpen(player, event)) {
 							return;
 						}
-
 						barrel.open(player);
 					}
 				}

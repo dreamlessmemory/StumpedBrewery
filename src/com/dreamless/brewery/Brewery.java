@@ -351,7 +351,7 @@ public class Brewery extends JavaPlugin {
 				//Ingredients
 				ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
 				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
-				BIngredients ingredients = new BIngredients (ingredientsList, aspects, state, result.getString("type"));
+				BIngredients ingredients = new BIngredients (ingredientsList, aspects, result.getString("type"));
 				
 				//Cooked
 				boolean cooking = result.getBoolean("cooking");
