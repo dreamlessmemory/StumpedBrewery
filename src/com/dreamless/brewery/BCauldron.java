@@ -301,14 +301,15 @@ public class BCauldron {
 		}
 	}
 
-	public static boolean setCooking(Block block, boolean cooking) {
+	public static BreweryMessage setCooking(Block block, boolean cooking) {
 		BCauldron bcauldron = get(block);
 		if(bcauldron!= null) {
 			if(cooking && !bcauldron.ingredients.isEmpty()) {
-				bcauldron.cooking = bcauldron.ingredients.startCooking(block);
-				return bcauldron.cooking;
+				BreweryMessage result = bcauldron.ingredients.startCooking(block);
+				bcauldron.cooking = result.getResult();
+				return result;
 			}
 		}
-		return false;
+		return new BreweryMessage(false, "No cauldron at this location.");
 	}
 }

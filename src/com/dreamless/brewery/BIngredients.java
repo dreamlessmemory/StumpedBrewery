@@ -29,6 +29,8 @@ public class BIngredients implements InventoryHolder{
 	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
 	private String type;
 	private boolean cooking = false;
+	//private Material primary;
+	//private Material secondary;
 	// Represents ingredients in Cauldron, Brew
 	// Init a new BIngredients
 	public BIngredients() {
@@ -46,6 +48,8 @@ public class BIngredients implements InventoryHolder{
 		for(ItemStack item: ingredients) {
 			inventory.addItem(item);
 		}
+		//this.primary = ingredients.get(0).getType();
+		//this.secondary = ingredients.get(1).getType();
 	}
 
 	// Add an ingredient to this
@@ -265,7 +269,7 @@ public class BIngredients implements InventoryHolder{
 		Brewery.breweryDriver.debugLog("Starting brew: " + type);
 	}
 
-	public boolean startCooking(Block block) {
+	public BreweryMessage startCooking(Block block) {		
 		for(ItemStack item : inventory.getContents())	{
 		    if(item != null) {
 		    	if(BIngredients.acceptableIngredient(item.getType())) {
@@ -284,12 +288,12 @@ public class BIngredients implements InventoryHolder{
 		    }
 		}
 		if(ingredients.isEmpty()) {
-			return false;
+			return new BreweryMessage(false, "No items were acceptable ingredients!");
 		}
 		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 		setCooking(true);
 		calculateType();
-		return true;
+		return new BreweryMessage(true, null);
 	}
 
 	public static boolean acceptableIngredient(Material material) {
