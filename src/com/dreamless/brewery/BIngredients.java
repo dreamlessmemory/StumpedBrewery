@@ -29,8 +29,8 @@ public class BIngredients implements InventoryHolder{
 	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
 	private String type;
 	private boolean cooking = false;
-	//private Material primary;
-	//private Material secondary;
+	private String primary= "";
+	private String secondary = "";
 	// Represents ingredients in Cauldron, Brew
 	// Init a new BIngredients
 	public BIngredients() {
@@ -48,8 +48,10 @@ public class BIngredients implements InventoryHolder{
 		for(ItemStack item: ingredients) {
 			inventory.addItem(item);
 		}
-		//this.primary = ingredients.get(0).getType();
-		//this.secondary = ingredients.get(1).getType();
+		this.primary = ingredients.get(0).getType().name();
+		if(ingredients.size() > 1) {
+			this.secondary = ingredients.get(1).getType().name();
+		}
 	}
 
 	// Add an ingredient to this
@@ -241,35 +243,54 @@ public class BIngredients implements InventoryHolder{
 		this.type = type;
 	}
 
-	public void calculateType() {
-		// SQL
-		String query = "SELECT * FROM " + Brewery.database + "brewtypes WHERE material=?";
+	public void calculateType(int time) {
+		HashMap<String, Integer> resultsMap = queryForType(primary, secondary, time);
 		int highestCount = 0;
-		int priority = 0;
-		for (ItemStack ingredient : ingredients) {
-			// Pull from DB
-			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
-				stmt.setString(1, ingredient.getType().name());
-				ResultSet results;
-				results = stmt.executeQuery();
-				if (results.next()) {
-					if (ingredient.getAmount() > highestCount && results.getInt("priority") > priority) {
-						highestCount = ingredient.getAmount();
-						priority = results.getInt("priority");
-						type = results.getString("type");
-					}
+		
+		if(!resultsMap.isEmpty()) {//There is a secondary
+			for(Entry<String, Integer> entry: resultsMap.entrySet()) {
+				if(entry.getValue() >= highestCount) {
+					highestCount = entry.getValue();
+					type = entry.getKey();
 				}
-			} catch (SQLException e1) {
-				e1.printStackTrace();
+			}
+		} else {
+			resultsMap = queryForType(primary, "", 0);
+			if(resultsMap.isEmpty()) {
+				type = "ELIXR";
+			} else {
+				type = (String) resultsMap.keySet().iterator().next();
 			}
 		}
-		if (highestCount == 0) {// no one is the right one
-			type = "ELIXIR";
-		}
+		
 		Brewery.breweryDriver.debugLog("Starting brew: " + type);
 	}
+	
+	private HashMap<String, Integer> queryForType(String primary, String secondary, int time){
+		HashMap<String, Integer> resultsMap = new HashMap<String, Integer>();
+		
+		String query = "SELECT * FROM " + Brewery.database + "brewtypes_test WHERE core=? AND secondary=? AND time<=?";
+		
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			//Set values
+			stmt.setString(1, primary);
+			stmt.setString(2, secondary);
+			stmt.setInt(3, time);
+			
+			//Retrieve results
+			ResultSet results;
+			results = stmt.executeQuery();
+			while (results.next()) {
+				resultsMap.put(results.getString("type"), results.getInt("time"));
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		return resultsMap;
+	}
 
-	public BreweryMessage startCooking(Block block) {		
+	public BreweryMessage startCooking(Block block) {	
 		for(ItemStack item : inventory.getContents())	{
 		    if(item != null) {
 		    	if(BIngredients.acceptableIngredient(item.getType())) {
@@ -290,10 +311,22 @@ public class BIngredients implements InventoryHolder{
 		if(ingredients.isEmpty()) {
 			return new BreweryMessage(false, "No items were acceptable ingredients!");
 		}
+		
+		//Set Feedback effects
 		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		
+		//Manage parameters 
 		setCooking(true);
-		calculateType();
-		return new BreweryMessage(true, null);
+		primary = ingredients.get(0).getType().name();
+		if(ingredients.size() > 1) {
+			secondary = ingredients.get(1).getType().name();
+		}
+		
+		//Calculate type
+		calculateType(0);
+		
+		//Return
+		return new BreweryMessage(true, "The cauldron begins to ferment a new " + type.toLowerCase() + ".");
 	}
 
 	public static boolean acceptableIngredient(Material material) {

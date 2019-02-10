@@ -200,6 +200,9 @@ public class BCauldron {
 	public static void remove(Block block) {
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
+			if(!bcauldron.cooking) {
+				bcauldron.ingredients.dumpContents(block);
+			}
 			bcauldrons.remove(bcauldron);
 		}
 	}

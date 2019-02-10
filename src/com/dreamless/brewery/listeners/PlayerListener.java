@@ -43,11 +43,9 @@ public class PlayerListener implements Listener {
 							} else if(((Levelled)clickedBlock.getBlockData()).getLevel() > 0){
 								BreweryMessage result = BCauldron.setCooking(clickedBlock, true);
 								if(result.getResult()) {//Start cooking
-									Brewery.breweryDriver.msg(player, "The caudron has started boiling and the brew is fermenting!");
 									clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
-								} else {
-									Brewery.breweryDriver.msg(player, result.getMessage());
 								}
+								Brewery.breweryDriver.msg(player, result.getMessage());
 							}	
 							return;
 						} else if (materialInHand == Material.IRON_SHOVEL) {//Interact with inventory

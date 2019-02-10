@@ -219,7 +219,7 @@ public class BRecipe {
 	
 	private static String generateNewName(Player player, String type){
 		String name = "";
-		name = type + " Brew #";
+		name = type + " #";
 		int count = 0;
 		//SQL
 		String query = "SELECT COUNT(*) FROM " + Brewery.database + "recipes";
