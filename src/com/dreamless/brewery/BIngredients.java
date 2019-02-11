@@ -16,6 +16,8 @@ import com.dreamless.brewery.Aspect.AspectRarity;
 
 import de.tr7zw.itemnbtapi.NBTCompound;
 import de.tr7zw.itemnbtapi.NBTItem;
+
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,13 +27,15 @@ import java.util.Map.Entry;
 public class BIngredients implements InventoryHolder{
 
 	private Inventory inventory;
-	private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
+	//private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
 	private String type;
 	private boolean cooking = false;
-	private String primary= "";
-	private String secondary = "";
-	// Represents ingredients in Cauldron, Brew
+	private String coreIngredient= "";
+	private String adjunctIngredient = "";
+	private int coreAmount = 0;
+	private int adjunctAmount = 0;
+
 	// Init a new BIngredients
 	public BIngredients() {
 		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
@@ -39,7 +43,7 @@ public class BIngredients implements InventoryHolder{
 
 	// Load from File
 	public BIngredients(ArrayList<ItemStack> ingredients, HashMap<String, Aspect> aspects, String type) {
-		this.ingredients = ingredients;
+		//this.ingredients = ingredients;
 		this.aspectMap = aspects;
 		this.type = type;
 				
@@ -48,27 +52,104 @@ public class BIngredients implements InventoryHolder{
 		for(ItemStack item: ingredients) {
 			inventory.addItem(item);
 		}
-		this.primary = ingredients.get(0).getType().name();
+		this.coreIngredient = ingredients.get(0).getType().name();
 		if(ingredients.size() > 1) {
-			this.secondary = ingredients.get(1).getType().name();
+			this.adjunctIngredient = ingredients.get(1).getType().name();
+		}
+	}
+	
+	public BIngredients(String inventoryString, HashMap<String, Aspect> aspects, int state, boolean cooking) {
+		this.aspectMap = aspects;
+		this.cooking = cooking;
+				
+		//Initialize Inventory
+		try {
+			inventory = BreweryUtils.fromBase64(inventoryString, this);
+		} catch (IOException e) {
+			inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
+			Brewery.breweryDriver.debugLog("Error creating inventory for a cauldron");
+			e.printStackTrace();
+		}
+		
+		//Initialize
+		determineIng(inventory.getContents());
+		calculateType(state);
+	}
+
+	public BreweryMessage startCooking(Block block) {
+		ItemStack[] contents = inventory.getContents();
+		for(int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			if(item != null) {
+		    	if(acceptableIngredient(item.getType())) {
+		    		if(usesBucket(item)) {
+		    			block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), new ItemStack(Material.BUCKET));
+		    			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+		    		}
+		    	} else {//eject
+		    		block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), item);
+		    		block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+		    		//inventory.remove(item);
+		    		contents[i] = null;
+		    	}
+		    }
+		}
+		
+		inventory.setContents(contents);
+		
+		//Check if empty
+		//if(inventory.isEmpty()) {
+		if(isEmpty()) {
+			return new BreweryMessage(false, "No items were acceptable ingredients!");
+		}
+		
+		//Set Feedback effects
+		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		
+		//Manage parameters 
+		setCooking(true);
+		determineIng(contents);
+		
+		//Calculate type
+		calculateType(0);
+		
+		//Return
+		return new BreweryMessage(true, "The cauldron begins to ferment a new " + type.toLowerCase() + ".");
+	}
+	
+	private void determineIng(ItemStack[] contents) {
+		if(contents[0] != null) {
+			coreIngredient = contents[0].getType().name();
+			coreAmount = contents[0].getAmount();
+			if(contents[1] != null) {
+				adjunctIngredient = contents[1].getType().name();
+				adjunctAmount = contents[1].getAmount();
+			} else {
+				adjunctIngredient = "";
+				adjunctAmount = 0;
+			}
+		} else {
+			coreIngredient = "";
+			coreAmount = 0;
+			adjunctIngredient = "";
+			adjunctAmount = 0;
 		}
 	}
 
 	// Add an ingredient to this
-	public boolean add(ItemStack ingredient) {
-		boolean duplicate = false;
+	public void add(ItemStack ingredient) {
 		// SQL
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
 		String query = "SELECT " + aspectQuery + " FROM " + Brewery.database + "ingredients WHERE name=?";
-
+	
 		// Add Item
-		int ingPosition = getIndexOf(ingredient);
+		/*int ingPosition = getIndexOf(ingredient);
 		if (ingPosition != -1) {
 			ingredients.get(ingPosition).setAmount(ingredients.get(ingPosition).getAmount() + ingredient.getAmount());
 			duplicate = true;
 		} else {
 			ingredients.add(ingredient);
-		}
+		}*/
 		
 		// Aspect multipliers
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -94,12 +175,27 @@ public class BIngredients implements InventoryHolder{
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+	}
+
+	public void fermentOneStep(int state) {
+		//Calculate type
+		calculateType(state);
 		
-		return duplicate;
+		//Update aspects
+		for (String currentAspect : aspectMap.keySet()) {
+			Aspect aspect = aspectMap.get(currentAspect);
+	
+			double activationIncrease = Aspect.getFermentationIncrease(state, currentAspect, type);
+			double newActivation = aspect.getActivation() + activationIncrease;
+			Brewery.breweryDriver.debugLog("Update Activation of " + currentAspect + ": " + aspect.getActivation()
+					+ " + " + activationIncrease + " -> " + newActivation);
+			aspect.setActivation(newActivation);
+			aspectMap.put(currentAspect, aspect);
+		}
 	}
 
 	// returns an Potion item with cooked ingredients
-	public ItemStack cook(int state, Player player) {
+	public ItemStack finishFermentation(int state, Player player) {
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
@@ -156,6 +252,61 @@ public class BIngredients implements InventoryHolder{
 		return potion;
 	}
 	
+	public void dumpContents(Block block) {
+		for(ItemStack item : inventory.getContents())	{
+		    if(item != null) {
+		    	block.getWorld().dropItem(block.getLocation(), item);
+		    	inventory.remove(item);
+		    }
+		}
+	}
+	
+	private void calculateType(int time) {
+		String result = queryForType(coreIngredient, coreAmount, adjunctIngredient, adjunctAmount, time);
+		
+		if(result != null) {//There is a secondary
+			type = result;
+		} else {
+			result = queryForType(coreIngredient, 1, "", 0, 0);
+			if(result == null) {
+				type = "ELIXR";
+			} else {
+				type = result;
+			}
+		}
+		
+		Brewery.breweryDriver.debugLog("Resultant brew: " + type);
+	}
+
+	private String queryForType(String primary, int primaryAmount, String secondary, int secondaryAmount, int time){
+		String result = null;
+		String query = "SELECT type FROM " + Brewery.database + "brewtypes_merged WHERE core=? AND adjunct=? GROUP BY type "
+				+ "HAVING MAX(coreamount) <= ? AND MAX(adjunctamount) <= ? AND MAX(time) <=? "
+				+ "ORDER BY time DESC LIMIT 1";
+		
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
+			//Set values
+			stmt.setString(1, primary);
+			stmt.setString(2, secondary);
+			stmt.setInt(3, primaryAmount);
+			stmt.setInt(4, secondaryAmount);
+			stmt.setInt(5, time);
+			
+			Brewery.breweryDriver.debugLog(stmt.toString());
+			
+			//Retrieve results
+			ResultSet results;
+			results = stmt.executeQuery();
+			if (results.next()) {
+				result = results.getString("type");
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+		return result;
+	}
+
 	private HashMap<String, Double> calculateActivation() {
 		HashMap<String, Double> activation = new HashMap<String, Double>();
 		// Add calculated aspects to the map
@@ -167,7 +318,7 @@ public class BIngredients implements InventoryHolder{
 		}
 		return activation;
 	}
-	
+
 	private HashMap<String, Double> calculateEffectivePotency(HashMap<String, Double> activation) {
 		HashMap<String, Double> effective = new HashMap<String, Double>();
 		for(Entry<String, Double> entry: activation.entrySet()) {
@@ -207,129 +358,7 @@ public class BIngredients implements InventoryHolder{
 		}
 	}
 
-	public void fermentOneStep(int state) {
-		for (String currentAspect : aspectMap.keySet()) {
-			Aspect aspect = aspectMap.get(currentAspect);
-
-			double activationIncrease = Aspect.getFermentationIncrease(state, currentAspect, type);
-			double newActivation = aspect.getActivation() + activationIncrease;
-			Brewery.breweryDriver.debugLog("Update Activation of " + currentAspect + ": " + aspect.getActivation()
-					+ " + " + activationIncrease + " -> " + newActivation);
-			aspect.setActivation(newActivation);
-			aspectMap.put(currentAspect, aspect);
-		}
-	}
-
-	public String getContents() {
-		if(ingredients.isEmpty()) {
-			return "nothing.";
-		}
-		String manifest = " ";
-		for (ItemStack item : ingredients) {
-			String itemName = "";
-			for (String part : item.getType().toString().split("_")) {
-				itemName = itemName.concat(part.substring(0, 1) + part.substring(1).toLowerCase() + " ");
-			}
-			manifest = manifest.concat(itemName + "x" + item.getAmount() + " - ");
-		}
-		return manifest.substring(0, manifest.length() - 3);
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public void calculateType(int time) {
-		HashMap<String, Integer> resultsMap = queryForType(primary, secondary, time);
-		int highestCount = 0;
-		
-		if(!resultsMap.isEmpty()) {//There is a secondary
-			for(Entry<String, Integer> entry: resultsMap.entrySet()) {
-				if(entry.getValue() >= highestCount) {
-					highestCount = entry.getValue();
-					type = entry.getKey();
-				}
-			}
-		} else {
-			resultsMap = queryForType(primary, "", 0);
-			if(resultsMap.isEmpty()) {
-				type = "ELIXR";
-			} else {
-				type = (String) resultsMap.keySet().iterator().next();
-			}
-		}
-		
-		Brewery.breweryDriver.debugLog("Starting brew: " + type);
-	}
-	
-	private HashMap<String, Integer> queryForType(String primary, String secondary, int time){
-		HashMap<String, Integer> resultsMap = new HashMap<String, Integer>();
-		
-		String query = "SELECT * FROM " + Brewery.database + "brewtypes_test WHERE core=? AND secondary=? AND time<=?";
-		
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
-			//Set values
-			stmt.setString(1, primary);
-			stmt.setString(2, secondary);
-			stmt.setInt(3, time);
-			
-			//Retrieve results
-			ResultSet results;
-			results = stmt.executeQuery();
-			while (results.next()) {
-				resultsMap.put(results.getString("type"), results.getInt("time"));
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		
-		return resultsMap;
-	}
-
-	public BreweryMessage startCooking(Block block) {	
-		for(ItemStack item : inventory.getContents())	{
-		    if(item != null) {
-		    	if(BIngredients.acceptableIngredient(item.getType())) {
-		    		if(usesBucket(item)) {
-		    			block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), new ItemStack(Material.BUCKET));
-		    			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
-		    		}
-		    		if(add(item)) {
-		    			inventory.remove(item);
-		    		}
-		    	} else {//eject
-		    		block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), item);
-		    		block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
-		    		inventory.remove(item);
-		    	}
-		    }
-		}
-		if(ingredients.isEmpty()) {
-			return new BreweryMessage(false, "No items were acceptable ingredients!");
-		}
-		
-		//Set Feedback effects
-		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-		
-		//Manage parameters 
-		setCooking(true);
-		primary = ingredients.get(0).getType().name();
-		if(ingredients.size() > 1) {
-			secondary = ingredients.get(1).getType().name();
-		}
-		
-		//Calculate type
-		calculateType(0);
-		
-		//Return
-		return new BreweryMessage(true, "The cauldron begins to ferment a new " + type.toLowerCase() + ".");
-	}
-
-	public static boolean acceptableIngredient(Material material) {
+	private boolean acceptableIngredient(Material material) {
 		// SQL
 		String query = "SELECT EXISTS(SELECT 1 FROM " + Brewery.database + "ingredients WHERE name='" + material.name() + "')";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -346,59 +375,14 @@ public class BIngredients implements InventoryHolder{
 		return false;
 	}
 
-	public HashMap<String, Aspect> getAspects() {
-		return aspectMap;
-	}
-
-	public void setAspects(HashMap<String, Aspect> aspects) {
-		this.aspectMap = aspects;
-	}
-
-	public ArrayList<ItemStack> getIngredients() {
-		return ingredients;
-	}
-
-	public void setIngredients(ArrayList<ItemStack> ingredients) {
-		this.ingredients = ingredients;
-	}
-
-	@Override
-	public Inventory getInventory() {
-		return inventory;
-	}
-	
-	public void dumpContents(Block block) {
-		for(ItemStack item : inventory.getContents())	{
-		    if(item != null) {
-		    	block.getWorld().dropItem(block.getLocation(), item);
-		    	inventory.remove(item);
-		    }
-		}
-	}
-	
-	public boolean isEmpty() {
-		for(ItemStack it : inventory.getContents())	{
-		    if(it != null) return false;
-		}
-		return true;
-	}
-
-	public boolean isCooking() {
-		return cooking;
-	}
-
-	public void setCooking(boolean cooking) {
-		this.cooking = cooking;
-	}
-	
-	private int getIndexOf(ItemStack item) {
+	/*private int getIndexOf(ItemStack item) {
 		for (ItemStack i : ingredients) {
 			if (item.isSimilar(i)) {
 				return ingredients.indexOf(i);
 			}
 		}
 		return -1;
-	}
+	}*/
 	private boolean usesBucket(ItemStack item) {
 		switch(item.getType()) {
 		case LAVA_BUCKET:
@@ -409,4 +393,63 @@ public class BIngredients implements InventoryHolder{
 			return false;
 		}
 	}
+
+	public boolean isEmpty() {
+		for(ItemStack it : inventory.getContents())	{
+		    if(it != null) return false;
+		}
+		return true;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public boolean isCooking() {
+		return cooking;
+	}
+
+	@Override
+	public Inventory getInventory() {
+		return inventory;
+	}
+
+	/*public String getContents() {
+		if(ingredients.isEmpty()) {
+			return "nothing.";
+		}
+		String manifest = " ";
+		for (ItemStack item : ingredients) {
+			String itemName = "";
+			for (String part : item.getType().toString().split("_")) {
+				itemName = itemName.concat(part.substring(0, 1) + part.substring(1).toLowerCase() + " ");
+			}
+			manifest = manifest.concat(itemName + "x" + item.getAmount() + " - ");
+		}
+		return manifest.substring(0, manifest.length() - 3);
+	}*/
+
+	public HashMap<String, Aspect> getAspects() {
+		return aspectMap;
+	}
+
+	/*public ArrayList<ItemStack> getIngredients() {
+		return ingredients;
+	}*/
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setCooking(boolean cooking) {
+		this.cooking = cooking;
+	}
+
+	public void setAspects(HashMap<String, Aspect> aspects) {
+		this.aspectMap = aspects;
+	}
+
+	/*public void setIngredients(ArrayList<ItemStack> ingredients) {
+		this.ingredients = ingredients;
+	}*/
 }

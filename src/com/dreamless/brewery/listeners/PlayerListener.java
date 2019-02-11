@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.*;
@@ -50,9 +51,9 @@ public class PlayerListener implements Listener {
 							return;
 						} else if (materialInHand == Material.IRON_SHOVEL) {//Interact with inventory
 							if (player.hasPermission("brewery.cauldron.insert")) {
-								player.openInventory(BCauldron.getInventory(clickedBlock));
-								if(Brewery.debug) {
-									BCauldron.printContents(player, clickedBlock);
+								Inventory inventory = BCauldron.getInventory(clickedBlock);
+								if(inventory != null) {
+									player.openInventory(inventory);
 								}
 							} else {
 								Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));

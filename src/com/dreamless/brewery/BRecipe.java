@@ -144,7 +144,7 @@ public class BRecipe {
 		ArrayList<String> newLore = generateLore(null, flavor, aspects);
 		
 		//Ignore if in dev mode
-		if(!Brewery.development) {
+		if(!Brewery.development && Brewery.newrecipes) {
 			addRecipeToClaimList(uuid, newName);
 			addRecipeToMainList(newName, type, aspects, isAged, isDistilled, flavor, potencyMultiplier, durationMultiplier);	
 		}

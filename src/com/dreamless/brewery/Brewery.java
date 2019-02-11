@@ -43,12 +43,20 @@ import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.Connection;
 
 public class Brewery extends JavaPlugin {
+	//Params
 	public static Brewery breweryDriver;
-	public static boolean debug;
-	public static boolean development;
 	public static boolean useUUID;
 	public static boolean use1_9;
 	public static boolean updateCheck;
+	
+	//debug
+	public static boolean debug;
+	public static boolean development;
+	public static boolean loadcauldrons;
+	public static boolean loadbarrels;
+	public static boolean loadwakeup;
+	public static boolean loadplayers;
+	public static boolean newrecipes;
 
 	// Listeners
 	public BlockListener blockListener;
@@ -275,6 +283,11 @@ public class Brewery extends JavaPlugin {
 		DataSave.autosave = currentConfig.getInt("autosave", 3);
 		debug = currentConfig.getBoolean("debug", false);
 		development = currentConfig.getBoolean("development", false);
+		loadcauldrons = currentConfig.getBoolean("loadcauldrons", true);
+		loadbarrels = currentConfig.getBoolean("loadbarrels", true);
+		loadwakeup = currentConfig.getBoolean("loadwakeup", true);
+		loadplayers = currentConfig.getBoolean("loadplayers", true);
+		newrecipes = currentConfig.getBoolean("newrecipes", true);
 		BPlayer.pukeItem = Material.matchMaterial(currentConfig.getString("pukeItem", "SOUL_SAND"));
 		BPlayer.hangoverTime = currentConfig.getInt("hangoverDays", 0) * 24 * 60;
 		BPlayer.overdrinkKick = currentConfig.getBoolean("enableKickOnOverdrink", false);
@@ -332,7 +345,40 @@ public class Brewery extends JavaPlugin {
 		//Brew.installTime = data.getLong("installTime", System.currentTimeMillis());
 
 		//Cauldrons
-		String cauldronQuery = "SELECT * FROM " + Brewery.database + "cauldrons";
+		if(loadcauldrons) {
+			loadCauldrons();
+			Brewery.breweryDriver.debugLog("Cauldrons loaded");
+		} else {
+			Brewery.breweryDriver.debugLog("Cauldron loading disabled");
+		}
+		
+		//Barrel
+		if(loadbarrels) {
+			loadBarrels();
+			Brewery.breweryDriver.debugLog("Barrels loaded");
+		} else {
+			Brewery.breweryDriver.debugLog("Barrel loading disabled");
+		}
+			
+		//Player
+		if(loadplayers) {
+			loadPlayers();
+			Brewery.breweryDriver.debugLog("Players loaded");
+		} else {
+			Brewery.breweryDriver.debugLog("Player loading disabled");
+		}
+		
+		//Wakeup
+		if(loadwakeup) {
+			loadWakeup();
+			Brewery.breweryDriver.debugLog("Wakeups loaded");
+		} else {
+			Brewery.breweryDriver.debugLog("Wakeup loading disabled");
+		}
+	}
+	
+	private void loadCauldrons() {
+		String cauldronQuery = "SELECT * FROM " + Brewery.database + "cauldron_test";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){					
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -348,21 +394,23 @@ public class Brewery extends JavaPlugin {
 				//State
 				int state = result.getInt("state");
 				
-				//Ingredients
-				ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
-				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
-				BIngredients ingredients = new BIngredients (ingredientsList, aspects, result.getString("type"));
-				
 				//Cooked
 				boolean cooking = result.getBoolean("cooking");
 				
+				//Ingredients
+				//ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
+				String inventory = result.getString("contents");
+				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
+				BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);
+							
 				new BCauldron(worldBlock, ingredients, state, cooking);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		
-		//Barrel
+	}
+
+	private void loadBarrels() {
 		String barrelQuery = "SELECT * FROM " + Brewery.database + "barrels";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
 			ResultSet result = stmt.executeQuery();
@@ -402,8 +450,9 @@ public class Brewery extends JavaPlugin {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-			
-		//Player
+	}
+	
+	private void loadPlayers() {
 		String playerQuery = "SELECT * FROM " + Brewery.database + "players";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(playerQuery)){						
 			ResultSet result = stmt.executeQuery();
@@ -418,8 +467,9 @@ public class Brewery extends JavaPlugin {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		
-		//Wakeup
+	}
+	
+	private void loadWakeup() {
 		String wakeupQuery = "SELECT location FROM " + Brewery.database + "wakeup";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(wakeupQuery)){						
 			ResultSet result = stmt.executeQuery();
@@ -432,7 +482,7 @@ public class Brewery extends JavaPlugin {
 			e1.printStackTrace();
 		}
 	}
-
+	
 	private boolean checkConfigs() {
 		File cfg = new File(breweryDriver.getDataFolder(), "config.yml");
 		if (!cfg.exists()) {

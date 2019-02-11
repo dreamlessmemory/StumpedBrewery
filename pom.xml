@@ -4,7 +4,7 @@
 
 	<groupId>com.dre</groupId>
 	<artifactId>brewery</artifactId>
-	<version>3.5.1-STUMPED</version>
+	<version>4.0.0-STUMPED</version>
 	<name>Brewery</name>
 
 	<properties>

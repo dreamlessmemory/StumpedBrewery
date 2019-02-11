@@ -122,7 +122,7 @@ public class BCauldron {
 				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronFill"));
 				return true;
 			}
-			ItemStack potion = bcauldron.ingredients.cook(bcauldron.state, player);
+			ItemStack potion = bcauldron.ingredients.finishFermentation(bcauldron.state, player);
 			
 			if (potion != null) {
 				
@@ -184,14 +184,15 @@ public class BCauldron {
 		}
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
-			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronContents", "" + bcauldron.ingredients.getContents()));
+			//Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronContents", "" + bcauldron.ingredients.getContents()));
 		}
 	}
 	
 	public static Inventory getInventory(Block block) {
 		BCauldron bcauldron = get(block);
 		if (bcauldron == null) {
-			bcauldron = new BCauldron(block);
+			//bcauldron = new BCauldron(block);
+			return null;
 		}
 		return bcauldron.ingredients.getInventory();
 	}
@@ -227,22 +228,30 @@ public class BCauldron {
 				Brewery.breweryDriver.debugLog(location);
 				
 				//Ingredients
-				String ingredients = Brewery.gson.toJson(cauldron.ingredients.getIngredients());
-				Brewery.breweryDriver.debugLog(ingredients);
+				//String ingredients = Brewery.gson.toJson(cauldron.ingredients.getIngredients());
+				//Brewery.breweryDriver.debugLog(ingredients);
+				
+				String jsonInventory = null;
+				//inventory
+				try {
+					jsonInventory = BreweryUtils.toBase64(cauldron.ingredients.getInventory());
+					Brewery.breweryDriver.debugLog(jsonInventory);
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				}
 				
 				//Aspects
 				String aspects = Brewery.gson.toJson(cauldron.ingredients.getAspects());
 				Brewery.breweryDriver.debugLog(aspects);
 				
-				String query = "REPLACE " + Brewery.database + "cauldrons SET idcauldrons=?, location=?, ingredients=?, aspects=?, type=?, state=?, cooking=?";
+				String query = "REPLACE " + Brewery.database + "cauldron_test SET idcauldrons=?, location=?, contents=?, aspects=?, state=?, cooking=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);
-					stmt.setString(3, ingredients);
+					stmt.setString(3, jsonInventory);
 					stmt.setString(4, aspects);
-					stmt.setString(5, cauldron.ingredients.getType());
-					stmt.setInt(6, cauldron.state);
-					stmt.setBoolean(7, cauldron.cooking);
+					stmt.setInt(5, cauldron.state);
+					stmt.setBoolean(6, cauldron.cooking);
 					
 					Brewery.breweryDriver.debugLog(stmt.toString());
 					
