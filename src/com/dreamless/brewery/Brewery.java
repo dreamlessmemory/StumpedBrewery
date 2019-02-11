@@ -31,7 +31,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -378,6 +377,7 @@ public class Brewery extends JavaPlugin {
 	}
 	
 	private void loadCauldrons() {
+		//TODO: revert cauldron_test -> cauldrons
 		String cauldronQuery = "SELECT * FROM " + Brewery.database + "cauldron_test";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){					
 			ResultSet result = stmt.executeQuery();
@@ -398,7 +398,6 @@ public class Brewery extends JavaPlugin {
 				boolean cooking = result.getBoolean("cooking");
 				
 				//Ingredients
-				//ArrayList<ItemStack> ingredientsList = gson.fromJson(result.getString("ingredients"), new TypeToken<ArrayList<ItemStack>>(){}.getType());
 				String inventory = result.getString("contents");
 				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
 				BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);

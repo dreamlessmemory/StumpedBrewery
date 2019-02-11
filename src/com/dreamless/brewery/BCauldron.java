@@ -22,13 +22,6 @@ public class BCauldron {
 	private Block block;
 	private int state = 0;
 	private boolean cooking = false;
-
-	public BCauldron(Block block, ItemStack ingredient) {
-		this.block = block;
-		add(ingredient);
-		cooking = false;
-		bcauldrons.add(this);
-	}
 	
 	public BCauldron(Block block) {
 		this.block = block;
@@ -77,17 +70,6 @@ public class BCauldron {
 		this.cooking = cooking;
 	}
 
-	// add an ingredient to the cauldron
-	public void add(ItemStack ingredient){
-		//
-		//ingredient = new ItemStack(ingredient.getType(), 1, ingredient.getDurability());
-		ingredients.add(ingredient);
-		block.getWorld().playEffect(block.getLocation(), Effect.EXTINGUISH, 0);
-		if (state > 1) {
-			state--;
-		}
-	}
-
 	// get cauldron by Block
 	public static BCauldron get(Block block) {
 		for (BCauldron bcauldron : bcauldrons) {
@@ -98,21 +80,6 @@ public class BCauldron {
 		return null;
 	}
 
-	// get cauldron from block and add given ingredient
-	public static boolean ingredientAdd(Block block, ItemStack ingredient) {
-		// if not empty
-		if (getFillLevel(block) != 0) {
-			BCauldron bcauldron = get(block);
-			if (bcauldron != null) {
-				bcauldron.add(new ItemStack(ingredient.getType(), 1));
-				return true;
-			} else {
-				new BCauldron(block, new ItemStack(ingredient.getType(), 1));
-				return true;
-			}
-		}
-		return false;
-	}
 
 	// fills players bottle with cooked brew
 	public static boolean fill(Player player, Block block) {
@@ -177,17 +144,6 @@ public class BCauldron {
 		}
 	}
 	
-	public static void printContents(Player player, Block block) {
-		if (!player.hasPermission("brewery.cauldron.time")) {
-			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoPermissions"));
-			return;
-		}
-		BCauldron bcauldron = get(block);
-		if (bcauldron != null) {
-			//Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronContents", "" + bcauldron.ingredients.getContents()));
-		}
-	}
-	
 	public static Inventory getInventory(Block block) {
 		BCauldron bcauldron = get(block);
 		if (bcauldron == null) {
@@ -227,10 +183,6 @@ public class BCauldron {
 				String location = Brewery.gson.toJson(cauldron.block.getLocation().serialize());
 				Brewery.breweryDriver.debugLog(location);
 				
-				//Ingredients
-				//String ingredients = Brewery.gson.toJson(cauldron.ingredients.getIngredients());
-				//Brewery.breweryDriver.debugLog(ingredients);
-				
 				String jsonInventory = null;
 				//inventory
 				try {
@@ -243,7 +195,7 @@ public class BCauldron {
 				//Aspects
 				String aspects = Brewery.gson.toJson(cauldron.ingredients.getAspects());
 				Brewery.breweryDriver.debugLog(aspects);
-				
+				//TODO: revert cauldron_test -> cauldrons
 				String query = "REPLACE " + Brewery.database + "cauldron_test SET idcauldrons=?, location=?, contents=?, aspects=?, state=?, cooking=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);

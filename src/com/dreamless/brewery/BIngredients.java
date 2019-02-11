@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 public class BIngredients implements InventoryHolder{
 
 	private Inventory inventory;
-	//private ArrayList<ItemStack> ingredients = new ArrayList<ItemStack>();
 	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
 	private String type;
 	private boolean cooking = false;
@@ -41,23 +40,7 @@ public class BIngredients implements InventoryHolder{
 		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
 	}
 
-	// Load from File
-	public BIngredients(ArrayList<ItemStack> ingredients, HashMap<String, Aspect> aspects, String type) {
-		//this.ingredients = ingredients;
-		this.aspectMap = aspects;
-		this.type = type;
-				
-		//Initialize Inventory
-		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
-		for(ItemStack item: ingredients) {
-			inventory.addItem(item);
-		}
-		this.coreIngredient = ingredients.get(0).getType().name();
-		if(ingredients.size() > 1) {
-			this.adjunctIngredient = ingredients.get(1).getType().name();
-		}
-	}
-	
+	// Load from database
 	public BIngredients(String inventoryString, HashMap<String, Aspect> aspects, int state, boolean cooking) {
 		this.aspectMap = aspects;
 		this.cooking = cooking;
@@ -72,7 +55,7 @@ public class BIngredients implements InventoryHolder{
 		}
 		
 		//Initialize
-		determineIng(inventory.getContents());
+		determineCoreAndAdjunct(inventory.getContents());
 		calculateType(state);
 	}
 
@@ -108,7 +91,7 @@ public class BIngredients implements InventoryHolder{
 		
 		//Manage parameters 
 		setCooking(true);
-		determineIng(contents);
+		determineCoreAndAdjunct(contents);
 		
 		//Calculate type
 		calculateType(0);
@@ -117,7 +100,7 @@ public class BIngredients implements InventoryHolder{
 		return new BreweryMessage(true, "The cauldron begins to ferment a new " + type.toLowerCase() + ".");
 	}
 	
-	private void determineIng(ItemStack[] contents) {
+	private void determineCoreAndAdjunct(ItemStack[] contents) {
 		if(contents[0] != null) {
 			coreIngredient = contents[0].getType().name();
 			coreAmount = contents[0].getAmount();
@@ -141,15 +124,6 @@ public class BIngredients implements InventoryHolder{
 		// SQL
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
 		String query = "SELECT " + aspectQuery + " FROM " + Brewery.database + "ingredients WHERE name=?";
-	
-		// Add Item
-		/*int ingPosition = getIndexOf(ingredient);
-		if (ingPosition != -1) {
-			ingredients.get(ingPosition).setAmount(ingredients.get(ingPosition).getAmount() + ingredient.getAmount());
-			duplicate = true;
-		} else {
-			ingredients.add(ingredient);
-		}*/
 		
 		// Aspect multipliers
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -198,9 +172,6 @@ public class BIngredients implements InventoryHolder{
 	public ItemStack finishFermentation(int state, Player player) {
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
-
-		// cookedTime is always time in minutes, state may differ with number of ticks
-		//cookedTime = state;
 
 		// Calculate activation and effective potency
 		HashMap<String, Double> calculatedActivation = calculateActivation();
@@ -374,15 +345,6 @@ public class BIngredients implements InventoryHolder{
 		}
 		return false;
 	}
-
-	/*private int getIndexOf(ItemStack item) {
-		for (ItemStack i : ingredients) {
-			if (item.isSimilar(i)) {
-				return ingredients.indexOf(i);
-			}
-		}
-		return -1;
-	}*/
 	private boolean usesBucket(ItemStack item) {
 		switch(item.getType()) {
 		case LAVA_BUCKET:
@@ -413,29 +375,9 @@ public class BIngredients implements InventoryHolder{
 	public Inventory getInventory() {
 		return inventory;
 	}
-
-	/*public String getContents() {
-		if(ingredients.isEmpty()) {
-			return "nothing.";
-		}
-		String manifest = " ";
-		for (ItemStack item : ingredients) {
-			String itemName = "";
-			for (String part : item.getType().toString().split("_")) {
-				itemName = itemName.concat(part.substring(0, 1) + part.substring(1).toLowerCase() + " ");
-			}
-			manifest = manifest.concat(itemName + "x" + item.getAmount() + " - ");
-		}
-		return manifest.substring(0, manifest.length() - 3);
-	}*/
-
 	public HashMap<String, Aspect> getAspects() {
 		return aspectMap;
 	}
-
-	/*public ArrayList<ItemStack> getIngredients() {
-		return ingredients;
-	}*/
 
 	public void setType(String type) {
 		this.type = type;
@@ -448,8 +390,4 @@ public class BIngredients implements InventoryHolder{
 	public void setAspects(HashMap<String, Aspect> aspects) {
 		this.aspectMap = aspects;
 	}
-
-	/*public void setIngredients(ArrayList<ItemStack> ingredients) {
-		this.ingredients = ingredients;
-	}*/
 }
