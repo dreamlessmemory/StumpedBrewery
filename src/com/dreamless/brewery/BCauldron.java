@@ -6,6 +6,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.entity.Player;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -20,6 +23,9 @@ import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 
 public class BCauldron {
 	public static CopyOnWriteArrayList<BCauldron> bcauldrons = new CopyOnWriteArrayList<BCauldron>();
@@ -29,6 +35,7 @@ public class BCauldron {
 	private int state = 0;
 	private boolean cooking = false;
 	private long lastCook = 0;
+	private Hologram hologram;
 	
 	public BCauldron(Block block) {
 		this.block = block;
@@ -37,14 +44,6 @@ public class BCauldron {
 	}
 
 	// loading from file
-	public BCauldron(Block block, BIngredients ingredients, int state, boolean cooking) {
-		this.block = block;
-		this.state = state;
-		this.ingredients = ingredients;
-		this.cooking = cooking;
-		bcauldrons.add(this);
-	}
-	
 	public BCauldron(Block block, BIngredients ingredients, int state, boolean cooking, long lastCook) {
 		this.block = block;
 		this.state = state;
@@ -52,6 +51,9 @@ public class BCauldron {
 		this.cooking = cooking;
 		this.lastCook = lastCook;
 		bcauldrons.add(this);
+		createHologram(block);
+		updateHologram(ingredients.getType(), state);
+		
 	}
 
 	public void onUpdate() {//UPDATE THE POTION
@@ -81,19 +83,7 @@ public class BCauldron {
 				ingredients.fermentOneStep(state);
 				
 				//Update Sign
-				
-				//Set Sign facing player
-				Block above = block.getRelative(BlockFace.UP);
-				
-				if(above.getType() != Material.SIGN) {//If no sign, make one
-					above.getWorld().getBlockAt(above.getLocation()).setType(Material.SIGN);
-				}
-				Sign sign = (Sign) block.getWorld().getBlockAt(above.getLocation()).getState();
-				//MaterialData
-				sign.setLine(0, "[Brewery]");
-				sign.setLine(1, state + " minutes");
-				//((Rotatable)sign).setRotation(BreweryUtils.getPlayerDirection(player).getOppositeFace());
-				sign.update();
+				updateHologram(ingredients.getType(), state);
 				
 				
 			} else {
@@ -105,6 +95,7 @@ public class BCauldron {
 			if(isCooking()) {
 				setCooking(false);
 				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 2.0f, 1.0f);
+				hologram.appendTextLine("Fermentation stopped");
 			}
 		}
 	}
@@ -147,6 +138,8 @@ public class BCauldron {
 					level = cauldronData.getMaximumLevel();
 				} else if (level <= 0) {
 					bcauldrons.remove(bcauldron);
+					//Remove hologram
+					bcauldron.hologram.delete();
 					return false;
 				}
 				
@@ -156,6 +149,8 @@ public class BCauldron {
 				
 				if (level == 0) {
 					bcauldrons.remove(bcauldron);
+					//Remove hologram
+					bcauldron.hologram.delete();
 				}
 				giveItem(player, potion);
 				return true;
@@ -212,8 +207,8 @@ public class BCauldron {
 			}
 			bcauldrons.remove(bcauldron);
 			
-			Block above = block.getRelative(BlockFace.UP);
-			above.getWorld().getBlockAt(above.getLocation()).setType(Material.AIR);
+			//Remove hologram
+			bcauldron.hologram.delete();
 		}
 	}
 
@@ -308,6 +303,32 @@ public class BCauldron {
 		return new BreweryMessage(true, "");
 	}
 	
+	private void createHologram(Block block) {
+		Location above = block.getRelative(BlockFace.UP).getLocation();
+		above.setX(above.getX()+ 0.5);
+		above.setY(above.getY()+ 0.75);
+		above.setZ(above.getZ()+ 0.5);
+		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
+	}
+	
+	private void updateHologram(String type, int time) {
+		String message;	
+		switch(time) { 
+			case 0:
+				message = "Starting brewing...";
+				break;
+			case 1:
+				message = "1 minute";
+				break;
+			default:
+				message = time + "minutes";
+				break;
+		}	
+		hologram.clearLines();
+		hologram.appendTextLine(WordUtils.capitalize(type.toLowerCase()));
+		hologram.appendTextLine(message);	
+	}
+	
 	/*public static boolean fireActive(Block block) {
 		BCauldron cauldron = get(block);
 		if(cauldron ==null) {
@@ -345,21 +366,12 @@ public class BCauldron {
 				//Set time
 				bcauldron.lastCook = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
 				
-				//Set Sign facing player
-				Block above = block.getRelative(BlockFace.UP);
-				player.getWorld().getBlockAt(above.getLocation()).setType(Material.SIGN);
-				Sign sign = (Sign) player.getWorld().getBlockAt(above.getLocation()).getState();
-				BlockData signData = sign.getBlockData();
-				//MaterialData
-				sign.setLine(0, "[Brewery]");
-				sign.setLine(1, "Started boiling");
-				//TODO: Fix rotation or replace with holograms
-				((Rotatable)signData).setRotation(BreweryUtils.getPlayerDirection(player).getOppositeFace());
-				sign.setBlockData(signData);
-				sign.update();
-			}
-			
-				
+				//Create hologram
+				if(bcauldron.hologram == null) {
+					bcauldron.createHologram(block);
+				}
+				bcauldron.updateHologram(WordUtils.capitalize(bcauldron.ingredients.getType().toLowerCase()), bcauldron.state);
+			}			
 			return result;
 		}
 		return new BreweryMessage(false, "No cauldron at this location.");

@@ -4,7 +4,7 @@ description: Create various beverages through a database-driven system
 main: com.dreamless.brewery.Brewery
 api-version: 1.13
 authors: [Milan Albrecht, Frank Baumann, ProgrammerDan, Sumire Kobayashi]
-#softdepend: [HolographicDisplays]
+softdepend: [HolographicDisplays]
 commands:
   brewery:
     description: Command for Administration

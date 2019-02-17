@@ -36,7 +36,10 @@ public class PlayerListener implements Listener {
 						Material materialInHand = event.getMaterial();
 						ItemStack item = event.getItem();
 
-						if (materialInHand == null || materialInHand == Material.BUCKET) {
+						if (materialInHand == null) {
+							return;
+						} else if (materialInHand == Material.BUCKET) {
+							BCauldron.remove(clickedBlock);
 							return;
 						} else if (materialInHand == Material.CLOCK) {
 							if(BCauldron.isCooking(clickedBlock)) {//Print time if cooking

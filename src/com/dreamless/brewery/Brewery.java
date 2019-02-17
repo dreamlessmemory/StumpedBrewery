@@ -104,6 +104,14 @@ public class Brewery extends JavaPlugin {
 			return;
 		}
 		
+		//Check dependency
+		if (!Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
+			getLogger().severe("*** HolographicDisplays is not installed or not enabled. ***");
+			getLogger().severe("*** This plugin will be disabled. ***");
+			this.setEnabled(false);
+			return;
+		}
+		
 		//Server Check
 		try { //We use a try catch to avoid errors, hopefully we don't get any.
 		    Class.forName("com.mysql.jdbc.Driver"); //this accesses Driver in jdbc.
