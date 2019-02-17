@@ -1,6 +1,8 @@
 package com.dreamless.brewery.listeners;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -10,6 +12,7 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.SignChangeEvent;
 
+import com.dreamless.brewery.BCauldron;
 import com.dreamless.brewery.BPlayer;
 import com.dreamless.brewery.Barrel;
 import com.dreamless.brewery.Brewery;
@@ -48,6 +51,15 @@ public class BlockListener implements Listener {
 	public void onBlockBreak(BlockBreakEvent event) {
 		if (!Brewery.breweryDriver.blockDestroy(event.getBlock(), event.getPlayer())) {
 			event.setCancelled(true);
+		}
+		
+		//Check if sign
+		if(event.getBlock().getType() == Material.SIGN) {
+			BCauldron bcauldron = BCauldron.get(event.getBlock().getRelative(BlockFace.DOWN));
+			if(bcauldron != null) {
+				event.setCancelled(true);
+				event.getBlock().setType(Material.AIR);
+			}
 		}
 	}
 

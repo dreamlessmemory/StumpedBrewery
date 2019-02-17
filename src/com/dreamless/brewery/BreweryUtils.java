@@ -1,6 +1,8 @@
 package com.dreamless.brewery;
 
 import org.bukkit.Bukkit;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -68,5 +70,40 @@ public final class BreweryUtils {
         } catch (ClassNotFoundException e) {
             throw new IOException("Unable to decode class type.", e);
         }
+    }
+    
+    public static BlockFace getPlayerDirection(Player player)
+    {
+ 
+        BlockFace dir = null;
+     
+        float y = player.getLocation().getYaw();
+     
+        if( y < 0 ){y += 360;}
+     
+        y %= 360;
+     
+        int i = (int)((y+8) / 22.5);
+     
+        if(i == 0){dir = BlockFace.WEST;}
+        else if(i == 1){dir = BlockFace.WEST_NORTH_WEST;}
+        else if(i == 2){dir = BlockFace.NORTH_WEST;}
+        else if(i == 3){dir = BlockFace.NORTH_NORTH_WEST;}
+        else if(i == 4){dir = BlockFace.NORTH;}
+        else if(i == 5){dir = BlockFace.NORTH_NORTH_EAST;}
+        else if(i == 6){dir = BlockFace.NORTH_EAST;}
+        else if(i == 7){dir = BlockFace.EAST_NORTH_EAST;}
+        else if(i == 8){dir = BlockFace.EAST;}
+        else if(i == 9){dir = BlockFace.EAST_SOUTH_EAST;}
+        else if(i == 10){dir = BlockFace.SOUTH_EAST;}
+        else if(i == 11){dir = BlockFace.SOUTH_SOUTH_EAST;}
+        else if(i == 12){dir = BlockFace.SOUTH;}
+        else if(i == 13){dir = BlockFace.SOUTH_SOUTH_WEST;}
+        else if(i == 14){dir = BlockFace.SOUTH_WEST;}
+        else if(i == 15){dir = BlockFace.WEST_SOUTH_WEST;}
+        else {dir = BlockFace.WEST;}
+     
+        return dir;
+ 
     }
 }

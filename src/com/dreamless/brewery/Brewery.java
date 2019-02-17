@@ -150,6 +150,7 @@ public class Brewery extends JavaPlugin {
 
 		// Heartbeat
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
+		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new CauldronRunnable(), 120, 20);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000
 
@@ -401,8 +402,11 @@ public class Brewery extends JavaPlugin {
 				String inventory = result.getString("contents");
 				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
 				BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);
+				
+				//lastCook
+				long lastCook = result.getLong("lastCook");
 							
-				new BCauldron(worldBlock, ingredients, state, cooking);
+				new BCauldron(worldBlock, ingredients, state, cooking, lastCook);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -674,15 +678,23 @@ public class Brewery extends JavaPlugin {
 		@Override
 		public void run() {
 			reloader = null;
-			for (BCauldron cauldron : BCauldron.bcauldrons) {
-				cauldron.onUpdate();// runs every min to update cooking time
-			}
 			Barrel.onUpdate();// runs every min to check and update ageing time
 			BPlayer.onUpdate();// updates players drunkeness
 
 			debugLog("Update");
 
 			DataSave.autoSave();
+		}
+
+	}
+	
+	public class CauldronRunnable implements Runnable {
+		@Override
+		public void run() {
+			//reloader = null;
+			for (BCauldron cauldron : BCauldron.bcauldrons) {
+				cauldron.onUpdate();// runs every second
+			}
 		}
 
 	}

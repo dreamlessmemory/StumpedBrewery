@@ -42,7 +42,7 @@ public class PlayerListener implements Listener {
 							if(BCauldron.isCooking(clickedBlock)) {//Print time if cooking
 								BCauldron.printTime(player, clickedBlock);
 							} else if(((Levelled)clickedBlock.getBlockData()).getLevel() > 0){
-								BreweryMessage result = BCauldron.setCooking(clickedBlock, true);
+								BreweryMessage result = BCauldron.startCooking(clickedBlock, player);
 								if(result.getResult()) {//Start cooking
 									clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
 								}
@@ -51,14 +51,14 @@ public class PlayerListener implements Listener {
 							return;
 						} else if (materialInHand == Material.IRON_SHOVEL) {//Interact with inventory
 							if (player.hasPermission("brewery.cauldron.insert")) {
-								Inventory inventory = BCauldron.getInventory(clickedBlock);
+								Inventory inventory = BCauldron.getInventory(clickedBlock);				
 								if(inventory != null) {
 									player.openInventory(inventory);
 								}
 							} else {
 								Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));
 							}
-							player.openInventory(BCauldron.getInventory(clickedBlock));
+							//player.openInventory(BCauldron.getInventory(clickedBlock));
 							return;
 						} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
 							if (BCauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
