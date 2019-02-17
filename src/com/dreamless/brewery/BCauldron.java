@@ -6,7 +6,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.entity.Player;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,10 +13,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
-import org.bukkit.block.data.Rotatable;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,7 +21,6 @@ import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
-import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 
 public class BCauldron {
 	public static CopyOnWriteArrayList<BCauldron> bcauldrons = new CopyOnWriteArrayList<BCauldron>();
@@ -328,14 +323,6 @@ public class BCauldron {
 		hologram.appendTextLine(WordUtils.capitalize(type.toLowerCase()));
 		hologram.appendTextLine(message);	
 	}
-	
-	/*public static boolean fireActive(Block block) {
-		BCauldron cauldron = get(block);
-		if(cauldron ==null) {
-			return false;
-		}
-		return cauldron.fireActive();
-	}*/
 	
 	public static boolean isCooking(Block block) {
 		BCauldron bcauldron = get(block);
