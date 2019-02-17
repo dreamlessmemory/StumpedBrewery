@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.utils;
 
 public class BreweryMessage {
 	private final boolean result;

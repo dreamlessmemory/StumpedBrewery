@@ -13,9 +13,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 
 import com.dreamless.brewery.Aspect.AspectRarity;
-
-import de.tr7zw.itemnbtapi.NBTCompound;
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.dreamless.brewery.utils.*;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -56,7 +54,12 @@ public class BIngredients implements InventoryHolder{
 		
 		//Initialize
 		determineCoreAndAdjunct(inventory.getContents());
+		/*for(ItemStack item: inventory.getContents()) {
+			add(item);
+		}*/
 		calculateType(state);
+		
+		
 	}
 
 	public BreweryMessage startCooking(Block block) {
@@ -69,6 +72,7 @@ public class BIngredients implements InventoryHolder{
 		    			block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), new ItemStack(Material.BUCKET));
 		    			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
 		    		}
+		    		add(item);
 		    	} else {//eject
 		    		block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), item);
 		    		block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);

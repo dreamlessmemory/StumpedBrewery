@@ -15,8 +15,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.*;
-
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.dreamless.brewery.utils.BreweryMessage;
+import com.dreamless.brewery.utils.NBTItem;
 
 
 public class PlayerListener implements Listener {

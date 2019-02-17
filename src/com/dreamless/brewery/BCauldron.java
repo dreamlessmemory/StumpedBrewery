@@ -17,7 +17,9 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.Effect;
+
+import com.dreamless.brewery.utils.BreweryMessage;
+import com.dreamless.brewery.utils.BreweryUtils;
 
 public class BCauldron {
 	public static CopyOnWriteArrayList<BCauldron> bcauldrons = new CopyOnWriteArrayList<BCauldron>();

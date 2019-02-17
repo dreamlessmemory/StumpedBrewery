@@ -22,8 +22,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import de.tr7zw.itemnbtapi.NBTCompound;
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.dreamless.brewery.utils.BreweryUtils;
+import com.dreamless.brewery.utils.NBTCompound;
+import com.dreamless.brewery.utils.NBTItem;
+
 import org.apache.commons.lang.ArrayUtils;
 
 public class Barrel implements InventoryHolder {

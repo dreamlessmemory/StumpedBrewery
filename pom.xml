@@ -87,11 +87,6 @@
     		<artifactId>commons-io</artifactId>
     		<version>2.6</version>
 		</dependency>
-		<dependency>
-	    	<groupId>com.github.tr7zw</groupId>
-	    	<artifactId>Item-NBT-API</artifactId>
-	    	<version>-SNAPSHOT</version>
-	    </dependency>
 	    <dependency>
   			<groupId>mysql</groupId>
   			<artifactId>mysql-connector-java</artifactId>

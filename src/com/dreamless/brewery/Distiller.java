@@ -9,8 +9,8 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
-import de.tr7zw.itemnbtapi.NBTCompound;
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.dreamless.brewery.utils.NBTCompound;
+import com.dreamless.brewery.utils.NBTItem;
 
 public class Distiller {
 

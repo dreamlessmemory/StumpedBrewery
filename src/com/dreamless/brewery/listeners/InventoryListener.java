@@ -22,9 +22,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.*;
-
-import de.tr7zw.itemnbtapi.NBTCompound;
-import de.tr7zw.itemnbtapi.NBTItem;
+import com.dreamless.brewery.utils.NBTCompound;
+import com.dreamless.brewery.utils.NBTItem;
 
 import java.util.HashMap;
 import java.util.HashSet;

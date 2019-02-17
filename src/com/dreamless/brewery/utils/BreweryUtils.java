@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
@@ -12,6 +12,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
+
+import com.dreamless.brewery.BIngredients;
+import com.dreamless.brewery.Barrel;
+import com.dreamless.brewery.Brewery;
 
 public final class BreweryUtils {
     
