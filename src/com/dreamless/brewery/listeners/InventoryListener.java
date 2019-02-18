@@ -51,7 +51,6 @@ public class InventoryListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerOpen(InventoryOpenEvent event) {
-		if (!Brewery.use1_9) return;
 		HumanEntity player = event.getPlayer();
 		Inventory inv = event.getInventory();
 		if (player == null || inv == null || !(inv instanceof BrewerInventory)) return;
@@ -66,7 +65,6 @@ public class InventoryListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerClose(InventoryCloseEvent event) {
-		if (!Brewery.use1_9) return;
 		HumanEntity player = event.getPlayer();
 		Inventory inv = event.getInventory();
 		if (player == null || inv == null || !(inv instanceof BrewerInventory)) return;
@@ -77,7 +75,6 @@ public class InventoryListener implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerDrag(InventoryDragEvent event) {
-		if (!Brewery.use1_9) return;
 		// Workaround the Drag event when only clicking a slot
 		if (event.getInventory() instanceof BrewerInventory) {
 			onBrewerClick(new InventoryClickEvent(event.getView(), InventoryType.SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PLACE_ALL));
@@ -95,7 +92,6 @@ public class InventoryListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerClick(InventoryClickEvent event) {
-		if (!Brewery.use1_9) return;
 		HumanEntity player = event.getWhoClicked();
 		Inventory inv = event.getInventory();
 		if (player == null || inv == null || !(inv instanceof BrewerInventory)) return;

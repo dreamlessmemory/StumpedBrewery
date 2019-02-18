@@ -25,6 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.dreamless.brewery.utils.NBTCompound;
 import com.dreamless.brewery.utils.NBTItem;
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
 
 import org.apache.commons.lang.ArrayUtils;
 
@@ -43,18 +44,21 @@ public class Barrel implements InventoryHolder {
 	private boolean checked = false;
 	private Inventory inventory;
 	private float time;
+	private Hologram hologram;
+	private boolean aging = false;
 
 	public Barrel(Block spigot, byte signoffset) {
 		this.spigot = spigot;
 		this.signoffset = signoffset;
 	}
 	
-	public Barrel(Block spigot, byte sign, int[] woodsloc, int[] stairsloc, String inventory, float time) {
+	public Barrel(Block spigot, byte sign, int[] woodsloc, int[] stairsloc, String inventory, float time, boolean aging) {
 		this.spigot = spigot;
 		this.signoffset = sign;
 		this.time = time;
 		this.woodsloc = woodsloc;
 		this.stairsloc = stairsloc;
+		this.aging = aging;
 		try {
 			this.inventory = BreweryUtils.fromBase64(inventory, this);
 		} catch (IOException e) {
@@ -429,6 +433,7 @@ public class Barrel implements InventoryHolder {
 		return false;
 	}
 
+	//TODO: Unmask brews!
 	// removes a barrel, throwing included potions to the ground
 	public void remove(Block broken, Player breaker) {
 		if (inventory != null) {
@@ -500,7 +505,10 @@ public class Barrel implements InventoryHolder {
 					e.printStackTrace();
 				}
 				
-				String query = "REPLACE " + Brewery.database + "barrels SET idbarrels=?, location=?, woodsloc=?, stairsloc=?, signoffset=?, checked=?, inventory=?, time=?";
+				//aging
+				
+				//TODO: Revert test
+				String query = "REPLACE " + Brewery.database + "barrels_test SET idbarrels=?, location=?, woodsloc=?, stairsloc=?, signoffset=?, checked=?, inventory=?, time=?, aging=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);
@@ -510,6 +518,7 @@ public class Barrel implements InventoryHolder {
 					stmt.setBoolean(6, barrel.checked);
 					stmt.setString(7, jsonInventory);
 					stmt.setFloat(8, barrel.time);
+					stmt.setBoolean(9, barrel.aging);
 					
 					Brewery.breweryDriver.debugLog(stmt.toString());
 					

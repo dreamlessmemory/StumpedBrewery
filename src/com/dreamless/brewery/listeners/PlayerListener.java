@@ -33,64 +33,11 @@ public class PlayerListener implements Listener {
 
 					// Interacting with a Cauldron
 					if (type == Material.CAULDRON) {
-						Material materialInHand = event.getMaterial();
-						ItemStack item = event.getItem();
-
-						if (materialInHand == null) {
-							return;
-						} else if (materialInHand == Material.BUCKET) {
-							BCauldron.remove(clickedBlock);
-							return;
-						} else if (materialInHand == Material.CLOCK) {
-							if(BCauldron.isCooking(clickedBlock)) {//Print time if cooking
-								BCauldron.printTime(player, clickedBlock);
-							} else if(((Levelled)clickedBlock.getBlockData()).getLevel() > 0){
-								BreweryMessage result = BCauldron.startCooking(clickedBlock, player);
-								if(result.getResult()) {//Start cooking
-									clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
-								}
-								Brewery.breweryDriver.msg(player, result.getMessage());
-							}	
-							return;
-						} else if (materialInHand == Material.IRON_SHOVEL) {//Interact with inventory
-							if (player.hasPermission("brewery.cauldron.insert")) {
-								Inventory inventory = BCauldron.getInventory(clickedBlock);				
-								if(inventory != null) {
-									player.openInventory(inventory);
-								}
-							} else {
-								Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));
-							}
-							//player.openInventory(BCauldron.getInventory(clickedBlock));
-							return;
-						} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
-							if (BCauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
-								if (BCauldron.fill(player, clickedBlock)) {
-									event.setCancelled(true);
-									if (player.hasPermission("brewery.cauldron.fill")) {
-										if (item.getAmount() > 1) {
-											item.setAmount(item.getAmount() - 1);
-										} else {
-											setItemInHand(event, Material.AIR, false);
-										}
-									}
-								}
-							} else {
-								event.setCancelled(true);
-							}
-							return;
-							// reset cauldron when refilling to prevent unlimited source of potions
-						} else if (materialInHand == Material.WATER_BUCKET) {
-							if (BCauldron.getFillLevel(clickedBlock) != 0 && BCauldron.getFillLevel(clickedBlock) < 2) {
-								// will only remove when existing
-								BCauldron.remove(clickedBlock);
-							}
-							return;
-						}
+						handleCauldron(event, player);
 						return;
 					}
 
-					if (Brewery.use1_9 && event.getHand() != EquipmentSlot.HAND) {
+					if (event.getHand() != EquipmentSlot.HAND) {
 						return;
 					}
 
@@ -125,6 +72,95 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+	
+	private void handleCauldron(PlayerInteractEvent event, Player player) {
+		Block clickedBlock = event.getClickedBlock();
+		Material materialInHand = event.getMaterial();
+		ItemStack item = event.getItem();
+
+		if (materialInHand == null) {
+			return;
+		} else if (materialInHand == Material.BUCKET) {
+			BCauldron.remove(clickedBlock);
+			return;
+		} else if (materialInHand == Material.CLOCK) {
+			if(BCauldron.isCooking(clickedBlock)) {//Print time if cooking
+				BCauldron.printTime(player, clickedBlock);
+			} else if(((Levelled)clickedBlock.getBlockData()).getLevel() > 0){
+				BreweryMessage result = BCauldron.startCooking(clickedBlock, player);
+				if(result.getResult()) {//Start cooking
+					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
+				}
+				Brewery.breweryDriver.msg(player, result.getMessage());
+			}	
+			return;
+		} else if (materialInHand == Material.IRON_SHOVEL) {//Interact with inventory
+			if (player.hasPermission("brewery.cauldron.insert")) {
+				Inventory inventory = BCauldron.getInventory(clickedBlock);				
+				if(inventory != null) {
+					player.openInventory(inventory);
+				}
+			} else {
+				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));
+			}
+			//player.openInventory(BCauldron.getInventory(clickedBlock));
+			return;
+		} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
+			if (BCauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
+				if (BCauldron.fill(player, clickedBlock)) {
+					event.setCancelled(true);
+					if (player.hasPermission("brewery.cauldron.fill")) {
+						if (item.getAmount() > 1) {
+							item.setAmount(item.getAmount() - 1);
+						} else {
+							setItemInHand(event, Material.AIR, false);
+						}
+					}
+				}
+			} else {
+				event.setCancelled(true);
+			}
+		} else if (materialInHand == Material.WATER_BUCKET) { // reset cauldron when refilling to prevent unlimited source of potions
+			if (BCauldron.getFillLevel(clickedBlock) != 0 && BCauldron.getFillLevel(clickedBlock) < 2) {
+				// will only remove when existing
+				BCauldron.remove(clickedBlock);
+			}
+		}
+	}
+	
+	private void handleBarrel(PlayerInteractEvent event, Player player) {
+		Barrel barrel = findBarrel(event.getClickedBlock());
+		if (barrel != null) {
+			event.setCancelled(true);
+			if (!barrel.hasPermsOpen(player, event)) {
+				return;
+			}
+			barrel.open(player);
+		}
+	}
+	
+	private Barrel findBarrel(Block block) {
+		Barrel barrel = null;
+		Material type = block.getType();
+		if (Barrel.isWood(type)) {
+			if (openEverywhere) {
+				barrel = Barrel.get(block);
+			}
+		} else if (Barrel.isStairs(type)) {
+			for (Barrel barrel2 : Barrel.barrels) {
+				if (barrel2.hasStairsBlock(block)) {
+					if (openEverywhere || !barrel2.isLarge()) {
+						barrel = barrel2;
+					}
+					break;
+				}
+			}
+		} else if (Barrel.isFence(type) || type == Material.SIGN || type == Material.WALL_SIGN) {
+			barrel = Barrel.getBySpigot(block);
+		}
+		
+		return barrel;
+	}
 	
 	public void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
 		if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {

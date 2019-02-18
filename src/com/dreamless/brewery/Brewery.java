@@ -45,7 +45,7 @@ public class Brewery extends JavaPlugin {
 	//Params
 	public static Brewery breweryDriver;
 	public static boolean useUUID;
-	public static boolean use1_9;
+	//public static boolean use1_9;
 	public static boolean updateCheck;
 	
 	//debug
@@ -87,7 +87,6 @@ public class Brewery extends JavaPlugin {
 		// Version check
 		String v = Bukkit.getBukkitVersion();
 		useUUID = !v.matches("(^|.*[^\\.\\d])1\\.[0-6]([^\\d].*|$)") && !v.matches("(^|.*[^\\.\\d])1\\.7\\.[0-5]([^\\d].*|$)");
-		use1_9 = !v.matches("(^|.*[^\\.\\d])1\\.[0-8]([^\\d].*|$)");
 		
 
 		// load the Config
@@ -152,9 +151,7 @@ public class Brewery extends JavaPlugin {
 		breweryDriver.getServer().getPluginManager().registerEvents(entityListener, breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(inventoryListener, breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(worldListener, breweryDriver);
-		if (use1_9) {
-			breweryDriver.getServer().getPluginManager().registerEvents(new CauldronListener(), breweryDriver);
-		}
+		breweryDriver.getServer().getPluginManager().registerEvents(new CauldronListener(), breweryDriver);
 
 		// Heartbeat
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
@@ -456,7 +453,10 @@ public class Brewery extends JavaPlugin {
 				//Time
 				float time = result.getFloat("time");
 				
-				new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time);
+				//Aging,
+				boolean aging = result.getBoolean("aging");
+				
+				new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time, aging);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
