@@ -1,6 +1,7 @@
 package com.dreamless.brewery;
 
 import java.io.IOException;
+import java.nio.channels.NonWritableChannelException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -22,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.dreamless.brewery.utils.NBTCompound;
 import com.dreamless.brewery.utils.NBTItem;
@@ -82,11 +85,13 @@ public class Barrel implements InventoryHolder {
 	public static void onUpdate() {
 		//Brewery.breweryDriver.debugLog("Update Barrel");
 		for (Barrel barrel : barrels) {
-			barrel.time += (1.0 / minutesPerYear);
-			if(barrel.ageContents((1.0 / minutesPerYear))) {
-				barrel.time += (1.0 / minutesPerYear);	
-			} else {
-				barrel.time = 0;
+			if(barrel.isAging()) {
+				barrel.time += (1.0 / minutesPerYear);
+				if(barrel.ageContents((1.0 / minutesPerYear))) {
+					barrel.time += (1.0 / minutesPerYear);	
+				} else {
+					barrel.time = 0;
+				}
 			}
 		}
 		if (check == 0 && barrels.size() > 0) {
@@ -97,6 +102,24 @@ public class Barrel implements InventoryHolder {
 				random.checked = false;
 			}
 			new BarrelCheck().runTaskTimer(Brewery.breweryDriver, 1, 1);
+		}
+	}
+	
+	public BreweryMessage startAging() {
+		for(ItemStack item: inventory.getContents()) {
+			if(item == null) continue;
+			NBTItem nbti = new NBTItem(item);
+			if(!nbti.hasKey("brewery")) {//eject if not a brewery item
+				spigot.getWorld().dropItem(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
+				inventory.remove(item);
+			}
+		}
+		
+		if(isEmpty()) {
+			return new BreweryMessage(false, "This barrel is empty.");
+		} else {
+			aging = true;
+			return new BreweryMessage(true, "The barrel has been sealed and its contents are aging.");
 		}
 	}
 	
@@ -212,6 +235,13 @@ public class Barrel implements InventoryHolder {
 		
 		return item;
 		
+	}
+	
+	public boolean isEmpty() {
+		for(ItemStack it : inventory.getContents())	{
+		    if(it != null) return false;
+		}
+		return true;
 	}
 	
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
@@ -662,6 +692,10 @@ public class Barrel implements InventoryHolder {
 			y++;
 		}
 		return block;
+	}
+
+	public boolean isAging() {
+		return aging;
 	}
 
 	public static boolean isStairs(Material material) {

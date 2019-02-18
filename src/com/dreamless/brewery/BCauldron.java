@@ -220,8 +220,12 @@ public class BCauldron {
 	public static void save() {
 		int id = 0;
 		if (!bcauldrons.isEmpty()) {
-			for (BCauldron cauldron : bcauldrons) {	
+			for (BCauldron cauldron : bcauldrons) {
 				Brewery.breweryDriver.debugLog("CAULDRON");
+				if(((Levelled)cauldron.block.getBlockData()).getLevel() < 1) {
+					Brewery.breweryDriver.debugLog("Skipping saving, empty");
+					continue;
+				}
 				//Location
 				String location = Brewery.gson.toJson(cauldron.block.getLocation().serialize());
 				Brewery.breweryDriver.debugLog(location);
@@ -260,6 +264,7 @@ public class BCauldron {
 				id++;
 			}
 		}
+	
 		//clean up extras
 		String query = "DELETE FROM " + Brewery.database + "cauldrons WHERE idcauldrons >=?";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {

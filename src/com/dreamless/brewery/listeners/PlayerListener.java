@@ -34,38 +34,8 @@ public class PlayerListener implements Listener {
 					// Interacting with a Cauldron
 					if (type == Material.CAULDRON) {
 						handleCauldron(event, player);
-						return;
-					}
-
-					if (event.getHand() != EquipmentSlot.HAND) {
-						return;
-					}
-
-					// Access a Barrel
-					Barrel barrel = null;
-					if (Barrel.isWood(type)) {
-						if (openEverywhere) {
-							barrel = Barrel.get(clickedBlock);
-						}
-					} else if (Barrel.isStairs(type)) {
-						for (Barrel barrel2 : Barrel.barrels) {
-							if (barrel2.hasStairsBlock(clickedBlock)) {
-								if (openEverywhere || !barrel2.isLarge()) {
-									barrel = barrel2;
-								}
-								break;
-							}
-						}
-					} else if (Barrel.isFence(type) || type == Material.SIGN || type == Material.WALL_SIGN) {
-						barrel = Barrel.getBySpigot(clickedBlock);
-					}
-
-					if (barrel != null) {
-						event.setCancelled(true);
-						if (!barrel.hasPermsOpen(player, event)) {
-							return;
-						}
-						barrel.open(player);
+					} else {
+						handleBarrel(event, player);
 					}
 				}
 			}
@@ -129,12 +99,28 @@ public class PlayerListener implements Listener {
 	}
 	
 	private void handleBarrel(PlayerInteractEvent event, Player player) {
+		if(event.getHand() != EquipmentSlot.HAND) {
+			return;
+		}
+		//Get the barrel
 		Barrel barrel = findBarrel(event.getClickedBlock());
 		if (barrel != null) {
 			event.setCancelled(true);
 			if (!barrel.hasPermsOpen(player, event)) {
 				return;
 			}
+		} else {
+			return;
+		}
+		
+		if(event.getMaterial() == Material.CLOCK && !barrel.isAging()) {
+			//TODO: Start Aging
+			BreweryMessage result = barrel.startAging();
+			if(result.getResult()) {//Start cooking
+				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
+			}
+			Brewery.breweryDriver.msg(player, result.getMessage());
+		} else {
 			barrel.open(player);
 		}
 	}
