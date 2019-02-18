@@ -143,11 +143,13 @@ public class Barrel implements InventoryHolder {
 			if(!nbti.hasKey("brewery")) {//eject if not a brewery item
 				spigot.getWorld().dropItem(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
 				inventory.remove(item);
+				continue;
 			} else { 
 				NBTCompound brewery = nbti.getCompound("brewery");
 				if(brewery.hasKey("aging")) {//eject if aged already
 					spigot.getWorld().dropItem(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
 					inventory.remove(item);
+					continue;
 				}
 				
 				brewery.addCompound("aging");

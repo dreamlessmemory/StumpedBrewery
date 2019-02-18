@@ -28,11 +28,11 @@ public class DataSave extends BukkitRunnable {
 	@Override
 	public void run() {
 		Brewery.breweryDriver.debugLog("Starting save...");
-		if (!BCauldron.bcauldrons.isEmpty() && Brewery.loadcauldrons) {
+		if (Brewery.loadcauldrons) {
 			BCauldron.save();
 		}
 		//Brewery.breweryDriver.debugLog("CAUL SAVE");
-		if (!Barrel.barrels.isEmpty()  && Brewery.loadbarrels) {
+		if (Brewery.loadbarrels) {
 			Barrel.save();
 		}
 		//Brewery.breweryDriver.debugLog("BAR SAVE");

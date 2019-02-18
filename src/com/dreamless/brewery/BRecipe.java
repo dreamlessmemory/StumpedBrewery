@@ -414,6 +414,7 @@ public class BRecipe {
 			player = Bukkit.getPlayer(UUID.fromString(brewery.getString("placedInBrewer")));
 			brewery.removeKey("placedInBrewer");
 			Brewery.breweryDriver.debugLog("Removed Player");
+			if(player != null)
 			crafterName = player.getDisplayName();
 		}
 		
