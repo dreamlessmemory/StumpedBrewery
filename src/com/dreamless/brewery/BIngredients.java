@@ -70,12 +70,12 @@ public class BIngredients implements InventoryHolder{
 		    	if(acceptableIngredient(item.getType())) {
 		    		if(usesBucket(item)) {
 		    			block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), new ItemStack(Material.BUCKET));
-		    			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+		    			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, (float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 		    		}
 		    		add(item);
 		    	} else {//eject
 		    		block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation(), item);
-		    		block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
+		    		block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 		    		//inventory.remove(item);
 		    		contents[i] = null;
 		    	}
@@ -231,6 +231,7 @@ public class BIngredients implements InventoryHolder{
 		for(ItemStack item : inventory.getContents())	{
 		    if(item != null) {
 		    	block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
+		    	block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 		    	inventory.remove(item);
 		    }
 		}

@@ -419,7 +419,8 @@ public class Brewery extends JavaPlugin {
 	}
 
 	private void loadBarrels() {
-		String barrelQuery = "SELECT * FROM " + Brewery.database + "barrels";
+		//TODO: Revert test
+		String barrelQuery = "SELECT * FROM " + Brewery.database + "barrels_test";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {

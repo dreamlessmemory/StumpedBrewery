@@ -46,7 +46,9 @@ public class BCauldron {
 		this.cooking = cooking;
 		this.lastCook = lastCook;
 		bcauldrons.add(this);
-		createHologram(block);
+		if(hologram == null) {
+			createHologram(block);
+		}
 		updateHologram(ingredients.getType(), state);
 		
 	}
@@ -83,7 +85,7 @@ public class BCauldron {
 				
 			} else {
 				//Bubble effects
-				block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.15, 0.15, 0.15, 0.05);
+				block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15, 0.05);
 				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, (float)(Math.random()/8) + 0.1f, (float)(Math.random() * 1.5) + 0.5f);
 			}
 		} else { //no fire, stop cooking
@@ -312,7 +314,8 @@ public class BCauldron {
 	}
 	
 	private void updateHologram(String type, int time) {
-		String message;	
+		String message;
+		if(cooking) {
 		switch(time) { 
 			case 0:
 				message = "Starting brewing...";
@@ -323,9 +326,13 @@ public class BCauldron {
 			default:
 				message = time + "minutes";
 				break;
-		}	
+			}
+		} else {
+			message =  "Awaiting start";
+		}
+		
 		hologram.clearLines();
-		hologram.appendTextLine(WordUtils.capitalize(type.toLowerCase()));
+		if(cooking) hologram.appendTextLine(WordUtils.capitalize(type.toLowerCase()));
 		hologram.appendTextLine(message);	
 	}
 	

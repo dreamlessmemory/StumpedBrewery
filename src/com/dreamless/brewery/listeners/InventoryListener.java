@@ -73,6 +73,7 @@ public class InventoryListener implements Listener {
 		trackedBrewmen.remove(player.getUniqueId());
 	}
 
+	/***
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onBrewerDrag(InventoryDragEvent event) {
 		// Workaround the Drag event when only clicking a slot
@@ -81,7 +82,7 @@ public class InventoryListener implements Listener {
 		} else if (event.getInventory().getHolder() instanceof Barrel) {
 			onTransferToBrewer(new InventoryClickEvent(event.getView(), InventoryType.SlotType.CONTAINER, 0, ClickType.LEFT, InventoryAction.PLACE_ALL));
 		}
-	}
+	}***/
 
 	/**
 	 * Clicking can either start or stop the new brew distillation tracking.
@@ -238,8 +239,8 @@ public class InventoryListener implements Listener {
 	private int getLongestDistillTime(BrewerInventory inv) {
 		return 800;
 	}
-	
-	//Check if a brew is transferred into a brewing stand or barrel
+	/***
+	Check if a brew is transferred into a brewing stand or barrel
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onTransferToBrewer(InventoryClickEvent event) {
 		ItemStack item = null;
@@ -280,10 +281,6 @@ public class InventoryListener implements Listener {
 			if(brewery.hasKey("finishedAging") && topHolder instanceof Barrel) {
 				return;
 			}
-			//Ignore if already finished
-			/*if(brewery.hasKey("finishedDistilling") && topHolder instanceof BrewingStand) {
-				return;
-			}*/
 			
 			if(!brewery.hasKey("placedInBrewer")) {
 				//Cancel event
@@ -337,14 +334,7 @@ public class InventoryListener implements Listener {
 				if(event.getClickedInventory() == bottomInventory)	return;
 				item = event.getCurrentItem();
 			} else return;
-			
-			/*
-			if(item.getType() != Material.POTION && topHolder instanceof Barrel) {
-				event.setCancelled(true);
-				return;
-			} else if (hasFilter(item)) {
-				return;
-			}*/
+
 			
 			//Brewery.breweryDriver.debugLog("Clear to proceed");
 			NBTItem nbti = new NBTItem(item);
@@ -374,7 +364,7 @@ public class InventoryListener implements Listener {
 					((Player)event.getWhoClicked()).updateInventory();
 				}
 			}
-		}
+		}***/
 		
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronOpen(InventoryClickEvent event) {
@@ -391,6 +381,24 @@ public class InventoryListener implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
+	public void onBreweryBarrelOpen(InventoryClickEvent event) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof Barrel)) {
+			return;
+		}
+		Brewery.breweryDriver.debugLog("Barrel click open");
+		Barrel barrel = (Barrel) event.getView().getTopInventory().getHolder();
+		if(barrel.isAging()) {
+			if(event.isShiftClick() || (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof Barrel)) {
+				event.setCancelled(true);
+				event.setResult(Result.DENY);
+				Brewery.breweryDriver.debugLog("barrel cancelled interaction");
+			}
+		}
+	}
+	
+	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronDrag(InventoryDragEvent event) {
 		if (!(event.getView().getTopInventory().getHolder() instanceof BIngredients)) {
@@ -402,6 +410,20 @@ public class InventoryListener implements Listener {
 			event.setCancelled(true);
 			event.setResult(Result.DENY);
 			Brewery.breweryDriver.debugLog("Cauldron cancelled interaction");
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
+	public void onBreweryBarrelDrag(InventoryDragEvent event) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof Barrel)) {
+			return;
+		}
+		Brewery.breweryDriver.debugLog("barrel drag open");
+		Barrel barrel = (Barrel) event.getView().getTopInventory().getHolder();
+		if(barrel.isAging()) {
+			event.setCancelled(true);
+			event.setResult(Result.DENY);
+			Brewery.breweryDriver.debugLog("barrel cancelled interaction");
 		}
 	}
 

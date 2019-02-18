@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
@@ -29,8 +30,10 @@ import com.dreamless.brewery.utils.BreweryUtils;
 import com.dreamless.brewery.utils.NBTCompound;
 import com.dreamless.brewery.utils.NBTItem;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.WordUtils;
 
 public class Barrel implements InventoryHolder {
 
@@ -53,6 +56,9 @@ public class Barrel implements InventoryHolder {
 	public Barrel(Block spigot, byte signoffset) {
 		this.spigot = spigot;
 		this.signoffset = signoffset;
+		
+		createHologram(spigot);
+		updateHologram();
 	}
 	
 	public Barrel(Block spigot, byte sign, int[] woodsloc, int[] stairsloc, String inventory, float time, boolean aging) {
@@ -79,19 +85,42 @@ public class Barrel implements InventoryHolder {
 		}
 		
 		barrels.add(this);
+		
+		createHologram(spigot);
+		updateHologram();
 	}
 
+
+	private void createHologram(Block block) {
+		Location above = block.getRelative(BlockFace.UP).getLocation();
+		above.setX(above.getX()+ 0.5);
+		above.setY(above.getY()+ 0.75);
+		above.setZ(above.getZ()+ 0.5);
+		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
+	}
+
+	private void updateHologram() {
+		hologram.clearLines();
+		hologram.appendTextLine(getWoodName() + " barrel");
+		if(aging) {
+			hologram.appendTextLine("Aged " + (int)time + " years");	
+		} else {
+			hologram.appendTextLine("Ready to age");
+		}
+	}
 
 	public static void onUpdate() {
 		//Brewery.breweryDriver.debugLog("Update Barrel");
 		for (Barrel barrel : barrels) {
 			if(barrel.isAging()) {
-				barrel.time += (1.0 / minutesPerYear);
-				if(barrel.ageContents((1.0 / minutesPerYear))) {
-					barrel.time += (1.0 / minutesPerYear);	
-				} else {
-					barrel.time = 0;
+				double newTime = barrel.time + (1.0 / minutesPerYear);
+				
+				//So, if the new time has ticked over at least a year
+				if(Math.floor(newTime) - Math.floor(barrel.time) >= 1) {
+					barrel.ageContents(Math.floor(newTime));
 				}
+				barrel.time = (float) newTime;
+				barrel.updateHologram();
 			}
 		}
 		if (check == 0 && barrels.size() > 0) {
@@ -105,13 +134,27 @@ public class Barrel implements InventoryHolder {
 		}
 	}
 	
-	public BreweryMessage startAging() {
-		for(ItemStack item: inventory.getContents()) {
+	public BreweryMessage startAging(Player player) {
+		ItemStack[] contentsStack = inventory.getContents();
+		for(int i = 0; i < inventory.getSize(); i++) {
+			ItemStack item = contentsStack[i];
 			if(item == null) continue;
 			NBTItem nbti = new NBTItem(item);
 			if(!nbti.hasKey("brewery")) {//eject if not a brewery item
 				spigot.getWorld().dropItem(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
 				inventory.remove(item);
+			} else { 
+				NBTCompound brewery = nbti.getCompound("brewery");
+				if(brewery.hasKey("aging")) {//eject if aged already
+					spigot.getWorld().dropItem(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
+					inventory.remove(item);
+				}
+				
+				brewery.addCompound("aging");
+				brewery.setString("placedInBrewer", player.getUniqueId().toString());
+				item = nbti.getItem();
+				inventory.setItem(i, item);
+				
 			}
 		}
 		
@@ -119,15 +162,17 @@ public class Barrel implements InventoryHolder {
 			return new BreweryMessage(false, "This barrel is empty.");
 		} else {
 			aging = true;
+			
+			if(hologram == null) {
+				createHologram(spigot);
+			}
+			updateHologram();
+			
 			return new BreweryMessage(true, "The barrel has been sealed and its contents are aging.");
 		}
 	}
 	
-	private boolean ageContents(double time) {
-		if(inventory == null) {
-			return false;
-		}
-		boolean containsBrew = false;
+	private void ageContents(double time) {
 		ItemStack[] contents = inventory.getContents(); 
 		for(int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
@@ -135,47 +180,20 @@ public class Barrel implements InventoryHolder {
 			if(item == null) {
 				continue;
 			}
-			NBTItem nbti = new NBTItem(item);
-			
-			if(!nbti.hasKey("brewery")) {
-				continue;//Not brewery, skip
-			}
-			//Brewery.breweryDriver.debugLog("Get item?");
-			NBTCompound brewery = nbti.getCompound("brewery");
-			
-			if(brewery.hasKey("finishedAging")) {
-				Brewery.breweryDriver.debugLog("Skipping aging");
-				continue;
-			}
-			
-			NBTCompound aging = brewery.hasKey("aging") ? brewery.getCompound("aging") : brewery.addCompound("aging");
-			double age = aging.hasKey("age") ? aging.getDouble("age") : 0; 
-			double newAge = age + time;
-			
-			//Assign age now
-			aging.setDouble("age", newAge);
-			item = nbti.getItem();
-			Brewery.breweryDriver.debugLog("Age is " + newAge);
-			//Check new Age
-			if(Math.floor(newAge) > Math.floor(age) && newAge < 11) {//Logic - round down, then compare. Precondition, time =<1.0
-				containsBrew = true;
-				item = ageOneYear(item, getWood());
-			}
+			item = ageOneYear(item, getWood(), time);
 
 			//Update Inventory
 			inventory.setItem(i, item);
 		}
-		return containsBrew;
 	}
 	
-	public ItemStack ageOneYear(ItemStack item, byte woodType) {
+	private ItemStack ageOneYear(ItemStack item, byte woodType, double time) {
 	
 		Brewery.breweryDriver.debugLog("AGING 1 YEAR : " + item.toString());
 		
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
 		NBTCompound brewery = nbti.getCompound("brewery");
-		NBTCompound aging = brewery.getCompound("aging");
 		
 		//Adjust multipliers
 		
@@ -206,29 +224,17 @@ public class Barrel implements InventoryHolder {
 			break;
 		default:
 			break;
-		}
-		
+		}	
 		
 		item = nbti.getItem();
 		
 		//Mask as Aging Brew
-		int age = (int) Math.floor(aging.getDouble("age"));
+		//int age = (int) Math.floor(aging.getDouble("age"));
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-		potionMeta.setDisplayName("#Aging Brew");
+		potionMeta.setDisplayName("Aging Brew");
 		ArrayList<String> agedFlavorText = new ArrayList<String>();
-		if(!aging.hasKey("isAging") && aging.getBoolean("isAging") != true) {
-			aging.setBoolean("isAging", true);
-			item = nbti.getItem();
-
-			agedFlavorText.add("An aging " +  brewery.getString("type").toLowerCase() + " brew.");
-			agedFlavorText.add("This brew has aged for " + age + (age > 1 ? " years" : " year"));
-		} else {
-			//Update flavor text
-			List<String> flavorText = potionMeta.getLore();
-			agedFlavorText.add(flavorText.get(0));
-			agedFlavorText.add("This brew has aged for " + age + " years");
-		}
-		
+		agedFlavorText.add("An aging " +  brewery.getString("type").toLowerCase() + " brew.");
+		agedFlavorText.add("This brew has aged for " + (int)time + " years");
 		potionMeta.setLore(agedFlavorText);
 		potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 		item.setItemMeta(potionMeta);
@@ -475,15 +481,20 @@ public class Barrel implements InventoryHolder {
 			for (ItemStack item : items) {
 				if (item != null) {
 					// "broken" is the block that destroyed, throw them there!
+					//TODO: Unmask
+					item = BRecipe.revealMaskedBrew(item, "Barrel");
 					if (broken != null) {
-						broken.getWorld().dropItem(broken.getLocation(), item);
+						broken.getWorld().dropItem(broken.getLocation().add(0.5, 0.5, 0.5), item);
+						broken.getWorld().playSound(broken.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 					} else {
-						spigot.getWorld().dropItem(spigot.getLocation(), item);
+						spigot.getWorld().dropItem(spigot.getLocation().add(0.5, 0.5, 0.5), item);
+						spigot.getWorld().playSound(spigot.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 					}
+					inventory.remove(item);
 				}
 			}
 		}
-
+		hologram.delete();
 		barrels.remove(this);
 	}
 
@@ -663,6 +674,53 @@ public class Barrel implements InventoryHolder {
 		}
 	}
 
+	
+	public String getWoodName() {
+		Block wood;
+		switch (getDirection(spigot)) { // 1=x+ 2=x- 3=z+ 4=z-
+			case 0:
+				return "Wood";
+			case 1:
+				wood = spigot.getRelative(1, 0, 0);
+				break;
+			case 2:
+				wood = spigot.getRelative(-1, 0, 0);
+				break;
+			case 3:
+				wood = spigot.getRelative(0, 0, 1);
+				break;
+			default:
+				wood = spigot.getRelative(0, 0, -1);
+		}
+		try {
+			switch (wood.getType()) {
+				case OAK_PLANKS:
+				case OAK_STAIRS:
+					return "Oak";
+				case SPRUCE_PLANKS:
+				case SPRUCE_STAIRS:
+					return "Spruce";
+				case BIRCH_PLANKS:
+				case BIRCH_STAIRS:
+					return "Birch";
+				case JUNGLE_PLANKS:
+				case JUNGLE_STAIRS:
+					return "Jungle wood";
+				case ACACIA_PLANKS:
+				case ACACIA_STAIRS:
+					return "Acacia";
+				case DARK_OAK_PLANKS:
+				case DARK_OAK_STAIRS:
+					return "Dark oak";
+				default:
+					return "Wood";
+			}
+
+		} catch (NoSuchFieldError | NoClassDefFoundError e) {
+			// Using older minecraft versions some fields and classes do not exist
+			return "Wood";
+		}
+	}
 	// returns the Sign of a large barrel, the spigot if there is none
 	public Block getSignOfSpigot() {
 		if (signoffset != 0) {

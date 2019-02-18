@@ -115,7 +115,7 @@ public class PlayerListener implements Listener {
 		
 		if(event.getMaterial() == Material.CLOCK && !barrel.isAging()) {
 			//TODO: Start Aging
-			BreweryMessage result = barrel.startAging();
+			BreweryMessage result = barrel.startAging(player);
 			if(result.getResult()) {//Start cooking
 				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 			}
