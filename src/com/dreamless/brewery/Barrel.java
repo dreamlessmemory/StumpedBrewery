@@ -573,8 +573,9 @@ public class Barrel implements InventoryHolder {
 				id++;
 			}
 		}
+		//TODO: Revert test
 		//clean up extras
-		String query = "DELETE FROM " + Brewery.database + "barrels WHERE idbarrels >=?";
+		String query = "DELETE FROM " + Brewery.database + "barrels_test WHERE idbarrels >=?";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setInt(1, id);
 			Brewery.breweryDriver.debugLog(stmt.toString());

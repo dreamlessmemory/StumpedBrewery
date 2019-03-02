@@ -34,7 +34,9 @@ public class PlayerListener implements Listener {
 					// Interacting with a Cauldron
 					if (type == Material.CAULDRON) {
 						handleCauldron(event, player);
-					} else {
+					} else if (type == Material.BREWING_STAND){
+						handleDistiller(event, player);
+					}	else {
 						handleBarrel(event, player);
 					}
 				}
@@ -122,6 +124,22 @@ public class PlayerListener implements Listener {
 			Brewery.breweryDriver.msg(player, result.getMessage());
 		} else {
 			barrel.open(player);
+		}
+	}
+	
+	private void handleDistiller(PlayerInteractEvent event, Player player) {
+		Block clickedBlock = event.getClickedBlock();
+		Material materialInHand = event.getMaterial();
+		
+		if (materialInHand == Material.IRON_SHOVEL) {
+			//TODO:
+			event.setCancelled(true);
+			Distiller distiller = Distiller.get(clickedBlock);
+			if(distiller == null) {//Add a new one
+				distiller = new Distiller(clickedBlock);
+			}
+			
+			player.openInventory(distiller.getInventory());
 		}
 	}
 	

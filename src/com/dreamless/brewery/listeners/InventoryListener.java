@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.*;
+import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.NBTCompound;
 import com.dreamless.brewery.utils.NBTItem;
 
@@ -437,8 +438,12 @@ public class InventoryListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
-		if (event.getInventory().getHolder() instanceof Barrel) {
+		InventoryHolder holder = event.getInventory().getHolder();
+		if (holder instanceof Barrel) {
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
+		} else if (holder instanceof Distiller) {
+			BreweryMessage breweryMessage = ((Distiller) holder).prepDistiller();
+			Brewery.breweryDriver.msg(event.getPlayer(), breweryMessage.getMessage());
 		}
 	}
 }

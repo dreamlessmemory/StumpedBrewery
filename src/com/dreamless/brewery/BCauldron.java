@@ -149,7 +149,8 @@ public class BCauldron {
 					//Remove hologram
 					bcauldron.hologram.delete();
 				}
-				giveItem(player, potion);
+				player.getInventory().addItem(potion);
+				//giveItem(player, potion);
 				return true;
 			}
 		}
@@ -268,7 +269,8 @@ public class BCauldron {
 		}
 	
 		//clean up extras
-		String query = "DELETE FROM " + Brewery.database + "cauldrons WHERE idcauldrons >=?";
+		//TODO: revert cauldron_test -> cauldrons
+		String query = "DELETE FROM " + Brewery.database + "cauldron_test WHERE idcauldrons >=?";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setInt(1, id);
 			Brewery.breweryDriver.debugLog(stmt.toString());
@@ -281,13 +283,13 @@ public class BCauldron {
 
 	// bukkit bug not updating the inventory while executing event, have to
 	// schedule the give
-	public static void giveItem(final Player player, final ItemStack item) {
+	/*public static void giveItem(final Player player, final ItemStack item) {
 		Brewery.breweryDriver.getServer().getScheduler().runTaskLater(Brewery.breweryDriver, new Runnable() {
 			public void run() {
 				player.getInventory().addItem(item);
 			}
 		}, 1L);
-	}
+	}*/
 	
 	private BreweryMessage fireAndAirInPlace() {
 		
