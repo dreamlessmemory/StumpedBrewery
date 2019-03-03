@@ -84,6 +84,11 @@ public class Distiller implements InventoryHolder {
 			
 			//Remove hologram
 			distiller.hologram.delete();
+			
+			//ruin brew if distilling
+			if(distiller.distilling) {
+				distiller.ruinPotions();
+			}
 		}
 	}
 	
@@ -180,18 +185,7 @@ public class Distiller implements InventoryHolder {
 					brewery.setBoolean("Distilled", true);
 					brewery.setString("placedInBrewer", player.getUniqueId().toString());
 					item = nbti.getItem();
-					
-					
-					//Mask as Distilling
-					PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-					potionMeta.setDisplayName("Ruined Brew");
-					ArrayList<String> agedFlavorText = new ArrayList<String>();
-					agedFlavorText.add("A " +  brewery.getString("type").toLowerCase() + " brew that was ruined");
-					agedFlavorText.add("by being removed during distillation.");
-					potionMeta.setLore(agedFlavorText);
-					potionMeta.clearCustomEffects();
-					item.setItemMeta(potionMeta);
-						
+	
 					brewingInventory.setItem(i, item);	
 				} else {
 					ejectItem(item);
@@ -277,6 +271,28 @@ public class Distiller implements InventoryHolder {
 		hologram.delete();
 		distillers.remove(this);
 		Brewery.breweryDriver.debugLog("Check distill list: " + distillers.size());
+	}
+	
+	public void ruinPotions() {
+		for(int i = 0; i < 3; i++) {
+			ItemStack item = brewingInventory.getItem(i);
+			if(item == null) continue;
+			
+			PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+			
+			potionMeta.setDisplayName("Ruined Brew");
+			
+			ArrayList<String> agedFlavorText = new ArrayList<String>();
+			agedFlavorText.add("A brew that was ruined");
+			agedFlavorText.add("by being removed during distillation.");
+			potionMeta.setLore(agedFlavorText);
+			
+			potionMeta.clearCustomEffects();
+			
+			item.setItemMeta(potionMeta);
+			
+			brewingInventory.setItem(i, item);	
+		}
 	}
 	
 	private void createHologram(Block block) {
