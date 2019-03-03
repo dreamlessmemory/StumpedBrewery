@@ -74,7 +74,8 @@ public class Brewery extends JavaPlugin {
 	private String username; 
 	private String password; 
 	private String url;
-	public static String database;
+	private static String database;
+	private static String testdatabase;
 
 	//Connection vars
 	public static Connection connection; //This is the variable we will use to connect to database
@@ -131,12 +132,14 @@ public class Brewery extends JavaPlugin {
 		//Load the GSON
 		gson = new Gson();
 		
+		readData();
+		
 		//Do not load anything if in dev mode
-		if(!development) {
+		/*if(!development) {
 			readData();
 		} else {
 			Brewery.breweryDriver.debugLog("Loading disabled in development mode");
-		}
+		}*/
 
 		// Listeners
 		blockListener = new BlockListener();
@@ -283,6 +286,7 @@ public class Brewery extends JavaPlugin {
 		password = currentConfig.getString("password");
 		url = currentConfig.getString("url");
 		database = currentConfig.getString("prefix");
+		testdatabase = currentConfig.getString("testprefix");
 
 		// various Settings
 		DataSave.autosave = currentConfig.getInt("autosave", 3);
@@ -383,8 +387,7 @@ public class Brewery extends JavaPlugin {
 	}
 	
 	private void loadCauldrons() {
-		//TODO: revert cauldron_test -> cauldrons
-		String cauldronQuery = "SELECT * FROM " + Brewery.database + "cauldron_test";
+		String cauldronQuery = "SELECT * FROM " + Brewery.getDatabase("cauldrons")+ "cauldrons";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){					
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -419,8 +422,7 @@ public class Brewery extends JavaPlugin {
 	}
 
 	private void loadBarrels() {
-		//TODO: Revert test
-		String barrelQuery = "SELECT * FROM " + Brewery.database + "barrels_test";
+		String barrelQuery = "SELECT * FROM " + Brewery.getDatabase("barrels") + "barrels";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -492,6 +494,20 @@ public class Brewery extends JavaPlugin {
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
+		}
+	}
+	
+	public static String getDatabase(String type) {
+		if(type == null) {
+			return database;
+		}
+		switch(type) {
+		case "cauldrons":
+		case "barrels":
+		case "brewtypes":
+			return development? testdatabase : database;
+		default:
+			return database;
 		}
 	}
 	

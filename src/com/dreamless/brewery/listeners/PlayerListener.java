@@ -152,7 +152,7 @@ public class PlayerListener implements Listener {
 				BreweryMessage breweryMessage = distiller.startDistilling(player);
 				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
 				if(breweryMessage.getResult()) {
-					new DistillerRunnable(3, distiller).runTaskTimer(Brewery.breweryDriver, 20, 20);
+					new DistillerRunnable(40, distiller).runTaskTimer(Brewery.breweryDriver, 20, 20);
 				}
 			}
 		}

@@ -30,18 +30,26 @@ public class DataSave extends BukkitRunnable {
 		Brewery.breweryDriver.debugLog("Starting save...");
 		if (Brewery.loadcauldrons) {
 			BCauldron.save();
+		} else {
+			Brewery.breweryDriver.debugLog("Cauldron saving disabled");
 		}
 		//Brewery.breweryDriver.debugLog("CAUL SAVE");
 		if (Brewery.loadbarrels) {
 			Barrel.save();
+		} else {
+			Brewery.breweryDriver.debugLog("Barrel saving disabled");
 		}
 		//Brewery.breweryDriver.debugLog("BAR SAVE");
 		if (!BPlayer.isEmpty() && Brewery.loadplayers) {
 			BPlayer.save();
+		} else {
+			Brewery.breweryDriver.debugLog("Player saving disabled");
 		}
 		//Brewery.breweryDriver.debugLog("P SAVE");
 		if (!Wakeup.wakeups.isEmpty() && Brewery.loadwakeup) {
 			Wakeup.save();
+		} else {
+			Brewery.breweryDriver.debugLog("Wakeup saving disabled");
 		}
 		//Brewery.breweryDriver.debugLog("W SAVE");
 	}
@@ -54,10 +62,10 @@ public class DataSave extends BukkitRunnable {
 	public static void save() {
 		
 		//Do not save if in dev mode
-		if(Brewery.development) {
+		/*if(Brewery.development) {
 			Brewery.breweryDriver.debugLog("Saving disabled in development mode");
 			return;
-		}
+		}*/
 		
 		long time = System.nanoTime();
 		if (running != null) {

@@ -246,8 +246,7 @@ public class BCauldron {
 				String aspects = Brewery.gson.toJson(cauldron.ingredients.getAspects());
 				Brewery.breweryDriver.debugLog(aspects);
 				
-				//TODO: revert cauldron_test -> cauldrons
-				String query = "REPLACE " + Brewery.database + "cauldron_test SET idcauldrons=?, location=?, contents=?, aspects=?, state=?, cooking=?, lastCook=?";
+				String query = "REPLACE " + Brewery.getDatabase("cauldrons") + "cauldrons SET idcauldrons=?, location=?, contents=?, aspects=?, state=?, cooking=?, lastCook=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);
@@ -269,8 +268,7 @@ public class BCauldron {
 		}
 	
 		//clean up extras
-		//TODO: revert cauldron_test -> cauldrons
-		String query = "DELETE FROM " + Brewery.database + "cauldron_test WHERE idcauldrons >=?";
+		String query = "DELETE FROM " + Brewery.getDatabase("cauldrons") + "cauldrons WHERE idcauldrons >=?";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setInt(1, id);
 			Brewery.breweryDriver.debugLog(stmt.toString());

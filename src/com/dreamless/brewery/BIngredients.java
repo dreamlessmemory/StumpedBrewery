@@ -127,7 +127,7 @@ public class BIngredients implements InventoryHolder{
 	public void add(ItemStack ingredient) {
 		// SQL
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
-		String query = "SELECT " + aspectQuery + " FROM " + Brewery.database + "ingredients WHERE name=?";
+		String query = "SELECT " + aspectQuery + " FROM " + Brewery.getDatabase(null) + "ingredients WHERE name=?";
 		
 		// Aspect multipliers
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -253,10 +253,9 @@ public class BIngredients implements InventoryHolder{
 		
 		Brewery.breweryDriver.debugLog("Resultant brew: " + type);
 	}
-	//TODO: Adjusted for correct tables
 	private String queryForType(String primary, int primaryAmount, String secondary, int secondaryAmount, int time){
 		String result = null;
-		String query = "SELECT type FROM " + Brewery.database + "brewtypes_merged WHERE core=? AND adjunct=? GROUP BY type "
+		String query = "SELECT type FROM " + Brewery.getDatabase("brewtypes") + "brewtypes WHERE core=? AND adjunct=? GROUP BY type "
 				+ "HAVING MAX(coreamount) <= ? AND MAX(adjunctamount) <= ? AND MAX(time) <=? "
 				+ "ORDER BY time DESC LIMIT 1";
 		
@@ -336,7 +335,7 @@ public class BIngredients implements InventoryHolder{
 
 	private boolean acceptableIngredient(Material material) {
 		// SQL
-		String query = "SELECT EXISTS(SELECT 1 FROM " + Brewery.database + "ingredients WHERE name='" + material.name() + "')";
+		String query = "SELECT EXISTS(SELECT 1 FROM " + Brewery.getDatabase(null) + "ingredients WHERE name='" + material.name() + "')";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			ResultSet results;
 			results = stmt.executeQuery();

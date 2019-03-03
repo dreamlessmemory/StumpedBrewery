@@ -239,7 +239,7 @@ public class Wakeup {
 				String location = Brewery.gson.toJson(wakeup.loc.serialize());
 				//Brewery.breweryDriver.debugLog("Saving loc " + location);
 				
-				String query = "REPLACE " + Brewery.database + "wakeup SET idwakeup=?, location=?, active=?";
+				String query = "REPLACE " + Brewery.getDatabase("wakeup") + "wakeup SET idwakeup=?, location=?, active=?";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);

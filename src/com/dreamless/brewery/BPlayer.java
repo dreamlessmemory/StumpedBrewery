@@ -122,7 +122,7 @@ public class BPlayer {
 	public static void remove(Player player) {
 		players.remove(Brewery.playerString(player));
 		//SQL
-		String query = "INSERT INTO " + Brewery.database + "players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
+		String query = "INSERT INTO " + Brewery.getDatabase("players") + "players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, player.getUniqueId().toString());
 			//Brewery.breweryDriver.debugLog(stmt.toString());
@@ -138,7 +138,7 @@ public class BPlayer {
 				players.remove(entry.getKey());
 				
 				//SQL
-				String query = "INSERT INTO " + Brewery.database + "players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
+				String query = "INSERT INTO " + Brewery.getDatabase("players") + "players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 					stmt.setString(1, entry.getKey());
 					Brewery.breweryDriver.debugLog(stmt.toString());
@@ -158,7 +158,7 @@ public class BPlayer {
 	// Drink a brew and apply effects, etc.
 	public static void drink(Player player, ItemStack item) {
 		//Get if player wants to be drunk.
-		String query = "SELECT * FROM " + Brewery.database + "players WHERE uuid=?";
+		String query = "SELECT * FROM " + Brewery.getDatabase("players") + "players WHERE uuid=?";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, player.getUniqueId().toString());
 			//Brewery.breweryDriver.debugLog(stmt.toString());
@@ -567,7 +567,7 @@ public class BPlayer {
 	// save all data
 	public static void save() {
 		for (Map.Entry<String, BPlayer> entry : players.entrySet()) {
-			String query = "REPLACE " + Brewery.database + "players SET uuid=?, drunkeness=?, offlinedrunk=?, drunkeffects=?";
+			String query = "REPLACE " + Brewery.getDatabase("players") + "players SET uuid=?, drunkeness=?, offlinedrunk=?, drunkeffects=?";
 			BPlayer bPlayer = entry.getValue();
 			try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 				stmt.setString(1, entry.getKey());
@@ -605,7 +605,7 @@ public class BPlayer {
 		if(bPlayer != null) {
 			bPlayer.setDrunkEffects(setDrunk);
 		}
-		String query = "REPLACE " + Brewery.database + "players SET drunkeffects=?, uuid=?";
+		String query = "REPLACE " + Brewery.getDatabase("players") + "players SET drunkeffects=?, uuid=?";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setBoolean(1, setDrunk);
 			stmt.setString(2, uuid);
