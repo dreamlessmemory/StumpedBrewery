@@ -177,12 +177,12 @@ public class Distiller implements InventoryHolder {
 			if(item != null) {
 				NBTItem nbti = new NBTItem(item);
 				
-				if(nbti.hasKey("brewery") && !nbti.getCompound("brewery").hasKey("distilling")) {
+				if(nbti.hasKey("brewery") && !nbti.getCompound("brewery").hasKey("distilled")) {
 					result = true;
 					
 					//Tag as distilling brew
 					NBTCompound brewery = nbti.getCompound("brewery");
-					brewery.setBoolean("Distilled", true);
+					brewery.setBoolean("distilled", true);
 					brewery.setString("placedInBrewer", player.getUniqueId().toString());
 					item = nbti.getItem();
 	
