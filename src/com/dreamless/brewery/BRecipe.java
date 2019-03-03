@@ -374,22 +374,7 @@ public class BRecipe {
     public static ItemStack revealMaskedBrew(ItemStack item, String equipmentType) {
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
-		NBTCompound brewery = nbti.getCompound("brewery");
-		NBTCompound aging = brewery.getCompound("aging");
-		NBTCompound distilling = brewery.getCompound("distilling");
-		
-		//Remove isAging and isDistilling tags
-		if(aging != null && equipmentType.equalsIgnoreCase("Barrel")) {
-			aging.removeKey("isAging");
-			brewery.setBoolean("finishedAging", true);
-			Brewery.breweryDriver.debugLog("Removed Aging Tag");
-		}
-		if(distilling != null && equipmentType.equalsIgnoreCase("BrewingStand")) {
-			distilling.removeKey("isDistilling");
-			brewery.setBoolean("finishedDistilling", true);
-			Brewery.breweryDriver.debugLog("Removed Distilling Tag");
-		}
-				
+		NBTCompound brewery = nbti.getCompound("brewery");		
 				
 		//Pull aspects
 		NBTCompound aspectBaseList = brewery.getCompound("aspectsBase");
@@ -418,7 +403,7 @@ public class BRecipe {
 			crafterName = player.getDisplayName();
 		}
 		
-		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), maskedAspects, brewery.hasKey("aging"), brewery.hasKey("distilling"), brewery.getInteger("potency"), brewery.getInteger("duration"));
+		BRecipe recipe = BRecipe.getRecipe(player, brewery.getString("type"), maskedAspects, brewery.hasKey("aged"), brewery.hasKey("distilled"), brewery.getInteger("potency"), brewery.getInteger("duration"));
 		
 		//Handle crafter list
 		ArrayList<String> craftersList = new ArrayList<String>();
