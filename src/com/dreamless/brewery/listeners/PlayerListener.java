@@ -116,7 +116,6 @@ public class PlayerListener implements Listener {
 		}
 		
 		if(event.getMaterial() == Material.CLOCK && !barrel.isAging()) {
-			//TODO: Start Aging
 			BreweryMessage result = barrel.startAging(player);
 			if(result.getResult()) {//Start cooking
 				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
@@ -140,7 +139,7 @@ public class PlayerListener implements Listener {
 		}
 		
 		if (materialInHand == Material.IRON_SHOVEL) {
-			//TODO:
+			//TODO: Brewer's tool
 			event.setCancelled(true);
 			if(distiller == null) {//Add a new one
 				distiller = new Distiller(clickedBlock);

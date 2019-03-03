@@ -371,7 +371,7 @@ public class BRecipe {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
-    public static ItemStack revealMaskedBrew(ItemStack item, String equipmentType) {
+    public static ItemStack revealMaskedBrew(ItemStack item) {
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
 		NBTCompound brewery = nbti.getCompound("brewery");		

@@ -253,7 +253,7 @@ public class BIngredients implements InventoryHolder{
 		
 		Brewery.breweryDriver.debugLog("Resultant brew: " + type);
 	}
-
+	//TODO: Adjusted for correct tables
 	private String queryForType(String primary, int primaryAmount, String secondary, int secondaryAmount, int time){
 		String result = null;
 		String query = "SELECT type FROM " + Brewery.database + "brewtypes_merged WHERE core=? AND adjunct=? GROUP BY type "

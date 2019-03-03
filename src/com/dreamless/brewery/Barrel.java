@@ -468,7 +468,6 @@ public class Barrel implements InventoryHolder {
 		return false;
 	}
 
-	//TODO: Unmask brews!
 	// removes a barrel, throwing included potions to the ground
 	public void remove(Block broken, Player breaker) {
 		if (inventory != null) {
@@ -480,8 +479,7 @@ public class Barrel implements InventoryHolder {
 			for (ItemStack item : items) {
 				if (item != null) {
 					// "broken" is the block that destroyed, throw them there!
-					//TODO: Unmask
-					item = BRecipe.revealMaskedBrew(item, "Barrel");
+					item = BRecipe.revealMaskedBrew(item);
 					if (broken != null) {
 						broken.getWorld().dropItem(broken.getLocation().add(0.5, 0.5, 0.5), item);
 						broken.getWorld().playSound(broken.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);

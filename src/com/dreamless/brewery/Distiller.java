@@ -246,7 +246,7 @@ public class Distiller implements InventoryHolder {
 		for(int i = 0; i < 3; i++) {
 			ItemStack item = brewingInventory.getItem(i);
 			if(item != null) {
-				item = BRecipe.revealMaskedBrew(item, "BrewingStand");
+				item = BRecipe.revealMaskedBrew(item);
 				brewingInventory.setItem(i, item);
 			}
 		}

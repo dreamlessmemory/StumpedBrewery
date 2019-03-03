@@ -166,8 +166,6 @@ public class CommandListener implements CommandExecutor {
 
 			}
 		}
-		//TODO purgeplayer
-		//TODO flavortext
 		return true;
 	}
 
