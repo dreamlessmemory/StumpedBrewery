@@ -168,23 +168,23 @@ public class Aspect implements Comparable<Object> {
 	//Increases everything under 100% to 100% by one half-step
 	private static double glowstoneFilter(double activation, double reactivity, int multiplier) {
 		if(activation < 1.0) {
-			return Math.min(activation + reactivity/((double)multiplier/100) , 1.0);
+			return Math.min(activation + (reactivity/((double)multiplier/100)/100) , 1.0);
 		} else return activation;
 	}
 	//Decreases everything by one step
 	private static double redstoneFilter(double activation, double reactivity, int multiplier) {
-		return Math.max(activation - reactivity * ((double)multiplier/100) , 0);
+		return Math.max(activation - (reactivity * ((double)multiplier/100)/100) , 0);
 	}
 	//Increases everything above 100% by one half-step
 	private static double gunpowderFilter(double activation, double reactivity, int multiplier) {
 		if(activation >= 1.0) {
-			return activation + reactivity/((double)multiplier/100);
+			return activation + (reactivity/((double)multiplier/100)/100);
 		} else return activation;
 	}
 	//Decreases everything over stability by one half step
 	private static double sugarFilter(double activation, double reactivity, double stability, int multiplier) {
-		if(activation * 100 > stability) {
-			return Math.max(activation - reactivity/((double)multiplier/100), stability);
+		if(activation > stability) {
+			return Math.max(activation - (reactivity/((double)multiplier/100)/100), stability);
 		} else return activation;
 	}
 	
