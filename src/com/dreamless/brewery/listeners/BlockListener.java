@@ -16,8 +16,6 @@ import com.dreamless.brewery.Barrel;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.Distiller;
 import com.dreamless.brewery.Words;
-import com.dreamless.brewery.Distiller.DistillerRunnable;
-
 import org.bukkit.event.block.BlockBreakEvent;
 
 public class BlockListener implements Listener {

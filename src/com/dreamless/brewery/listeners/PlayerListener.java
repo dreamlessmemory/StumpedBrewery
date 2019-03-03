@@ -15,7 +15,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.*;
-import com.dreamless.brewery.Brewery.BreweryRunnable;
 import com.dreamless.brewery.Distiller.DistillerRunnable;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.NBTItem;

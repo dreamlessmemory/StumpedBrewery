@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
-import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.InventoryHolder;
 import com.dreamless.brewery.*;
 import com.dreamless.brewery.utils.BreweryMessage;

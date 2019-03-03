@@ -1,8 +1,6 @@
 package com.dreamless.brewery;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
@@ -11,25 +9,21 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BrewingStand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.utils.BreweryMessage;
-import com.dreamless.brewery.utils.BreweryUtils;
 import com.dreamless.brewery.utils.NBTCompound;
 import com.dreamless.brewery.utils.NBTItem;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.gmail.filoghost.holographicdisplays.api.line.ItemLine;
 import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
-import com.mysql.jdbc.Messages;
 
 public class Distiller implements InventoryHolder {
 	
@@ -105,7 +99,7 @@ public class Distiller implements InventoryHolder {
 			filterLine.setItemStack(new ItemStack(filters.get(0)));
 		}
 		
-		statusLine.setText("Filter: " + filters.get(0).toString().toLowerCase());
+		statusLine.setText("Filter: " + WordUtils.capitalize((filters.get(0).toString().toLowerCase().replace("_", " "))));
 		secondStatusLine.setText((filters.size() + (filters.size() > 1 ? " filters" : " filter") + " loaded"));
 		
 		return new BreweryMessage(true, filters.size() + (filters.size() > 1 ? " filters" : " filter") + " loaded into the distiller.");
@@ -229,7 +223,7 @@ public class Distiller implements InventoryHolder {
 	}
 
 	// distill custom potion in given slot
-	private ItemStack distillSlot(ItemStack item, Material filter) {//TODO Update
+	private ItemStack distillSlot(ItemStack item, Material filter) {
 		Brewery.breweryDriver.debugLog("DISTILLING 1 CYCLE : " + item.toString() + " FILTER: " + filter.toString());
 		
 		//Pull NBT
@@ -341,7 +335,7 @@ public class Distiller implements InventoryHolder {
 					this.cancel();
 				} else {
 					distiller.filterLine.setItemStack(new ItemStack(distiller.filters.get(0)));
-					distiller.statusLine.setText("Filter: " + distiller.filters.get(0).toString().toLowerCase());
+					distiller.statusLine.setText("Filter: " + WordUtils.capitalize((distiller.filters.get(0).toString().toLowerCase().replace("_", " "))));
 					distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
 				}
 			}

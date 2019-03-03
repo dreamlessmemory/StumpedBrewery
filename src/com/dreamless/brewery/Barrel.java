@@ -1,11 +1,9 @@
 package com.dreamless.brewery;
 
 import java.io.IOException;
-import java.nio.channels.NonWritableChannelException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Location;
@@ -33,7 +31,6 @@ import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.WordUtils;
 
 public class Barrel implements InventoryHolder {
 
