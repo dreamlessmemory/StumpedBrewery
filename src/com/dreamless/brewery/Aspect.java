@@ -120,7 +120,7 @@ public class Aspect implements Comparable<Object> {
 	}
 	
 	private static typeBonuses getTypeBonus(String type, boolean aspect) {
-		String query = "SELECT * FROM " + Brewery.getDatabase(null) + (aspect? "aspects" : "typebonuses") + " WHERE " + (aspect? "aspect" : "type")+ "=?";
+		String query = "SELECT * FROM " + Brewery.getDatabase((aspect? "aspects" : "brewtypes")) + (aspect? "aspects" : "brewtypes") + " WHERE " + (aspect? "aspect" : "type")+ "=?";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, type);
 			ResultSet results;
