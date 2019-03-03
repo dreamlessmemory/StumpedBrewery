@@ -15,9 +15,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.*;
+import com.dreamless.brewery.Brewery.BreweryRunnable;
+import com.dreamless.brewery.Distiller.DistillerRunnable;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.NBTItem;
-
 
 public class PlayerListener implements Listener {
 	public static boolean openEverywhere;
@@ -131,15 +132,31 @@ public class PlayerListener implements Listener {
 		Block clickedBlock = event.getClickedBlock();
 		Material materialInHand = event.getMaterial();
 		
+		Distiller distiller = Distiller.get(clickedBlock);
+		
+		//Cancel interaction if distilling
+		if(distiller != null && distiller.isDistilling()) {
+			event.setCancelled(true);
+			return;
+		}
+		
 		if (materialInHand == Material.IRON_SHOVEL) {
 			//TODO:
 			event.setCancelled(true);
-			Distiller distiller = Distiller.get(clickedBlock);
 			if(distiller == null) {//Add a new one
 				distiller = new Distiller(clickedBlock);
 			}
 			
 			player.openInventory(distiller.getInventory());
+		} else if (materialInHand == Material.CLOCK) {
+			event.setCancelled(true);
+			if(distiller != null) {
+				BreweryMessage breweryMessage = distiller.startDistilling(player);
+				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
+				if(breweryMessage.getResult()) {
+					new DistillerRunnable(3, distiller).runTaskTimer(Brewery.breweryDriver, 20, 20);
+				}
+			}
 		}
 	}
 	

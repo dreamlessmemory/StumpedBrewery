@@ -12,12 +12,14 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BrewingStand;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
@@ -25,6 +27,9 @@ import com.dreamless.brewery.utils.NBTCompound;
 import com.dreamless.brewery.utils.NBTItem;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.gmail.filoghost.holographicdisplays.api.line.ItemLine;
+import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
+import com.mysql.jdbc.Messages;
 
 public class Distiller implements InventoryHolder {
 	
@@ -34,14 +39,23 @@ public class Distiller implements InventoryHolder {
 	private ArrayList<Material> filters = new ArrayList<Material>(); 
 	private Block block;
 	private Inventory filterInventory;
-	private Hologram hologram;
-	private BrewingStand brewingStand;
+	private BrewerInventory brewingInventory;
+	private boolean distilling = false;
+	private boolean finishedDistilling = false;
 	
+	private Hologram hologram;
+	private ItemLine filterLine;
+	private TextLine statusLine;
+	private TextLine secondStatusLine;
+
+
 	public Distiller(Block block) {
 		this.block = block;
 		
 		//Initialize Inventory
 		filterInventory = org.bukkit.Bukkit.createInventory(this, FILTER_LIMT, "Distiller Filter Cache");
+		
+		brewingInventory = (BrewerInventory) ((InventoryHolder)block.getState()).getInventory();
 		
 		//Hologram
 		if(hologram == null) {
@@ -85,12 +99,14 @@ public class Distiller implements InventoryHolder {
 			removeSelf();
 			return new BreweryMessage(false, "No appropriate filters were loaded.");
 		}
+		if(filterLine == null) {
+			filterLine = hologram.insertItemLine(0, new ItemStack(filters.get(0)));
+		} else {
+			filterLine.setItemStack(new ItemStack(filters.get(0)));
+		}
 		
-		ArrayList<String> hologramMessageArrayList = new ArrayList<String>();
-		hologramMessageArrayList.add("Distiller ready!");
-		hologramMessageArrayList.add(filters.size() + (filters.size() > 1 ? " filters" : " filter") + " loaded");
-		
-		updateHologram(hologramMessageArrayList, false);
+		statusLine.setText("Filter: " + filters.get(0).toString().toLowerCase());
+		secondStatusLine.setText((filters.size() + (filters.size() > 1 ? " filters" : " filter") + " loaded"));
 		
 		return new BreweryMessage(true, filters.size() + (filters.size() > 1 ? " filters" : " filter") + " loaded into the distiller.");
 	}
@@ -149,58 +165,83 @@ public class Distiller implements InventoryHolder {
 	}
 	//Distilling Handling
 	
-	
+	public BreweryMessage startDistilling(Player player) {
+		
+		if(finishedDistilling) {
+			return new BreweryMessage(false, "Please remove finished brews before starting a new brew.");
+		}
+		
+		boolean result = false;
+		
+		for(int i = 0; i < 3; i++) {
+			ItemStack item = brewingInventory.getItem(i);
+			if(item != null) {
+				NBTItem nbti = new NBTItem(item);
+				
+				if(nbti.hasKey("brewery") && !nbti.getCompound("brewery").hasKey("distilling")) {
+					result = true;
+					
+					//Tag as distilling brew
+					NBTCompound brewery = nbti.getCompound("brewery");
+					brewery.setBoolean("Distilled", true);
+					brewery.setString("placedInBrewer", player.getUniqueId().toString());
+					item = nbti.getItem();
+					
+					
+					//Mask as Distilling
+					PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
+					potionMeta.setDisplayName("Ruined Brew");
+					ArrayList<String> agedFlavorText = new ArrayList<String>();
+					agedFlavorText.add("A " +  brewery.getString("type").toLowerCase() + " brew that was ruined");
+					agedFlavorText.add("by being removed during distillation.");
+					potionMeta.setLore(agedFlavorText);
+					potionMeta.clearCustomEffects();
+					item.setItemMeta(potionMeta);
+						
+					brewingInventory.setItem(i, item);	
+				} else {
+					ejectItem(item);
+					brewingInventory.setItem(i, null);
+				}	
+			}
+		}
+
+		if(!result) {
+			return new BreweryMessage(false, "There are no brews that can be distilled");
+		} else {
+			distilling = true;
+			return new BreweryMessage(true, "Distilling started");
+		}
+	}
 	
 	
 
 	// distill all custom potions in the brewer
-	public static void distillAll(BrewerInventory inv) {
+	public void distillAll() {
+		Material nextFilterMaterial = filters.remove(0);
+		filterInventory.remove(nextFilterMaterial);
 		for(int i = 0; i < 3; i++) {
-			ItemStack item = inv.getItem(i);
+			ItemStack item = brewingInventory.getItem(i);
 			if(item != null) {
-				NBTItem nbti = new NBTItem(item);
-				if(nbti.hasKey("brewery")) {
-					NBTCompound brewery = nbti.getCompound("brewery");
-					/*if(brewery.hasKey("finishedDistilling")) {
-						continue;
-					}*/
-					
-					NBTCompound distilling = brewery.hasKey("distilling") ? brewery.getCompound("distilling") : brewery.addCompound("distilling");
-					int cycles = distilling.hasKey("cycles") ? distilling.getInteger("cycles") : 0; 
-					if(cycles >= 10) { //You only get 10 cycles
-						//TODO Add effects?
-						continue;
-					}
-					//Assign age now
-					distilling.setInteger("cycles", ++cycles);
-					item = nbti.getItem();
-					//Brewery.breweryDriver.debugLog("Cycles is " + cycles);
-					item = distillSlot(item, inv.getIngredient());
-					
-					inv.setItem(i, item);
-				}
+				brewingInventory.setItem(i, distillSlot(item, nextFilterMaterial));
 			}
 		}
 	}
 
 	// distill custom potion in given slot
-	public static ItemStack distillSlot(ItemStack item, ItemStack filter) {//TODO Update
+	private ItemStack distillSlot(ItemStack item, Material filter) {//TODO Update
 		Brewery.breweryDriver.debugLog("DISTILLING 1 CYCLE : " + item.toString() + " FILTER: " + filter.toString());
 		
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
 		NBTCompound brewery = nbti.getCompound("brewery");
-		NBTCompound distilling = brewery.getCompound("distilling");
-		
 		//Pull aspects
 		NBTCompound aspectList = brewery.getCompound("aspectsActivation");
 		Set<String> aspects = aspectList.getKeys();
 		
-		//Calculate new aspects
-		int cycles = distilling.getInteger("cycles");
 		for(String currentAspect : aspects) {
 			double aspectPotency = aspectList.getDouble(currentAspect);
-			double newPotency = Aspect.processFilter(currentAspect, brewery.getString("type"), aspectPotency, filter.getType());
+			double newPotency = Aspect.processFilter(currentAspect, brewery.getString("type"), aspectPotency, filter);
 			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " -> " + newPotency);
 			//Update NBT
 			aspectList.setDouble(currentAspect, newPotency);
@@ -208,39 +249,37 @@ public class Distiller implements InventoryHolder {
 		
 		item = nbti.getItem();
 		
-		//Mask as Aging Brew
-		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-		potionMeta.setDisplayName("#Distilling Brew");
-		ArrayList<String> distilledFlavorText = new ArrayList<String>();
-		if(!distilling.hasKey("isDistilling") && distilling.getBoolean("isDistilling") != true) {
-			distilling.setBoolean("isDistilling", true);
-			item = nbti.getItem();
-
-			distilledFlavorText.add("A distilling " +  brewery.getString("type").toLowerCase() + " brew.");
-			distilledFlavorText.add("This brew has distilled for " + cycles + (cycles > 1 ? " cycles" : " cycle"));
-		} else {
-			//Update flavor text
-			List<String> flavorText = potionMeta.getLore();
-			distilledFlavorText.add(flavorText.get(0));
-			distilledFlavorText.add("This brew has distilled for " + cycles + " cycles");
-		}
-		
-		potionMeta.setLore(distilledFlavorText);
-		potionMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
-		item.setItemMeta(potionMeta);
-		
 		return item;
 	}
 	
-	//Inventory handling
-	private boolean isEmpty() {
-		for(ItemStack it : filterInventory.getContents())	{
-		    if(it != null) return false;
+	private void finishDistilling() {
+		distilling = false;
+		finishedDistilling = true;
+		for(int i = 0; i < 3; i++) {
+			ItemStack item = brewingInventory.getItem(i);
+			if(item != null) {
+				item = BRecipe.revealMaskedBrew(item, "BrewingStand");
+				brewingInventory.setItem(i, item);
+			}
+		}
+		filterLine.setItemStack(new ItemStack(Material.POTION));
+		statusLine.setText("Brews distilled.");
+		secondStatusLine.setText("Remove brews");
+	}
+	
+	
+	public boolean isEmpty() {
+		for(int i = 0; i < 3; i++) {
+			ItemStack item = brewingInventory.getItem(i);
+			if(item == null) continue;
+			if(item.getType() != Material.AIR) {
+				return false;
+			}
 		}
 		return true;
 	}
 	
-	private void removeSelf() {
+	public void removeSelf() {
 		hologram.delete();
 		distillers.remove(this);
 		Brewery.breweryDriver.debugLog("Check distill list: " + distillers.size());
@@ -249,28 +288,66 @@ public class Distiller implements InventoryHolder {
 	private void createHologram(Block block) {
 		Location above = block.getRelative(BlockFace.UP).getLocation();
 		above.setX(above.getX()+ 0.5);
-		above.setY(above.getY()+ 0.75);
+		above.setY(above.getY()+ 1.25);
 		above.setZ(above.getZ()+ 0.5);
 		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
 		
 		//Create ready message
-		hologram.appendTextLine("Distiller Ready");
-		hologram.appendTextLine("Awaiting filters...");
-	}
-	
-	private void updateHologram(ArrayList<String> messages, Boolean distilling) {
-		hologram.clearLines();
-		if(distilling) {
-			hologram.appendItemLine(new ItemStack(filters.get(0)));
-		}
-		for(String message : messages) {
-			hologram.appendTextLine(message);
-		}
+		statusLine = hologram.appendTextLine("Distiller Ready");
+		secondStatusLine = hologram.appendTextLine("Awaiting filters...");
 	}
 
 	@Override
 	public Inventory getInventory() {
 		return filterInventory;
 	}
-
+	
+	public boolean isDistilling() {
+		return distilling;
+	}
+	
+	public boolean isFinishedDistilling() {
+		return finishedDistilling;
+	}
+	
+	public static class DistillerRunnable extends BukkitRunnable {
+		private final int cycles;
+		private final int cycleLength;
+		private int currentCycle = 1;
+		private int currentTime = 0;
+		private Distiller distiller;
+		
+		public DistillerRunnable(int cycleLength, Distiller distiller) {
+			cycles = distiller.filters.size();
+			this.cycleLength = cycleLength;
+			this.distiller = distiller;
+			
+		}
+		
+		@Override
+		public void run() {
+			if(++currentTime < cycleLength) {
+				//Update Hologram
+				distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
+				
+			} else {
+				//increment cycles
+				currentTime = 0;
+				currentCycle +=1;
+				distiller.distillAll();
+				if(currentCycle > cycles) {
+					distiller.finishDistilling();
+					Brewery.breweryDriver.debugLog("End distill");
+					this.cancel();
+				} else {
+					distiller.filterLine.setItemStack(new ItemStack(distiller.filters.get(0)));
+					distiller.statusLine.setText("Filter: " + distiller.filters.get(0).toString().toLowerCase());
+					distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
+				}
+			}
+		}
+		
+	}
+	
+	
 }

@@ -1,5 +1,6 @@
 package com.dreamless.brewery.listeners;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,7 +14,9 @@ import org.bukkit.event.block.SignChangeEvent;
 import com.dreamless.brewery.BPlayer;
 import com.dreamless.brewery.Barrel;
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.Distiller;
 import com.dreamless.brewery.Words;
+import com.dreamless.brewery.Distiller.DistillerRunnable;
 
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -49,6 +52,19 @@ public class BlockListener implements Listener {
 		if (!Brewery.breweryDriver.blockDestroy(event.getBlock(), event.getPlayer())) {
 			event.setCancelled(true);
 		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void onBrewingStandBreak(BlockBreakEvent event) {
+		Block block = event.getBlock();
+		if(block.getType() != Material.BREWING_STAND) {
+			return;
+		}
+		Distiller distiller = Distiller.get(block);
+		if(distiller == null) {
+			return;
+		}
+		Distiller.remove(block);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
