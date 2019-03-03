@@ -87,7 +87,7 @@ public class BIngredients implements InventoryHolder{
 		//Check if empty
 		//if(inventory.isEmpty()) {
 		if(isEmpty()) {
-			return new BreweryMessage(false, "No items were acceptable ingredients!");
+			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Ingredients"));
 		}
 		
 		//Set Feedback effects

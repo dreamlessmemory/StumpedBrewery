@@ -63,7 +63,7 @@ public final class BreweryUtils {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-            Inventory inventory = Bukkit.getServer().createInventory(barrel, dataInput.readInt(), Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
+            Inventory inventory = Bukkit.getServer().createInventory(barrel, dataInput.readInt(), Brewery.getText("Etc_Barrel"));
     
             // Read the serialized inventory
             for (int i = 0; i < inventory.getSize(); i++) {

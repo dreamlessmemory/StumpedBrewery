@@ -66,7 +66,7 @@ public class Brewery extends JavaPlugin {
 
 	// Language
 	public String language;
-	public LanguageReader languageReader;
+	private LanguageReader languageReader;
 
 	private CommandSender reloader;
 	
@@ -509,6 +509,10 @@ public class Brewery extends JavaPlugin {
 		default:
 			return database;
 		}
+	}
+	
+	public static String getText(String name, String... args) {
+		return breweryDriver.languageReader.get(name, args);
 	}
 	
 	private boolean checkConfigs() {

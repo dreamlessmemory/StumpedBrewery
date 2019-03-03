@@ -24,14 +24,14 @@ public class BlockListener implements Listener {
 	public void onSignChange(SignChangeEvent event) {
 		String[] lines = event.getLines();
 
-		if (lines[0].equalsIgnoreCase("Barrel") || lines[0].equalsIgnoreCase(Brewery.breweryDriver.languageReader.get("Etc_Barrel"))) {
+		if (lines[0].equalsIgnoreCase("Barrel") || lines[0].equalsIgnoreCase(Brewery.getText("Etc_Barrel"))) {
 			Player player = event.getPlayer();
 			if (!player.hasPermission("brewery.createbarrel.small") && !player.hasPermission("brewery.createbarrel.big")) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoBarrelCreate"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoBarrelCreate"));
 				return;
 			}
 			if (Barrel.create(event.getBlock(), player)) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_BarrelCreated"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Player_BarrelCreated"));
 			}
 		}
 	}

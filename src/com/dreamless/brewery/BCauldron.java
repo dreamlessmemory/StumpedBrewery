@@ -121,7 +121,7 @@ public class BCauldron {
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (!player.hasPermission("brewery.cauldron.fill")) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronFill"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronFill"));
 				return true;
 			}
 			ItemStack potion = bcauldron.ingredients.finishFermentation(bcauldron.state, player);
@@ -169,17 +169,17 @@ public class BCauldron {
 	// prints the current cooking time to the player
 	public static void printTime(Player player, Block block) {
 		if (!player.hasPermission("brewery.cauldron.time")) {
-			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoPermissions"));
+			Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoPermissions"));
 			return;
 		}
 		BCauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (bcauldron.state > 1) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo2", Integer.toString(bcauldron.state)));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo2", Integer.toString(bcauldron.state)));
 			} else if (bcauldron.state == 1) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo1"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo1"));
 			} else {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CauldronInfo0"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo0"));
 			}
 		}
 	}

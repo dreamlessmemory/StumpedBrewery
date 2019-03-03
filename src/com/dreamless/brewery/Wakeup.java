@@ -91,16 +91,16 @@ public class Wakeup {
 
 			Player player = (Player) sender;
 			wakeups.add(new Wakeup(player.getLocation()));
-			p.msg(sender, p.languageReader.get("Player_WakeCreated", "" + (wakeups.size() - 1)));
+			p.msg(sender, Brewery.getText("Player_WakeCreated", "" + (wakeups.size() - 1)));
 
 		} else {
-			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
+			p.msg(sender, Brewery.getText("Error_PlayerCommand"));
 		}
 	}
 
 	public static void remove(CommandSender sender, int id) {
 		if (wakeups.isEmpty() || id < 0 || id >= wakeups.size()) {
-			p.msg(sender, p.languageReader.get("Player_WakeNotExist", "" + id));//"&cDer Aufwachpunkt mit der id: &6" + id + " &cexistiert nicht!");
+			p.msg(sender, Brewery.getText("Player_WakeNotExist", "" + id));//"&cDer Aufwachpunkt mit der id: &6" + id + " &cexistiert nicht!");
 			return;
 		}
 
@@ -108,16 +108,16 @@ public class Wakeup {
 
 		if (wakeup.active) {
 			wakeup.active = false;
-			p.msg(sender, p.languageReader.get("Player_WakeDeleted", "" + id));
+			p.msg(sender, Brewery.getText("Player_WakeDeleted", "" + id));
 
 		} else {
-			p.msg(sender, p.languageReader.get("Player_WakeAlreadyDeleted", "" + id));
+			p.msg(sender, Brewery.getText("Player_WakeAlreadyDeleted", "" + id));
 		}
 	}
 
 	public static void list(CommandSender sender, int page, String worldOnly) {
 		if (wakeups.isEmpty()) {
-			p.msg(sender, p.languageReader.get("Player_WakeNoPoints"));
+			p.msg(sender, Brewery.getText("Player_WakeNoPoints"));
 			return;
 		}
 
@@ -150,7 +150,7 @@ public class Wakeup {
 
 			if (!all) {
 				if (wakeups.isEmpty() || id >= wakeups.size()) {
-					p.msg(sender, p.languageReader.get("Player_WakeNotExist", "" + id));
+					p.msg(sender, Brewery.getText("Player_WakeNotExist", "" + id));
 					return;
 				}
 
@@ -162,12 +162,12 @@ public class Wakeup {
 					int x = (int) wakeup.loc.getX();
 					int y = (int) wakeup.loc.getY();
 					int z = (int) wakeup.loc.getZ();
-					p.msg(sender, p.languageReader.get("Player_WakeFilled", "" + id, world, "" + x , "" + y, "" + z));
+					p.msg(sender, Brewery.getText("Player_WakeFilled", "" + id, world, "" + x , "" + y, "" + z));
 				}
 
 			} else {
 				if (wakeups.isEmpty()) {
-					p.msg(sender, p.languageReader.get("Player_WakeNoPoints"));
+					p.msg(sender, Brewery.getText("Player_WakeNoPoints"));
 					return;
 				}
 				if (checkPlayer != null && checkPlayer != player) {
@@ -179,7 +179,7 @@ public class Wakeup {
 
 
 		} else {
-			p.msg(sender, p.languageReader.get("Error_PlayerCommand"));
+			p.msg(sender, Brewery.getText("Error_PlayerCommand"));
 		}
 	}
 
@@ -190,7 +190,7 @@ public class Wakeup {
 	public static void tpNext() {
 		checkId++;
 		if (checkId >= wakeups.size()) {
-			p.msg(checkPlayer, p.languageReader.get("Player_WakeLast"));
+			p.msg(checkPlayer, Brewery.getText("Player_WakeLast"));
 			checkId = -1;
 			checkPlayer = null;
 			return;
@@ -208,23 +208,23 @@ public class Wakeup {
 		int z = (int) wakeup.loc.getZ();
 
 		if (wakeup.check()) {
-			p.msg(checkPlayer, p.languageReader.get("Player_WakeTeleport", "" + checkId, world, "" + x , "" + y, "" + z));
+			p.msg(checkPlayer, Brewery.getText("Player_WakeTeleport", "" + checkId, world, "" + x , "" + y, "" + z));
 			checkPlayer.teleport(wakeup.loc);
 		} else {
-			p.msg(checkPlayer, p.languageReader.get("Player_WakeFilled", "" + checkId, world, "" + x , "" + y, "" + z));
+			p.msg(checkPlayer, Brewery.getText("Player_WakeFilled", "" + checkId, world, "" + x , "" + y, "" + z));
 		}			
-		p.msg(checkPlayer, p.languageReader.get("Player_WakeHint1"));
-		p.msg(checkPlayer, p.languageReader.get("Player_WakeHint2"));
+		p.msg(checkPlayer, Brewery.getText("Player_WakeHint1"));
+		p.msg(checkPlayer, Brewery.getText("Player_WakeHint2"));
 	}
 
 	public static void cancel(CommandSender sender) {
 		if (checkPlayer != null) {
 			checkPlayer = null;
 			checkId = -1;
-			p.msg(sender, p.languageReader.get("Player_WakeCancel"));
+			p.msg(sender, Brewery.getText("Player_WakeCancel"));
 			return;
 		}
-		p.msg(sender, p.languageReader.get("Player_WakeNoCheck"));
+		p.msg(sender, Brewery.getText("Player_WakeNoCheck"));
 	}
 
 

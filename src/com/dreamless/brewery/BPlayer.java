@@ -192,7 +192,7 @@ public class BPlayer {
 			passOut(player);
 		} else {
 			addPuke(player, 60 + (int) (Math.random() * 60.0));
-			Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_CantDrink"));
+			Brewery.breweryDriver.msg(player, Brewery.getText("Player_CantDrink"));
 		}
 	}
 
@@ -270,7 +270,7 @@ public class BPlayer {
 	}
 
 	public void passOut(Player player) {
-		player.kickPlayer(Brewery.breweryDriver.languageReader.get("Player_DrunkPassOut"));
+		player.kickPlayer(Brewery.getText("Player_DrunkPassOut"));
 		offlineDrunk = drunkeness;
 	}
 
@@ -336,7 +336,7 @@ public class BPlayer {
 			if (randomLoc != null) {
 				if (!player.hasPermission("brewery.bypass.teleport")) {
 					player.teleport(randomLoc);
-					Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Player_Wake"));
+					Brewery.breweryDriver.msg(player, Brewery.getText("Player_Wake"));
 				}
 			}
 		}

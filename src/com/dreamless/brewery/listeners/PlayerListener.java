@@ -73,7 +73,7 @@ public class PlayerListener implements Listener {
 					player.openInventory(inventory);
 				}
 			} else {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoCauldronInsert"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronInsert"));
 			}
 			//player.openInventory(BCauldron.getInventory(clickedBlock));
 			return;
@@ -274,10 +274,10 @@ public class PlayerListener implements Listener {
 						bplayer.join(player);
 						return;
 					case 2:
-						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, Brewery.breweryDriver.languageReader.get("Player_LoginDeny"));
+						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, Brewery.getText("Player_LoginDeny"));
 						return;
 					case 3:
-						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, Brewery.breweryDriver.languageReader.get("Player_LoginDenyLong"));
+						event.disallow(PlayerLoginEvent.Result.KICK_OTHER, Brewery.getText("Player_LoginDenyLong"));
 				}
 			}
 		}

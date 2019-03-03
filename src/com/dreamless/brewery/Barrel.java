@@ -252,12 +252,12 @@ public class Barrel implements InventoryHolder {
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
 		if (isLarge()) {
 			if (!player.hasPermission("brewery.openbarrel.big")) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoBarrelAccess"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoBarrelAccess"));
 				return false;
 			}
 		} else {
 			if (!player.hasPermission("brewery.openbarrel.small")) {
-				Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Error_NoBarrelAccess"));
+				Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoBarrelAccess"));
 				return false;
 			}
 		}
@@ -269,9 +269,9 @@ public class Barrel implements InventoryHolder {
 		player.getWorld().playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1.0f, 1.0f);
 		if (inventory == null) {
 			if (isLarge()) {
-				inventory = org.bukkit.Bukkit.createInventory(this, 27, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
+				inventory = org.bukkit.Bukkit.createInventory(this, 27, Brewery.getText("Etc_Barrel"));
 			} else {
-				inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.breweryDriver.languageReader.get("Etc_Barrel"));
+				inventory = org.bukkit.Bukkit.createInventory(this, 9, Brewery.getText("Etc_Barrel"));
 			}
 		}
 		player.openInventory(inventory);
@@ -447,12 +447,12 @@ public class Barrel implements InventoryHolder {
 			if (barrel.getBrokenBlock(true) == null) {
 				if (isSign(spigot)) {
 					if (!player.hasPermission("brewery.createbarrel.small")) {
-						Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoSmallBarrelCreate"));
+						Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoSmallBarrelCreate"));
 						return false;
 					}
 				} else {
 					if (!player.hasPermission("brewery.createbarrel.big")) {
-						Brewery.breweryDriver.msg(player, Brewery.breweryDriver.languageReader.get("Perms_NoBigBarrelCreate"));
+						Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoBigBarrelCreate"));
 						return false;
 					}
 				}
