@@ -96,7 +96,7 @@ public class Distiller implements InventoryHolder {
 	public BreweryMessage prepDistiller() {
 		if(loadFilters() == 0) {//No filters
 			removeSelf();
-			return new BreweryMessage(false, "No appropriate filters were loaded.");
+			return new BreweryMessage(false, Brewery.getText("Distiller_No_Filters"));
 		}
 		if(filterLine == null) {
 			filterLine = hologram.insertItemLine(0, new ItemStack(filters.get(0)));
@@ -167,7 +167,7 @@ public class Distiller implements InventoryHolder {
 	public BreweryMessage startDistilling(Player player) {
 		
 		if(finishedDistilling) {
-			return new BreweryMessage(false, "Please remove finished brews before starting a new brew.");
+			return new BreweryMessage(false, Brewery.getText("Distiller_Remove_Brews"));
 		}
 		
 		boolean result = false;
@@ -195,10 +195,10 @@ public class Distiller implements InventoryHolder {
 		}
 
 		if(!result) {
-			return new BreweryMessage(false, "There are no brews that can be distilled");
+			return new BreweryMessage(false, Brewery.getText("Distiller_No_Brews"));
 		} else {
 			distilling = true;
-			return new BreweryMessage(true, "Distilling started");
+			return new BreweryMessage(true, Brewery.getText("Distiller_Started"));
 		}
 	}
 	

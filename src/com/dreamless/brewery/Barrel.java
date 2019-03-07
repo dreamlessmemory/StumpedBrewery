@@ -158,7 +158,7 @@ public class Barrel implements InventoryHolder {
 		}
 		
 		if(isEmpty()) {
-			return new BreweryMessage(false, "This barrel is empty.");
+			return new BreweryMessage(false, Brewery.getText("Barrel_Empty"));
 		} else {
 			aging = true;
 			
@@ -167,7 +167,7 @@ public class Barrel implements InventoryHolder {
 			}
 			updateHologram();
 			
-			return new BreweryMessage(true, "The barrel has been sealed and its contents are aging.");
+			return new BreweryMessage(true, Brewery.getText("Barrel_Start_Aging"));
 		}
 	}
 	

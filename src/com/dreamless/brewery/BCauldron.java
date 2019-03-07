@@ -295,11 +295,11 @@ public class BCauldron {
 		Material up = block.getRelative(BlockFace.UP).getType();
 		
 		if(down != Material.FIRE && down != Material.LAVA && down != Material.MAGMA_BLOCK) {
-			return new BreweryMessage(false, "There is no heat source for this cauldron.");
+			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Heat"));
 		}
 		
 		if(up != Material.AIR && up != Material.SIGN) {
-			return new BreweryMessage(false, "The space above the cauldron is not clear.");
+			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Space_Above"));
 		}
 		
 		return new BreweryMessage(true, "");
@@ -355,7 +355,7 @@ public class BCauldron {
 			}
 			
 			if(bcauldron.ingredients.isEmpty()) {
-				return new BreweryMessage(false, "This cauldron is empty and cannot start cooking");
+				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Ingredients"));
 			}
 			
 			BreweryMessage result = bcauldron.ingredients.startCooking(block);
@@ -373,6 +373,6 @@ public class BCauldron {
 			}			
 			return result;
 		}
-		return new BreweryMessage(false, "No cauldron at this location.");
+		return new BreweryMessage(false, Brewery.getText("Fermentation_No_Cauldron"));
 	}
 }

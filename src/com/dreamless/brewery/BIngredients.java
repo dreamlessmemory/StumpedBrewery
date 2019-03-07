@@ -101,7 +101,7 @@ public class BIngredients implements InventoryHolder{
 		calculateType(0);
 		
 		//Return
-		return new BreweryMessage(true, "The cauldron begins to ferment a new " + type.toLowerCase() + ".");
+		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting") + type.toLowerCase() + ".");
 	}
 	
 	private void determineCoreAndAdjunct(ItemStack[] contents) {
