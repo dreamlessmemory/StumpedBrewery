@@ -324,7 +324,7 @@ public class BCauldron {
 				message = "1 minute";
 				break;
 			default:
-				message = time + "minutes";
+				message = time + " minutes";
 				break;
 			}
 		} else {

@@ -105,13 +105,13 @@ public class CommandListener implements CommandExecutor {
 
 		} else if (cmd.equalsIgnoreCase("claim")) {
 
-			if (sender.hasPermission("brewery.cmd.claim")) {
+			if (sender.hasPermission("brewery.cmd.claim") && Brewery.newrecipes) {
 				cmdClaim(sender, args);
 			} else {
 				p.msg(sender, Brewery.getText("Error_NoPermissions"));
 			}
 
-		} else if (cmd.equalsIgnoreCase("release") || cmd.equalsIgnoreCase("relinquish")) {
+		} else if ((cmd.equalsIgnoreCase("release") || cmd.equalsIgnoreCase("relinquish")) && Brewery.newrecipes) {
 
 			if (sender.hasPermission("brewery.cmd.claim")) {
 				cmdRelease(sender);
