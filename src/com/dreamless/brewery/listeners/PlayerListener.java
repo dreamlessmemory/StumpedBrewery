@@ -61,7 +61,7 @@ public class PlayerListener implements Listener {
 			} else if(((Levelled)clickedBlock.getBlockData()).getLevel() > 0){
 				BreweryMessage result = BCauldron.startCooking(clickedBlock, player);
 				if(result.getResult()) {//Start cooking
-					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 2.0f, 1.0f);
+					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.0f, 1.0f);
 				}
 				Brewery.breweryDriver.msg(player, result.getMessage());
 			}	
@@ -152,7 +152,8 @@ public class PlayerListener implements Listener {
 				BreweryMessage breweryMessage = distiller.startDistilling(player);
 				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
 				if(breweryMessage.getResult()) {
-					new DistillerRunnable(40, distiller).runTaskTimer(Brewery.breweryDriver, 20, 20);
+					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
+					new DistillerRunnable(Distiller.DEFAULT_CYCLE_LENGTH, distiller).runTaskTimer(Brewery.breweryDriver, 20, 20);
 				}
 			}
 		}

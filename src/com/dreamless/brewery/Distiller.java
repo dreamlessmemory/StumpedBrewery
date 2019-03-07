@@ -30,6 +30,7 @@ public class Distiller implements InventoryHolder {
 	
 	public static ArrayList<Distiller> distillers = new ArrayList<Distiller>();
 	private static final int FILTER_LIMT = 9;
+	public static int DEFAULT_CYCLE_LENGTH = 40;
 	
 	private ArrayList<Material> filters = new ArrayList<Material>(); 
 	private Block block;
@@ -351,9 +352,10 @@ public class Distiller implements InventoryHolder {
 		@Override
 		public void run() {
 			//Bubble effects
-			distiller.block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, distiller.block.getLocation().getX() + 0.5, distiller.block.getLocation().getY() + 1.5, distiller.block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15, 0.05);
-			distiller.block.getWorld().playSound(distiller.block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, (float)(Math.random()/8) + 0.1f, (float)(Math.random() * 1.5) + 0.5f);
-			
+			if(Math.random() > Brewery.effectLevel) {
+				distiller.block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, distiller.block.getLocation().getX() + 0.5, distiller.block.getLocation().getY() + 1.5, distiller.block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15, 0.05);
+				distiller.block.getWorld().playSound(distiller.block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, (float)(Math.random()/8) + 0.1f, (float)(Math.random() * 1.5) + 0.5f);
+			}
 			
 			if(++currentTime < cycleLength) {
 				//Update Hologram
@@ -375,8 +377,5 @@ public class Distiller implements InventoryHolder {
 				}
 			}
 		}
-		
 	}
-	
-	
 }

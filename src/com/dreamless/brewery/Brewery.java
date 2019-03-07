@@ -56,6 +56,9 @@ public class Brewery extends JavaPlugin {
 	public static boolean loadwakeup;
 	public static boolean loadplayers;
 	public static boolean newrecipes;
+	
+	//Effects
+	public static double effectLevel;
 
 	// Listeners
 	public BlockListener blockListener;
@@ -297,6 +300,7 @@ public class Brewery extends JavaPlugin {
 		loadwakeup = currentConfig.getBoolean("loadwakeup", true);
 		loadplayers = currentConfig.getBoolean("loadplayers", true);
 		newrecipes = currentConfig.getBoolean("newrecipes", true);
+		//Player
 		BPlayer.pukeItem = Material.matchMaterial(currentConfig.getString("pukeItem", "SOUL_SAND"));
 		BPlayer.hangoverTime = currentConfig.getInt("hangoverDays", 0) * 24 * 60;
 		BPlayer.overdrinkKick = currentConfig.getBoolean("enableKickOnOverdrink", false);
@@ -309,6 +313,10 @@ public class Brewery extends JavaPlugin {
 		
 		//difficulty settings
 		Barrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
+		Distiller.DEFAULT_CYCLE_LENGTH = currentConfig.getInt("distillcycle", 40);
+		
+		//Effects
+		effectLevel = currentConfig.getDouble("effectLevel", 0.35);
 		
 		// loading drainItems
 		List<String> drainList = currentConfig.getStringList("drainItems");
