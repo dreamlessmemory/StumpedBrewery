@@ -153,7 +153,7 @@ public class PlayerListener implements Listener {
 				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
 				if(breweryMessage.getResult()) {
 					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
-					new DistillerRunnable(Distiller.DEFAULT_CYCLE_LENGTH, distiller).runTaskTimer(Brewery.breweryDriver, 20, 20);
+					Distiller.runningDistillers.put(distiller, new DistillerRunnable(Distiller.DEFAULT_CYCLE_LENGTH, distiller).runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
 				}
 			}
 		}

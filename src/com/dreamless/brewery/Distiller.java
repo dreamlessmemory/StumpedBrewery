@@ -1,9 +1,11 @@
 package com.dreamless.brewery;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -29,6 +31,8 @@ import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 public class Distiller implements InventoryHolder {
 	
 	public static ArrayList<Distiller> distillers = new ArrayList<Distiller>();
+	public static HashMap<Distiller, Integer> runningDistillers = new HashMap<Distiller, Integer>();
+	
 	private static final int FILTER_LIMT = 9;
 	public static int DEFAULT_CYCLE_LENGTH = 40;
 	
@@ -90,6 +94,7 @@ public class Distiller implements InventoryHolder {
 			//ruin brew if distilling
 			if(distiller.distilling) {
 				distiller.ruinPotions();
+				Bukkit.getScheduler().cancelTask(runningDistillers.get(distiller));
 			}
 		}
 	}
@@ -199,7 +204,7 @@ public class Distiller implements InventoryHolder {
 		if(!result) {
 			return new BreweryMessage(false, Brewery.getText("Distiller_No_Brews"));
 		} else {
-			distilling = true;
+			distilling = true;			
 			return new BreweryMessage(true, Brewery.getText("Distiller_Started"));
 		}
 	}
