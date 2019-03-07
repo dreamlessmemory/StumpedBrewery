@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -177,7 +178,7 @@ public class Distiller implements InventoryHolder {
 			if(item != null) {
 				NBTItem nbti = new NBTItem(item);
 				
-				if(nbti.hasKey("brewery") && !nbti.getCompound("brewery").hasKey("distilled")) {
+				if(nbti.hasKey("brewery") && !nbti.getCompound("brewery").hasKey("distilled") && !nbti.getCompound("brewery").hasKey("ruined")) {
 					result = true;
 					
 					//Tag as distilling brew
@@ -250,9 +251,15 @@ public class Distiller implements InventoryHolder {
 				brewingInventory.setItem(i, item);
 			}
 		}
+		//Set Hologram
 		filterLine.setItemStack(new ItemStack(Material.POTION));
 		statusLine.setText("Brews distilled.");
 		secondStatusLine.setText("Remove brews");
+		
+		//Effects
+		//Sound and particle effects
+		block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		block.getWorld().playSound(block.getLocation(), Sound.ITEM_BOTTLE_FILL, (float)(Math.random()/8) + 0.1f, (float)(Math.random()/2) + 0.75f);
 	}
 	
 	
@@ -290,6 +297,13 @@ public class Distiller implements InventoryHolder {
 			potionMeta.clearCustomEffects();
 			
 			item.setItemMeta(potionMeta);
+			
+			//Set NBT
+			NBTItem nbti = new NBTItem(item);
+			
+			//Tag as distilling brew
+			NBTCompound brewery = nbti.getCompound("brewery");
+			brewery.setBoolean("ruined", true);
 			
 			brewingInventory.setItem(i, item);	
 		}
@@ -336,6 +350,11 @@ public class Distiller implements InventoryHolder {
 		
 		@Override
 		public void run() {
+			//Bubble effects
+			distiller.block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, distiller.block.getLocation().getX() + 0.5, distiller.block.getLocation().getY() + 1.5, distiller.block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15, 0.05);
+			distiller.block.getWorld().playSound(distiller.block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, (float)(Math.random()/8) + 0.1f, (float)(Math.random() * 1.5) + 0.5f);
+			
+			
 			if(++currentTime < cycleLength) {
 				//Update Hologram
 				distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
