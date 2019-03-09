@@ -166,7 +166,7 @@ public class Distiller implements InventoryHolder {
 	
 	private void ejectItem(ItemStack item) {
 		if(item != null && item.getType() != Material.AIR)
-		block.getWorld().dropItem(block.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
+		block.getWorld().dropItemNaturally(block.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
     	block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 	}
 	//Distilling Handling

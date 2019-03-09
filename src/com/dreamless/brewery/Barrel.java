@@ -138,13 +138,13 @@ public class Barrel implements InventoryHolder {
 			if(item == null) continue;
 			NBTItem nbti = new NBTItem(item);
 			if(!nbti.hasKey("brewery")) {//eject if not a brewery item
-				spigot.getWorld().dropItem(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
+				spigot.getWorld().dropItemNaturally(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
 				inventory.remove(item);
 				continue;
 			} else { 
 				NBTCompound brewery = nbti.getCompound("brewery");
 				if(brewery.hasKey("aged") ||  brewery.hasKey("ruined")) {//eject if aged already
-					spigot.getWorld().dropItem(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
+					spigot.getWorld().dropItemNaturally(spigot.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
 					inventory.remove(item);
 					continue;
 				}
@@ -481,10 +481,10 @@ public class Barrel implements InventoryHolder {
 					// "broken" is the block that destroyed, throw them there!
 					item = BRecipe.revealMaskedBrew(item);
 					if (broken != null) {
-						broken.getWorld().dropItem(broken.getLocation().add(0.5, 0.5, 0.5), item);
+						broken.getWorld().dropItemNaturally(broken.getLocation().add(0.5, 0.5, 0.5), item);
 						broken.getWorld().playSound(broken.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 					} else {
-						spigot.getWorld().dropItem(spigot.getLocation().add(0.5, 0.5, 0.5), item);
+						spigot.getWorld().dropItemNaturally(spigot.getLocation().add(0.5, 0.5, 0.5), item);
 						spigot.getWorld().playSound(spigot.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
 					}
 					inventory.remove(item);
