@@ -300,7 +300,7 @@ public class BCauldron {
 			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Heat"));
 		}
 		
-		if(up != Material.AIR && up != Material.SIGN) {
+		if(up != Material.AIR) {
 			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Space_Above"));
 		}
 		

@@ -72,7 +72,7 @@
 		<dependency>
            <groupId>org.spigotmc</groupId>
            <artifactId>spigot-api</artifactId>
-           <version>1.13.2-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
+           <version>1.14.1-R0.1-SNAPSHOT</version><!--change this value depending on the version-->
            <type>jar</type>
            <scope>provided</scope>
         </dependency>
@@ -114,23 +114,4 @@
     		<scope>provided</scope>
 		</dependency>
 	</dependencies>
-	<plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-            <execution>
-                <id>copy-dependencies</id>
-                <phase>install</phase>
-                <goals>
-                    <goal>copy-dependencies</goal>
-                </goals>
-                <configuration>
-                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                    <overWriteReleases>false</overWriteReleases>
-                    <overWriteSnapshots>false</overWriteSnapshots>
-                    <overWriteIfNewer>true</overWriteIfNewer>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin> 
 </project>

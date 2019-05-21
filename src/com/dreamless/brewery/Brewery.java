@@ -610,8 +610,18 @@ public class Brewery extends JavaPlugin {
 				barrel.remove(null, player);
 			}
 			return true;
-		case SIGN:
-		case WALL_SIGN:
+		case OAK_SIGN:
+		case OAK_WALL_SIGN:
+		case DARK_OAK_SIGN:
+		case DARK_OAK_WALL_SIGN:
+		case BIRCH_SIGN:
+		case BIRCH_WALL_SIGN:
+		case ACACIA_SIGN:
+		case ACACIA_WALL_SIGN:
+		case JUNGLE_SIGN:
+		case JUNGLE_WALL_SIGN:
+		case SPRUCE_SIGN:
+		case SPRUCE_WALL_SIGN:
 			// remove small Barrels
 			Barrel barrel2 = Barrel.getBySpigot(block);
 			if (barrel2 != null) {

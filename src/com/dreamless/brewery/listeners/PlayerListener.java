@@ -175,7 +175,7 @@ public class PlayerListener implements Listener {
 					break;
 				}
 			}
-		} else if (Barrel.isFence(type) || type == Material.SIGN || type == Material.WALL_SIGN) {
+		} else if (Barrel.isFence(type) || Barrel.isSign(block)) {
 			barrel = Barrel.getBySpigot(block);
 		}
 		
