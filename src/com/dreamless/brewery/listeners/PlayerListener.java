@@ -17,7 +17,8 @@ import org.bukkit.inventory.ItemStack;
 import com.dreamless.brewery.*;
 import com.dreamless.brewery.Distiller.DistillerRunnable;
 import com.dreamless.brewery.utils.BreweryMessage;
-import com.dreamless.brewery.utils.NBTItem;
+
+import de.tr7zw.itemnbtapi.NBTItem;
 
 public class PlayerListener implements Listener {
 	public static boolean openEverywhere;

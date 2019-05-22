@@ -14,7 +14,8 @@ import com.dreamless.brewery.BPlayer;
 import com.dreamless.brewery.BRecipe;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.Wakeup;
-import com.dreamless.brewery.utils.NBTItem;
+
+import de.tr7zw.itemnbtapi.NBTItem;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

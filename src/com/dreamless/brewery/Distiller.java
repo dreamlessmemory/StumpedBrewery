@@ -21,12 +21,13 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.utils.BreweryMessage;
-import com.dreamless.brewery.utils.NBTCompound;
-import com.dreamless.brewery.utils.NBTItem;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.gmail.filoghost.holographicdisplays.api.line.ItemLine;
 import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
+
+import de.tr7zw.itemnbtapi.NBTCompound;
+import de.tr7zw.itemnbtapi.NBTItem;
 
 public class Distiller implements InventoryHolder {
 	

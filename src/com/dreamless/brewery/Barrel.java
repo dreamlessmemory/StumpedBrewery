@@ -24,10 +24,11 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
-import com.dreamless.brewery.utils.NBTCompound;
-import com.dreamless.brewery.utils.NBTItem;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+
+import de.tr7zw.itemnbtapi.NBTCompound;
+import de.tr7zw.itemnbtapi.NBTItem;
 
 import org.apache.commons.lang.ArrayUtils;
 

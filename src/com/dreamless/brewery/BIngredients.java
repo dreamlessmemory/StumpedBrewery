@@ -15,6 +15,9 @@ import org.bukkit.potion.PotionEffect;
 import com.dreamless.brewery.Aspect.AspectRarity;
 import com.dreamless.brewery.utils.*;
 
+import de.tr7zw.itemnbtapi.NBTCompound;
+import de.tr7zw.itemnbtapi.NBTItem;
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

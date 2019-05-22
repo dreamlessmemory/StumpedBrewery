@@ -113,5 +113,10 @@
     		<version>2.3.2</version>
     		<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.github.tr7zw</groupId>
+			<artifactId>Item-NBT-API</artifactId>
+			<version>-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 </project>
