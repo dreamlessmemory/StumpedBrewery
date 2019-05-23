@@ -53,9 +53,6 @@ public class Barrel implements InventoryHolder {
 	public Barrel(Block spigot, byte signoffset) {
 		this.spigot = spigot;
 		this.signoffset = signoffset;
-
-		createHologram(spigot);
-		updateHologram();
 	}
 
 	public Barrel(Block spigot, byte sign, int[] woodsloc, int[] stairsloc, String inventory, float time,
@@ -470,6 +467,8 @@ public class Barrel implements InventoryHolder {
 						return false;
 					}
 				}
+				barrel.createHologram(spigot);
+				barrel.updateHologram();
 				barrels.add(barrel);
 				return true;
 			}
