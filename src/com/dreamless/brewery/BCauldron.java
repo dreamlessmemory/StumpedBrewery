@@ -296,7 +296,7 @@ public class BCauldron {
 		Material down = block.getRelative(BlockFace.DOWN).getType();
 		Material up = block.getRelative(BlockFace.UP).getType();
 		
-		if(down != Material.FIRE && down != Material.LAVA && down != Material.MAGMA_BLOCK) {
+		if(down != Material.FIRE && down != Material.LAVA && down != Material.MAGMA_BLOCK && down != Material.CAMPFIRE) {
 			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Heat"));
 		}
 		
