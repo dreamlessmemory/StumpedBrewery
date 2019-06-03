@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.recipe;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,8 @@ import java.util.Random;
 
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+
+import com.dreamless.brewery.Brewery;
 
 public class BEffect {
 

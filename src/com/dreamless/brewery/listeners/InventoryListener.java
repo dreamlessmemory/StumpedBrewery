@@ -9,6 +9,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.InventoryHolder;
 import com.dreamless.brewery.*;
+import com.dreamless.brewery.entity.BIngredients;
+import com.dreamless.brewery.entity.BreweryBarrel;
+import com.dreamless.brewery.entity.Distiller;
+import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.utils.BreweryMessage;
 
 public class InventoryListener implements Listener {
@@ -31,13 +35,13 @@ public class InventoryListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryBarrelOpen(InventoryClickEvent event) {
-		if (!(event.getView().getTopInventory().getHolder() instanceof Barrel)) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryBarrel)) {
 			return;
 		}
 		Brewery.breweryDriver.debugLog("Barrel click open");
-		Barrel barrel = (Barrel) event.getView().getTopInventory().getHolder();
+		BreweryBarrel barrel = (BreweryBarrel) event.getView().getTopInventory().getHolder();
 		if(barrel.isAging()) {
-			if(event.isShiftClick() || (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof Barrel)) {
+			if(event.isShiftClick() || (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof BreweryBarrel)) {
 				event.setCancelled(true);
 				event.setResult(Result.DENY);
 				Brewery.breweryDriver.debugLog("barrel cancelled interaction");
@@ -62,11 +66,11 @@ public class InventoryListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryBarrelDrag(InventoryDragEvent event) {
-		if (!(event.getView().getTopInventory().getHolder() instanceof Barrel)) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryBarrel)) {
 			return;
 		}
 		Brewery.breweryDriver.debugLog("barrel drag open");
-		Barrel barrel = (Barrel) event.getView().getTopInventory().getHolder();
+		BreweryBarrel barrel = (BreweryBarrel) event.getView().getTopInventory().getHolder();
 		if(barrel.isAging()) {
 			event.setCancelled(true);
 			event.setResult(Result.DENY);
@@ -107,7 +111,7 @@ public class InventoryListener implements Listener {
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
 		InventoryHolder holder = event.getInventory().getHolder();
-		if (holder instanceof Barrel) {
+		if (holder instanceof BreweryBarrel) {
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 		} else if (holder instanceof BrewingStand) {
 			Distiller distiller = Distiller.get(((BrewingStand)holder).getBlock());

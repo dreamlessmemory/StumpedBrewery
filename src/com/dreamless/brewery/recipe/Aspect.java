@@ -1,9 +1,11 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.recipe;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.bukkit.Material;
+
+import com.dreamless.brewery.Brewery;
 
 public class Aspect implements Comparable<Object> {
 	//Static Numbers for balancing

@@ -10,10 +10,10 @@ import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.dreamless.brewery.BPlayer;
-import com.dreamless.brewery.BRecipe;
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.Wakeup;
+import com.dreamless.brewery.entity.BRecipe;
+import com.dreamless.brewery.player.BPlayer;
+import com.dreamless.brewery.player.Wakeup;
 
 import de.tr7zw.itemnbtapi.NBTItem;
 

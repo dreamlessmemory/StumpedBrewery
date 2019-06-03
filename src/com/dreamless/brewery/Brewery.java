@@ -35,8 +35,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.dreamless.brewery.entity.BIngredients;
+import com.dreamless.brewery.entity.BRecipe;
+import com.dreamless.brewery.entity.BreweryBarrel;
+import com.dreamless.brewery.entity.BreweryBarrelRecipe;
+import com.dreamless.brewery.entity.Cauldron;
+import com.dreamless.brewery.entity.Distiller;
 import com.dreamless.brewery.filedata.*;
 import com.dreamless.brewery.listeners.*;
+import com.dreamless.brewery.player.BPlayer;
+import com.dreamless.brewery.player.Wakeup;
+import com.dreamless.brewery.player.Words;
+import com.dreamless.brewery.recipe.Aspect;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.Connection;
@@ -165,6 +175,8 @@ public class Brewery extends JavaPlugin {
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000
 
+		BreweryBarrelRecipe.registerRecipes();
+		
 		this.log(this.getDescription().getName() + " enabled!");
 	}
 
@@ -189,8 +201,8 @@ public class Brewery extends JavaPlugin {
 		languageReader.save();
 
 		// delete Data from Ram
-		Barrel.barrels.clear();
-		BCauldron.bcauldrons.clear();
+		BreweryBarrel.barrels.clear();
+		Cauldron.bcauldrons.clear();
 		//BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		BPlayer.clear();
@@ -312,7 +324,7 @@ public class Brewery extends JavaPlugin {
 		PlayerListener.openEverywhere = currentConfig.getBoolean("openLargeBarrelEverywhere", false);
 		
 		//difficulty settings
-		Barrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
+		BreweryBarrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
 		Distiller.DEFAULT_CYCLE_LENGTH = currentConfig.getInt("distillcycle", 40);
 		
 		//Effects
@@ -422,7 +434,7 @@ public class Brewery extends JavaPlugin {
 				//lastCook
 				long lastCook = result.getLong("lastCook");
 							
-				new BCauldron(worldBlock, ingredients, state, cooking, lastCook);
+				new Cauldron(worldBlock, ingredients, state, cooking, lastCook);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -434,40 +446,23 @@ public class Brewery extends JavaPlugin {
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(barrelQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
-				String resultString;
 				//spigot
 				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
 				debugLog(locationMap.toString());
 				Block worldBlock = (Location.deserialize(locationMap).getBlock());
 				debugLog(worldBlock.toString());
-				
-				//Wood
-				int[] woodsLoc = null;
-				resultString = result.getString("woodsloc");
-				if(resultString != null) {
-					woodsLoc = gson.fromJson(resultString, int[].class);
-				}
-				
-				//Stairs
-				int[] stairsLoc = null;
-				resultString = result.getString("stairsloc");
-				if(resultString != null) {
-					stairsLoc = gson.fromJson(resultString, int[].class);
-				}
-			
-				//Sign
-				byte signoffset = result.getByte("signoffset");
-			
+
+
 				//Inventory
 				String inventory = result.getString("inventory");
 
 				//Time
 				float time = result.getFloat("time");
 				
-				//Aging,
+				//Aging
 				boolean aging = result.getBoolean("aging");
 				
-				new Barrel(worldBlock, signoffset, woodsLoc, stairsLoc, inventory, time, aging);
+				//new BreweryBarrel(worldBlock, time, aging);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -589,65 +584,6 @@ public class Brewery extends JavaPlugin {
 		}
 	}
 
-	// Returns true if the Block can be destroyed by the Player or something else (null)
-	public boolean blockDestroy(Block block, Player player) {
-		switch (block.getType()) {
-		case CAULDRON:
-			// will only remove when existing
-			BCauldron.remove(block);
-			return true;
-		case OAK_FENCE:
-		case NETHER_BRICK_FENCE:
-		case ACACIA_FENCE:
-		case BIRCH_FENCE:
-		case DARK_OAK_FENCE:
-		case IRON_BARS:
-		case JUNGLE_FENCE:
-		case SPRUCE_FENCE:
-			// remove barrel and throw potions on the ground
-			Barrel barrel = Barrel.getBySpigot(block);
-			if (barrel != null) {
-				barrel.remove(null, player);
-			}
-			return true;
-		case OAK_SIGN:
-		case OAK_WALL_SIGN:
-		case DARK_OAK_SIGN:
-		case DARK_OAK_WALL_SIGN:
-		case BIRCH_SIGN:
-		case BIRCH_WALL_SIGN:
-		case ACACIA_SIGN:
-		case ACACIA_WALL_SIGN:
-		case JUNGLE_SIGN:
-		case JUNGLE_WALL_SIGN:
-		case SPRUCE_SIGN:
-		case SPRUCE_WALL_SIGN:
-			// remove small Barrels
-			Barrel barrel2 = Barrel.getBySpigot(block);
-			if (barrel2 != null) {
-				if (!barrel2.isLarge()) {
-						barrel2.remove(null, player);
-				} else {
-					barrel2.destroySign();
-				}
-			}
-			return true;
-		case OAK_PLANKS:
-		case OAK_STAIRS:
-		case BIRCH_STAIRS:
-		case JUNGLE_STAIRS:
-		case SPRUCE_STAIRS:
-		case ACACIA_STAIRS:
-		case DARK_OAK_STAIRS:
-			Barrel barrel3 = Barrel.getByWood(block);
-			if (barrel3 != null) {
-					barrel3.remove(block, player);
-			}
-		default:
-			break;
-		}
-		return true;
-	}
 
 	public String color(String msg) {
 		if (msg != null) {
@@ -725,7 +661,7 @@ public class Brewery extends JavaPlugin {
 		@Override
 		public void run() {
 			reloader = null;
-			Barrel.onUpdate();// runs every min to check and update ageing time
+			BreweryBarrel.onUpdate();// runs every min to check and update ageing time
 			BPlayer.onUpdate();// updates players drunkeness
 
 			debugLog("Update");
@@ -739,7 +675,7 @@ public class Brewery extends JavaPlugin {
 		@Override
 		public void run() {
 			//reloader = null;
-			for (BCauldron cauldron : BCauldron.bcauldrons) {
+			for (Cauldron cauldron : Cauldron.bcauldrons) {
 				cauldron.onUpdate();// runs every second
 			}
 		}

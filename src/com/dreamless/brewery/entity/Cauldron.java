@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.entity;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -17,13 +17,14 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 
-public class BCauldron {
-	public static CopyOnWriteArrayList<BCauldron> bcauldrons = new CopyOnWriteArrayList<BCauldron>();
+public class Cauldron {
+	public static CopyOnWriteArrayList<Cauldron> bcauldrons = new CopyOnWriteArrayList<Cauldron>();
 
 	private BIngredients ingredients = new BIngredients();
 	private Block block;
@@ -32,14 +33,14 @@ public class BCauldron {
 	private long lastCook = 0;
 	private Hologram hologram;
 	
-	public BCauldron(Block block) {
+	public Cauldron(Block block) {
 		this.block = block;
 		cooking = false;
 		bcauldrons.add(this);
 	}
 
 	// loading from file
-	public BCauldron(Block block, BIngredients ingredients, int state, boolean cooking, long lastCook) {
+	public Cauldron(Block block, BIngredients ingredients, int state, boolean cooking, long lastCook) {
 		this.block = block;
 		this.state = state;
 		this.ingredients = ingredients;
@@ -108,8 +109,8 @@ public class BCauldron {
 	}
 
 	// get cauldron by Block
-	public static BCauldron get(Block block) {
-		for (BCauldron bcauldron : bcauldrons) {
+	public static Cauldron get(Block block) {
+		for (Cauldron bcauldron : bcauldrons) {
 			if (bcauldron.block.equals(block)) {
 				return bcauldron;
 			}
@@ -120,7 +121,7 @@ public class BCauldron {
 
 	// fills players bottle with cooked brew
 	public static boolean fill(Player player, Block block) {
-		BCauldron bcauldron = get(block);
+		Cauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (!player.hasPermission("brewery.cauldron.fill")) {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronFill"));
@@ -174,7 +175,7 @@ public class BCauldron {
 			Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoPermissions"));
 			return;
 		}
-		BCauldron bcauldron = get(block);
+		Cauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (bcauldron.state > 1) {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo2", Integer.toString(bcauldron.state)));
@@ -187,10 +188,10 @@ public class BCauldron {
 	}
 	
 	public static Inventory getInventory(Block block) {
-		BCauldron bcauldron = get(block);
+		Cauldron bcauldron = get(block);
 		if (bcauldron == null) {
 			if(getFillLevel(block) > 1) {
-				bcauldron = new BCauldron(block);
+				bcauldron = new Cauldron(block);
 			} else {
 				return null;
 			}
@@ -200,7 +201,7 @@ public class BCauldron {
 	
 	// reset to normal cauldron
 	public static void remove(Block block) {
-		BCauldron bcauldron = get(block);
+		Cauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if(!bcauldron.cooking) {
 				bcauldron.ingredients.dumpContents(block);
@@ -215,7 +216,7 @@ public class BCauldron {
 	// unloads cauldrons that are in a unloading world
 	// as they were written to file just before, this is safe to do
 	public static void onUnload(String name) {
-		for (BCauldron bcauldron : bcauldrons) {
+		for (Cauldron bcauldron : bcauldrons) {
 			if (bcauldron.block.getWorld().getName().equals(name)) {
 				bcauldrons.remove(bcauldron);
 			}
@@ -225,7 +226,7 @@ public class BCauldron {
 	public static void save() {
 		int id = 0;
 		if (!bcauldrons.isEmpty()) {
-			for (BCauldron cauldron : bcauldrons) {
+			for (Cauldron cauldron : bcauldrons) {
 				Brewery.breweryDriver.debugLog("CAULDRON");
 				if(((Levelled)cauldron.block.getBlockData()).getLevel() < 1) {
 					Brewery.breweryDriver.debugLog("Skipping saving, empty");
@@ -339,7 +340,7 @@ public class BCauldron {
 	}
 	
 	public static boolean isCooking(Block block) {
-		BCauldron bcauldron = get(block);
+		Cauldron bcauldron = get(block);
 		if(bcauldron != null) {
 			return bcauldron.cooking;
 		} else {
@@ -348,7 +349,7 @@ public class BCauldron {
 	}
 
 	public static BreweryMessage startCooking(Block block, Player player) {
-		BCauldron bcauldron = get(block);
+		Cauldron bcauldron = get(block);
 		if(bcauldron!= null) {
 			BreweryMessage spaceCheck = bcauldron.fireAndAirInPlace();
 			

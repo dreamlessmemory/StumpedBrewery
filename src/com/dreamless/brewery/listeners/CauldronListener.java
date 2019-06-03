@@ -5,7 +5,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.CauldronLevelChangeEvent;
 
-import com.dreamless.brewery.BCauldron;
+import com.dreamless.brewery.entity.Cauldron;
 
 public class CauldronListener implements Listener {
 
@@ -15,9 +15,9 @@ public class CauldronListener implements Listener {
 			if (event.getReason() == CauldronLevelChangeEvent.ChangeReason.BOTTLE_FILL) {
 				return;
 			}
-			BCauldron.remove(event.getBlock());
+			Cauldron.remove(event.getBlock());
 		} else if (event.getNewLevel() == 3 && event.getOldLevel() != 3) {
-			BCauldron.remove(event.getBlock());
+			Cauldron.remove(event.getBlock());
 		}
 	}
 }

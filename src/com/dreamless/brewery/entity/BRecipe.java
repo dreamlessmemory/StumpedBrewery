@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.entity;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,6 +13,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.ChatPaginator;
 
+import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.recipe.Aspect;
+import com.dreamless.brewery.recipe.BEffect;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import de.tr7zw.itemnbtapi.NBTCompound;

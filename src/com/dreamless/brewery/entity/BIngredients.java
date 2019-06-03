@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.entity;
 
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -12,7 +12,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 
-import com.dreamless.brewery.Aspect.AspectRarity;
+import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.recipe.Aspect;
+import com.dreamless.brewery.recipe.BEffect;
+import com.dreamless.brewery.recipe.Aspect.AspectRarity;
 import com.dreamless.brewery.utils.*;
 
 import de.tr7zw.itemnbtapi.NBTCompound;

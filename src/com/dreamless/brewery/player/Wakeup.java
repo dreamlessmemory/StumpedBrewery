@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.player;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -8,6 +8,8 @@ import java.util.Iterator;
 import org.bukkit.command.CommandSender;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+
+import com.dreamless.brewery.Brewery;
 
 public class Wakeup {
 

@@ -1,8 +1,10 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.player;
 
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+
+import com.dreamless.brewery.Brewery;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.recipe;
 
 import java.util.Comparator;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.dreamless.brewery;
+package com.dreamless.brewery.player;
 
 import org.apache.commons.lang.mutable.MutableInt;
 import org.bukkit.Bukkit;
@@ -12,6 +12,9 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+
+import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.entity.BRecipe;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
