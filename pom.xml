@@ -40,6 +40,29 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
+			<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <id>shade</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <createDependencyReducedPom>false</createDependencyReducedPom>
+          <relocations>
+            <relocation>
+              <pattern>de.tr7zw.changeme.nbtapi</pattern>
+              <shadedPattern>com.dreamless.brewery.nbtapi</shadedPattern>
+            </relocation>
+          </relocations>
+        </configuration>
+      </plugin>
 		</plugins>
 	</build>
 	<repositories>
@@ -60,8 +83,8 @@
 			<url>http://nexus.hc.to/content/repositories/pub_releases</url>
 		</repository>
 		<repository>
- 			<id>filoghost-repo</id>
-  			<url>https://ci.filoghost.me/plugin/repository/everything/</url>
+    		<id>codemc-repo</id>
+    		<url>https://repo.codemc.org/repository/maven-public/</url>
 		</repository>
 		<repository>
 		    <id>jitpack.io</id>
@@ -112,11 +135,6 @@
     		<artifactId>holographicdisplays-api</artifactId>
     		<version>2.3.2</version>
     		<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.github.tr7zw</groupId>
-			<artifactId>Item-NBT-API</artifactId>
-			<version>-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>

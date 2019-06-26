@@ -6,20 +6,18 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.Distiller;
 import com.dreamless.brewery.entity.BreweryBarrel.BarrelType;
+import com.dreamless.brewery.entity.Distiller;
 
-import de.tr7zw.itemnbtapi.NBTCompound;
-import de.tr7zw.itemnbtapi.NBTItem;
-import de.tr7zw.itemnbtapi.NBTTileEntity;
-
-import org.bukkit.event.block.BlockBreakEvent;
+import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BlockListener implements Listener {
 	

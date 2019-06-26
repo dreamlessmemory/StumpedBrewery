@@ -1,12 +1,14 @@
-name: ${project.name}
-version: ${project.version}
-main: com.dre.brewery.P
-authors: [Milan Albrecht, Frank Baumann, ProgrammerDan]
-softdepend: [LWC, LogBlock, WorldGuard, GriefPrevention, Vault]
+name: StumpedBrewery
+version: 5.0.0-Alpha
+description: Create various beverages through a database-driven system 
+main: com.dreamless.brewery.Brewery
+api-version: 1.13
+authors: [Milan Albrecht, Frank Baumann, ProgrammerDan, Sumire Kobayashi]
+depend: [HolographicDisplays]
 commands:
   brewery:
     description: Command for Administration
-    aliases: [brew]
+    aliases: [brew, brewery]
 permissions:
 # -- Groups --
 # User
@@ -20,6 +22,7 @@ permissions:
       brewery.cauldron.time: true
       brewery.cauldron.insert: true
       brewery.cauldron.fill: true
+      brewery.cmd.claim: true
 # Mod
   brewery.mod:
     description: Allow to maintain Wakeup Points and to login even if overdrunken
@@ -43,6 +46,7 @@ permissions:
       brewery.cmd.persist: true
       brewery.cmd.static: true
       brewery.cmd.reload: true
+      brewery.cmd.purge: true
 # *
   brewery.*:
     description: Gives Access to every Permission, including bypasses and overrides
@@ -74,6 +78,10 @@ permissions:
     description: Make Potions Static
   brewery.cmd.reload:
     description: Reload config
+  brewery.cmd.claim:
+    description: Claim, relinquish, or add flavortext to a recipe
+  brewery.cmd.purge:
+    description: 
 
 # -- Barrel --
   brewery.createbarrel:

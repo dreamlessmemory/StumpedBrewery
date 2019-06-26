@@ -7,6 +7,12 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
@@ -15,14 +21,7 @@ import com.dreamless.brewery.entity.BRecipe;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 
-import de.tr7zw.itemnbtapi.NBTItem;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
+import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class CommandListener implements CommandExecutor {
 
