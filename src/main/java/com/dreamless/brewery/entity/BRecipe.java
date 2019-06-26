@@ -30,6 +30,9 @@ import com.dreamless.brewery.recipe.Aspect;
 import com.dreamless.brewery.recipe.BEffect;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
+import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTItem;
+
 public class BRecipe {
 	
 	
