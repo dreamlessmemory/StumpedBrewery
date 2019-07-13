@@ -6,9 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.lang.WordUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -21,6 +19,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.scheduler.BukkitTask;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.recipe.Aspect;
 import com.dreamless.brewery.recipe.Aspect.AspectRarity;
@@ -33,25 +32,27 @@ import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BreweryCauldron implements InventoryHolder {
-	public static CopyOnWriteArrayList<BreweryCauldron> bcauldrons = new CopyOnWriteArrayList<BreweryCauldron>();
+	private static CopyOnWriteArrayList<BreweryCauldron> bcauldrons = new CopyOnWriteArrayList<BreweryCauldron>();
+	private static HashMap<BreweryCauldron, BukkitTask> taskMap = new HashMap<>();
 
-	//private BIngredients ingredients = new BIngredients();
+	// private BIngredients ingredients = new BIngredients();
 	private Block block;
-	private int state = 0;
+	private int minutesCooked = 0;
 	private boolean cooking = false;
-	private long lastCook = 0;
+	private byte secondsCooked = 0;
 	private Hologram hologram;
 
 	// Ingredients
-
 	private Inventory inventory;
 	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
 	private String type;
-	// private boolean cooking = false;
-	private String coreIngredient = "";
-	private String adjunctIngredient = "";
-	private int coreAmount = 0;
-	private int adjunctAmount = 0;
+	//private ItemStack coreIngredient;
+	//private ItemStack adjunctIngredient;
+
+	// private String coreIngredient = "";
+	// private String adjunctIngredient = "";
+	// private int coreAmount = 0;
+	// private int adjunctAmount = 0;
 
 	public BreweryCauldron(Block block) {
 		this.block = block;
@@ -60,19 +61,18 @@ public class BreweryCauldron implements InventoryHolder {
 	}
 
 	// loading from file
-	public BreweryCauldron(Block block, int state, boolean cooking, long lastCook,
-			String inventoryString, HashMap<String, Aspect> aspects) {
+	public BreweryCauldron(Block block, int minutesCooked, byte secondsCooked, boolean cooking, String inventoryString,
+			HashMap<String, Aspect> aspects) {
 		this.block = block;
-		this.state = state;
-		//this.ingredients = ingredients;
+		this.minutesCooked = minutesCooked;
+		// this.ingredients = ingredients;
 		this.cooking = cooking;
-		this.lastCook = lastCook;
-		
-		
+		this.secondsCooked = secondsCooked;
+
 		this.aspectMap = aspects;
 		this.cooking = cooking;
-				
-		//Initialize Inventory
+
+		// Initialize Inventory
 		try {
 			inventory = BreweryUtils.fromBase64(inventoryString, this);
 		} catch (IOException e) {
@@ -80,77 +80,24 @@ public class BreweryCauldron implements InventoryHolder {
 			Brewery.breweryDriver.debugLog("Error creating inventory for a cauldron");
 			e.printStackTrace();
 		}
-		
-		//Initialize
-		determineCoreAndAdjunct(inventory.getContents());
-		
-		// Add to list
+
+		// Initialize
+		//determineCoreAndAdjunct(inventory.getContents());
+
+		// Add to lists
 		bcauldrons.add(this);
-		
+		if (cooking) {
+			BukkitTask task = Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
+					new BreweryCauldronRunnable(this), 0, 20);
+			taskMap.put(this, task);
+		}
+
 		// Start Hologram
 		if (hologram == null) {
 			createHologram(block);
 		}
-		updateHologram(type, state);
+		updateHologram();
 
-	}
-
-	public void onUpdate() {// UPDATE THE POTION
-		// Check if fire still alive
-		if ((!block.getChunk().isLoaded() || fireAndAirInPlace().getResult()) && cooking) {
-
-			if (getFillLevel(block) == 0) {// remove yourself if empty
-				remove(block);
-				return;
-			}
-
-			// Check if a minute has passed
-			long currentTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-			// Brewery.breweryDriver.debugLog("Second tick = " + currentTime);
-			if ((currentTime - lastCook) > 60) {
-				// Update cook time
-				lastCook = currentTime;
-
-				// add a minute to cooking time
-				state++;
-
-				// Sound and particle effects
-				block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5,
-						block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE,
-						(float) (Math.random() / 8) + 0.1f, (float) (Math.random() / 2) + 0.75f);
-
-				// Run aspect calculation
-				//ingredients.fermentOneStep(state);
-
-				// Update Sign
-				updateHologram(type, state);
-
-			} else {
-				// Bubble effects
-				if (Math.random() > Brewery.effectLevel) {
-					block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation().getX() + 0.5,
-							block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15,
-							0.05);
-					block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW,
-							(float) (Math.random() / 8) + 0.1f, (float) (Math.random() * 1.5) + 0.5f);
-				}
-			}
-		} else { // no fire, stop cooking
-			if (isCooking()) {
-				setCooking(false);
-				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 2.0f, 1.0f);
-				hologram.appendTextLine("Fermentation stopped");
-			}
-		}
-	}
-
-	public boolean isCooking() {
-		return cooking;
-	}
-
-	public void setCooking(boolean cooking) {
-		this.cooking = cooking;
 	}
 
 	// get cauldron by Block
@@ -171,7 +118,7 @@ public class BreweryCauldron implements InventoryHolder {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronFill"));
 				return true;
 			}
-			ItemStack potion = bcauldron.finishFermentation(bcauldron.state, player);
+			ItemStack potion = bcauldron.finishFermentation(bcauldron.minutesCooked, player);
 
 			if (potion != null) {
 
@@ -221,10 +168,10 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 		BreweryCauldron bcauldron = get(block);
 		if (bcauldron != null) {
-			if (bcauldron.state > 1) {
+			if (bcauldron.minutesCooked > 1) {
 				Brewery.breweryDriver.msg(player,
-						Brewery.getText("Player_CauldronInfo2", Integer.toString(bcauldron.state)));
-			} else if (bcauldron.state == 1) {
+						Brewery.getText("Player_CauldronInfo2", Integer.toString(bcauldron.minutesCooked)));
+			} else if (bcauldron.minutesCooked == 1) {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo1"));
 			} else {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo0"));
@@ -249,7 +196,7 @@ public class BreweryCauldron implements InventoryHolder {
 		BreweryCauldron bcauldron = get(block);
 		if (bcauldron != null) {
 			if (!bcauldron.cooking) {
-				bcauldron.dumpContents(block);
+				bcauldron.dumpContents();
 			}
 			bcauldrons.remove(bcauldron);
 
@@ -301,9 +248,9 @@ public class BreweryCauldron implements InventoryHolder {
 					stmt.setString(2, location);
 					stmt.setString(3, jsonInventory);
 					stmt.setString(4, aspects);
-					stmt.setInt(5, cauldron.state);
+					stmt.setInt(5, cauldron.minutesCooked);
 					stmt.setBoolean(6, cauldron.cooking);
-					stmt.setLong(7, cauldron.lastCook);
+					stmt.setLong(7, cauldron.secondsCooked);
 
 					Brewery.breweryDriver.debugLog(stmt.toString());
 
@@ -337,6 +284,104 @@ public class BreweryCauldron implements InventoryHolder {
 	 * player.getInventory().addItem(item); } }, 1L); }
 	 */
 
+	public static boolean isCooking(Block block) {
+		BreweryCauldron bcauldron = get(block);
+		if (bcauldron != null) {
+			return bcauldron.cooking;
+		} else {
+			return false;
+		}
+	}
+
+	public static BreweryMessage startCooking(Block block, Player player) {
+		BreweryCauldron bcauldron = get(block);
+		if (bcauldron != null) {
+			BreweryMessage spaceCheck = bcauldron.fireAndAirInPlace();
+
+			if (!spaceCheck.getResult()) {
+				return spaceCheck;
+			}
+
+			if (bcauldron.isEmpty()) {
+				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Ingredients"));
+			}
+
+			BreweryMessage result = bcauldron.startCooking();
+			// Set cook time
+			if (result.getResult()) {
+				// Set time
+				// bcauldron.lastCook =
+				// TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+
+				// Create hologram
+				if (bcauldron.hologram == null) {
+					bcauldron.createHologram(block);
+				}
+				bcauldron.updateHologram();
+			}
+			return result;
+		}
+		return new BreweryMessage(false, Brewery.getText("Fermentation_No_Cauldron"));
+	}
+	
+	public static void onDisable() {
+		bcauldrons.clear();
+	}
+
+	public boolean isCooking() {
+		return cooking;
+	}
+
+	public void onUpdate() {// UPDATE THE POTION
+		// Check if fire still alive
+		if ((!block.getChunk().isLoaded() || fireAndAirInPlace().getResult()) && cooking) {
+
+			if (getFillLevel(block) == 0) {// remove yourself if empty
+				remove(block);
+				return;
+			}
+
+			// Update Sign
+			updateHologram();
+
+			++secondsCooked;
+			if (secondsCooked >= 60) {
+				// Update cook time
+				secondsCooked = 0;
+				// add a minute to cooking time
+				minutesCooked++;
+
+				// Sound and particle effects
+				block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5,
+						block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE,
+						(float) (Math.random() / 8) + 0.1f, (float) (Math.random() / 2) + 0.75f);
+
+			} else {
+				// Bubble effects
+				if (Math.random() > Brewery.effectLevel) {
+					block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation().getX() + 0.5,
+							block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15,
+							0.05);
+					block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW,
+							(float) (Math.random() / 8) + 0.1f, (float) (Math.random() * 1.5) + 0.5f);
+				}
+			}
+		} else { // no fire, stop cooking
+			if (cooking) {
+				cooking = false;
+				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 2.0f, 1.0f);
+				updateHologram();
+				hologram.appendTextLine("Fermentation stopped");
+			}
+		}
+	}
+
+	@Override
+	public Inventory getInventory() {
+		return inventory;
+	}
+
 	private BreweryMessage fireAndAirInPlace() {
 
 		Material down = block.getRelative(BlockFace.DOWN).getType();
@@ -362,73 +407,59 @@ public class BreweryCauldron implements InventoryHolder {
 		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
 	}
 
-	private void updateHologram(String type, int time) {
-		String message;
+	private void updateHologram() {
+		hologram.clearLines();
+
+		// Time
+		hologram.appendTextLine(minutesCooked + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
+
+		// Status
 		if (cooking) {
-			switch (time) {
-			case 0:
-				message = "Starting brewing...";
-				break;
-			case 1:
-				message = "1 minute";
-				break;
-			default:
-				message = time + " minutes";
-				break;
+			hologram.appendTextLine("Cooking...");
+		}
+		if (fireAndAirInPlace().getResult()) {
+			if (isEmpty()) {
+				hologram.appendTextLine("Empty...");
+			} else {
+				hologram.appendTextLine("Ready...");
 			}
-		} else {
-			message = "Awaiting start";
 		}
 
-		hologram.clearLines();
-		if (cooking)
-			hologram.appendTextLine(WordUtils.capitalize(type.toLowerCase()));
-		hologram.appendTextLine(message);
 	}
-	
-	private void determineCoreAndAdjunct(ItemStack[] contents) {
-		if(contents[0] != null) {
-			coreIngredient = contents[0].getType().name();
-			coreAmount = contents[0].getAmount();
-			if(contents[1] != null) {
-				adjunctIngredient = contents[1].getType().name();
-				adjunctAmount = contents[1].getAmount();
-			} else {
-				adjunctIngredient = "";
-				adjunctAmount = 0;
+
+	private void dumpContents() {
+		for (ItemStack item : inventory.getContents()) {
+			if (item != null) {
+				dumpItem(item);
+				inventory.remove(item);
 			}
-		} else {
-			coreIngredient = "";
-			coreAmount = 0;
-			adjunctIngredient = "";
-			adjunctAmount = 0;
 		}
 	}
-	
-	private void dumpContents(Block block) {
-		for(ItemStack item : inventory.getContents())	{
-		    if(item != null) {
-		    	block.getWorld().dropItemNaturally(block.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
-		    	block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
-		    	inventory.remove(item);
-		    }
+
+	private void dumpItem(ItemStack item) {
+		if (item != null) {
+			block.getWorld().dropItemNaturally(block.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), item);
+			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP,
+					(float) (Math.random() / 2) + 0.75f, (float) (Math.random() / 2) + 0.75f);
 		}
 	}
-	
+
 	private HashMap<String, Aspect> getAspects() {
 		return aspectMap;
 	}
-	
+
 	private boolean isEmpty() {
-		for(ItemStack it : inventory.getContents())	{
-		    if(it != null) return false;
+		for (ItemStack it : inventory.getContents()) {
+			if (it != null)
+				return false;
 		}
 		return true;
 	}
-	
-	private boolean acceptableIngredient(Material material) {
+
+	private boolean isAnAccceptableIngredient(Material material) {
 		// SQL
-		String query = "SELECT EXISTS(SELECT 1 FROM " + Brewery.getDatabase(null) + "ingredients WHERE name='" + material.name() + "')";
+		String query = "SELECT EXISTS(SELECT 1 FROM " + Brewery.getDatabase(null) + "ingredients WHERE name='"
+				+ material.name() + "')";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			ResultSet results;
 			results = stmt.executeQuery();
@@ -442,8 +473,9 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 		return false;
 	}
+
 	private boolean usesBucket(ItemStack item) {
-		switch(item.getType()) {
+		switch (item.getType()) {
 		case LAVA_BUCKET:
 		case MILK_BUCKET:
 		case WATER_BUCKET:
@@ -452,12 +484,12 @@ public class BreweryCauldron implements InventoryHolder {
 			return false;
 		}
 	}
-	
-	private void add(ItemStack ingredient) {
+
+	private void addIngredient(ItemStack ingredient) {
 		// SQL
 		String aspectQuery = "name, aspect1name, aspect1rating, aspect2name, aspect2rating, aspect3name, aspect3rating";
 		String query = "SELECT " + aspectQuery + " FROM " + Brewery.getDatabase(null) + "ingredients WHERE name=?";
-		
+
 		// Aspect multipliers
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 			stmt.setString(1, ingredient.getType().name());
@@ -466,16 +498,19 @@ public class BreweryCauldron implements InventoryHolder {
 			if (!results.next()) {
 				Brewery.breweryDriver.debugLog("Failed to poll SQL");
 			} else {// Successful Pull
-				for(int i = 1; i <=3; i++) {
-					String name = results.getString("aspect"+i+"name");
-					if(name == null) continue;
+				for (int i = 1; i <= 3; i++) {
+					String name = results.getString("aspect" + i + "name");
+					if (name == null)
+						continue;
 					Aspect aspect = aspectMap.get(name);
 					int multiplier = ingredient.getAmount();
-					AspectRarity values = Aspect.getRarityValues(results.getInt("aspect"+i+"rating"));
+					AspectRarity values = Aspect.getRarityValues(results.getInt("aspect" + i + "rating"));
 					if (aspect != null) {// aspect is found
-						aspect.setValues(values.getPotency() * multiplier + aspect.getPotency(), values.getSaturation() * multiplier + aspect.getSaturation());
+						aspect.setValues(values.getPotency() * multiplier + aspect.getPotency(),
+								values.getSaturation() * multiplier + aspect.getSaturation());
 					} else {
-						aspectMap.put(name, new Aspect(values.getPotency() * multiplier, values.getSaturation() * multiplier));
+						aspectMap.put(name,
+								new Aspect(values.getPotency() * multiplier, values.getSaturation() * multiplier));
 					}
 				}
 			}
@@ -483,24 +518,25 @@ public class BreweryCauldron implements InventoryHolder {
 			e1.printStackTrace();
 		}
 	}
-	
-	private String queryForType(String primary, int primaryAmount, String secondary, int secondaryAmount, int time){
+
+	private String queryForType(String primary, int primaryAmount, String secondary, int secondaryAmount, int time) {
 		String result = null;
-		String query = "SELECT type FROM " + Brewery.getDatabase("brewtypes") + "brewtypes WHERE core=? AND adjunct=? GROUP BY type "
+		String query = "SELECT type FROM " + Brewery.getDatabase("brewtypes")
+				+ "brewtypes WHERE core=? AND adjunct=? GROUP BY type "
 				+ "HAVING MAX(coreamount) <= ? AND MAX(adjunctamount) <= ? AND MAX(time) <=? "
 				+ "ORDER BY time DESC LIMIT 1";
-		
+
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
-			//Set values
+			// Set values
 			stmt.setString(1, primary);
 			stmt.setString(2, secondary);
 			stmt.setInt(3, primaryAmount);
 			stmt.setInt(4, secondaryAmount);
 			stmt.setInt(5, time);
-			
+
 			Brewery.breweryDriver.debugLog(stmt.toString());
-			
-			//Retrieve results
+
+			// Retrieve results
 			ResultSet results;
 			results = stmt.executeQuery();
 			if (results.next()) {
@@ -509,63 +545,82 @@ public class BreweryCauldron implements InventoryHolder {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		
+
 		return result;
 	}
-	
-	private void calculateType(int time) {
-		String result = queryForType(coreIngredient, coreAmount, adjunctIngredient, adjunctAmount, time);
+
+	// TODO: Null checks on core and adjunct
+	private void calculateType() {
+		//determineCoreAndAdjunct(inventory.getContents());
 		
-		if(result != null) {//There is a secondary
+		ItemStack coreIngredient = inventory.getItem(0);
+		ItemStack adjunctIngredient = inventory.getItem(1);
+		
+		
+		String result = queryForType(coreIngredient.getType().name(), coreIngredient.getAmount(),
+				adjunctIngredient.getType().name(), adjunctIngredient.getAmount(), minutesCooked);
+
+		if (result != null) {// There is a secondary
 			type = result;
 		} else {
-			result = queryForType(coreIngredient, 1, "", 0, 0);
-			if(result == null) {
+			result = queryForType(coreIngredient.getType().name(), 1, "", 0, 0);
+			if (result == null) {
 				type = "ELIXR";
 			} else {
 				type = result;
 			}
 		}
-		
+
 		Brewery.breweryDriver.debugLog("Resultant brew: " + type);
 	}
-	
+
 	private ItemStack finishFermentation(int state, Player player) {
+
+		// Stop Task timer
+		taskMap.get(this).cancel();
+
+		// Get type
+		calculateType();
+		
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
 		// Calculate activation and effective potency
-		//HashMap<String, Double> calculatedActivation = calculateActivation();
-		//HashMap<String, Double> calculatedEffectivePotency = calculateEffectivePotency(calculatedActivation);
-		//selectAspects(calculatedActivation, calculatedEffectivePotency);
-		
+		// HashMap<String, Double> calculatedActivation = calculateActivation();
+		// HashMap<String, Double> calculatedEffectivePotency =
+		// calculateEffectivePotency(calculatedActivation);
+		// selectAspects(calculatedActivation, calculatedEffectivePotency);
+
 		// Add custom potion effects based on effect aspects
-		//ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String, Double>(calculatedEffectivePotency), 100, 100);
-		//for (PotionEffect effect : effects) {
-		//	potionMeta.addCustomEffect(effect, true);
-		//}
+		// ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String,
+		// Double>(calculatedEffectivePotency), 100, 100);
+		// for (PotionEffect effect : effects) {
+		// potionMeta.addCustomEffect(effect, true);
+		// }
 
 		// Recipe
-		//BRecipe recipe = BRecipe.getRecipe(player, type, calculatedEffectivePotency, false, false, 100, 100);
-		//potionMeta.setDisplayName(recipe.getName());
-		//ArrayList<String> craftersList = new ArrayList<String>();
-		//craftersList.add(player.getDisplayName());
-		//potionMeta.setLore(recipe.getFlavorText(craftersList));
-		//potionMeta.setColor(BRecipe.getColor(type));
+		// BRecipe recipe = BRecipe.getRecipe(player, type, calculatedEffectivePotency,
+		// false, false, 100, 100);
+		// potionMeta.setDisplayName(recipe.getName());
+		// ArrayList<String> craftersList = new ArrayList<String>();
+		// craftersList.add(player.getDisplayName());
+		// potionMeta.setLore(recipe.getFlavorText(craftersList));
+		// potionMeta.setColor(BRecipe.getColor(type));
 
 		potion.setItemMeta(potionMeta);
 
 		// Custom NBT Setup
 		NBTItem nbti = new NBTItem(potion);
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); // All brewery NBT gets set here.
-		
-		// Aspects
-		//NBTCompound aspectTagList = breweryMeta.addCompound("aspectsBase");
-		//NBTCompound aspectActList = breweryMeta.addCompound("aspectsActivation");
-		//for(Entry<String, Double> entry: calculatedActivation.entrySet()) {
-		//	aspectTagList.setDouble(entry.getKey(), aspectMap.get(entry.getKey()).getCookedBase());
-		//	aspectActList.setDouble(entry.getKey(), entry.getValue());
-		//}
+
+		// TODO: Assign aspects
+		// NBTCompound aspectTagList = breweryMeta.addCompound("aspectsBase");
+		// NBTCompound aspectActList = breweryMeta.addCompound("aspectsActivation");
+		// for(Entry<String, Double> entry: calculatedActivation.entrySet()) {
+		// aspectTagList.setDouble(entry.getKey(),
+		// aspectMap.get(entry.getKey()).getCookedBase());
+		// aspectActList.setDouble(entry.getKey(), entry.getValue());
+		// }
 
 		// Multipliers
 		breweryMeta.setInteger("potency", 100);
@@ -577,98 +632,64 @@ public class BreweryCauldron implements InventoryHolder {
 		// Crafter
 		NBTCompound crafters = breweryMeta.addCompound("crafters");
 		crafters.setString(player.getDisplayName(), player.getDisplayName());
-		
-		//Finish writing NBT
+
+		// Finish writing NBT
 		potion = nbti.getItem();
 
 		return potion;
 	}
-	
-	public BreweryMessage startCooking(Block block) {
+
+	private BreweryMessage startCooking() {
 		ItemStack[] contents = inventory.getContents();
-		for(int i = 0; i < contents.length; i++) {
+		for (int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
-			if(item != null) {
-		    	if(acceptableIngredient(item.getType())) {
-		    		if(usesBucket(item)) {
-		    			block.getWorld().dropItemNaturally(block.getRelative(BlockFace.UP).getLocation().add(0.5, 0, 0.5), new ItemStack(Material.BUCKET));
-		    			block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP, (float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
-		    		}
-		    		add(item);
-		    	} else {//eject
-		    		block.getWorld().dropItemNaturally(block.getRelative(BlockFace.UP).getLocation(), item);
-		    		block.getWorld().playSound(block.getLocation(), Sound.ENTITY_ITEM_PICKUP,(float)(Math.random()/2) + 0.75f, (float)(Math.random()/2) + 0.75f);
-		    		//inventory.remove(item);
-		    		contents[i] = null;
-		    	}
-		    }
+			if (item != null) {
+				if (isAnAccceptableIngredient(item.getType())) {
+					if (usesBucket(item)) {
+						dumpItem(new ItemStack(Material.BUCKET));
+					}
+					addIngredient(item);
+				} else {// eject
+					dumpItem(item);
+					contents[i] = null;
+				}
+			}
 		}
-		
+
 		inventory.setContents(contents);
-		
-		//Check if empty
-		//if(inventory.isEmpty()) {
-		if(isEmpty()) {
+
+		// Check if empty
+		// if(inventory.isEmpty()) {
+		if (isEmpty()) {
 			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Ingredients"));
 		}
-		
-		//Set Feedback effects
-		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-		
-		//Manage parameters 
-		setCooking(true);
-		determineCoreAndAdjunct(contents);
-		
-		//Calculate type
-		calculateType(0);
-		
-		//Return
+
+		// Set Feedback effects
+		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5,
+				block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+
+		// Manage parameters
+		cooking = true;
+		//determineCoreAndAdjunct(contents);
+
+		// Calculate type
+		//calculateType(0);
+
+		// Return
 		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting") + type.toLowerCase() + ".");
 	}
 
-	public static boolean isCooking(Block block) {
-		BreweryCauldron bcauldron = get(block);
-		if (bcauldron != null) {
-			return bcauldron.cooking;
-		} else {
-			return false;
+	public class BreweryCauldronRunnable implements Runnable {
+
+		private BreweryCauldron cauldron;
+
+		public BreweryCauldronRunnable(BreweryCauldron cauldron) {
+			this.cauldron = cauldron;
 		}
-	}
 
-	public static BreweryMessage startCooking(Block block, Player player) {
-		BreweryCauldron bcauldron = get(block);
-		if (bcauldron != null) {
-			BreweryMessage spaceCheck = bcauldron.fireAndAirInPlace();
-
-			if (!spaceCheck.getResult()) {
-				return spaceCheck;
-			}
-
-			if (bcauldron.isEmpty()) {
-				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Ingredients"));
-			}
-
-			BreweryMessage result = bcauldron.startCooking(block);
-			bcauldron.cooking = result.getResult();
-			// Set cook time
-			if (result.getResult()) {
-				// Set time
-				bcauldron.lastCook = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-
-				// Create hologram
-				if (bcauldron.hologram == null) {
-					bcauldron.createHologram(block);
-				}
-				bcauldron.updateHologram(WordUtils.capitalize(bcauldron.type.toLowerCase()),
-						bcauldron.state);
-			}
-			return result;
+		@Override
+		public void run() {
+			cauldron.onUpdate();
 		}
-		return new BreweryMessage(false, Brewery.getText("Fermentation_No_Cauldron"));
-	}
-
-	@Override
-	public Inventory getInventory() {
-		return inventory;
 	}
 }

@@ -178,7 +178,7 @@ public class Brewery extends JavaPlugin {
 
 		// Heartbeat
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
-		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new CauldronRunnable(), 120, 20);
+		//breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new CauldronRunnable(), 120, 20);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000
 
@@ -209,7 +209,7 @@ public class Brewery extends JavaPlugin {
 
 		// delete Data from Ram
 		BreweryBarrel.barrels.clear();
-		BreweryCauldron.bcauldrons.clear();
+		BreweryCauldron.onDisable();
 		//BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		BPlayer.clear();
@@ -439,9 +439,9 @@ public class Brewery extends JavaPlugin {
 				//BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);
 				
 				//lastCook
-				long lastCook = result.getLong("lastCook");
+				byte lastCook = result.getByte("lastCook");
 							
-				new BreweryCauldron(worldBlock, state, cooking, lastCook, inventory, aspects);
+				new BreweryCauldron(worldBlock, state, lastCook, cooking, inventory, aspects);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -677,7 +677,7 @@ public class Brewery extends JavaPlugin {
 		}
 
 	}
-	
+	/**
 	public class CauldronRunnable implements Runnable {
 		@Override
 		public void run() {
@@ -687,7 +687,7 @@ public class Brewery extends JavaPlugin {
 			}
 		}
 
-	}
+	}*/
 	
 	public class RecipeRunnable implements Runnable {
 		@Override
