@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.WorldUnloadEvent;
 
 import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.Cauldron;
+import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.filedata.DataSave;
 
 public class WorldListener implements Listener {
@@ -15,7 +15,7 @@ public class WorldListener implements Listener {
 	public void onWorldUnload(WorldUnloadEvent event) {
 		DataSave.save();
 		BreweryBarrel.onUnload(event.getWorld().getName());
-		Cauldron.onUnload(event.getWorld().getName());
+		BreweryCauldron.onUnload(event.getWorld().getName());
 	}
 
 }

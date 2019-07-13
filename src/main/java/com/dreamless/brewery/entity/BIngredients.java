@@ -53,13 +53,13 @@ public class BIngredients implements InventoryHolder{
 		this.cooking = cooking;
 				
 		//Initialize Inventory
-		try {
-			inventory = BreweryUtils.fromBase64(inventoryString, this);
-		} catch (IOException e) {
-			inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
-			Brewery.breweryDriver.debugLog("Error creating inventory for a cauldron");
-			e.printStackTrace();
-		}
+		//try {
+		//	inventory = BreweryUtils.fromBase64(inventoryString, this);
+		//} catch (IOException e) {
+		//	inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
+		//	Brewery.breweryDriver.debugLog("Error creating inventory for a cauldron");
+		//	e.printStackTrace();
+		//}
 		
 		//Initialize
 		determineCoreAndAdjunct(inventory.getContents());

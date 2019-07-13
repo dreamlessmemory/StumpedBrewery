@@ -25,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.Cauldron;
+import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.Distiller;
 import com.dreamless.brewery.entity.Distiller.DistillerRunnable;
 import com.dreamless.brewery.player.BPlayer;
@@ -71,13 +71,13 @@ public class PlayerListener implements Listener {
 		if (materialInHand == null) {
 			return;
 		} else if (materialInHand == Material.BUCKET) {
-			Cauldron.remove(clickedBlock);
+			BreweryCauldron.remove(clickedBlock);
 			return;
 		} else if (materialInHand == Material.CLOCK) {
-			if (Cauldron.isCooking(clickedBlock)) {// Print time if cooking
-				Cauldron.printTime(player, clickedBlock);
+			if (BreweryCauldron.isCooking(clickedBlock)) {// Print time if cooking
+				BreweryCauldron.printTime(player, clickedBlock);
 			} else if (((Levelled) clickedBlock.getBlockData()).getLevel() > 0) {
-				BreweryMessage result = Cauldron.startCooking(clickedBlock, player);
+				BreweryMessage result = BreweryCauldron.startCooking(clickedBlock, player);
 				if (result.getResult()) {// Start cooking
 					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED,
 							1.0f, 1.0f);
@@ -87,7 +87,7 @@ public class PlayerListener implements Listener {
 			return;
 		} else if (materialInHand == Material.IRON_SHOVEL) {// Interact with inventory
 			if (player.hasPermission("brewery.cauldron.insert")) {
-				Inventory inventory = Cauldron.getInventory(clickedBlock);
+				Inventory inventory = BreweryCauldron.getInventory(clickedBlock);
 				if (inventory != null) {
 					player.openInventory(inventory);
 				}
@@ -97,8 +97,8 @@ public class PlayerListener implements Listener {
 			// player.openInventory(BCauldron.getInventory(clickedBlock));
 			return;
 		} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
-			if (Cauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
-				if (Cauldron.fill(player, clickedBlock)) {
+			if (BreweryCauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
+				if (BreweryCauldron.fill(player, clickedBlock)) {
 					event.setCancelled(true);
 					if (player.hasPermission("brewery.cauldron.fill")) {
 						if (item.getAmount() > 1) {
@@ -113,9 +113,9 @@ public class PlayerListener implements Listener {
 			}
 		} else if (materialInHand == Material.WATER_BUCKET) { // reset cauldron when refilling to prevent unlimited
 																// source of potions
-			if (Cauldron.getFillLevel(clickedBlock) != 0 && Cauldron.getFillLevel(clickedBlock) < 2) {
+			if (BreweryCauldron.getFillLevel(clickedBlock) != 0 && BreweryCauldron.getFillLevel(clickedBlock) < 2) {
 				// will only remove when existing
-				Cauldron.remove(clickedBlock);
+				BreweryCauldron.remove(clickedBlock);
 			}
 		}
 	}

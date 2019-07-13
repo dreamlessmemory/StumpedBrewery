@@ -14,6 +14,7 @@ import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import com.dreamless.brewery.entity.BIngredients;
+import com.dreamless.brewery.entity.BreweryCauldron;
 
 public final class BreweryUtils {
     
@@ -40,11 +41,11 @@ public final class BreweryUtils {
         }        
     }
     
-    public static Inventory fromBase64(String data, BIngredients ingredients) throws IOException {
+    public static Inventory fromBase64(String data, BreweryCauldron cauldron) throws IOException {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-            Inventory inventory = Bukkit.getServer().createInventory(ingredients, dataInput.readInt(), "Brewery Cauldron");
+            Inventory inventory = Bukkit.getServer().createInventory(cauldron, dataInput.readInt(), "Brewery Cauldron");
     
             // Read the serialized inventory
             for (int i = 0; i < inventory.getSize(); i++) {

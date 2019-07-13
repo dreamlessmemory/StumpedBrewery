@@ -39,7 +39,7 @@ import com.dreamless.brewery.entity.BIngredients;
 import com.dreamless.brewery.entity.BRecipe;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryBarrelRecipe;
-import com.dreamless.brewery.entity.Cauldron;
+import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.Distiller;
 import com.dreamless.brewery.filedata.DataSave;
 import com.dreamless.brewery.filedata.LanguageReader;
@@ -209,7 +209,7 @@ public class Brewery extends JavaPlugin {
 
 		// delete Data from Ram
 		BreweryBarrel.barrels.clear();
-		Cauldron.bcauldrons.clear();
+		BreweryCauldron.bcauldrons.clear();
 		//BRecipe.recipes.clear();
 		//BIngredients.cookedNames.clear();
 		BPlayer.clear();
@@ -436,12 +436,12 @@ public class Brewery extends JavaPlugin {
 				//Ingredients
 				String inventory = result.getString("contents");
 				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
-				BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);
+				//BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);
 				
 				//lastCook
 				long lastCook = result.getLong("lastCook");
 							
-				new Cauldron(worldBlock, ingredients, state, cooking, lastCook);
+				new BreweryCauldron(worldBlock, state, cooking, lastCook, inventory, aspects);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -682,7 +682,7 @@ public class Brewery extends JavaPlugin {
 		@Override
 		public void run() {
 			//reloader = null;
-			for (Cauldron cauldron : Cauldron.bcauldrons) {
+			for (BreweryCauldron cauldron : BreweryCauldron.bcauldrons) {
 				cauldron.onUpdate();// runs every second
 			}
 		}

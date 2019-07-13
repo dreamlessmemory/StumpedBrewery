@@ -15,6 +15,7 @@ import org.bukkit.inventory.InventoryHolder;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.entity.BIngredients;
 import com.dreamless.brewery.entity.BreweryBarrel;
+import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.Distiller;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.utils.BreweryMessage;
@@ -23,13 +24,13 @@ public class InventoryListener implements Listener {
 		
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronOpen(InventoryClickEvent event) {
-		if (!(event.getView().getTopInventory().getHolder() instanceof BIngredients)) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryCauldron)) {
 			return;
 		}
 		Brewery.breweryDriver.debugLog("Cauldron click open");
-		BIngredients ingredients = (BIngredients) event.getView().getTopInventory().getHolder();
+		BreweryCauldron ingredients = (BreweryCauldron) event.getView().getTopInventory().getHolder();
 		if(ingredients.isCooking()) {
-			if(event.isShiftClick() || (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof BIngredients)) {
+			if(event.isShiftClick() || (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof BreweryCauldron)) {
 				event.setCancelled(true);
 				event.setResult(Result.DENY);
 				Brewery.breweryDriver.debugLog("Cauldron cancelled interaction");
@@ -56,11 +57,11 @@ public class InventoryListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronDrag(InventoryDragEvent event) {
-		if (!(event.getView().getTopInventory().getHolder() instanceof BIngredients)) {
+		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryCauldron)) {
 			return;
 		}
 		Brewery.breweryDriver.debugLog("Cauldron drag open");
-		BIngredients ingredients = (BIngredients) event.getView().getTopInventory().getHolder();
+		BreweryCauldron ingredients = (BreweryCauldron) event.getView().getTopInventory().getHolder();
 		if(ingredients.isCooking()) {
 			event.setCancelled(true);
 			event.setResult(Result.DENY);
