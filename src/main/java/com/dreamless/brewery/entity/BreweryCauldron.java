@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitTask;
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.filedata.DatabaseCache;
 import com.dreamless.brewery.recipe.AspectOld;
 import com.dreamless.brewery.recipe.AspectOld.AspectRarity;
 import com.dreamless.brewery.utils.BreweryMessage;
@@ -456,24 +457,6 @@ public class BreweryCauldron implements InventoryHolder {
 		return true;
 	}
 
-	private boolean isAnAccceptableIngredient(Material material) {
-		// SQL
-		String query = "SELECT EXISTS(SELECT 1 FROM " + Brewery.getDatabase(null) + "ingredients WHERE name='"
-				+ material.name() + "')";
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
-			ResultSet results;
-			results = stmt.executeQuery();
-			if (!results.next()) {
-				return false;
-			} else {
-				return results.getInt(1) == 1;
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		return false;
-	}
-
 	private boolean usesBucket(ItemStack item) {
 		switch (item.getType()) {
 		case LAVA_BUCKET:
@@ -644,7 +627,7 @@ public class BreweryCauldron implements InventoryHolder {
 		for (int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
 			if (item != null) {
-				if (isAnAccceptableIngredient(item.getType())) {
+				if (DatabaseCache.containsIngredient(item.getType())) {
 					if (usesBucket(item)) {
 						dumpItem(new ItemStack(Material.BUCKET));
 					}
