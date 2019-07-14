@@ -21,8 +21,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitTask;
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.Aspect;
-import com.dreamless.brewery.recipe.Aspect.AspectRarity;
+import com.dreamless.brewery.recipe.AspectOld;
+import com.dreamless.brewery.recipe.AspectOld.AspectRarity;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
@@ -44,7 +44,7 @@ public class BreweryCauldron implements InventoryHolder {
 
 	// Ingredients
 	private Inventory inventory;
-	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
+	private HashMap<String, AspectOld> aspectMap = new HashMap<String, AspectOld>();
 	private String type;
 	//private ItemStack coreIngredient;
 	//private ItemStack adjunctIngredient;
@@ -62,7 +62,7 @@ public class BreweryCauldron implements InventoryHolder {
 
 	// loading from file
 	public BreweryCauldron(Block block, int minutesCooked, byte secondsCooked, boolean cooking, String inventoryString,
-			HashMap<String, Aspect> aspects) {
+			HashMap<String, AspectOld> aspects) {
 		this.block = block;
 		this.minutesCooked = minutesCooked;
 		// this.ingredients = ingredients;
@@ -444,7 +444,7 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 	}
 
-	private HashMap<String, Aspect> getAspects() {
+	private HashMap<String, AspectOld> getAspects() {
 		return aspectMap;
 	}
 
@@ -502,15 +502,15 @@ public class BreweryCauldron implements InventoryHolder {
 					String name = results.getString("aspect" + i + "name");
 					if (name == null)
 						continue;
-					Aspect aspect = aspectMap.get(name);
+					AspectOld aspect = aspectMap.get(name);
 					int multiplier = ingredient.getAmount();
-					AspectRarity values = Aspect.getRarityValues(results.getInt("aspect" + i + "rating"));
+					AspectRarity values = AspectOld.getRarityValues(results.getInt("aspect" + i + "rating"));
 					if (aspect != null) {// aspect is found
 						aspect.setValues(values.getPotency() * multiplier + aspect.getPotency(),
 								values.getSaturation() * multiplier + aspect.getSaturation());
 					} else {
 						aspectMap.put(name,
-								new Aspect(values.getPotency() * multiplier, values.getSaturation() * multiplier));
+								new AspectOld(values.getPotency() * multiplier, values.getSaturation() * multiplier));
 					}
 				}
 			}

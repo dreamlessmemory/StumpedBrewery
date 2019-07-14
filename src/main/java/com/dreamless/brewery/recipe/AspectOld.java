@@ -8,7 +8,7 @@ import org.bukkit.Material;
 
 import com.dreamless.brewery.Brewery;
 
-public class Aspect implements Comparable<Object> {
+public class AspectOld implements Comparable<Object> {
 	//Static Numbers for balancing
 	public static double commonPotency = 4;
 	public static double rarePotency = 24;
@@ -22,7 +22,7 @@ public class Aspect implements Comparable<Object> {
 	private double saturation = 0.0;
 	private double activation = 0.0;
 	
-	public Aspect (double potency, double saturation) {
+	public AspectOld (double potency, double saturation) {
 		this.potency = potency;
 		this.saturation = saturation;
 	}
@@ -112,7 +112,7 @@ public class Aspect implements Comparable<Object> {
 	
 	@Override
 	public int compareTo(Object arg0) {
-		double difference = this.potency - ((Aspect)arg0).getPotency();
+		double difference = this.potency - ((AspectOld)arg0).getPotency();
 		if(difference > 0) {
 			return 1; 
 		} else if (difference < 0) {

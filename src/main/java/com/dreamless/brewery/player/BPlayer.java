@@ -26,7 +26,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.entity.BRecipe;
+import com.dreamless.brewery.recipe.BRecipe;
 
 public class BPlayer {
 	private static Map<String, BPlayer> players = new HashMap<String, BPlayer>();// Players name/uuid and BPlayer

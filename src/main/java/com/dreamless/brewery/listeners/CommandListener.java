@@ -17,9 +17,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.entity.BRecipe;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
+import com.dreamless.brewery.recipe.BRecipe;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
 

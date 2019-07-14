@@ -1,4 +1,4 @@
-package com.dreamless.brewery.entity;
+package com.dreamless.brewery.recipe;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,8 +26,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.ChatPaginator;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.Aspect;
-import com.dreamless.brewery.recipe.BEffect;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
@@ -386,7 +384,7 @@ public class BRecipe {
 		Set<String> aspects = aspectBaseList.getKeys();
 		HashMap <String, Double> maskedAspects = new HashMap<String, Double>();
 		for(String currentAspect : aspects) {
-			double effectiveRating = aspectBaseList.getDouble(currentAspect) * Aspect.getEffectiveActivation(currentAspect, aspectActivationList.getDouble(currentAspect) * 100, brewery.getString("type"));
+			double effectiveRating = aspectBaseList.getDouble(currentAspect) * AspectOld.getEffectiveActivation(currentAspect, aspectActivationList.getDouble(currentAspect) * 100, brewery.getString("type"));
 			if(currentAspect.contains("_POTENCY")) {
 				effectiveRating *= (brewery.getInteger("potency")/100);
 			} else if (currentAspect.contains("_DURATION")) {

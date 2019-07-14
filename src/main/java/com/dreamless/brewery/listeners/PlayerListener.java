@@ -26,8 +26,8 @@ import org.bukkit.inventory.ItemStack;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
-import com.dreamless.brewery.entity.Distiller;
-import com.dreamless.brewery.entity.Distiller.DistillerRunnable;
+import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.entity.BreweryDistiller.DistillerRunnable;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
@@ -159,7 +159,7 @@ public class PlayerListener implements Listener {
 		Block clickedBlock = event.getClickedBlock();
 		Material materialInHand = event.getMaterial();
 
-		Distiller distiller = Distiller.get(clickedBlock);
+		BreweryDistiller distiller = BreweryDistiller.get(clickedBlock);
 
 		// Cancel interaction if distilling
 		if (distiller != null && distiller.isDistilling()) {
@@ -171,7 +171,7 @@ public class PlayerListener implements Listener {
 			// TODO: Brewer's tool
 			event.setCancelled(true);
 			if (distiller == null) {// Add a new one
-				distiller = new Distiller(clickedBlock);
+				distiller = new BreweryDistiller(clickedBlock);
 			}
 
 			player.openInventory(distiller.getInventory());
@@ -182,8 +182,8 @@ public class PlayerListener implements Listener {
 				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
 				if (breweryMessage.getResult()) {
 					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
-					Distiller.runningDistillers.put(distiller,
-							new DistillerRunnable(Distiller.DEFAULT_CYCLE_LENGTH, distiller)
+					BreweryDistiller.runningDistillers.put(distiller,
+							new DistillerRunnable(BreweryDistiller.DEFAULT_CYCLE_LENGTH, distiller)
 									.runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
 				}
 			}

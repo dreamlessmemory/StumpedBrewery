@@ -21,7 +21,8 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.Aspect;
+import com.dreamless.brewery.recipe.AspectOld;
+import com.dreamless.brewery.recipe.BRecipe;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
@@ -31,10 +32,10 @@ import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
-public class Distiller implements InventoryHolder {
+public class BreweryDistiller implements InventoryHolder {
 	
-	public static ArrayList<Distiller> distillers = new ArrayList<Distiller>();
-	public static HashMap<Distiller, Integer> runningDistillers = new HashMap<Distiller, Integer>();
+	public static ArrayList<BreweryDistiller> distillers = new ArrayList<BreweryDistiller>();
+	public static HashMap<BreweryDistiller, Integer> runningDistillers = new HashMap<BreweryDistiller, Integer>();
 	
 	private static final int FILTER_LIMT = 9;
 	public static int DEFAULT_CYCLE_LENGTH = 40;
@@ -52,7 +53,7 @@ public class Distiller implements InventoryHolder {
 	private TextLine secondStatusLine;
 
 
-	public Distiller(Block block) {
+	public BreweryDistiller(Block block) {
 		this.block = block;
 		
 		//Initialize Inventory
@@ -70,8 +71,8 @@ public class Distiller implements InventoryHolder {
 	
 	
 	//Static methods
-	public static Distiller get(Block block) {
-		for (Distiller distiller : distillers) {
+	public static BreweryDistiller get(Block block) {
+		for (BreweryDistiller distiller : distillers) {
 			if (distiller.block.equals(block)) {
 				return distiller;
 			}
@@ -79,12 +80,12 @@ public class Distiller implements InventoryHolder {
 		return null;
 	}
 	
-	public static void add(Distiller distiller) {
+	public static void add(BreweryDistiller distiller) {
 		distillers.add(distiller);
 	}
 	
 	public static void remove(Block block) {
-		Distiller distiller = get(block);
+		BreweryDistiller distiller = get(block);
 		if (distiller != null) {
 			for(ItemStack item: distiller.filterInventory) {
 				distiller.ejectItem(item);
@@ -239,7 +240,7 @@ public class Distiller implements InventoryHolder {
 		
 		for(String currentAspect : aspects) {
 			double aspectPotency = aspectList.getDouble(currentAspect);
-			double newPotency = Aspect.processFilter(currentAspect, brewery.getString("type"), aspectPotency, filter);
+			double newPotency = AspectOld.processFilter(currentAspect, brewery.getString("type"), aspectPotency, filter);
 			Brewery.breweryDriver.debugLog("Update Potency of " + currentAspect + ": " + aspectPotency + " -> " + newPotency);
 			//Update NBT
 			aspectList.setDouble(currentAspect, newPotency);
@@ -348,9 +349,9 @@ public class Distiller implements InventoryHolder {
 		private final int cycleLength;
 		private int currentCycle = 1;
 		private int currentTime = 0;
-		private Distiller distiller;
+		private BreweryDistiller distiller;
 		
-		public DistillerRunnable(int cycleLength, Distiller distiller) {
+		public DistillerRunnable(int cycleLength, BreweryDistiller distiller) {
 			cycles = distiller.filters.size();
 			this.cycleLength = cycleLength;
 			this.distiller = distiller;

@@ -22,9 +22,10 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.Aspect;
-import com.dreamless.brewery.recipe.Aspect.AspectRarity;
+import com.dreamless.brewery.recipe.AspectOld;
+import com.dreamless.brewery.recipe.AspectOld.AspectRarity;
 import com.dreamless.brewery.recipe.BEffect;
+import com.dreamless.brewery.recipe.BRecipe;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 
@@ -34,7 +35,7 @@ import de.tr7zw.changeme.nbtapi.NBTItem;
 public class BIngredients implements InventoryHolder{
 
 	private Inventory inventory;
-	private HashMap<String, Aspect> aspectMap = new HashMap<String, Aspect>();
+	private HashMap<String, AspectOld> aspectMap = new HashMap<String, AspectOld>();
 	private String type;
 	private boolean cooking = false;
 	private String coreIngredient= "";
@@ -48,7 +49,7 @@ public class BIngredients implements InventoryHolder{
 	}
 
 	// Load from database
-	public BIngredients(String inventoryString, HashMap<String, Aspect> aspects, int state, boolean cooking) {
+	public BIngredients(String inventoryString, HashMap<String, AspectOld> aspects, int state, boolean cooking) {
 		this.aspectMap = aspects;
 		this.cooking = cooking;
 				
@@ -149,13 +150,13 @@ public class BIngredients implements InventoryHolder{
 				for(int i = 1; i <=3; i++) {
 					String name = results.getString("aspect"+i+"name");
 					if(name == null) continue;
-					Aspect aspect = aspectMap.get(name);
+					AspectOld aspect = aspectMap.get(name);
 					int multiplier = ingredient.getAmount();
-					AspectRarity values = Aspect.getRarityValues(results.getInt("aspect"+i+"rating"));
+					AspectRarity values = AspectOld.getRarityValues(results.getInt("aspect"+i+"rating"));
 					if (aspect != null) {// aspect is found
 						aspect.setValues(values.getPotency() * multiplier + aspect.getPotency(), values.getSaturation() * multiplier + aspect.getSaturation());
 					} else {
-						aspectMap.put(name, new Aspect(values.getPotency() * multiplier, values.getSaturation() * multiplier));
+						aspectMap.put(name, new AspectOld(values.getPotency() * multiplier, values.getSaturation() * multiplier));
 					}
 				}
 			}
@@ -170,9 +171,9 @@ public class BIngredients implements InventoryHolder{
 		
 		//Update aspects
 		for (String currentAspect : aspectMap.keySet()) {
-			Aspect aspect = aspectMap.get(currentAspect);
+			AspectOld aspect = aspectMap.get(currentAspect);
 	
-			double activationIncrease = Aspect.getFermentationIncrease(state, currentAspect, type);
+			double activationIncrease = AspectOld.getFermentationIncrease(state, currentAspect, type);
 			double newActivation = aspect.getActivation() + activationIncrease;
 			Brewery.breweryDriver.debugLog("Update Activation of " + currentAspect + ": " + aspect.getActivation()
 					+ " + " + activationIncrease + " -> " + newActivation);
@@ -295,8 +296,8 @@ public class BIngredients implements InventoryHolder{
 		HashMap<String, Double> activation = new HashMap<String, Double>();
 		// Add calculated aspects to the map
 		for (String currentAspect : aspectMap.keySet()) {
-			Aspect aspect = aspectMap.get(currentAspect);
-			double effectiveActivation = Aspect.getEffectiveActivation(currentAspect, aspect.getActivation(), type);
+			AspectOld aspect = aspectMap.get(currentAspect);
+			double effectiveActivation = AspectOld.getEffectiveActivation(currentAspect, aspect.getActivation(), type);
 			activation.put(currentAspect, effectiveActivation);
 			Brewery.breweryDriver.debugLog("PUT EFFECTIVE ACTIVATION" + currentAspect + " " + effectiveActivation);
 		}
@@ -388,7 +389,7 @@ public class BIngredients implements InventoryHolder{
 	public Inventory getInventory() {
 		return inventory;
 	}
-	public HashMap<String, Aspect> getAspects() {
+	public HashMap<String, AspectOld> getAspects() {
 		return aspectMap;
 	}
 
@@ -400,7 +401,7 @@ public class BIngredients implements InventoryHolder{
 		this.cooking = cooking;
 	}
 
-	public void setAspects(HashMap<String, Aspect> aspects) {
+	public void setAspects(HashMap<String, AspectOld> aspects) {
 		this.aspectMap = aspects;
 	}
 }

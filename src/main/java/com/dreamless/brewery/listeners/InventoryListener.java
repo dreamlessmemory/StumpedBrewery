@@ -16,7 +16,7 @@ import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.entity.BIngredients;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
-import com.dreamless.brewery.entity.Distiller;
+import com.dreamless.brewery.entity.BreweryDistiller;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.utils.BreweryMessage;
 
@@ -119,7 +119,7 @@ public class InventoryListener implements Listener {
 		if (holder instanceof BreweryBarrel) {
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 		} else if (holder instanceof BrewingStand) {
-			Distiller distiller = Distiller.get(((BrewingStand)holder).getBlock());
+			BreweryDistiller distiller = BreweryDistiller.get(((BrewingStand)holder).getBlock());
 			if(distiller == null) {
 				return;
 			}
@@ -130,8 +130,8 @@ public class InventoryListener implements Listener {
 					distiller.removeSelf();
 				}
 			}
-		} else if (holder instanceof Distiller) {
-			Distiller distiller = ((Distiller) holder);
+		} else if (holder instanceof BreweryDistiller) {
+			BreweryDistiller distiller = ((BreweryDistiller) holder);
 			BreweryMessage breweryMessage = distiller.prepDistiller();
 			Brewery.breweryDriver.msg(event.getPlayer(), breweryMessage.getMessage());
 		}

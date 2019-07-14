@@ -35,12 +35,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.dreamless.brewery.entity.BIngredients;
-import com.dreamless.brewery.entity.BRecipe;
 import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.BreweryBarrelRecipe;
 import com.dreamless.brewery.entity.BreweryCauldron;
-import com.dreamless.brewery.entity.Distiller;
+import com.dreamless.brewery.entity.BreweryDistiller;
 import com.dreamless.brewery.filedata.DataSave;
 import com.dreamless.brewery.filedata.LanguageReader;
 import com.dreamless.brewery.listeners.BlockListener;
@@ -53,7 +50,8 @@ import com.dreamless.brewery.listeners.WorldListener;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
-import com.dreamless.brewery.recipe.Aspect;
+import com.dreamless.brewery.recipe.AspectOld;
+import com.dreamless.brewery.recipe.BRecipe;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.Connection;
@@ -181,8 +179,6 @@ public class Brewery extends JavaPlugin {
 		//breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new CauldronRunnable(), 120, 20);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000
-
-		BreweryBarrelRecipe.registerRecipes();
 		
 		this.log(this.getDescription().getName() + " enabled!");
 	}
@@ -332,7 +328,7 @@ public class Brewery extends JavaPlugin {
 		
 		//difficulty settings
 		BreweryBarrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
-		Distiller.DEFAULT_CYCLE_LENGTH = currentConfig.getInt("distillcycle", 40);
+		BreweryDistiller.DEFAULT_CYCLE_LENGTH = currentConfig.getInt("distillcycle", 40);
 		
 		//Effects
 		effectLevel = currentConfig.getDouble("effectLevel", 0.35);
@@ -435,7 +431,7 @@ public class Brewery extends JavaPlugin {
 				
 				//Ingredients
 				String inventory = result.getString("contents");
-				HashMap<String, Aspect> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, Aspect>>(){}.getType());
+				HashMap<String, AspectOld> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, AspectOld>>(){}.getType());
 				//BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);
 				
 				//lastCook
