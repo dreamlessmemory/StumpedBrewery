@@ -39,6 +39,7 @@ import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
 import com.dreamless.brewery.filedata.DataSave;
+import com.dreamless.brewery.filedata.DatabaseCache;
 import com.dreamless.brewery.filedata.LanguageReader;
 import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
@@ -299,7 +300,7 @@ public class Brewery extends JavaPlugin {
 		}
 		FileConfiguration currentConfig = YamlConfiguration.loadConfiguration(currentFile);
 		
-		//Database seetings
+		//Database settings
 		username= currentConfig.getString("username");
 		password = currentConfig.getString("password");
 		url = currentConfig.getString("url");
@@ -375,6 +376,9 @@ public class Brewery extends JavaPlugin {
 	// load all Data
 	public void readData() {
 		//Brew.installTime = data.getLong("installTime", System.currentTimeMillis());
+		
+		// Ingredients
+		DatabaseCache.updateAcceptableIngredients();
 
 		//Cauldrons
 		if(loadcauldrons) {
