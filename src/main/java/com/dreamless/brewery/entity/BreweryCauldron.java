@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitTask;
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.filedata.DatabaseCache;
+import com.dreamless.brewery.database.DatabaseCache;
 import com.dreamless.brewery.recipe.AspectOld;
 import com.dreamless.brewery.recipe.AspectOld.AspectRarity;
 import com.dreamless.brewery.utils.BreweryMessage;
