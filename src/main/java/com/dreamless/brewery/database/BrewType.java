@@ -2,25 +2,23 @@ package com.dreamless.brewery.database;
 
 import java.util.ArrayDeque;
 
-import com.dreamless.brewery.recipe.Aspect;
+import com.dreamless.brewery.recipe.RecipeEnum.Aspect;
 
 public class BrewType {
 	private final String name;
 	private final ArrayDeque<Aspect> aspectPriority;
 	private final String cookedName;
 	private final String distilledName;
-	private final byte alcoholMin;
-	private final byte alcoholMax;
-	private final byte alcoholStep;
+	private final int colour;
+	private final byte alcohol;
 	
-	public BrewType(String name, ArrayDeque<Aspect> aspectPriority, String cookedName, String distilledName, byte alcoholMin, byte alcoholMax, byte alcoholStep) {
+	public BrewType(String name, ArrayDeque<Aspect> aspectPriority, String cookedName, String distilledName, int colour, byte alcohol) {
 		this.name = name;
 		this.aspectPriority = aspectPriority;
 		this.cookedName = cookedName;
 		this.distilledName = distilledName;
-		this.alcoholMin = alcoholMin;
-		this.alcoholMax = alcoholMax;
-		this.alcoholStep = alcoholStep;
+		this.colour = colour;
+		this.alcohol = alcohol;
 	}
 
 	public final String getName() {
@@ -39,15 +37,11 @@ public class BrewType {
 		return distilledName;
 	}
 
-	public final byte getAlcoholMin() {
-		return alcoholMin;
+	public final byte getAlcohol() {
+		return alcohol;
 	}
 
-	public final byte getAlcoholMax() {
-		return alcoholMax;
-	}
-
-	public final byte getAlcoholStep() {
-		return alcoholStep;
+	public int getColour() {
+		return colour;
 	}
 }

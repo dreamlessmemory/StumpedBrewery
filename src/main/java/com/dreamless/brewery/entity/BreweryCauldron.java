@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -38,17 +39,16 @@ public class BreweryCauldron implements InventoryHolder {
 
 	// private BIngredients ingredients = new BIngredients();
 	private Block block;
-	private int minutesCooked = 0;
+	private int cookTime = 0; // Seconds
 	private boolean cooking = false;
-	private byte secondsCooked = 0;
 	private Hologram hologram;
 
 	// Ingredients
 	private Inventory inventory;
 	private HashMap<String, AspectOld> aspectMap = new HashMap<String, AspectOld>();
 	private String type;
-	//private ItemStack coreIngredient;
-	//private ItemStack adjunctIngredient;
+	// private ItemStack coreIngredient;
+	// private ItemStack adjunctIngredient;
 
 	// private String coreIngredient = "";
 	// private String adjunctIngredient = "";
@@ -62,13 +62,12 @@ public class BreweryCauldron implements InventoryHolder {
 	}
 
 	// loading from file
-	public BreweryCauldron(Block block, int minutesCooked, byte secondsCooked, boolean cooking, String inventoryString,
+	public BreweryCauldron(Block block, int minutesCooked, boolean cooking, String inventoryString,
 			HashMap<String, AspectOld> aspects) {
 		this.block = block;
-		this.minutesCooked = minutesCooked;
+		this.cookTime = minutesCooked;
 		// this.ingredients = ingredients;
 		this.cooking = cooking;
-		this.secondsCooked = secondsCooked;
 
 		this.aspectMap = aspects;
 		this.cooking = cooking;
@@ -83,7 +82,7 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 
 		// Initialize
-		//determineCoreAndAdjunct(inventory.getContents());
+		// determineCoreAndAdjunct(inventory.getContents());
 
 		// Add to lists
 		bcauldrons.add(this);
@@ -119,7 +118,7 @@ public class BreweryCauldron implements InventoryHolder {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronFill"));
 				return true;
 			}
-			ItemStack potion = bcauldron.finishFermentation(bcauldron.minutesCooked, player);
+			ItemStack potion = bcauldron.finishFermentation(bcauldron.cookTime, player);
 
 			if (potion != null) {
 
@@ -169,10 +168,10 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 		BreweryCauldron bcauldron = get(block);
 		if (bcauldron != null) {
-			if (bcauldron.minutesCooked > 1) {
+			if (bcauldron.cookTime > 1) {
 				Brewery.breweryDriver.msg(player,
-						Brewery.getText("Player_CauldronInfo2", Integer.toString(bcauldron.minutesCooked)));
-			} else if (bcauldron.minutesCooked == 1) {
+						Brewery.getText("Player_CauldronInfo2", Integer.toString(bcauldron.cookTime)));
+			} else if (bcauldron.cookTime == 1) {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo1"));
 			} else {
 				Brewery.breweryDriver.msg(player, Brewery.getText("Player_CauldronInfo0"));
@@ -242,6 +241,7 @@ public class BreweryCauldron implements InventoryHolder {
 				String aspects = Brewery.gson.toJson(cauldron.getAspects());
 				Brewery.breweryDriver.debugLog(aspects);
 
+				// TODO: Data save
 				String query = "REPLACE " + Brewery.getDatabase("cauldrons")
 						+ "cauldrons SET idcauldrons=?, location=?, contents=?, aspects=?, state=?, cooking=?, lastCook=?";
 				try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
@@ -249,9 +249,8 @@ public class BreweryCauldron implements InventoryHolder {
 					stmt.setString(2, location);
 					stmt.setString(3, jsonInventory);
 					stmt.setString(4, aspects);
-					stmt.setInt(5, cauldron.minutesCooked);
+					stmt.setInt(5, cauldron.cookTime);
 					stmt.setBoolean(6, cauldron.cooking);
-					stmt.setLong(7, cauldron.secondsCooked);
 
 					Brewery.breweryDriver.debugLog(stmt.toString());
 
@@ -324,7 +323,7 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 		return new BreweryMessage(false, Brewery.getText("Fermentation_No_Cauldron"));
 	}
-	
+
 	public static void onDisable() {
 		bcauldrons.clear();
 	}
@@ -345,28 +344,19 @@ public class BreweryCauldron implements InventoryHolder {
 			// Update Sign
 			updateHologram();
 
-			++secondsCooked;
-			if (secondsCooked >= 60) {
-				// Update cook time
-				secondsCooked = 0;
-				// add a minute to cooking time
-				minutesCooked++;
-
+			++cookTime;
+			// Bubble effects
+			if (Math.random() > Brewery.effectLevel) {
+				block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation().getX() + 0.5,
+						block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15, 0.05);
+				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW,
+						(float) (Math.random() / 8) + 0.1f, (float) (Math.random() * 1.5) + 0.5f);
+			} else if (Math.random() > Brewery.effectLevel) {
 				// Sound and particle effects
 				block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5,
 						block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BUBBLE_COLUMN_UPWARDS_INSIDE,
 						(float) (Math.random() / 8) + 0.1f, (float) (Math.random() / 2) + 0.75f);
-
-			} else {
-				// Bubble effects
-				if (Math.random() > Brewery.effectLevel) {
-					block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation().getX() + 0.5,
-							block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15,
-							0.05);
-					block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW,
-							(float) (Math.random() / 8) + 0.1f, (float) (Math.random() * 1.5) + 0.5f);
-				}
 			}
 		} else { // no fire, stop cooking
 			if (cooking) {
@@ -410,9 +400,11 @@ public class BreweryCauldron implements InventoryHolder {
 
 	private void updateHologram() {
 		hologram.clearLines();
+		
+		int secondsCooked = cookTime % 60;
 
 		// Time
-		hologram.appendTextLine(minutesCooked + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
+		hologram.appendTextLine(cookTime + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
 
 		// Status
 		if (cooking) {
@@ -534,14 +526,15 @@ public class BreweryCauldron implements InventoryHolder {
 
 	// TODO: Null checks on core and adjunct
 	private void calculateType() {
-		//determineCoreAndAdjunct(inventory.getContents());
-		
+		// determineCoreAndAdjunct(inventory.getContents());
+
 		ItemStack coreIngredient = inventory.getItem(0);
 		ItemStack adjunctIngredient = inventory.getItem(1);
-		
-		
+
+		//
+
 		String result = queryForType(coreIngredient.getType().name(), coreIngredient.getAmount(),
-				adjunctIngredient.getType().name(), adjunctIngredient.getAmount(), minutesCooked);
+				adjunctIngredient.getType().name(), adjunctIngredient.getAmount(), cookTime);
 
 		if (result != null) {// There is a secondary
 			type = result;
@@ -564,31 +557,11 @@ public class BreweryCauldron implements InventoryHolder {
 
 		// Get type
 		calculateType();
-		
+
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
-		// Calculate activation and effective potency
-		// HashMap<String, Double> calculatedActivation = calculateActivation();
-		// HashMap<String, Double> calculatedEffectivePotency =
-		// calculateEffectivePotency(calculatedActivation);
-		// selectAspects(calculatedActivation, calculatedEffectivePotency);
-
-		// Add custom potion effects based on effect aspects
-		// ArrayList<PotionEffect> effects = BEffect.calculateEffect(new HashMap<String,
-		// Double>(calculatedEffectivePotency), 100, 100);
-		// for (PotionEffect effect : effects) {
-		// potionMeta.addCustomEffect(effect, true);
-		// }
-
-		// Recipe
-		// BRecipe recipe = BRecipe.getRecipe(player, type, calculatedEffectivePotency,
-		// false, false, 100, 100);
-		// potionMeta.setDisplayName(recipe.getName());
-		// ArrayList<String> craftersList = new ArrayList<String>();
-		// craftersList.add(player.getDisplayName());
-		// potionMeta.setLore(recipe.getFlavorText(craftersList));
-		// potionMeta.setColor(BRecipe.getColor(type));
+		// Set Name
 
 		potion.setItemMeta(potionMeta);
 
@@ -653,10 +626,10 @@ public class BreweryCauldron implements InventoryHolder {
 
 		// Manage parameters
 		cooking = true;
-		//determineCoreAndAdjunct(contents);
+		// determineCoreAndAdjunct(contents);
 
 		// Calculate type
-		//calculateType(0);
+		// calculateType(0);
 
 		// Return
 		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting") + type.toLowerCase() + ".");

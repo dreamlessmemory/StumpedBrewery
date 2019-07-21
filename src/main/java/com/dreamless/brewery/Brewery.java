@@ -436,12 +436,8 @@ public class Brewery extends JavaPlugin {
 				//Ingredients
 				String inventory = result.getString("contents");
 				HashMap<String, AspectOld> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, AspectOld>>(){}.getType());
-				//BIngredients ingredients = new BIngredients (inventory, aspects, state, cooking);
-				
-				//lastCook
-				byte lastCook = result.getByte("lastCook");
 							
-				new BreweryCauldron(worldBlock, state, lastCook, cooking, inventory, aspects);
+				new BreweryCauldron(worldBlock, state, cooking, inventory, aspects);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -515,6 +511,7 @@ public class Brewery extends JavaPlugin {
 		case "cauldrons":
 		case "barrels":
 		case "brewtypes":
+		case "ingredients":
 			return development? testdatabase : database;
 		default:
 			return database;
