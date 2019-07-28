@@ -38,7 +38,7 @@ public class BreweryCauldron implements InventoryHolder {
 	private static HashMap<BreweryCauldron, BukkitTask> taskMap = new HashMap<>();
 
 	// private BIngredients ingredients = new BIngredients();
-	private Block block;
+	private final Block block;
 	private int cookTime = 0; // Seconds
 	private boolean cooking = false;
 	private Hologram hologram;
@@ -205,6 +205,16 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 	}
 
+	public static void remove(BreweryCauldron bcauldron) {
+		if (!bcauldron.cooking) {
+			bcauldron.dumpContents();
+		}
+		bcauldrons.remove(bcauldron);
+
+		// Remove hologram
+		bcauldron.hologram.delete();
+	}
+
 	// unloads cauldrons that are in a unloading world
 	// as they were written to file just before, this is safe to do
 	public static void onUnload(String name) {
@@ -293,35 +303,44 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 	}
 
-	public static BreweryMessage startCooking(Block block, Player player) {
-		BreweryCauldron bcauldron = get(block);
-		if (bcauldron != null) {
-			BreweryMessage spaceCheck = bcauldron.fireAndAirInPlace();
+	public BreweryMessage startCooking(Player player) {
+		// Set Feedback effects
+		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5,
+				block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 
-			if (!spaceCheck.getResult()) {
-				return spaceCheck;
-			}
+		// Manage parameters
+		cooking = true;
+		// determineCoreAndAdjunct(contents);
 
-			if (bcauldron.isEmpty()) {
-				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Ingredients"));
-			}
+		// Calculate type
+		// calculateType(0);
 
-			BreweryMessage result = bcauldron.startCooking();
-			// Set cook time
-			if (result.getResult()) {
-				// Set time
-				// bcauldron.lastCook =
-				// TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-
-				// Create hologram
-				if (bcauldron.hologram == null) {
-					bcauldron.createHologram(block);
-				}
-				bcauldron.updateHologram();
-			}
-			return result;
+		// Create hologram
+		if (hologram == null) {
+			createHologram(block);
 		}
-		return new BreweryMessage(false, Brewery.getText("Fermentation_No_Cauldron"));
+		updateHologram();
+		// Return
+		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting") + type.toLowerCase() + ".");
+	}
+
+	public void purgeContents() {
+		ItemStack[] contents = inventory.getContents();
+		for (int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			if (item != null) {
+				if (DatabaseCache.containsIngredient(item.getType())) {
+					if (usesBucket(item)) {
+						dumpItem(new ItemStack(Material.BUCKET));
+					}
+					addIngredient(item);
+				} else {// eject
+					dumpItem(item);
+					contents[i] = null;
+				}
+			}
+		}
+		inventory.setContents(contents);
 	}
 
 	public static void onDisable() {
@@ -400,7 +419,7 @@ public class BreweryCauldron implements InventoryHolder {
 
 	private void updateHologram() {
 		hologram.clearLines();
-		
+
 		int secondsCooked = cookTime % 60;
 
 		// Time
@@ -411,11 +430,7 @@ public class BreweryCauldron implements InventoryHolder {
 			hologram.appendTextLine("Cooking...");
 		}
 		if (fireAndAirInPlace().getResult()) {
-			if (isEmpty()) {
-				hologram.appendTextLine("Empty...");
-			} else {
-				hologram.appendTextLine("Ready...");
-			}
+			hologram.appendTextLine("Ready...");
 		}
 
 	}
@@ -439,14 +454,6 @@ public class BreweryCauldron implements InventoryHolder {
 
 	private HashMap<String, AspectOld> getAspects() {
 		return aspectMap;
-	}
-
-	private boolean isEmpty() {
-		for (ItemStack it : inventory.getContents()) {
-			if (it != null)
-				return false;
-		}
-		return true;
 	}
 
 	private boolean usesBucket(ItemStack item) {
@@ -593,46 +600,6 @@ public class BreweryCauldron implements InventoryHolder {
 		potion = nbti.getItem();
 
 		return potion;
-	}
-
-	private BreweryMessage startCooking() {
-		ItemStack[] contents = inventory.getContents();
-		for (int i = 0; i < contents.length; i++) {
-			ItemStack item = contents[i];
-			if (item != null) {
-				if (DatabaseCache.containsIngredient(item.getType())) {
-					if (usesBucket(item)) {
-						dumpItem(new ItemStack(Material.BUCKET));
-					}
-					addIngredient(item);
-				} else {// eject
-					dumpItem(item);
-					contents[i] = null;
-				}
-			}
-		}
-
-		inventory.setContents(contents);
-
-		// Check if empty
-		// if(inventory.isEmpty()) {
-		if (isEmpty()) {
-			return new BreweryMessage(false, Brewery.getText("Fermentation_No_Ingredients"));
-		}
-
-		// Set Feedback effects
-		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5,
-				block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-
-		// Manage parameters
-		cooking = true;
-		// determineCoreAndAdjunct(contents);
-
-		// Calculate type
-		// calculateType(0);
-
-		// Return
-		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting") + type.toLowerCase() + ".");
 	}
 
 	public class BreweryCauldronRunnable implements Runnable {

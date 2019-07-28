@@ -2,6 +2,7 @@ package com.dreamless.brewery.listeners;
 
 import org.bukkit.Sound;
 import org.bukkit.block.BrewingStand;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -134,6 +135,17 @@ public class InventoryListener implements Listener {
 			BreweryDistiller distiller = ((BreweryDistiller) holder);
 			BreweryMessage breweryMessage = distiller.prepDistiller();
 			Brewery.breweryDriver.msg(event.getPlayer(), breweryMessage.getMessage());
+		} else if (holder instanceof BreweryCauldron) {
+			// TODO: Check if empty
+			BreweryCauldron cauldron = ((BreweryCauldron) holder);
+			cauldron.purgeContents();
+			if(event.getInventory().firstEmpty() == 0) { // Empty
+				BreweryCauldron.remove(cauldron);
+				Brewery.breweryDriver.msg(event.getPlayer(), Brewery.getText("Fermentation_No_Ingredients"));
+			} else {
+				// Start cooking
+				Brewery.breweryDriver.msg(event.getPlayer(), cauldron.startCooking((Player) event.getPlayer()).getMessage());
+			}
 		}
 	}
 }

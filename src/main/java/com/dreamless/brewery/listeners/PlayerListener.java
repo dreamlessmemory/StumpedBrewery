@@ -75,18 +75,20 @@ public class PlayerListener implements Listener {
 			return;
 		} else if (materialInHand == Material.CLOCK) {
 			if (BreweryCauldron.isCooking(clickedBlock)) {// Print time if cooking
+				// TODO: Stop cooking
 				BreweryCauldron.printTime(player, clickedBlock);
-			} else if (((Levelled) clickedBlock.getBlockData()).getLevel() > 0) {
+			}/* else if (((Levelled) clickedBlock.getBlockData()).getLevel() > 0) {
 				BreweryMessage result = BreweryCauldron.startCooking(clickedBlock, player);
 				if (result.getResult()) {// Start cooking
 					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED,
 							1.0f, 1.0f);
 				}
 				Brewery.breweryDriver.msg(player, result.getMessage());
-			}
+			} */
 			return;
 		} else if (materialInHand == Material.IRON_SHOVEL) {// Interact with inventory
 			if (player.hasPermission("brewery.cauldron.insert")) {
+				// TODO: Fire Check
 				Inventory inventory = BreweryCauldron.getInventory(clickedBlock);
 				if (inventory != null) {
 					player.openInventory(inventory);
