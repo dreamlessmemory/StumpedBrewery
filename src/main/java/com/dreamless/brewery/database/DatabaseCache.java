@@ -4,15 +4,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.HashSet;
-
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.recipe.RecipeEnum.Flavor;
 import com.dreamless.brewery.recipe.RecipeEnum.IngredientType;
 
+@Deprecated
 public class DatabaseCache {
 	private static HashMap<Material, IngredientInformation> ingredientsMap = new HashMap<>();
 	private static HashMap<BrewTypeRequirement, BrewType> brewTypesMap = new HashMap<>();

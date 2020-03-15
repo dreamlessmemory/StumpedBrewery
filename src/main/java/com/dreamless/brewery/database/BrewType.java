@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 
 import com.dreamless.brewery.recipe.RecipeEnum.Aspect;
 
+@Deprecated
 public class BrewType {
 	private final String name;
 	private final ArrayDeque<Aspect> aspectPriority;

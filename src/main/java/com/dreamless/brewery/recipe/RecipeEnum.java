@@ -1,5 +1,6 @@
 package com.dreamless.brewery.recipe;
 
+@Deprecated
 public class RecipeEnum {
 	public enum Aspect {
 		LITHIC, INFERNAL, PYROTIC, AERIAL, VOID, AQUATIC;

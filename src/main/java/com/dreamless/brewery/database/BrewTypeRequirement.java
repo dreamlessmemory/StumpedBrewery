@@ -2,6 +2,7 @@ package com.dreamless.brewery.database;
 
 import com.dreamless.brewery.recipe.RecipeEnum.IngredientType;
 
+@Deprecated
 public class BrewTypeRequirement {
 	private IngredientType primaryIngredient;
 	private IngredientType secondaryIngredient;

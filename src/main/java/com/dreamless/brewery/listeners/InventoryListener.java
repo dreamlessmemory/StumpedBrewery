@@ -2,7 +2,6 @@ package com.dreamless.brewery.listeners;
 
 import org.bukkit.Sound;
 import org.bukkit.block.BrewingStand;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,7 +13,6 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.InventoryHolder;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.entity.BIngredients;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
@@ -22,15 +20,16 @@ import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.utils.BreweryMessage;
 
 public class InventoryListener implements Listener {
-		
+	
+	// Prevent removing items from cauldron that is cooking
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronOpen(InventoryClickEvent event) {
 		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryCauldron)) {
 			return;
 		}
 		Brewery.breweryDriver.debugLog("Cauldron click open");
-		BreweryCauldron ingredients = (BreweryCauldron) event.getView().getTopInventory().getHolder();
-		if(ingredients.isCooking()) {
+		BreweryCauldron cauldronIngredientsngredients = (BreweryCauldron) event.getView().getTopInventory().getHolder();
+		if(cauldronIngredientsngredients.isCooking()) {
 			if(event.isShiftClick() || (event.getClickedInventory() != null && event.getClickedInventory().getHolder() instanceof BreweryCauldron)) {
 				event.setCancelled(true);
 				event.setResult(Result.DENY);
@@ -39,6 +38,7 @@ public class InventoryListener implements Listener {
 		}
 	}
 	
+	// Prevent removing items from barrel that is aging
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryBarrelOpen(InventoryClickEvent event) {
 		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryBarrel)) {
@@ -55,7 +55,7 @@ public class InventoryListener implements Listener {
 		}
 	}
 	
-	
+	// Prevent dragging actions with a cauldron that is cooking
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronDrag(InventoryDragEvent event) {
 		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryCauldron)) {
@@ -70,6 +70,7 @@ public class InventoryListener implements Listener {
 		}
 	}
 	
+	// Prevent dragging actions with a barrel that is aging
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryBarrelDrag(InventoryDragEvent event) {
 		if (!(event.getView().getTopInventory().getHolder() instanceof BreweryBarrel)) {
@@ -84,6 +85,7 @@ public class InventoryListener implements Listener {
 		}
 	}
 	
+	// Prevent actions with a Distiller that is active
 	/*@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryDistillerFinished(InventoryClickEvent event) {
 		InventoryHolder holder = event.getView().getTopInventory().getHolder();
@@ -91,7 +93,7 @@ public class InventoryListener implements Listener {
 			return;
 		}
 		Brewery.breweryDriver.debugLog("Distiller click open");
-		Distiller distiller = Distiller.get(((BrewingStand)holder).getBlock());
+		BreweryDistiller distiller = BreweryDistiller.get(((BrewingStand)holder).getBlock());
 		if(distiller != null && distiller.isFinishedDistilling()) {
 			
 			
@@ -114,12 +116,13 @@ public class InventoryListener implements Listener {
 		}
 	}
 
+	// Actions that fire off when closing an inventory
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
 		InventoryHolder holder = event.getInventory().getHolder();
-		if (holder instanceof BreweryBarrel) {
+		if (holder instanceof BreweryBarrel) { // Play sound effect if a barrel
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
-		} else if (holder instanceof BrewingStand) {
+		} else if (holder instanceof BrewingStand) { // Remove distiller if empty
 			BreweryDistiller distiller = BreweryDistiller.get(((BrewingStand)holder).getBlock());
 			if(distiller == null) {
 				return;
@@ -136,15 +139,15 @@ public class InventoryListener implements Listener {
 			BreweryMessage breweryMessage = distiller.prepDistiller();
 			Brewery.breweryDriver.msg(event.getPlayer(), breweryMessage.getMessage());
 		} else if (holder instanceof BreweryCauldron) {
-			// TODO: Check if empty
 			BreweryCauldron cauldron = ((BreweryCauldron) holder);
 			cauldron.purgeContents();
-			if(event.getInventory().firstEmpty() == 0) { // Empty
+			if(event.getInventory().firstEmpty() == 0) { // Empty Check, inform player if no ingredients were added
 				BreweryCauldron.remove(cauldron);
 				Brewery.breweryDriver.msg(event.getPlayer(), Brewery.getText("Fermentation_No_Ingredients"));
 			} else {
 				// Start cooking
-				Brewery.breweryDriver.msg(event.getPlayer(), cauldron.startCooking((Player) event.getPlayer()).getMessage());
+				//TODO: Is this behavior we want? Start cooking if people close the inventory? 
+				//Brewery.breweryDriver.msg(event.getPlayer(), cauldron.startCooking((Player) event.getPlayer()).getMessage());
 			}
 		}
 	}

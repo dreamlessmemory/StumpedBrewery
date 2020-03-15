@@ -1,6 +1,5 @@
 package com.dreamless.brewery.entity;
 
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,11 +26,9 @@ import com.dreamless.brewery.recipe.AspectOld.AspectRarity;
 import com.dreamless.brewery.recipe.BEffect;
 import com.dreamless.brewery.recipe.BRecipe;
 import com.dreamless.brewery.utils.BreweryMessage;
-import com.dreamless.brewery.utils.BreweryUtils;
-
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
-
+@Deprecated
 public class BIngredients implements InventoryHolder{
 
 	private Inventory inventory;

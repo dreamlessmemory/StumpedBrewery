@@ -40,11 +40,11 @@ public class BreweryBarrel {
 	private boolean aging = false;
 	private BarrelType type;
 
-	public BreweryBarrel(Barrel block, BarrelType type, float time, boolean aging) {
+	public BreweryBarrel(Barrel block, BarrelType barrelType, float time, boolean aging) {
 		this.barrel = block;
 		this.time = time;
 		this.aging = aging;
-		this.type = type;
+		this.type = barrelType;
 
 		barrels.add(this);
 

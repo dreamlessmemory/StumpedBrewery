@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -65,31 +64,31 @@ public class PlayerListener implements Listener {
 
 	private void handleCauldron(PlayerInteractEvent event, Player player) {
 		Block clickedBlock = event.getClickedBlock();
+		BreweryCauldron cauldron = BreweryCauldron.get(clickedBlock);
 		Material materialInHand = event.getMaterial();
 		ItemStack item = event.getItem();
 
-		if (materialInHand == null) {
+		if (materialInHand == null || cauldron == null) {
 			return;
 		} else if (materialInHand == Material.BUCKET) {
-			BreweryCauldron.remove(clickedBlock);
+			BreweryCauldron.remove(cauldron);
 			return;
 		} else if (materialInHand == Material.CLOCK) {
-			if (BreweryCauldron.isCooking(clickedBlock)) {// Print time if cooking
+			if (cauldron.isCooking()) {// Print time if cooking
 				// TODO: Stop cooking
-				BreweryCauldron.printTime(player, clickedBlock);
-			}/* else if (((Levelled) clickedBlock.getBlockData()).getLevel() > 0) {
-				BreweryMessage result = BreweryCauldron.startCooking(clickedBlock, player);
+				cauldron.printTime(player);
+			} else if (cauldron.getFillLevel() > 0) {
+				BreweryMessage result = new BreweryMessage(false, "TODO: REPLACE");//BreweryCauldron.startCooking(clickedBlock, player);
 				if (result.getResult()) {// Start cooking
 					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED,
 							1.0f, 1.0f);
 				}
 				Brewery.breweryDriver.msg(player, result.getMessage());
-			} */
+			}
 			return;
 		} else if (materialInHand == Material.IRON_SHOVEL) {// Interact with inventory
 			if (player.hasPermission("brewery.cauldron.insert")) {
-				// TODO: Fire Check
-				Inventory inventory = BreweryCauldron.getInventory(clickedBlock);
+				Inventory inventory = cauldron.getInventory();
 				if (inventory != null) {
 					player.openInventory(inventory);
 				}
@@ -99,8 +98,8 @@ public class PlayerListener implements Listener {
 			// player.openInventory(BCauldron.getInventory(clickedBlock));
 			return;
 		} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
-			if (BreweryCauldron.isCooking(clickedBlock) && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
-				if (BreweryCauldron.fill(player, clickedBlock)) {
+			if (cauldron.isCooking() && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
+				if (BreweryCauldron.fillBottle(player, clickedBlock)) {
 					event.setCancelled(true);
 					if (player.hasPermission("brewery.cauldron.fill")) {
 						if (item.getAmount() > 1) {
@@ -115,13 +114,14 @@ public class PlayerListener implements Listener {
 			}
 		} else if (materialInHand == Material.WATER_BUCKET) { // reset cauldron when refilling to prevent unlimited
 																// source of potions
-			if (BreweryCauldron.getFillLevel(clickedBlock) != 0 && BreweryCauldron.getFillLevel(clickedBlock) < 2) {
+			if (cauldron.getFillLevel() != 0 && cauldron.getFillLevel() < 2) {
 				// will only remove when existing
-				BreweryCauldron.remove(clickedBlock);
+				BreweryCauldron.remove(cauldron);
 			}
 		}
 	}
 
+	// TODO: Barrels
 	private void handleBarrel(PlayerInteractEvent event, Player player) {
 		player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Section 2");
 		if (event.getHand() != EquipmentSlot.HAND) {
@@ -192,6 +192,10 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+	/*******************************
+	 * HELPER METHODS
+	 *******************************/
+	
 	public void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
 		if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {
 			event.getPlayer().getInventory().setItemInOffHand(new ItemStack(mat));
@@ -199,6 +203,10 @@ public class PlayerListener implements Listener {
 			event.getPlayer().getInventory().setItemInMainHand(new ItemStack(mat));
 		}
 	}
+	
+	/*******************************
+	 * PLAYER/DRUNKENESS INTERACTIONS
+	 *******************************/
 
 	@EventHandler
 	public void onClickAir(PlayerInteractEvent event) {

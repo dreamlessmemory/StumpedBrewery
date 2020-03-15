@@ -13,7 +13,6 @@ import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import com.dreamless.brewery.entity.BIngredients;
 import com.dreamless.brewery.entity.BreweryCauldron;
 
 public final class BreweryUtils {

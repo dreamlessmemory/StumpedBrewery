@@ -24,8 +24,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.data.Levelled;
+import org.bukkit.block.Barrel;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -35,10 +34,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.dreamless.brewery.database.DatabaseCache;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.entity.BreweryBarrel.BarrelType;
 import com.dreamless.brewery.filedata.DataSave;
 import com.dreamless.brewery.filedata.LanguageReader;
 import com.dreamless.brewery.listeners.BlockListener;
@@ -51,7 +50,6 @@ import com.dreamless.brewery.listeners.WorldListener;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
-import com.dreamless.brewery.recipe.AspectOld;
 import com.dreamless.brewery.recipe.BRecipe;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -377,17 +375,7 @@ public class Brewery extends JavaPlugin {
 	public void readData() {
 		//Brew.installTime = data.getLong("installTime", System.currentTimeMillis());
 		
-		// Ingredients
-		DatabaseCache.updateAcceptableIngredients();
 
-		//Cauldrons
-		if(loadcauldrons) {
-			loadCauldrons();
-			Brewery.breweryDriver.debugLog("Cauldrons loaded");
-		} else {
-			Brewery.breweryDriver.debugLog("Cauldron loading disabled");
-		}
-		
 		//Barrel
 		if(loadbarrels) {
 			loadBarrels();
@@ -412,37 +400,6 @@ public class Brewery extends JavaPlugin {
 			Brewery.breweryDriver.debugLog("Wakeup loading disabled");
 		}
 	}
-	
-	private void loadCauldrons() {
-		String cauldronQuery = "SELECT * FROM " + Brewery.getDatabase("cauldrons")+ "cauldrons";
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(cauldronQuery)){					
-			ResultSet result = stmt.executeQuery();
-			while (result.next()) {
-				//Block
-				HashMap<String, Object> locationMap = Brewery.gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
-				debugLog(locationMap.toString());
-				Block worldBlock = (Location.deserialize(locationMap).getBlock());
-				debugLog(worldBlock.toString());
-				if(((Levelled)worldBlock.getBlockData()).getLevel() < 1) {
-					debugLog("Skipping loading, empty");
-					continue;
-				}
-				//State
-				int state = result.getInt("state");
-				
-				//Cooked
-				boolean cooking = result.getBoolean("cooking");
-				
-				//Ingredients
-				String inventory = result.getString("contents");
-				HashMap<String, AspectOld> aspects = Brewery.gson.fromJson(result.getString("aspects"), new TypeToken<HashMap<String, AspectOld>>(){}.getType());
-							
-				new BreweryCauldron(worldBlock, state, cooking, inventory, aspects);
-			} 
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-	}
 
 	private void loadBarrels() {
 		String barrelQuery = "SELECT * FROM " + Brewery.getDatabase("barrels") + "barrels";
@@ -452,12 +409,12 @@ public class Brewery extends JavaPlugin {
 				//spigot
 				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
 				debugLog(locationMap.toString());
-				Block worldBlock = (Location.deserialize(locationMap).getBlock());
+				Barrel worldBlock = (Barrel) (Location.deserialize(locationMap).getBlock());
 				debugLog(worldBlock.toString());
 
 
 				//Inventory
-				String inventory = result.getString("inventory");
+				String type = result.getString("type");
 
 				//Time
 				float time = result.getFloat("time");
@@ -465,7 +422,7 @@ public class Brewery extends JavaPlugin {
 				//Aging
 				boolean aging = result.getBoolean("aging");
 				
-				//new BreweryBarrel(worldBlock, time, aging);
+				new BreweryBarrel(worldBlock, BarrelType.valueOf(type), time, aging);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();

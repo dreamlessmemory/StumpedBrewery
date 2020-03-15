@@ -5,7 +5,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 
@@ -28,11 +27,7 @@ public class DataSave extends BukkitRunnable {
 	@Override
 	public void run() {
 		Brewery.breweryDriver.debugLog("Starting save...");
-		if (Brewery.loadcauldrons) {
-			BreweryCauldron.save();
-		} else {
-			Brewery.breweryDriver.debugLog("Cauldron saving disabled");
-		}
+		
 		//Brewery.breweryDriver.debugLog("CAUL SAVE");
 		if (Brewery.loadbarrels) {
 			BreweryBarrel.save();

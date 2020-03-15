@@ -21,6 +21,7 @@ import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BlockListener implements Listener {
 	
+	// Remove Distiller
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onBrewingStandBreak(BlockBreakEvent event) {
 		Block block = event.getBlock();
@@ -34,6 +35,7 @@ public class BlockListener implements Listener {
 		BreweryDistiller.remove(block);
 	}
 	
+	// Remove Barrels
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onBarrelBreak(BlockBreakEvent event) {
 		Block block = event.getBlock();
