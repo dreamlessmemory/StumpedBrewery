@@ -30,6 +30,7 @@ import com.dreamless.brewery.entity.BreweryDistiller.DistillerRunnable;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
+import com.dreamless.brewery.recipe.BreweryIngredient;
 import com.dreamless.brewery.utils.BreweryMessage;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
@@ -68,55 +69,73 @@ public class PlayerListener implements Listener {
 		Material materialInHand = event.getMaterial();
 		ItemStack item = event.getItem();
 
-		if (materialInHand == null || cauldron == null) {
+		if (cauldron == null && BreweryCauldron.isUseableCauldron(clickedBlock)
+				&& BreweryIngredient.isValidIngredient(materialInHand)) {
+			cauldron = new BreweryCauldron(clickedBlock);
+			cauldron.addIngredient(materialInHand);
+			removeItemFromPlayerHand(player);
 			return;
-		} else if (materialInHand == Material.BUCKET) {
-			BreweryCauldron.remove(cauldron);
-			return;
-		} else if (materialInHand == Material.CLOCK) {
-			if (cauldron.isCooking()) {// Print time if cooking
-				// TODO: Stop cooking
-				cauldron.printTime(player);
-			} else if (cauldron.getFillLevel() > 0) {
-				BreweryMessage result = new BreweryMessage(false, "TODO: REPLACE");//BreweryCauldron.startCooking(clickedBlock, player);
-				if (result.getResult()) {// Start cooking
-					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED,
-							1.0f, 1.0f);
+		} else if (cauldron != null) {
+			if (materialInHand == Material.AIR) {
+				Brewery.breweryDriver.debugLog("Open cauld " + (cauldron != null));
+				if (player.hasPermission("brewery.cauldron.insert")) {
+					Inventory inventory = cauldron.getInventory();
+					if (inventory != null) {
+						player.openInventory(inventory);
+					}
+				} else {
+					Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronInsert"));
 				}
-				Brewery.breweryDriver.msg(player, result.getMessage());
-			}
-			return;
-		} else if (materialInHand == Material.IRON_SHOVEL) {// Interact with inventory
-			if (player.hasPermission("brewery.cauldron.insert")) {
-				Inventory inventory = cauldron.getInventory();
-				if (inventory != null) {
-					player.openInventory(inventory);
+			} else if (materialInHand == Material.BUCKET) {
+				BreweryCauldron.remove(cauldron);
+			} else if (materialInHand == Material.CLOCK) {
+				if (cauldron.isCooking()) {// Print time if cooking
+					// TODO: Stop cooking?
+					cauldron.printTime(player);
+				} else if (cauldron.getFillLevel() > 0) {
+					BreweryMessage result = cauldron.startCooking();
+					if (result.getResult()) {// Start cooking
+						clickedBlock.getWorld().playSound(clickedBlock.getLocation(),
+								Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.0f, 1.0f);
+					}
+					Brewery.breweryDriver.msg(player, result.getMessage());
 				}
-			} else {
-				Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronInsert"));
-			}
-			// player.openInventory(BCauldron.getInventory(clickedBlock));
-			return;
-		} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
-			if (cauldron.isCooking() && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
-				if (BreweryCauldron.fillBottle(player, clickedBlock)) {
-					event.setCancelled(true);
-					if (player.hasPermission("brewery.cauldron.fill")) {
-						if (item.getAmount() > 1) {
-							item.setAmount(item.getAmount() - 1);
-						} else {
-							setItemInHand(event, Material.AIR, false);
+			} else if (materialInHand == Material.WOODEN_SHOVEL || materialInHand == Material.IRON_SHOVEL
+					|| materialInHand == Material.STONE_SHOVEL || materialInHand == Material.GOLDEN_SHOVEL
+					|| materialInHand == Material.DIAMOND_SHOVEL) {// Purge
+				if (player.hasPermission("brewery.cauldron.insert") && !cauldron.isCooking()) {
+					BreweryCauldron.remove(cauldron);
+				} else {
+					Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronInsert"));
+				}
+			} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
+				if (cauldron.isCooking() && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
+					if (BreweryCauldron.fillBottle(player, clickedBlock)) {
+						event.setCancelled(true);
+						if (player.hasPermission("brewery.cauldron.fill")) {
+							if (item.getAmount() > 1) {
+								item.setAmount(item.getAmount() - 1);
+							} else {
+								setItemInHand(event, Material.AIR, false);
+							}
 						}
 					}
+				} else {
+					event.setCancelled(true);
 				}
-			} else {
-				event.setCancelled(true);
-			}
-		} else if (materialInHand == Material.WATER_BUCKET) { // reset cauldron when refilling to prevent unlimited
-																// source of potions
-			if (cauldron.getFillLevel() != 0 && cauldron.getFillLevel() < 2) {
-				// will only remove when existing
-				BreweryCauldron.remove(cauldron);
+			} else if (materialInHand == Material.WATER_BUCKET) { // reset cauldron when refilling to prevent unlimited
+																	// source of potions
+				if (cauldron.getFillLevel() != 0 && cauldron.getFillLevel() < 2) {
+					// will only remove when existing
+					BreweryCauldron.remove(cauldron);
+				}
+			} else if (BreweryIngredient.isValidIngredient(materialInHand)){ // Add ingredient
+				BreweryMessage response = cauldron.addIngredient(materialInHand);
+				if (response.getResult()) {
+					removeItemFromPlayerHand(player);
+				} else {
+					Brewery.breweryDriver.msg(player, response.getMessage());
+				}
 			}
 		}
 	}
@@ -170,7 +189,6 @@ public class PlayerListener implements Listener {
 		}
 
 		if (materialInHand == Material.IRON_SHOVEL) {
-			// TODO: Brewer's tool
 			event.setCancelled(true);
 			if (distiller == null) {// Add a new one
 				distiller = new BreweryDistiller(clickedBlock);
@@ -195,7 +213,7 @@ public class PlayerListener implements Listener {
 	/*******************************
 	 * HELPER METHODS
 	 *******************************/
-	
+
 	public void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
 		if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {
 			event.getPlayer().getInventory().setItemInOffHand(new ItemStack(mat));
@@ -203,7 +221,7 @@ public class PlayerListener implements Listener {
 			event.getPlayer().getInventory().setItemInMainHand(new ItemStack(mat));
 		}
 	}
-	
+
 	/*******************************
 	 * PLAYER/DRUNKENESS INTERACTIONS
 	 *******************************/
@@ -316,6 +334,16 @@ public class PlayerListener implements Listener {
 		BPlayer bplayer = BPlayer.get(event.getPlayer());
 		if (bplayer != null) {
 			bplayer.disconnecting();
+		}
+	}
+
+	private void removeItemFromPlayerHand(Player player) {
+		ItemStack itemInHand = player.getInventory().getItemInMainHand();
+		if (itemInHand.getAmount() == 1) {
+			player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+		} else {
+			itemInHand.setAmount(itemInHand.getAmount() - 1);
+			player.getInventory().setItemInMainHand(itemInHand);
 		}
 	}
 }

@@ -530,7 +530,6 @@ public class BreweryCauldronOld implements InventoryHolder {
 		return result;
 	}
 
-	// TODO: Null checks on core and adjunct
 	private void calculateType() {
 		// determineCoreAndAdjunct(inventory.getContents());
 

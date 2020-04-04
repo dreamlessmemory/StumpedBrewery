@@ -22,7 +22,6 @@ import org.bukkit.scheduler.BukkitTask;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.recipe.AspectOld;
 import com.dreamless.brewery.recipe.BreweryIngredient.Aspect;
-//import com.dreamless.brewery.recipe.AspectOld.AspectRarity;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
@@ -49,7 +48,10 @@ public class BreweryCauldron implements InventoryHolder {
 	public BreweryCauldron(Block block) {
 		this.block = block;
 		cooking = false;
+		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
 		cauldronList.add(this);
+		createHologram(block);
+		updateHologram();
 	}
 
 	// loading from file
@@ -202,6 +204,21 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 		return false;
 	}
+	
+	public static boolean isUseableCauldron (Block block) {
+		Material down = block.getRelative(BlockFace.DOWN).getType();
+		Material up = block.getRelative(BlockFace.UP).getType();
+
+		if (down != Material.FIRE && down != Material.LAVA && down != Material.MAGMA_BLOCK
+				&& down != Material.CAMPFIRE) {
+			return false;
+		}
+
+		if (up != Material.AIR) {
+			return false;
+		}
+		return true;
+	}
 
 	// prints the current cooking time to the player
 	public void printTime(Player player) {
@@ -301,6 +318,17 @@ public class BreweryCauldron implements InventoryHolder {
 
 	public boolean isCooking() {
 		return cooking;
+	}
+	
+	public BreweryMessage addIngredient(Material ingredient) {
+		if(Aspect.getAspect(ingredient) != Aspect.INVALID) // Unnecessary?
+		{
+			if(!inventory.addItem(new ItemStack(ingredient)).isEmpty()) {
+				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Space"));
+			}
+			return new BreweryMessage(true, ""); 
+		}
+		return new BreweryMessage(false, Brewery.getText("Fermentation_Not_Valid"));
 	}
 
 	@Override

@@ -3,6 +3,10 @@ package com.dreamless.brewery.recipe;
 import org.bukkit.Material;
 
 public class BreweryIngredient {
+	
+	public static boolean isValidIngredient (Material material) {
+		return Aspect.getAspect(material) != Aspect.INVALID;
+	}
 
 	public enum Rarity {
 		COMMON, UNCOMMON, RARE, LEGENDARY, INVALID;
@@ -39,6 +43,9 @@ public class BreweryIngredient {
 		
 		public static Rarity getRarity(Material material) {
 			switch(material) {
+			case OAK_LEAVES:
+			case OAK_SAPLING:
+				return COMMON;
 			default:
 				return INVALID;
 			}
@@ -49,6 +56,9 @@ public class BreweryIngredient {
 		
 		public static Aspect getAspect(Material material) {
 			switch(material) {
+			case OAK_LEAVES:
+			case OAK_SAPLING:
+				return AERIAL;
 			default:
 				return INVALID;
 			}

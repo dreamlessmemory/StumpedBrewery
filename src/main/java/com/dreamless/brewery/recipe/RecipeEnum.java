@@ -9,12 +9,10 @@ public class RecipeEnum {
 		GRAIN, STARCH, APPLE, FRUIT, COCOA, NETHER, END, STONE, GRASS, FLORAL, MEAT, AQUATIC;
 		
 		public final int getCookTimeIncrease() {
-			// TODO: Stub
 			return 0;
 		}
 		
 		public final int getCookTimeVariance() {
-			// TODO: Stub
 			return 0;
 		}
 		
