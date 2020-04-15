@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -326,6 +327,7 @@ public class BreweryCauldron implements InventoryHolder {
 			if(!inventory.addItem(new ItemStack(ingredient)).isEmpty()) {
 				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Space"));
 			}
+			updateHologramWithInventory();
 			return new BreweryMessage(true, ""); 
 		}
 		return new BreweryMessage(false, Brewery.getText("Fermentation_Not_Valid"));
@@ -381,6 +383,35 @@ public class BreweryCauldron implements InventoryHolder {
 			hologram.appendTextLine("Ready...");
 		}
 
+	}
+
+	private void updateHologramWithInventory()
+	{
+		hologram.clearLines();
+		int secondsCooked = cookTime % 60;
+		
+		// Time
+		hologram.appendTextLine(cookTime + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
+
+		// Status
+		if (cooking) {
+			hologram.appendTextLine("Cooking...");
+		}
+		if (fireAndAirInPlace().getResult()) {
+			hologram.appendTextLine("Ready...");
+		}
+		
+		for(ItemStack itemStack : inventory.getContents()) {
+			if(itemStack != null){
+				hologram.appendTextLine(BreweryUtils.getItemName(itemStack) + " x" + itemStack.getAmount());
+			}		
+		}
+		//int shift = hologram.size() - previousSize;
+		Location above = block.getRelative(BlockFace.UP).getLocation().add(0.5, 0.75 + (hologram.size()-2) * 0.25, 0.5);
+		//above.setX(above.getX() + 0.5);
+		//above.setY(above.getY() + 0.75 + (hologram.size()-2) * 0.25);
+		//above.setZ(above.getZ() + 0.5);
+		hologram.teleport(above);
 	}
 
 	private void dumpContents() {
