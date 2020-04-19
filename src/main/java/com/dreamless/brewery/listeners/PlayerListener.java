@@ -19,7 +19,6 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
@@ -76,17 +75,7 @@ public class PlayerListener implements Listener {
 			removeItemFromPlayerHand(player);
 			return;
 		} else if (cauldron != null) {
-			if (materialInHand == Material.AIR) {
-				Brewery.breweryDriver.debugLog("Open cauld " + (cauldron != null));
-				if (player.hasPermission("brewery.cauldron.insert")) {
-					Inventory inventory = cauldron.getInventory();
-					if (inventory != null) {
-						player.openInventory(inventory);
-					}
-				} else {
-					Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronInsert"));
-				}
-			} else if (materialInHand == Material.BUCKET) {
+			if (materialInHand == Material.BUCKET) {
 				BreweryCauldron.remove(cauldron);
 			} else if (materialInHand == Material.CLOCK) {
 				if (cauldron.isCooking()) {// Print time if cooking

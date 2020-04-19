@@ -1,10 +1,11 @@
 package com.dreamless.brewery.entity;
 
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -16,17 +17,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.AspectOld;
+import com.dreamless.brewery.recipe.UnfinishedBrew;
 import com.dreamless.brewery.recipe.BreweryIngredient.Aspect;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
@@ -52,43 +53,7 @@ public class BreweryCauldron implements InventoryHolder {
 		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
 		cauldronList.add(this);
 		createHologram(block);
-		updateHologram();
-	}
-
-	// loading from file
-	public BreweryCauldron(Block block, int secondsCooked, boolean cooking, String inventoryString,
-			HashMap<String, AspectOld> aspects) { //TODO: Redo aspect save/load
-		this.block = block;
-		this.cookTime = secondsCooked;
-		this.cooking = cooking;
-
-		//this.aspectMap = aspects;
-		this.cooking = cooking;
-
-		// Initialize Inventory
-		try {
-			inventory = BreweryUtils.fromBase64(inventoryString, this);
-		} catch (IOException e) {
-			inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
-			Brewery.breweryDriver.debugLog("Error creating inventory for a cauldron");
-			e.printStackTrace();
-		}
-
-		// Initialize
-		// Add to lists
-		cauldronList.add(this);
-		if (cooking) {
-			BukkitTask task = Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
-					new BreweryCauldronRunnable(this), 0, 20);
-			taskMap.put(this, task);
-		}
-
-		// Start Hologram
-		if (hologram == null) {
-			createHologram(block);
-		}
-		updateHologram();
-
+		updateHologram(HologramActions.INIT);
 	}
 
 	// Retrieve cauldron from list by Block
@@ -124,19 +89,6 @@ public class BreweryCauldron implements InventoryHolder {
 		// Remove hologram
 		bcauldron.hologram.delete();
 	}
-
-	/*
-	public Inventory getInventory(Block block) {
-		BreweryCauldron bcauldron = get(block);
-		if (bcauldron == null) {
-			if (getFillLevel(block) > 1) {
-				bcauldron = new BreweryCauldron(block);
-			} else {
-				return null;
-			}
-		}
-		return bcauldron.getInventory();
-	}*/
 	
 	// unloads cauldrons that are in a unloading world
 	// as they were written to file just before, this is safe to do
@@ -147,19 +99,6 @@ public class BreweryCauldron implements InventoryHolder {
 			}
 		}
 	}
-
-	/*
-	public Inventory getInventory(Block block) {
-		BreweryCauldron bcauldron = get(block);
-		if (bcauldron == null) {
-			if (getFillLevel(block) > 1) {
-				bcauldron = new BreweryCauldron(block);
-			} else {
-				return null;
-			}
-		}
-		return bcauldron.getInventory();
-	}*/
 	
 	public static void onDisable() {
 		cauldronList.clear();
@@ -251,14 +190,19 @@ public class BreweryCauldron implements InventoryHolder {
 		// Manage parameters
 		cooking = true;
 		
+		//Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
+		//		new BreweryCauldronRunnable(this), 0, 20);
+		taskMap.put(this, Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
+				new BreweryCauldronRunnable(this), 0, 20));
+		
 		// Create hologram
 		if (hologram == null) {
 			createHologram(block);
 		}
-		updateHologram();
+		updateHologram(HologramActions.START_COOKING);
 		
 		// Return
-		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting") + ".");
+		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting"));
 	}
 
 	public void purgeContents() {
@@ -270,8 +214,6 @@ public class BreweryCauldron implements InventoryHolder {
 					if (usesBucket(item)) {
 						dumpItem(new ItemStack(Material.BUCKET));
 					}
-					// TODO: Add Ingredient
-					//addIngredient(item);
 				} else {// eject
 					dumpItem(item);
 					contents[i] = null;
@@ -291,7 +233,7 @@ public class BreweryCauldron implements InventoryHolder {
 			}
 
 			// Update Sign
-			updateHologram();
+			updateHologram(HologramActions.TICK);
 
 			++cookTime;
 			// Bubble effects
@@ -311,8 +253,8 @@ public class BreweryCauldron implements InventoryHolder {
 			if (cooking) {
 				cooking = false;
 				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 2.0f, 1.0f);
-				updateHologram();
-				hologram.appendTextLine("Fermentation stopped");
+				updateHologram(HologramActions.STOP_COOKING);
+				//hologram.appendTextLine("Fermentation stopped");
 			}
 		}
 	}
@@ -327,7 +269,7 @@ public class BreweryCauldron implements InventoryHolder {
 			if(!inventory.addItem(new ItemStack(ingredient)).isEmpty()) {
 				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Space"));
 			}
-			updateHologramWithInventory();
+			updateHologram(HologramActions.ADD_INGREDIENT);
 			return new BreweryMessage(true, ""); 
 		}
 		return new BreweryMessage(false, Brewery.getText("Fermentation_Not_Valid"));
@@ -367,51 +309,35 @@ public class BreweryCauldron implements InventoryHolder {
 		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
 	}
 
-	private void updateHologram() {
-		hologram.clearLines();
-
-		int secondsCooked = cookTime % 60;
-
-		// Time
-		hologram.appendTextLine(cookTime + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
-
-		// Status
-		if (cooking) {
-			hologram.appendTextLine("Cooking...");
-		}
-		if (fireAndAirInPlace().getResult()) {
+	private void updateHologram(HologramActions action) {
+		if(action == HologramActions.TICK) {// Time
+			int secondsCooked = cookTime % 60;
+			((TextLine)hologram.getLine(0)).setText(cookTime/60 + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
+		}	else if (action == HologramActions.START_COOKING) {
+			((TextLine)hologram.getLine(1)).setText("Cooking...");
+		} else if (action == HologramActions.STOP_COOKING) { // 
+			((TextLine)hologram.getLine(1)).setText("Cooking Stopped");
+		} else if (action == HologramActions.ADD_INGREDIENT) { // Inventory
+			// Clean out past lines
+			for (int i = hologram.size()-1; i >= 2; i--){
+				hologram.removeLine(i);
+			}
+			
+			// Add new Ones
+			for (ItemStack itemStack : inventory.getContents()) {
+				if (itemStack != null) {
+					hologram.appendTextLine(BreweryUtils.getItemName(itemStack) + " x" + itemStack.getAmount());
+				}
+			}
+			// Location above = block.getRelative(BlockFace.UP).getLocation().add(0.5, 0.75
+			// + (hologram.size()-2) * 0.25, 0.5);
+			hologram.teleport(
+					block.getRelative(BlockFace.UP).getLocation().add(0.5, 0.75 + (hologram.size() - 2) * 0.25, 0.5));
+		} else if (action == HologramActions.INIT) {
+			hologram.clearLines();
+			hologram.appendTextLine("0:00");
 			hologram.appendTextLine("Ready...");
 		}
-
-	}
-
-	private void updateHologramWithInventory()
-	{
-		hologram.clearLines();
-		int secondsCooked = cookTime % 60;
-		
-		// Time
-		hologram.appendTextLine(cookTime + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
-
-		// Status
-		if (cooking) {
-			hologram.appendTextLine("Cooking...");
-		}
-		if (fireAndAirInPlace().getResult()) {
-			hologram.appendTextLine("Ready...");
-		}
-		
-		for(ItemStack itemStack : inventory.getContents()) {
-			if(itemStack != null){
-				hologram.appendTextLine(BreweryUtils.getItemName(itemStack) + " x" + itemStack.getAmount());
-			}		
-		}
-		//int shift = hologram.size() - previousSize;
-		Location above = block.getRelative(BlockFace.UP).getLocation().add(0.5, 0.75 + (hologram.size()-2) * 0.25, 0.5);
-		//above.setX(above.getX() + 0.5);
-		//above.setY(above.getY() + 0.75 + (hologram.size()-2) * 0.25);
-		//above.setZ(above.getZ() + 0.5);
-		hologram.teleport(above);
 	}
 
 	private void dumpContents() {
@@ -446,29 +372,24 @@ public class BreweryCauldron implements InventoryHolder {
 
 		// Stop Task timer
 		taskMap.get(this).cancel();
-
-		// Get type
-		//calculateType();
+		
+		UnfinishedBrew brew = new UnfinishedBrew(inventory, cookTime);
 
 		ItemStack potion = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 
 		// Set Name
-
+		potionMeta.setDisplayName(Brewery.getText("Brew_UnfinishedPotion"));
+		potionMeta.setColor(Color.ORANGE); //TODO: Placeholder colour, make it drink-driven
 		potion.setItemMeta(potionMeta);
 
 		// Custom NBT Setup
 		NBTItem nbti = new NBTItem(potion);
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); // All brewery NBT gets set here.
 
-		// TODO: Assign aspects
-
-		// Multipliers
-		breweryMeta.setInteger("potency", 100);
-		breweryMeta.setInteger("duration", 100);
-
-		// Type
-		//breweryMeta.setString("type", type);
+		for(Entry<Aspect, Integer> entry : brew.getAspectMap().entrySet()) {
+			breweryMeta.setInteger(entry.getKey().toString(), entry.getValue());
+		}
 
 		// Crafter
 		NBTCompound crafters = breweryMeta.addCompound("crafters");
@@ -482,7 +403,7 @@ public class BreweryCauldron implements InventoryHolder {
 
 	public class BreweryCauldronRunnable implements Runnable {
 
-		private BreweryCauldron cauldron;
+		private final BreweryCauldron cauldron;
 
 		public BreweryCauldronRunnable(BreweryCauldron cauldron) {
 			this.cauldron = cauldron;
@@ -492,5 +413,9 @@ public class BreweryCauldron implements InventoryHolder {
 		public void run() {
 			cauldron.onUpdate();
 		}
+	}
+	
+	private enum HologramActions{
+		INIT, START_COOKING, ADD_INGREDIENT, TICK, STOP_COOKING;
 	}
 }

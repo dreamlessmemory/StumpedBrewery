@@ -9,16 +9,19 @@ public class BreweryIngredient {
 	}
 
 	public enum Rarity {
-		COMMON, UNCOMMON, RARE, LEGENDARY, INVALID;
+		COMMON, COMMON_REFINED, UNCOMMON, UNCOMMON_REFINED, RARE, RARE_REFINED, LEGENDARY, INVALID;
 		
 		public final int getCookTime() {
 			switch(this) {
 			case COMMON:
 				return 1;
+			case COMMON_REFINED:
 			case UNCOMMON:
 				return 2;
+			case UNCOMMON_REFINED:
 			case RARE:
 				return 3;
+			case RARE_REFINED:
 			case LEGENDARY:
 				return 4;
 			default:
@@ -30,12 +33,39 @@ public class BreweryIngredient {
 			switch(this) {
 			case COMMON:
 				return 1;
-			case UNCOMMON:
+			case COMMON_REFINED:
 				return 2;
-			case RARE:
+			case UNCOMMON:
 				return 3;
-			case LEGENDARY:
+			case UNCOMMON_REFINED:
 				return 4;
+			case RARE:
+				return 5;
+			case RARE_REFINED:
+				return 6;
+			case LEGENDARY:
+				return 7;
+			default:
+				return 0;
+			}	
+		}
+		
+		public final int getSaturation() {
+			switch(this) {
+			case COMMON:
+				return 10;
+			case COMMON_REFINED:
+				return 20;
+			case UNCOMMON:
+				return 30;
+			case UNCOMMON_REFINED:
+				return 40;
+			case RARE:
+				return 50;
+			case RARE_REFINED:
+				return 60;
+			case LEGENDARY:
+				return 70;
 			default:
 				return 0;
 			}	
@@ -64,4 +94,15 @@ public class BreweryIngredient {
 			}
 		}
 	}
+	
+	public static class PairedAspectRarity	{
+		public final Aspect aspect;
+		public final Rarity rarity;
+		
+		public PairedAspectRarity(Aspect aspect, Rarity rarity) {
+			this.aspect = aspect;
+			this.rarity = rarity;
+		}
+	}
+	
 }

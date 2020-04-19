@@ -59,7 +59,6 @@ public class Brewery extends JavaPlugin {
 	//Params
 	public static Brewery breweryDriver;
 	public static boolean useUUID;
-	//public static boolean use1_9;
 	public static boolean updateCheck;
 	
 	//debug
@@ -177,7 +176,9 @@ public class Brewery extends JavaPlugin {
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
 		//breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new CauldronRunnable(), 120, 20);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
-		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000
+		if(!development) {
+			breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000	
+		}
 		
 		this.log(this.getDescription().getName() + " enabled!");
 	}
