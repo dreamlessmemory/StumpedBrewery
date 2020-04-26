@@ -26,11 +26,12 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.ChatPaginator;
 
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.distillation.BEffect;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
-
+@Deprecated
 public class BRecipe {
 	
 	

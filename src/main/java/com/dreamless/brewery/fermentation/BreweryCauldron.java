@@ -1,4 +1,4 @@
-package com.dreamless.brewery.entity;
+package com.dreamless.brewery.fermentation;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -21,8 +21,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.UnfinishedBrew;
-import com.dreamless.brewery.recipe.BreweryIngredient.Aspect;
+import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;

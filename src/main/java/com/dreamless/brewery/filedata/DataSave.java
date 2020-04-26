@@ -4,7 +4,7 @@ package com.dreamless.brewery.filedata;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.entity.BreweryBarrel;
+import com.dreamless.brewery.aging.BreweryBarrel;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 

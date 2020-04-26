@@ -1,4 +1,4 @@
-package com.dreamless.brewery.entity;
+package com.dreamless.brewery.aging;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

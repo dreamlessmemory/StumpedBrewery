@@ -12,9 +12,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.BreweryBarrel.BarrelType;
-import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.aging.BreweryBarrel;
+import com.dreamless.brewery.aging.BreweryBarrel.BarrelType;
+import com.dreamless.brewery.distillation.BreweryDistillerOld;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
@@ -28,11 +28,11 @@ public class BlockListener implements Listener {
 		if(block.getType() != Material.BREWING_STAND) {
 			return;
 		}
-		BreweryDistiller distiller = BreweryDistiller.get(block);
+		BreweryDistillerOld distiller = BreweryDistillerOld.get(block);
 		if(distiller == null) {
 			return;
 		}
-		BreweryDistiller.remove(block);
+		BreweryDistillerOld.remove(block);
 	}
 	
 	// Remove Barrels

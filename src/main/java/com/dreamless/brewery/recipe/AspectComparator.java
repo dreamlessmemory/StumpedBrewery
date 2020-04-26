@@ -2,7 +2,7 @@ package com.dreamless.brewery.recipe;
 
 import java.util.Comparator;
 import java.util.Map;
-
+@Deprecated
 public class AspectComparator implements Comparator<String>{
 	
 	Map<String, Double> base;

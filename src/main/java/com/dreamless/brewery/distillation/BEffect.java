@@ -1,4 +1,4 @@
-package com.dreamless.brewery.recipe;
+package com.dreamless.brewery.distillation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.dreamless.brewery.Brewery;
-
+@Deprecated
 public class BEffect {
 
 	

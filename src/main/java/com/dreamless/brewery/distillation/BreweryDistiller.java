@@ -1,7 +1,8 @@
-package com.dreamless.brewery.entity;
+package com.dreamless.brewery.distillation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.WordUtils;
@@ -18,10 +19,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.AspectOld;
+import com.dreamless.brewery.distillation.BreweryEffect.BreweryAspectMatrix;
+//import com.dreamless.brewery.recipe.AspectOld;
 import com.dreamless.brewery.recipe.BRecipe;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
@@ -231,6 +234,7 @@ public class BreweryDistiller implements InventoryHolder {
 	private ItemStack distillSlot(ItemStack item, Material filter) {
 		Brewery.breweryDriver.debugLog("DISTILLING 1 CYCLE : " + item.toString() + " FILTER: " + filter.toString());
 		
+		/*
 		//Pull NBT
 		NBTItem nbti = new NBTItem(item);
 		NBTCompound brewery = nbti.getCompound("brewery");
@@ -247,7 +251,7 @@ public class BreweryDistiller implements InventoryHolder {
 		}
 		
 		item = nbti.getItem();
-		
+		*/
 		return item;
 	}
 	
@@ -386,5 +390,11 @@ public class BreweryDistiller implements InventoryHolder {
 				}
 			}
 		}
+	}
+	
+	// TODO: Implementation
+	public static Set<PotionEffectType> getPotionEffectTypes(BreweryAspectMatrix matrix){
+		HashSet<PotionEffectType> set = new HashSet<PotionEffectType>();
+		return set;
 	}
 }

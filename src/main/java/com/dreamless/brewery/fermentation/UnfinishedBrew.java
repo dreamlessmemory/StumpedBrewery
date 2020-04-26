@@ -1,4 +1,4 @@
-package com.dreamless.brewery.recipe;
+package com.dreamless.brewery.fermentation;
 
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -6,9 +6,7 @@ import java.util.Map.Entry;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.dreamless.brewery.recipe.BreweryIngredient.Aspect;
-import com.dreamless.brewery.recipe.BreweryIngredient.PairedAspectRarity;
-import com.dreamless.brewery.recipe.BreweryIngredient.Rarity;
+import com.dreamless.brewery.fermentation.BreweryIngredient.*;
 
 public class UnfinishedBrew {
 

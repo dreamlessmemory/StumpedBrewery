@@ -1,4 +1,4 @@
-package com.dreamless.brewery.entity;
+package com.dreamless.brewery.fermentation;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,9 +21,9 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.distillation.BEffect;
 import com.dreamless.brewery.recipe.AspectOld;
 import com.dreamless.brewery.recipe.AspectOld.AspectRarity;
-import com.dreamless.brewery.recipe.BEffect;
 import com.dreamless.brewery.recipe.BRecipe;
 import com.dreamless.brewery.utils.BreweryMessage;
 import de.tr7zw.changeme.nbtapi.NBTCompound;

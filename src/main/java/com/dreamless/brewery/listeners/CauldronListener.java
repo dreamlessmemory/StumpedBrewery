@@ -5,7 +5,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.CauldronLevelChangeEvent;
 
-import com.dreamless.brewery.entity.BreweryCauldron;
+import com.dreamless.brewery.fermentation.BreweryCauldron;
 
 public class CauldronListener implements Listener {
 

@@ -8,6 +8,7 @@ import org.bukkit.Material;
 
 import com.dreamless.brewery.Brewery;
 
+@Deprecated
 public class AspectOld implements Comparable<Object> {
 	//Static Numbers for balancing
 	public static double commonPotency = 4;

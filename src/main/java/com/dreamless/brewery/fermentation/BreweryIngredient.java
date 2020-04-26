@@ -1,4 +1,4 @@
-package com.dreamless.brewery.recipe;
+package com.dreamless.brewery.fermentation;
 
 import org.bukkit.Material;
 

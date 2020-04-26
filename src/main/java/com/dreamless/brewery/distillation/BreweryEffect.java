@@ -1,21 +1,18 @@
-package com.dreamless.brewery.recipe;
+package com.dreamless.brewery.distillation;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
-import org.w3c.dom.ranges.RangeException;
 
-import com.dreamless.brewery.recipe.BreweryIngredient.Aspect;
+import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
 import com.google.common.collect.Range;
-import com.google.gson.Gson;
 
 public class BreweryEffect {
 
+	public static final int MAXIMUM_STACKS = 3;
+	public static final int MAXIMUM_TOTAL_STACKS = MAXIMUM_STACKS * 6;
+	
 	public enum PotionEffect{
-		ABSORPTION, DAMAGE_RESISTANCE, DOLPHINS_GRACE, FAST_DIGGING, FIRE_RESISTANCE, HEAL,	HEALTH_BOOST, INCREASE_DAMAGE, INVISIBILITY, JUMP,	
+		ABSORPTION, DAMAGE_RESISTANCE, DOLPHINS_GRACE, FAST_DIGGING, FIRE_RESISTANCE, HEAL,	WATER_BREATHING, INCREASE_DAMAGE, INVISIBILITY, JUMP,	
 		LEVITATION,	LUCK, NIGHT_VISION,	REGENERATION, SATURATION, SLOW_FALLING,	SPEED;
 
 		public PotionEffectType getPotionEffectType() {
@@ -32,8 +29,8 @@ public class BreweryEffect {
 				return PotionEffectType.FIRE_RESISTANCE;
 			case HEAL:
 				return PotionEffectType.HEAL;
-			case HEALTH_BOOST:	
-				return PotionEffectType.HEALTH_BOOST;
+			case WATER_BREATHING:	
+				return PotionEffectType.WATER_BREATHING;
 			case INCREASE_DAMAGE:	
 				return PotionEffectType.INCREASE_DAMAGE;
 			case INVISIBILITY:
@@ -64,21 +61,21 @@ public class BreweryEffect {
 			switch(this){
 			case FAST_DIGGING:
 			case LUCK:
+			case ABSORPTION:
 				return 3;
 			case SPEED:
-			case ABSORPTION:
 			case DAMAGE_RESISTANCE:
 			case DOLPHINS_GRACE:
 			case FIRE_RESISTANCE:
 			case HEAL:
-			case HEALTH_BOOST:
 			case INCREASE_DAMAGE:
+			case REGENERATION:
+			case WATER_BREATHING:
 				return 2;
 			case INVISIBILITY:
 			case JUMP:
 			case LEVITATION:
 			case NIGHT_VISION:
-			case REGENERATION:
 			case SATURATION:
 			case SLOW_FALLING:
 			default:
@@ -95,7 +92,7 @@ public class BreweryEffect {
 			case FAST_DIGGING:
 			case FIRE_RESISTANCE:
 			case HEAL:
-			case HEALTH_BOOST:
+			case WATER_BREATHING:
 			case INCREASE_DAMAGE:
 			case INVISIBILITY:
 			case JUMP:
@@ -105,25 +102,21 @@ public class BreweryEffect {
 			case REGENERATION:
 			case SATURATION:
 			case SLOW_FALLING:
+				requirement = new BreweryEffectRequirement(5);
+				break;
 			case SPEED:
+				requirement = new BreweryEffectRequirement(0);
+				break;
 			default:
 				requirement = new BreweryEffectRequirement(0);
 			}
 			return requirement;
 		}
-	}
-	
-	// TODO: Implementation
-	public static Set<PotionEffectType> getPotionEffectTypes(BreweryAspectMatrix matrix){
-		HashSet<PotionEffectType> set = new HashSet<PotionEffectType>();
-		return set;
-	}
-	
-	
+	}	
 	
 	public class BreweryAspectMatrix{
 		private HashMap<Aspect, Integer> aspectMatrix;
-		private int totalCount = 18;
+		private int totalCount = MAXIMUM_TOTAL_STACKS;
 		public BreweryAspectMatrix() {
 			aspectMatrix.put(Aspect.LITHIC, 3);
 			aspectMatrix.put(Aspect.INFERNAL, 3);
@@ -143,8 +136,8 @@ public class BreweryEffect {
 	public static class BreweryEffectRequirement{
 		public final int totalMax;
 		public HashMap<Aspect, Range<Integer>> aspectRequriementMap;
-		public BreweryEffectRequirement(int max) {
-			totalMax = max;
+		public BreweryEffectRequirement(int minimumDistillCycles) {
+			totalMax = MAXIMUM_TOTAL_STACKS - minimumDistillCycles;
 		}
 		public void addAspectRequirement(Aspect aspect, int min, int max) {
 			aspectRequriementMap.put(aspect, Range.closed(min, max));

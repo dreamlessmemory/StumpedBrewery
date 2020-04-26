@@ -1,4 +1,4 @@
-package com.dreamless.brewery.entity;
+package com.dreamless.brewery.fermentation;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

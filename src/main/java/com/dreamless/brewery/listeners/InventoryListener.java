@@ -13,9 +13,9 @@ import org.bukkit.event.inventory.InventoryPickupItemEvent;
 import org.bukkit.inventory.InventoryHolder;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.BreweryCauldron;
-import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.aging.BreweryBarrel;
+import com.dreamless.brewery.distillation.BreweryDistillerOld;
+import com.dreamless.brewery.fermentation.BreweryCauldron;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.utils.BreweryMessage;
 
@@ -123,7 +123,7 @@ public class InventoryListener implements Listener {
 		if (holder instanceof BreweryBarrel) { // Play sound effect if a barrel
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 		} else if (holder instanceof BrewingStand) { // Remove distiller if empty
-			BreweryDistiller distiller = BreweryDistiller.get(((BrewingStand)holder).getBlock());
+			BreweryDistillerOld distiller = BreweryDistillerOld.get(((BrewingStand)holder).getBlock());
 			if(distiller == null) {
 				return;
 			}
@@ -134,8 +134,8 @@ public class InventoryListener implements Listener {
 					distiller.removeSelf();
 				}
 			}
-		} else if (holder instanceof BreweryDistiller) {
-			BreweryDistiller distiller = ((BreweryDistiller) holder);
+		} else if (holder instanceof BreweryDistillerOld) {
+			BreweryDistillerOld distiller = ((BreweryDistillerOld) holder);
 			BreweryMessage breweryMessage = distiller.prepDistiller();
 			Brewery.breweryDriver.msg(event.getPlayer(), breweryMessage.getMessage());
 		} else if (holder instanceof BreweryCauldron) {
