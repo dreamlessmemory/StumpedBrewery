@@ -23,7 +23,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.distillation.BreweryEffect.BreweryAspectMatrix;
+import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
 //import com.dreamless.brewery.recipe.AspectOld;
 import com.dreamless.brewery.recipe.BRecipe;
 import com.dreamless.brewery.utils.BreweryMessage;
@@ -395,6 +395,26 @@ public class BreweryDistiller implements InventoryHolder {
 	// TODO: Implementation
 	public static Set<PotionEffectType> getPotionEffectTypes(BreweryAspectMatrix matrix){
 		HashSet<PotionEffectType> set = new HashSet<PotionEffectType>();
+		set.add(PotionEffectType.GLOWING);
 		return set;
+	}
+	
+	public class BreweryAspectMatrix{
+		private HashMap<Aspect, Integer> aspectMatrix;
+		private int totalCount = BreweryEffectRequirement.MAXIMUM_TOTAL_STACKS;
+		public BreweryAspectMatrix() {
+			aspectMatrix.put(Aspect.LITHIC, 3);
+			aspectMatrix.put(Aspect.INFERNAL, 3);
+			aspectMatrix.put(Aspect.PYROTIC, 3);
+			aspectMatrix.put(Aspect.AERIAL, 3);
+			aspectMatrix.put(Aspect.VOID, 3);
+			aspectMatrix.put(Aspect.AQUATIC, 3);
+		}
+		public int getTotalCount() {
+			return totalCount;
+		}
+		public void distillAspect(Aspect aspect) {
+			aspectMatrix.put(aspect, Math.max(aspectMatrix.get(aspect) - 1, 0));
+		}
 	}
 }

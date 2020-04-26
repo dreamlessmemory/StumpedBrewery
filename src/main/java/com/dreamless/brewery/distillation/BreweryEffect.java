@@ -4,12 +4,10 @@ import java.util.HashMap;
 import org.bukkit.potion.PotionEffectType;
 
 import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
+import com.dreamless.brewery.distillation.*;
 import com.google.common.collect.Range;
 
 public class BreweryEffect {
-
-	public static final int MAXIMUM_STACKS = 3;
-	public static final int MAXIMUM_TOTAL_STACKS = MAXIMUM_STACKS * 6;
 	
 	public enum PotionEffect{
 		ABSORPTION, DAMAGE_RESISTANCE, DOLPHINS_GRACE, FAST_DIGGING, FIRE_RESISTANCE, HEAL,	WATER_BREATHING, INCREASE_DAMAGE, INVISIBILITY, JUMP,	
@@ -102,7 +100,11 @@ public class BreweryEffect {
 			case REGENERATION:
 			case SATURATION:
 			case SLOW_FALLING:
-				requirement = new BreweryEffectRequirement(5);
+				requirement = new BreweryEffectRequirement(3);
+				requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+				requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 2);
+				requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 2);
+				requirement.addAspectMinimalRequirement(Aspect.VOID, 1);
 				break;
 			case SPEED:
 				requirement = new BreweryEffectRequirement(0);
@@ -113,35 +115,5 @@ public class BreweryEffect {
 			return requirement;
 		}
 	}	
-	
-	public class BreweryAspectMatrix{
-		private HashMap<Aspect, Integer> aspectMatrix;
-		private int totalCount = MAXIMUM_TOTAL_STACKS;
-		public BreweryAspectMatrix() {
-			aspectMatrix.put(Aspect.LITHIC, 3);
-			aspectMatrix.put(Aspect.INFERNAL, 3);
-			aspectMatrix.put(Aspect.PYROTIC, 3);
-			aspectMatrix.put(Aspect.AERIAL, 3);
-			aspectMatrix.put(Aspect.VOID, 3);
-			aspectMatrix.put(Aspect.AQUATIC, 3);
-		}
-		public int getTotalCount() {
-			return totalCount;
-		}
-		public void distillAspect(Aspect aspect) {
-			aspectMatrix.put(aspect, Math.max(aspectMatrix.get(aspect) - 1, 0));
-		}
-	}
-
-	public static class BreweryEffectRequirement{
-		public final int totalMax;
-		public HashMap<Aspect, Range<Integer>> aspectRequriementMap;
-		public BreweryEffectRequirement(int minimumDistillCycles) {
-			totalMax = MAXIMUM_TOTAL_STACKS - minimumDistillCycles;
-		}
-		public void addAspectRequirement(Aspect aspect, int min, int max) {
-			aspectRequriementMap.put(aspect, Range.closed(min, max));
-		}
-	}
 	
 }
