@@ -99,15 +99,15 @@ public class BreweryIngredient {
 			case DIORITE:
 				return AERIAL;
 			case GRANITE:
-				return AERIAL;
+				return LITHIC;
 			case ANDESITE:
-				return AERIAL;
+				return INFERNAL;
 			case GRAVEL:
-				return AERIAL;
+				return PYROTIC;
 			case SAND:
-				return AERIAL;
+				return AQUATIC;
 			case COBBLESTONE:
-				return AERIAL;
+				return VOID;
 			default:
 				return INVALID;
 			}
