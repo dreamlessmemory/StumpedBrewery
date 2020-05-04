@@ -23,6 +23,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.aging.BreweryBarrel;
+import com.dreamless.brewery.distillation.BreweryDistiller;
 import com.dreamless.brewery.distillation.BreweryDistillerOld;
 import com.dreamless.brewery.distillation.BreweryDistillerOld.DistillerRunnable;
 import com.dreamless.brewery.fermentation.BreweryCauldron;
@@ -169,7 +170,7 @@ public class PlayerListener implements Listener {
 		Block clickedBlock = event.getClickedBlock();
 		Material materialInHand = event.getMaterial();
 
-		BreweryDistillerOld distiller = BreweryDistillerOld.get(clickedBlock);
+		BreweryDistiller distiller = BreweryDistiller.get(clickedBlock);
 
 		// Cancel interaction if distilling
 		if (distiller != null && distiller.isDistilling()) {
@@ -177,22 +178,25 @@ public class PlayerListener implements Listener {
 			return;
 		}
 
-		if (materialInHand == Material.IRON_SHOVEL) {
-			event.setCancelled(true);
-			if (distiller == null) {// Add a new one
-				distiller = new BreweryDistillerOld(clickedBlock);
+		if (BreweryDistiller.isValidFilter(materialInHand)) {
+			if(distiller == null) {// New Distiller
+				distiller = new BreweryDistiller(clickedBlock);
 			}
-
-			player.openInventory(distiller.getInventory());
-		} else if (materialInHand == Material.CLOCK) {
+			if(distiller.addFilter(materialInHand)) {
+				removeItemFromPlayerHand(player);
+			}
+		} else if (materialInHand == Material.IRON_SHOVEL) { // Eject Filters
+			event.setCancelled(true);
+			distiller.ejectAllFilters();
+		} else if (materialInHand == Material.CLOCK) { // Start Distilling
 			event.setCancelled(true);
 			if (distiller != null) {
 				BreweryMessage breweryMessage = distiller.startDistilling(player);
 				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
 				if (breweryMessage.getResult()) {
 					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
-					BreweryDistillerOld.runningDistillers.put(distiller,
-							new DistillerRunnable(BreweryDistillerOld.DEFAULT_CYCLE_LENGTH, distiller)
+					BreweryDistiller.runningDistillers.put(distiller,
+							new BreweryDistiller.DistillerRunnable(BreweryDistiller.DEFAULT_CYCLE_LENGTH, distiller)
 									.runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
 				}
 			}

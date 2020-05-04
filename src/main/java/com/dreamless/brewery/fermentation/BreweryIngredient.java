@@ -93,6 +93,25 @@ public class BreweryIngredient {
 				return INVALID;
 			}
 		}
+		
+		public static Aspect getFilterAspect(Material material) {
+			switch(material) {
+			case DIORITE:
+				return AERIAL;
+			case GRANITE:
+				return AERIAL;
+			case ANDESITE:
+				return AERIAL;
+			case GRAVEL:
+				return AERIAL;
+			case SAND:
+				return AERIAL;
+			case COBBLESTONE:
+				return AERIAL;
+			default:
+				return INVALID;
+			}
+		}
 	}
 	
 	public static class PairedAspectRarity	{
