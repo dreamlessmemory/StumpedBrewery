@@ -2,9 +2,6 @@ package com.dreamless.brewery.distillation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,22 +15,16 @@ import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.brew.BreweryEffectRequirement;
-import com.dreamless.brewery.brew.Aspect;
+import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.gmail.filoghost.holographicdisplays.api.line.ItemLine;
 import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
-
-import de.tr7zw.changeme.nbtapi.NBTCompound;
-import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BreweryDistiller implements InventoryHolder {
 	
@@ -155,29 +146,11 @@ public class BreweryDistiller implements InventoryHolder {
 		BrewerInventory brewingInventory = (BrewerInventory) ((InventoryHolder)block.getState()).getInventory();
 		for(int i = 0; i < 3; i++) {
 			ItemStack item = brewingInventory.getItem(i);
-			if(item == null) continue;
-			
-			PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
-			
-			potionMeta.setDisplayName("Ruined Brew");
-			
-			ArrayList<String> agedFlavorText = new ArrayList<String>();
-			agedFlavorText.add("A brew that was ruined");
-			agedFlavorText.add("by being removed during distillation.");
-			potionMeta.setLore(agedFlavorText);
-			
-			potionMeta.clearCustomEffects();
-			
-			item.setItemMeta(potionMeta);
-			
-			//Set NBT
-			NBTItem nbti = new NBTItem(item);
-			
-			//Tag as distilling brew
-			NBTCompound brewery = nbti.getCompound("brewery");
-			brewery.setBoolean("ruined", true);
-			
-			brewingInventory.setItem(i, item);	
+			if(item == null) {
+				continue;
+			} else {
+				brewingInventory.setItem(i, BrewItemFactory.getRuinedPotion());	
+			}
 		}
 	}
 	
@@ -204,16 +177,7 @@ public class BreweryDistiller implements InventoryHolder {
 		distilling = false;
 		finishedDistilling = true;
 		
-		BreweryAspectMatrix matrix = new BreweryAspectMatrix();
-		
-		for(ItemStack item : filterInventory) {
-			if(item != null) {
-				matrix.distillAspect(Aspect.getFilterAspect(item.getType()), item.getAmount());
-			}
-		}
-		
-		// TODO: Apply calculations now
-		HashSet<PotionEffectType> effects = getPotionEffectTypes(matrix);
+		BrewItemFactory.doDistillBrews((BrewerInventory) ((InventoryHolder)block.getState()).getInventory(), filterInventory);
 		
 		//Set Hologram
 		filterLine.setItemStack(new ItemStack(Material.POTION));
@@ -237,13 +201,6 @@ public class BreweryDistiller implements InventoryHolder {
 	
 	public boolean isFinishedDistilling() {
 		return finishedDistilling;
-	}
-	
-	// TODO: Implementation
-	public static HashSet<PotionEffectType> getPotionEffectTypes(BreweryAspectMatrix matrix){
-		HashSet<PotionEffectType> set = new HashSet<PotionEffectType>();
-		set.add(PotionEffectType.GLOWING);
-		return set;
 	}
 	
 	public static class DistillerRunnable extends BukkitRunnable {
@@ -286,25 +243,6 @@ public class BreweryDistiller implements InventoryHolder {
 					distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
 				}
 			}
-		}
-	}
-
-	public class BreweryAspectMatrix{
-		private HashMap<Aspect, Integer> aspectMatrix;
-		private int totalCount = BreweryEffectRequirement.MAXIMUM_TOTAL_STACKS;
-		public BreweryAspectMatrix() {
-			aspectMatrix.put(Aspect.LITHIC, 3);
-			aspectMatrix.put(Aspect.INFERNAL, 3);
-			aspectMatrix.put(Aspect.PYROTIC, 3);
-			aspectMatrix.put(Aspect.AERIAL, 3);
-			aspectMatrix.put(Aspect.VOID, 3);
-			aspectMatrix.put(Aspect.AQUATIC, 3);
-		}
-		public int getTotalCount() {
-			return totalCount;
-		}
-		public void distillAspect(Aspect aspect, int amount) {
-			aspectMatrix.put(aspect, Math.max(aspectMatrix.get(aspect) - amount, 0));
 		}
 	}
 }
