@@ -23,11 +23,9 @@ import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.aging.BreweryBarrel;
+import com.dreamless.brewery.brew.Rarity;
 import com.dreamless.brewery.distillation.BreweryDistiller;
-import com.dreamless.brewery.distillation.BreweryDistillerOld;
-import com.dreamless.brewery.distillation.BreweryDistillerOld.DistillerRunnable;
 import com.dreamless.brewery.fermentation.BreweryCauldron;
-import com.dreamless.brewery.fermentation.BreweryIngredient;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
@@ -70,7 +68,7 @@ public class PlayerListener implements Listener {
 		ItemStack item = event.getItem();
 
 		if (cauldron == null && BreweryCauldron.isUseableCauldron(clickedBlock)
-				&& BreweryIngredient.isValidIngredient(materialInHand)) {
+				&& Rarity.isValidIngredient(materialInHand)) {
 			cauldron = new BreweryCauldron(clickedBlock);
 			cauldron.addIngredient(materialInHand);
 			removeItemFromPlayerHand(player);
@@ -119,7 +117,7 @@ public class PlayerListener implements Listener {
 					// will only remove when existing
 					BreweryCauldron.remove(cauldron);
 				}
-			} else if (BreweryIngredient.isValidIngredient(materialInHand)){ // Add ingredient
+			} else if (Rarity.isValidIngredient(materialInHand)){ // Add ingredient
 				BreweryMessage response = cauldron.addIngredient(materialInHand);
 				if (response.getResult()) {
 					removeItemFromPlayerHand(player);

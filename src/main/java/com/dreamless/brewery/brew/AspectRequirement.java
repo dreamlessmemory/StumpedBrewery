@@ -1,6 +1,4 @@
-package com.dreamless.brewery.distillation;
-
-import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
+package com.dreamless.brewery.brew;
 
 public abstract class AspectRequirement {
 	protected final Aspect aspect;

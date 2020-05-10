@@ -1,8 +1,6 @@
-package com.dreamless.brewery.distillation;
+package com.dreamless.brewery.brew;
 
 import java.util.HashMap;
-
-import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
 
 public class BreweryEffectRequirement{
 	

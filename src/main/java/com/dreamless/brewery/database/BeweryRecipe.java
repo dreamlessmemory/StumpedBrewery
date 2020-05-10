@@ -1,4 +1,4 @@
-package com.dreamless.brewery.recipe;
+package com.dreamless.brewery.database;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

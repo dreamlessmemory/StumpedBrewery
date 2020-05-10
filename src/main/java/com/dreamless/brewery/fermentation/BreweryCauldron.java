@@ -1,11 +1,9 @@
 package com.dreamless.brewery.fermentation;
 
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -17,34 +15,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
+import com.dreamless.brewery.brew.Aspect;
+import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.dreamless.brewery.utils.BreweryUtils;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 
-import de.tr7zw.changeme.nbtapi.NBTCompound;
-import de.tr7zw.changeme.nbtapi.NBTItem;
-
 public class BreweryCauldron implements InventoryHolder {
 	private static CopyOnWriteArrayList<BreweryCauldron> cauldronList = new CopyOnWriteArrayList<BreweryCauldron>();
 	private static HashMap<BreweryCauldron, BukkitTask> taskMap = new HashMap<>();
 
-	// private BIngredients ingredients = new BIngredients();
 	private final Block block;
 	private int cookTime = 0; // Seconds
 	private boolean cooking = false;
 	private Hologram hologram;
-
-	// Ingredients
 	private Inventory inventory;
-	//private HashMap<String, AspectOld> aspectMap = new HashMap<String, AspectOld>();
-	//private String type;
 
 	public BreweryCauldron(Block block) {
 		this.block = block;
@@ -137,7 +127,6 @@ public class BreweryCauldron implements InventoryHolder {
 					bcauldron.hologram.delete();
 				}
 				player.getInventory().addItem(potion);
-				// giveItem(player, potion);
 				return true;
 			}
 		}
@@ -372,32 +361,7 @@ public class BreweryCauldron implements InventoryHolder {
 		// Stop Task timer
 		taskMap.get(this).cancel();
 		
-		UnfinishedBrew brew = new UnfinishedBrew(inventory, cookTime);
-
-		ItemStack potion = new ItemStack(Material.POTION);
-		PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
-
-		// Set Name
-		potionMeta.setDisplayName(Brewery.getText("Brew_UnfinishedPotion"));
-		potionMeta.setColor(Color.ORANGE); //TODO: Placeholder colour, make it drink-driven
-		potion.setItemMeta(potionMeta);
-
-		// Custom NBT Setup
-		NBTItem nbti = new NBTItem(potion);
-		NBTCompound breweryMeta = nbti.addCompound("brewery"); // All brewery NBT gets set here.
-
-		for(Entry<Aspect, Integer> entry : brew.getAspectMap().entrySet()) {
-			breweryMeta.setInteger(entry.getKey().toString(), entry.getValue());
-		}
-
-		// Crafter
-		NBTCompound crafters = breweryMeta.addCompound("crafters");
-		crafters.setString(player.getDisplayName(), player.getDisplayName());
-
-		// Finish writing NBT
-		potion = nbti.getItem();
-
-		return potion;
+		return BrewItemFactory.getFermentedBrew(player, inventory, state);
 	}
 
 	public class BreweryCauldronRunnable implements Runnable {

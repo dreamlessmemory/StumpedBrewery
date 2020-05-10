@@ -1,6 +1,4 @@
-package com.dreamless.brewery.distillation;
-
-import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
+package com.dreamless.brewery.brew;
 
 public class AspectMaximalRequirement extends AspectRequirement {
 

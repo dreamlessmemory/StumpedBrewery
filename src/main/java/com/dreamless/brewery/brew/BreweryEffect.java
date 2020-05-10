@@ -1,11 +1,6 @@
-package com.dreamless.brewery.distillation;
+package com.dreamless.brewery.brew;
 
-import java.util.HashMap;
 import org.bukkit.potion.PotionEffectType;
-
-import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
-import com.dreamless.brewery.distillation.*;
-import com.google.common.collect.Range;
 
 public class BreweryEffect {
 	

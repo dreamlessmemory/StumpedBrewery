@@ -24,7 +24,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.fermentation.BreweryIngredient.Aspect;
+import com.dreamless.brewery.brew.BreweryEffectRequirement;
+import com.dreamless.brewery.brew.Aspect;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
