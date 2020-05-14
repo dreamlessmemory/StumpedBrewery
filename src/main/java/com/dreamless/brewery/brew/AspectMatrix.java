@@ -19,4 +19,7 @@ public class AspectMatrix {
 	public void distillAspect(Aspect aspect, int amount) {
 		aspectMatrix.put(aspect, Math.max(aspectMatrix.get(aspect) - amount, 0));
 	}
+	public int getAspectLevel(Aspect aspect) {
+		return aspectMatrix.get(aspect);
+	}
 }

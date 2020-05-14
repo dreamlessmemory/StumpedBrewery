@@ -1,6 +1,7 @@
 package com.dreamless.brewery.brew;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
 public class BreweryEffectRequirement{
 	
@@ -26,5 +27,14 @@ public class BreweryEffectRequirement{
 		} else {
 			return aspectRequirement.checkRequirement(level);
 		}
+	}
+	
+	public boolean checkAspectRequirement(AspectMatrix matrix) {
+		for(Entry<Aspect, AspectRequirement> entry : aspectRequriementMap.entrySet()) {
+			if(!entry.getValue().checkRequirement(matrix.getAspectLevel(entry.getKey()))){
+				return false;
+			}
+		}
+		return true;
 	}
 }

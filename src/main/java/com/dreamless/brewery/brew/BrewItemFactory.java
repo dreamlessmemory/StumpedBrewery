@@ -100,6 +100,7 @@ public class BrewItemFactory {
 			}
 		}
 
+		// Get all potential effects
 		HashSet<BreweryEffect> set = BreweryEffect.getEffectsMatrix(matrix);
 
 		for(int i = 0; i < 3; i++) {
@@ -122,7 +123,8 @@ public class BrewItemFactory {
 	private static ItemStack getDistilledPotion(NBTItem item, HashSet<BreweryEffect> set, AspectMatrix matrix) {
 		
 		// Extract info
-		NBTCompound itemAspects = item.getCompound("brewery").getCompound("aspects");
+		NBTCompound originalNBT = item.getCompound("brewery");
+		NBTCompound itemAspects = originalNBT.getCompound("aspects");
 		if(itemAspects == null) {
 			return null;
 		}
@@ -149,6 +151,7 @@ public class BrewItemFactory {
 		NBTCompound breweryMeta = nbti.addCompound("brewery"); // All brewery NBT gets set here.
 
 		// Set state
+		breweryMeta.setString("crafter", originalNBT.getString("crafter"));
 		breweryMeta.setInteger("state", BrewState.DISTILLED.ordinal());
 		
 		// Write Effects

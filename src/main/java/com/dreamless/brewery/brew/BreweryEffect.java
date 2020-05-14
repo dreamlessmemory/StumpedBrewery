@@ -111,7 +111,9 @@ public enum BreweryEffect {
 		}
 		return requirement;
 	}
+	
 
+	// Gets the score of each effect
 	public static HashMap<BreweryEffect, Integer> getEffects(AspectMatrix matrix, HashMap<Aspect, Integer> aspectContents){
 		//TODO convert matrix to effects
 		HashMap<BreweryEffect, Integer> set = new HashMap<BreweryEffect, Integer>();
@@ -120,11 +122,16 @@ public enum BreweryEffect {
 		return set;
 	}
 	
+	// Get the list of effects
 	public static HashSet<BreweryEffect> getEffectsMatrix(AspectMatrix matrix){
 		//TODO convert matrix to effects
 		HashSet<BreweryEffect> set = new HashSet<BreweryEffect>();
-		set.add(BreweryEffect.SPEED);
-
+		
+		for(BreweryEffect effect : BreweryEffect.values()) {
+			if(effect.getEffectRequirement().checkAspectRequirement(matrix)) {
+				set.add(effect);
+			}
+		}
 		return set;
 	}
 }
