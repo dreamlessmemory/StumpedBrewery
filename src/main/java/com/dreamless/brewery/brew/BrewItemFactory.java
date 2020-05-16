@@ -2,7 +2,6 @@ package com.dreamless.brewery.brew;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
 
 import org.bukkit.Color;
