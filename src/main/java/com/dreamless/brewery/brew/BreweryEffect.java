@@ -2,13 +2,15 @@ package com.dreamless.brewery.brew;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
+import org.bukkit.Color;
 import org.bukkit.potion.PotionEffectType;
 
 public enum BreweryEffect {
 
 	ABSORPTION, DAMAGE_RESISTANCE, DOLPHINS_GRACE, FAST_DIGGING, FIRE_RESISTANCE, HEAL,	WATER_BREATHING, INCREASE_DAMAGE, INVISIBILITY, JUMP,	
-	LEVITATION,	LUCK, NIGHT_VISION,	REGENERATION, SATURATION, SLOW_FALLING,	SPEED;
+	LEVITATION,	LUCK, NIGHT_VISION,	REGENERATION, SATURATION, SLOW_FALLING,	SPEED, NONE;
 
 	public PotionEffectType getPotionEffectType() {
 		switch(this){
@@ -51,33 +53,7 @@ public enum BreweryEffect {
 		}
 	}
 
-	//TODO Finalize this
-	public int getCost() {
-		switch(this){
-		case FAST_DIGGING:
-		case LUCK:
-		case ABSORPTION:
-			return 3;
-		case SPEED:
-		case DAMAGE_RESISTANCE:
-		case DOLPHINS_GRACE:
-		case FIRE_RESISTANCE:
-		case HEAL:
-		case INCREASE_DAMAGE:
-		case REGENERATION:
-		case WATER_BREATHING:
-			return 2;
-		case INVISIBILITY:
-		case JUMP:
-		case LEVITATION:
-		case NIGHT_VISION:
-		case SATURATION:
-		case SLOW_FALLING:
-		default:
-			return 1;
-		}
-	}
-
+	// TODO: Finish this
 	public BreweryEffectRequirement getEffectRequirement() {
 		BreweryEffectRequirement requirement;
 		switch(this){
@@ -111,27 +87,84 @@ public enum BreweryEffect {
 		}
 		return requirement;
 	}
-	
+
+	public BreweryEffectAspectDistribution getEffectAspectDistribution() {
+		BreweryEffectAspectDistribution distribution = new BreweryEffectAspectDistribution();
+		switch(this){
+		case ABSORPTION:
+		case DAMAGE_RESISTANCE:
+		case DOLPHINS_GRACE:
+		case FAST_DIGGING:
+		case FIRE_RESISTANCE:
+		case HEAL:
+		case WATER_BREATHING:
+		case INCREASE_DAMAGE:
+		case INVISIBILITY:
+		case JUMP:
+		case LEVITATION:
+		case LUCK:
+		case NIGHT_VISION:
+		case REGENERATION:
+		case SATURATION:
+		case SLOW_FALLING:
+			break;
+		case SPEED:
+			distribution.addMultipler(Aspect.AERIAL, 1.0);
+			break;
+		default:
+			distribution.addMultipler(Aspect.AERIAL, 0);
+		}
+		return distribution;
+	}
+
+	//TODO: Finish this
+	public Color getColor() {
+		switch(this){
+		case ABSORPTION:
+		case DAMAGE_RESISTANCE:
+		case DOLPHINS_GRACE:
+		case FAST_DIGGING:
+		case FIRE_RESISTANCE:
+		case HEAL:
+		case WATER_BREATHING:
+		case INCREASE_DAMAGE:
+		case INVISIBILITY:
+		case JUMP:
+		case LEVITATION:
+		case LUCK:
+		case NIGHT_VISION:
+		case REGENERATION:
+		case SATURATION:
+		case SLOW_FALLING:
+		case SPEED:
+			return Color.WHITE;
+		case NONE:
+			return Color.BLACK;
+		default:
+			return Color.ORANGE;
+		}
+	}
+
 
 	// Gets the score of each effect
-	public static HashMap<BreweryEffect, Integer> getEffects(AspectMatrix matrix, HashMap<Aspect, Integer> aspectContents){
-		//TODO convert matrix to effects
-		HashMap<BreweryEffect, Integer> set = new HashMap<BreweryEffect, Integer>();
-		set.put(BreweryEffect.SPEED, 1000);
-
-		return set;
-	}
-	
-	// Get the list of effects
-	public static HashSet<BreweryEffect> getEffectsMatrix(AspectMatrix matrix){
-		//TODO convert matrix to effects
-		HashSet<BreweryEffect> set = new HashSet<BreweryEffect>();
-		
-		for(BreweryEffect effect : BreweryEffect.values()) {
-			if(effect.getEffectRequirement().checkAspectRequirement(matrix)) {
-				set.add(effect);
+	public int getEffectStrength(HashMap<Aspect, Integer> containedAspects){
+		int total = 0;
+		HashMap<Aspect, Double> distributionHashMap = this.getEffectAspectDistribution().multiplierMap;
+		for(Entry<Aspect, Double> entry : distributionHashMap.entrySet()) {
+			if(distributionHashMap.containsKey(entry.getKey())){
+				total += containedAspects.get(entry.getKey()) * entry.getValue();	
 			}
 		}
-		return set;
+		return total;
+	}
+
+	// Get the list of effects
+	public static BreweryEffect getEffect(AspectMatrix matrix){	
+		for(BreweryEffect effect : BreweryEffect.values()) {
+			if(effect.getEffectRequirement().checkAspectRequirement(matrix)) {
+				return effect;
+			}
+		}
+		return NONE;
 	}
 }

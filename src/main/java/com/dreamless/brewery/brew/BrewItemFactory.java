@@ -82,7 +82,7 @@ public class BrewItemFactory {
 		crafters.setString(player.getDisplayName(), player.getDisplayName());
 
 		// Set state
-		breweryMeta.setInteger("state", BrewState.FERMENTED.ordinal());
+		breweryMeta.setString("state", BrewState.FERMENTED.toString());
 
 		// Finish writing NBT
 		potion = nbti.getItem();
@@ -101,7 +101,7 @@ public class BrewItemFactory {
 		}
 
 		// Get all potential effects
-		HashSet<BreweryEffect> set = BreweryEffect.getEffectsMatrix(matrix);
+		BreweryEffect effect = BreweryEffect.getEffect(matrix);
 
 		for(int i = 0; i < 3; i++) {
 			ItemStack item = brewerInventory.getItem(i);
@@ -116,26 +116,32 @@ public class BrewItemFactory {
 				continue;
 			}
 
-			brewerInventory.setItem(i, getDistilledPotion(nbti, set, matrix));	
+			brewerInventory.setItem(i, getDistilledPotion(nbti, effect));	
 		}		
 	}
 
-	private static ItemStack getDistilledPotion(NBTItem item, HashSet<BreweryEffect> set, AspectMatrix matrix) {
+	private static ItemStack getDistilledPotion(NBTItem item, BreweryEffect effect) {
 		
 		// Extract info
 		NBTCompound originalNBT = item.getCompound("brewery");
 		NBTCompound itemAspects = originalNBT.getCompound("aspects");
 		if(itemAspects == null) {
-			return null;
+			return getRuinedPotion();
 		}
+		
+		try {
+			if(BrewState.valueOf(originalNBT.getString("state")) != BrewState.FERMENTED) {
+				return getRuinedPotion();
+			}
+		} catch (Exception e) {
+			return getRuinedPotion();
+		}
+		
 		
 		HashMap<Aspect, Integer> aspectContents = new HashMap<Aspect, Integer>();
 		for(String aspects : itemAspects.getKeys()) {
 			aspectContents.put(Aspect.valueOf(aspects), itemAspects.getInteger(aspects));
 		}
-		
-
-		HashMap<BreweryEffect, Integer> set2 = BreweryEffect.getEffects(matrix, aspectContents);
 		
 		// Create Item
 		ItemStack potion = new ItemStack(Material.POTION);
@@ -143,7 +149,7 @@ public class BrewItemFactory {
 
 		// Set Name
 		potionMeta.setDisplayName(Brewery.getText("Brew_UnfinishedPotion")); // TODO: Brew_DistilledPotion
-		potionMeta.setColor(Color.ORANGE); //TODO: Placeholder colour, make it drink-driven
+		potionMeta.setColor(effect.getColor());
 		potion.setItemMeta(potionMeta);
 
 		// Custom NBT Setup
@@ -152,12 +158,12 @@ public class BrewItemFactory {
 
 		// Set state
 		breweryMeta.setString("crafter", originalNBT.getString("crafter"));
-		breweryMeta.setInteger("state", BrewState.DISTILLED.ordinal());
+		breweryMeta.setString("state", BrewState.DISTILLED.toString());
 		
 		// Write Effects
-		for(Entry<BreweryEffect, Integer> entry : set2.entrySet()) {
-			breweryMeta.setInteger(entry.getKey().toString(), entry.getValue());
-		}
+		//for(Entry<BreweryEffect, Integer> entry : set2.entrySet()) {
+		breweryMeta.setInteger(effect.name(), effect.getEffectStrength(aspectContents));
+		//}
 
 		// Finish writing NBT
 		potion = nbti.getItem();
@@ -187,6 +193,5 @@ public class BrewItemFactory {
 		breweryMeta.setInteger("state", BrewState.RUINED.ordinal());
 
 		return item;
-	}
-
+	}	
 }
