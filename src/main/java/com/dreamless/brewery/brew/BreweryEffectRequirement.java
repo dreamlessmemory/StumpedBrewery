@@ -11,6 +11,7 @@ public class BreweryEffectRequirement{
 	public final int totalMax;
 	public HashMap<Aspect, AspectRequirement> aspectRequriementMap;
 	public BreweryEffectRequirement(int minimumDistillCycles) {
+		aspectRequriementMap = new HashMap<Aspect, AspectRequirement>();
 		totalMax = MAXIMUM_TOTAL_STACKS - minimumDistillCycles;
 	}
 	public void addAspectMaximalRequirement(Aspect aspect, int max) {
@@ -30,6 +31,10 @@ public class BreweryEffectRequirement{
 	}
 	
 	public boolean checkAspectRequirement(AspectMatrix matrix) {
+		if(matrix.getTotalCount() > totalMax)
+		{
+			return false;
+		}
 		for(Entry<Aspect, AspectRequirement> entry : aspectRequriementMap.entrySet()) {
 			if(!entry.getValue().checkRequirement(matrix.getAspectLevel(entry.getKey()))){
 				return false;

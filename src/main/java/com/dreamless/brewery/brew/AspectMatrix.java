@@ -6,6 +6,7 @@ public class AspectMatrix {
 	private HashMap<Aspect, Integer> aspectMatrix;
 	private int totalCount = BreweryEffectRequirement.MAXIMUM_TOTAL_STACKS;
 	public AspectMatrix() {
+		aspectMatrix = new HashMap<Aspect, Integer>();
 		aspectMatrix.put(Aspect.LITHIC, 3);
 		aspectMatrix.put(Aspect.INFERNAL, 3);
 		aspectMatrix.put(Aspect.PYROTIC, 3);
@@ -18,6 +19,7 @@ public class AspectMatrix {
 	}
 	public void distillAspect(Aspect aspect, int amount) {
 		aspectMatrix.put(aspect, Math.max(aspectMatrix.get(aspect) - amount, 0));
+		totalCount -= amount;
 	}
 	public int getAspectLevel(Aspect aspect) {
 		return aspectMatrix.get(aspect);

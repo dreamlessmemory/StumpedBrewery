@@ -360,7 +360,6 @@ public class BreweryCauldron implements InventoryHolder {
 
 		// Stop Task timer
 		taskMap.get(this).cancel();
-		
 		return BrewItemFactory.getFermentedBrew(player, inventory, state);
 	}
 

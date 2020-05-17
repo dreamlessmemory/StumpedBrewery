@@ -35,7 +35,6 @@ public class BreweryDistiller implements InventoryHolder {
 	private static final int FILTER_LIMIT = 9;
 	public static int DEFAULT_CYCLE_LENGTH = 40;
 	
-	private ArrayList<Material> filters = new ArrayList<Material>(); 
 	private Block block;
 	private Inventory filterInventory;
 	private int filterCounter = 0;
@@ -44,7 +43,7 @@ public class BreweryDistiller implements InventoryHolder {
 	private boolean finishedDistilling = false;
 	
 	private Hologram hologram;
-	private ItemLine filterLine;
+	//private ItemLine filterLine;
 	private TextLine statusLine;
 	private TextLine secondStatusLine;
 
@@ -115,6 +114,7 @@ public class BreweryDistiller implements InventoryHolder {
 		if(filterCounter < FILTER_LIMIT) {
 			filterInventory.addItem(new ItemStack(material));
 			++filterCounter;
+			secondStatusLine.setText(filterCounter +"/" + FILTER_LIMIT + " filters loaded");
 			return true;
 		} else {
 			return false;
@@ -163,7 +163,7 @@ public class BreweryDistiller implements InventoryHolder {
 		
 		//Create ready message
 		statusLine = hologram.appendTextLine("Distiller Ready");
-		secondStatusLine = hologram.appendTextLine("Awaiting filters...");
+		secondStatusLine = hologram.appendTextLine(filterCounter +"/" + FILTER_LIMIT + " filters loaded");
 	}
 
 	private void ejectItem(ItemStack item) {
@@ -180,7 +180,7 @@ public class BreweryDistiller implements InventoryHolder {
 		BrewItemFactory.doDistillBrews((BrewerInventory) ((InventoryHolder)block.getState()).getInventory(), filterInventory);
 		
 		//Set Hologram
-		filterLine.setItemStack(new ItemStack(Material.POTION));
+		//filterLine.setItemStack(new ItemStack(Material.POTION));
 		statusLine.setText("Brews distilled.");
 		secondStatusLine.setText("Remove brews");
 		
@@ -211,10 +211,12 @@ public class BreweryDistiller implements InventoryHolder {
 		private BreweryDistiller distiller;
 		
 		public DistillerRunnable(int cycleLength, BreweryDistiller distiller) {
-			cycles = distiller.filters.size();
+			cycles = distiller.filterCounter;
 			this.cycleLength = cycleLength;
 			this.distiller = distiller;
 			
+			distiller.statusLine.setText("Now distilling...");
+			distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
 		}
 		
 		@Override
@@ -225,6 +227,18 @@ public class BreweryDistiller implements InventoryHolder {
 				distiller.block.getWorld().playSound(distiller.block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW, (float)(Math.random()/8) + 0.1f, (float)(Math.random() * 1.5) + 0.5f);
 			}
 			
+			if(++currentTime >= cycleLength)
+			{
+				currentTime = 0;
+				currentCycle +=1;
+				if(currentCycle > cycles) {
+					distiller.finishDistilling();
+					Brewery.breweryDriver.debugLog("End distill");
+					this.cancel();
+				}
+			} 
+			distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
+			/*
 			if(++currentTime < cycleLength) {
 				//Update Hologram
 				distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
@@ -238,11 +252,11 @@ public class BreweryDistiller implements InventoryHolder {
 					Brewery.breweryDriver.debugLog("End distill");
 					this.cancel();
 				} else {
-					distiller.filterLine.setItemStack(new ItemStack(distiller.filters.get(0)));
-					distiller.statusLine.setText("Filter: " + WordUtils.capitalize((distiller.filters.get(0).toString().toLowerCase().replace("_", " "))));
+					//distiller.filterLine.setItemStack(new ItemStack(distiller.filters.get(0)));
+					//distiller.statusLine.setText("Filter: " + WordUtils.capitalize((distiller.filters.get(0).toString().toLowerCase().replace("_", " "))));
 					distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
 				}
-			}
+			}*/
 		}
 	}
 }

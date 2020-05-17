@@ -177,6 +177,7 @@ public class PlayerListener implements Listener {
 		}
 
 		if (BreweryDistiller.isValidFilter(materialInHand)) {
+			event.setCancelled(true);
 			if(distiller == null) {// New Distiller
 				distiller = new BreweryDistiller(clickedBlock);
 			}

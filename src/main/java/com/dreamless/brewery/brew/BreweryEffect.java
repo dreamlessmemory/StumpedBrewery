@@ -79,7 +79,8 @@ public enum BreweryEffect {
 			requirement.addAspectMinimalRequirement(Aspect.VOID, 1);
 			break;
 		case SPEED:
-			requirement = new BreweryEffectRequirement(0);
+			requirement = new BreweryEffectRequirement(1);
+			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 2);
 			break;
 		default:
 			requirement = new BreweryEffectRequirement(0);
