@@ -34,10 +34,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import com.dreamless.brewery.aging.BreweryBarrel;
-import com.dreamless.brewery.aging.BreweryBarrel.BarrelType;
-import com.dreamless.brewery.distillation.BreweryDistiller;
-import com.dreamless.brewery.fermentation.BreweryCauldron;
+import com.dreamless.brewery.database.BeweryRecipe;
+import com.dreamless.brewery.entity.BreweryBarrel;
+import com.dreamless.brewery.entity.BreweryCauldron;
+import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.entity.BreweryBarrel.BarrelType;
 import com.dreamless.brewery.filedata.DataSave;
 import com.dreamless.brewery.filedata.LanguageReader;
 import com.dreamless.brewery.listeners.BlockListener;
@@ -50,7 +51,6 @@ import com.dreamless.brewery.listeners.WorldListener;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
-import com.dreamless.brewery.recipe.BRecipe;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mysql.jdbc.Connection;
@@ -647,7 +647,7 @@ public class Brewery extends JavaPlugin {
 	public class RecipeRunnable implements Runnable {
 		@Override
 		public void run() {
-			BRecipe.periodicPurge();
+			BeweryRecipe.periodicPurge();
 		}
 	}
 }

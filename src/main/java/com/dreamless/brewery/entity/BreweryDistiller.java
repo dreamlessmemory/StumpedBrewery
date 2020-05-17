@@ -1,8 +1,7 @@
-package com.dreamless.brewery.distillation;
+package com.dreamless.brewery.entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,7 +22,6 @@ import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
-import com.gmail.filoghost.holographicdisplays.api.line.ItemLine;
 import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
 
 public class BreweryDistiller implements InventoryHolder {

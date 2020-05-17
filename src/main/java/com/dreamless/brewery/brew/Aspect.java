@@ -7,8 +7,11 @@ public enum Aspect {
 	
 	public static Aspect getAspect(Material material) {
 		switch(material) {
-		case OAK_LEAVES:
 		case OAK_SAPLING:
+		case SPRUCE_SAPLING:
+		case BIRCH_SAPLING:
+		case ACACIA_SAPLING:
+		case DARK_OAK_SAPLING:
 			return AERIAL;
 		default:
 			return INVALID;

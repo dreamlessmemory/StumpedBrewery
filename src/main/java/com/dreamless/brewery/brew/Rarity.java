@@ -2,45 +2,41 @@ package com.dreamless.brewery.brew;
 
 import org.bukkit.Material;
 
-import com.google.common.base.CaseFormat;
-
 public enum Rarity {
-	COMMON, COMMON_REFINED, UNCOMMON, UNCOMMON_REFINED, RARE, RARE_REFINED, LEGENDARY, INVALID;
+	COMMON, COMMON_PLUS, UNCOMMON, UNCOMMON_PLUS, RARE, RARE_PLUS, LEGENDARY, INVALID;
 	
 	public final int getCookTime() {
 		switch(this) {
 		case COMMON:
-			return 1;
-		case COMMON_REFINED:
-			return 2;
-		case UNCOMMON:
-			return 3;
-		case UNCOMMON_REFINED:
-			return 4;
-		case RARE:
+		case COMMON_PLUS:
 			return 5;
-		case RARE_REFINED:
-			return 6;
-		case LEGENDARY:
+		case UNCOMMON:
+		case UNCOMMON_PLUS:
 			return 7;
+		case RARE:
+		case RARE_PLUS:
+			return 10;
+		case LEGENDARY:
+			return 15;
 		default:
 			return 0;
 		}	
 	}
 	
+	// TODO: Finalize
 	public final int getValue() {
 		switch(this) {
 		case COMMON:
 			return 1;
-		case COMMON_REFINED:
+		case COMMON_PLUS:
 			return 2;
 		case UNCOMMON:
 			return 3;
-		case UNCOMMON_REFINED:
+		case UNCOMMON_PLUS:
 			return 4;
 		case RARE:
 			return 5;
-		case RARE_REFINED:
+		case RARE_PLUS:
 			return 6;
 		case LEGENDARY:
 			return 7;
@@ -49,20 +45,21 @@ public enum Rarity {
 		}	
 	}
 	
+	//TODO: Finalize
 	public final int getSaturation() {
 		switch(this) {
 		case COMMON:
 			return 10;
-		case COMMON_REFINED:
-			return 20;
+		case COMMON_PLUS:
+			return 5;
 		case UNCOMMON:
 			return 30;
-		case UNCOMMON_REFINED:
-			return 40;
+		case UNCOMMON_PLUS:
+			return 15;
 		case RARE:
 			return 50;
-		case RARE_REFINED:
-			return 60;
+		case RARE_PLUS:
+			return 25;
 		case LEGENDARY:
 			return 70;
 		default:
@@ -131,7 +128,7 @@ public enum Rarity {
 		case COOKED_SALMON:
 		case COOKED_COD:
 		case GLASS:
-			return COMMON_REFINED;
+			return COMMON_PLUS;
 		case DEAD_BUSH:
 		case GRASS:
 		case TALL_GRASS:
@@ -164,13 +161,14 @@ public enum Rarity {
 		case BLAZE_POWDER:
 		case HONEY_BOTTLE:
 		case HONEYCOMB:
+		case LAPIS_LAZULI:
 			return UNCOMMON;
 		case SNOW_BLOCK:
 		case POPPED_CHORUS_FRUIT:
 		case BONE_BLOCK:
 		case COOKED_PORKCHOP:
 		case HONEY_BLOCK:
-			return UNCOMMON_REFINED;
+			return UNCOMMON_PLUS;
 		case GOLD_BLOCK:
 		case IRON_BLOCK:
 		case DIAMOND:
@@ -182,7 +180,6 @@ public enum Rarity {
 		case PRISMARINE_SHARD:
 		case PRISMARINE_CRYSTALS:
 		case GOLDEN_APPLE:
-		case LAPIS_LAZULI:
 		case BLAZE_ROD:
 		case GHAST_TEAR:
 		case FERMENTED_SPIDER_EYE:
@@ -191,6 +188,7 @@ public enum Rarity {
 		case GOLDEN_CARROT:
 		case RABBIT_FOOT:
 		case DRAGON_BREATH:
+		case SHULKER_SHELL:
 			return RARE;
 		case SPONGE:
 		case DIAMOND_BLOCK:
@@ -198,7 +196,6 @@ public enum Rarity {
 		case DRAGON_EGG:
 		case BEACON:
 		case NETHER_STAR:
-		case SHULKER_SHELL:
 		case WITHER_ROSE:
 			return LEGENDARY;
 		default:

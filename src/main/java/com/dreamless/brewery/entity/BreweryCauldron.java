@@ -1,4 +1,4 @@
-package com.dreamless.brewery.fermentation;
+package com.dreamless.brewery.entity;
 
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;

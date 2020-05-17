@@ -1,23 +1,16 @@
 package com.dreamless.brewery.listeners;
 
-import org.bukkit.Sound;
-import org.bukkit.block.BrewingStand;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
-import org.bukkit.inventory.InventoryHolder;
-
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.aging.BreweryBarrel;
-import com.dreamless.brewery.distillation.BreweryDistillerOld;
-import com.dreamless.brewery.fermentation.BreweryCauldron;
+import com.dreamless.brewery.entity.BreweryBarrel;
+import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.player.BPlayer;
-import com.dreamless.brewery.utils.BreweryMessage;
 
 public class InventoryListener implements Listener {
 	
@@ -117,13 +110,14 @@ public class InventoryListener implements Listener {
 	}
 
 	// Actions that fire off when closing an inventory
+	/*
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent event) {
 		InventoryHolder holder = event.getInventory().getHolder();
 		if (holder instanceof BreweryBarrel) { // Play sound effect if a barrel
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 		} else if (holder instanceof BrewingStand) { // Remove distiller if empty
-			BreweryDistillerOld distiller = BreweryDistillerOld.get(((BrewingStand)holder).getBlock());
+			BreweryDistiller distiller = BreweryDistiller.get(((BrewingStand)holder).getBlock());
 			if(distiller == null) {
 				return;
 			}
@@ -134,8 +128,8 @@ public class InventoryListener implements Listener {
 					distiller.removeSelf();
 				}
 			}
-		} else if (holder instanceof BreweryDistillerOld) {
-			BreweryDistillerOld distiller = ((BreweryDistillerOld) holder);
+		} else if (holder instanceof BreweryDistiller) {
+			BreweryDistiller distiller = ((BreweryDistillerOld) holder);
 			BreweryMessage breweryMessage = distiller.prepDistiller();
 			Brewery.breweryDriver.msg(event.getPlayer(), breweryMessage.getMessage());
 		} else if (holder instanceof BreweryCauldron) {
@@ -150,5 +144,5 @@ public class InventoryListener implements Listener {
 				//Brewery.breweryDriver.msg(event.getPlayer(), cauldron.startCooking((Player) event.getPlayer()).getMessage());
 			}
 		}
-	}
+	}*/
 }

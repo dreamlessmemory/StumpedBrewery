@@ -1,4 +1,4 @@
-package com.dreamless.brewery.aging;
+package com.dreamless.brewery.entity;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -19,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.recipe.BRecipe;
+import com.dreamless.brewery.database.BeweryRecipe;
 import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
@@ -216,7 +216,7 @@ public class BreweryBarrel {
 			for (ItemStack item : items) {
 				if (item != null) {
 					// "broken" is the block that destroyed, throw them there!
-					item = BRecipe.revealMaskedBrew(item);
+					//item = BeweryRecipe.revealMaskedBrew(item);
 					if (broken != null) {
 						broken.getWorld().dropItemNaturally(broken.getLocation().add(0.5, 0.5, 0.5), item);
 						broken.getWorld().playSound(broken.getLocation(), Sound.ENTITY_ITEM_PICKUP,

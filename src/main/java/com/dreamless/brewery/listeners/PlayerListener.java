@@ -22,10 +22,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.aging.BreweryBarrel;
 import com.dreamless.brewery.brew.Rarity;
-import com.dreamless.brewery.distillation.BreweryDistiller;
-import com.dreamless.brewery.fermentation.BreweryCauldron;
+import com.dreamless.brewery.entity.BreweryBarrel;
+import com.dreamless.brewery.entity.BreweryCauldron;
+import com.dreamless.brewery.entity.BreweryDistiller;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
