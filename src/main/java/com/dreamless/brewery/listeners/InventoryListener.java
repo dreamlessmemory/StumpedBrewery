@@ -11,9 +11,9 @@ import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.player.BPlayer;
-
+@Deprecated
 public class InventoryListener implements Listener {
-	
+	/*
 	// Prevent removing items from cauldron that is cooking
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronOpen(InventoryClickEvent event) {
@@ -29,8 +29,9 @@ public class InventoryListener implements Listener {
 				Brewery.breweryDriver.debugLog("Cauldron cancelled interaction");
 			}
 		}
-	}
+	}*/
 	
+	/*
 	// Prevent removing items from barrel that is aging
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryBarrelOpen(InventoryClickEvent event) {
@@ -46,8 +47,8 @@ public class InventoryListener implements Listener {
 				Brewery.breweryDriver.debugLog("barrel cancelled interaction");
 			}
 		}
-	}
-	
+	}*/
+	/*
 	// Prevent dragging actions with a cauldron that is cooking
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryCauldronDrag(InventoryDragEvent event) {
@@ -61,8 +62,9 @@ public class InventoryListener implements Listener {
 			event.setResult(Result.DENY);
 			Brewery.breweryDriver.debugLog("Cauldron cancelled interaction");
 		}
-	}
+	}*/
 	
+	/*
 	// Prevent dragging actions with a barrel that is aging
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	
 	public void onBreweryBarrelDrag(InventoryDragEvent event) {
@@ -76,7 +78,7 @@ public class InventoryListener implements Listener {
 			event.setResult(Result.DENY);
 			Brewery.breweryDriver.debugLog("barrel cancelled interaction");
 		}
-	}
+	}*/
 	
 	// Prevent actions with a Distiller that is active
 	/*@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)	

@@ -1,23 +1,13 @@
 package com.dreamless.brewery.listeners;
 
 import org.bukkit.Material;
-import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.inventory.ItemStack;
-
-import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.BreweryBarrel.BarrelType;
 import com.dreamless.brewery.entity.BreweryDistiller;
-
-import de.tr7zw.changeme.nbtapi.NBTCompound;
-import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BlockListener implements Listener {
 	
@@ -49,6 +39,7 @@ public class BlockListener implements Listener {
 		//Brewery.breweryDriver.blockDestroy(event.getBlock(), null);
 	}
 	
+	/*
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void onBarrelPlace(BlockPlaceEvent event) {
 		Block placedBlock = event.getBlock();
@@ -65,5 +56,5 @@ public class BlockListener implements Listener {
 		} else {
 			Brewery.breweryDriver.debugLog("FAIL2");
 		}
-	}
+	}*/
 }

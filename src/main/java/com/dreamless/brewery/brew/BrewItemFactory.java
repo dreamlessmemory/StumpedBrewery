@@ -170,6 +170,11 @@ public class BrewItemFactory {
 		return potion;
 	}
 
+	// TODO: Implement
+	public static ItemStack getAgedPotion(ItemStack item, int age) {
+		return item;
+	}
+	
 	public static ItemStack getRuinedPotion() {		
 		ItemStack item = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();

@@ -34,18 +34,18 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.database.BeweryRecipe;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
-import com.dreamless.brewery.entity.BreweryBarrel.BarrelType;
 import com.dreamless.brewery.filedata.DataSave;
 import com.dreamless.brewery.filedata.LanguageReader;
 import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
 import com.dreamless.brewery.listeners.CommandListener;
 import com.dreamless.brewery.listeners.EntityListener;
-import com.dreamless.brewery.listeners.InventoryListener;
+//import com.dreamless.brewery.listeners.InventoryListener;
 import com.dreamless.brewery.listeners.PlayerListener;
 import com.dreamless.brewery.listeners.WorldListener;
 import com.dreamless.brewery.player.BPlayer;
@@ -74,11 +74,11 @@ public class Brewery extends JavaPlugin {
 	public static double effectLevel;
 
 	// Listeners
-	public BlockListener blockListener;
-	public PlayerListener playerListener;
-	public EntityListener entityListener;
-	public InventoryListener inventoryListener;
-	public WorldListener worldListener;
+	//public BlockListener blockListener;
+	//public PlayerListener playerListener;
+	//public EntityListener entityListener;
+	//public InventoryListener inventoryListener;
+	//public WorldListener worldListener;
 
 	// Language
 	public String language;
@@ -158,18 +158,18 @@ public class Brewery extends JavaPlugin {
 		}*/
 
 		// Listeners
-		blockListener = new BlockListener();
-		playerListener = new PlayerListener();
-		entityListener = new EntityListener();
-		inventoryListener = new InventoryListener();
-		worldListener = new WorldListener();
+		//blockListener = new BlockListener();
+		//playerListener = new PlayerListener();
+		//entityListener = new EntityListener();
+		//inventoryListener = new InventoryListener();
+		//worldListener = new WorldListener();
 		getCommand("Brewery").setExecutor(new CommandListener());
 
-		breweryDriver.getServer().getPluginManager().registerEvents(blockListener, breweryDriver);
-		breweryDriver.getServer().getPluginManager().registerEvents(playerListener, breweryDriver);
-		breweryDriver.getServer().getPluginManager().registerEvents(entityListener, breweryDriver);
-		breweryDriver.getServer().getPluginManager().registerEvents(inventoryListener, breweryDriver);
-		breweryDriver.getServer().getPluginManager().registerEvents(worldListener, breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(new BlockListener(), breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(new PlayerListener(), breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(new EntityListener(), breweryDriver);
+		//breweryDriver.getServer().getPluginManager().registerEvents(inventoryListener, breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(new WorldListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new CauldronListener(), breweryDriver);
 
 		// Heartbeat
@@ -418,12 +418,9 @@ public class Brewery extends JavaPlugin {
 				String type = result.getString("type");
 
 				//Time
-				float time = result.getFloat("time");
+				int time = result.getInt("time");
 				
-				//Aging
-				boolean aging = result.getBoolean("aging");
-				
-				new BreweryBarrel(worldBlock, BarrelType.valueOf(type), time, aging);
+				new BreweryBarrel(worldBlock, BarrelType.valueOf(type), time);
 			} 
 		} catch (Exception e1) {
 			e1.printStackTrace();

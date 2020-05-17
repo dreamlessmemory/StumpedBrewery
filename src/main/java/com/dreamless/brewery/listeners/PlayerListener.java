@@ -3,6 +3,7 @@ package com.dreamless.brewery.listeners;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,6 +23,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.Rarity;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
@@ -32,7 +34,6 @@ import com.dreamless.brewery.player.Words;
 import com.dreamless.brewery.utils.BreweryMessage;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
-import de.tr7zw.changeme.nbtapi.NBTTileEntity;
 
 public class PlayerListener implements Listener {
 	public static boolean openEverywhere;
@@ -130,37 +131,24 @@ public class PlayerListener implements Listener {
 
 	// TODO: Barrels
 	private void handleBarrel(PlayerInteractEvent event, Player player) {
-		player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Section 2");
-		if (event.getHand() != EquipmentSlot.HAND) {
-			return;
-		}
-
-		player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Section 3");
-		Block block = event.getClickedBlock();
-		NBTTileEntity entity = new NBTTileEntity(block.getState());
-		if (entity.hasKey("TestString")) {
-			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + entity.getString("TestString"));
-		} else {
-			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Section 4");
-		}
 		// Get the barrel
 		BreweryBarrel barrel = BreweryBarrel.getBarrel(event.getClickedBlock());
+		
+		// If actually a barrel, cancel all interactions
 		if (barrel != null) {
 			event.setCancelled(true);
-			if (!barrel.hasPermsOpen(player, event)) {
-				return;
-			}
-		} else {
+			return;
+		} 
+		
+		if (!player.hasPermission("brewery.openbarrel.big")) {
+			Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoBarrelAccess"));
 			return;
 		}
-
-		if (event.getMaterial() == Material.CLOCK && !barrel.isAging()) {
-			BreweryMessage result = barrel.startAging(player);
-			if (result.getResult()) {// Start cooking
-				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f,
-						1.0f);
-			}
-			Brewery.breweryDriver.msg(player, result.getMessage());
+		
+		if (event.getMaterial() == Material.CLOCK) {
+			barrel = new BreweryBarrel((Barrel)event.getClickedBlock(), BarrelType.OAK, 0);
+			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
+			Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
 		}
 	}
 
