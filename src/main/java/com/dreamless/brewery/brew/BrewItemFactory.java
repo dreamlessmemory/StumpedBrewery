@@ -124,7 +124,7 @@ public class BrewItemFactory {
 		// Extract info
 		NBTCompound originalNBT = item.getCompound("brewery");
 		NBTCompound itemAspects = originalNBT.getCompound("aspects");
-		if(itemAspects == null) {
+		if(itemAspects == null || effect == BreweryEffect.NONE) {
 			return getRuinedPotion();
 		}
 		
@@ -177,7 +177,7 @@ public class BrewItemFactory {
 		potionMeta.setDisplayName("Ruined Brew");
 
 		ArrayList<String> agedFlavorText = new ArrayList<String>();
-		agedFlavorText.add("A brew that was ruined");
+		agedFlavorText.add("A botched brew.");
 		potionMeta.setLore(agedFlavorText);
 
 		potionMeta.clearCustomEffects();
