@@ -234,29 +234,11 @@ public class BreweryDistiller implements InventoryHolder {
 				if(currentCycle > cycles) {
 					distiller.finishDistilling();
 					Brewery.breweryDriver.debugLog("End distill");
+					distiller.secondStatusLine.removeLine();
 					this.cancel();
 				}
 			} 
 			distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
-			/*
-			if(++currentTime < cycleLength) {
-				//Update Hologram
-				distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
-				
-			} else {
-				//increment cycles
-				currentTime = 0;
-				currentCycle +=1;
-				if(currentCycle > cycles) {
-					distiller.finishDistilling();
-					Brewery.breweryDriver.debugLog("End distill");
-					this.cancel();
-				} else {
-					//distiller.filterLine.setItemStack(new ItemStack(distiller.filters.get(0)));
-					//distiller.statusLine.setText("Filter: " + WordUtils.capitalize((distiller.filters.get(0).toString().toLowerCase().replace("_", " "))));
-					distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
-				}
-			}*/
 		}
 	}
 }
