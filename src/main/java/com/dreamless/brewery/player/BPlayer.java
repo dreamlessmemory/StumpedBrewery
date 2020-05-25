@@ -26,7 +26,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.database.BeweryRecipe;
+import com.dreamless.brewery.data.DatabaseCommunication;
 
 public class BPlayer {
 	private static Map<String, BPlayer> players = new HashMap<String, BPlayer>();// Players name/uuid and BPlayer
@@ -181,7 +181,7 @@ public class BPlayer {
 				if (bPlayer == null) {
 					bPlayer = addPlayer(player);
 				}
-				bPlayer.drunkeness += BeweryRecipe.getAlcohol(item);
+				bPlayer.drunkeness += DatabaseCommunication.getAlcohol(item);
 				bPlayer.drunkEffects = true;
 				
 				if(bPlayer.drunkeness > 100) bPlayer.drinkCap(player);

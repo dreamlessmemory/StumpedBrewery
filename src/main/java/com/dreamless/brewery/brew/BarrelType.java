@@ -21,4 +21,41 @@ public enum BarrelType {
 			return "Unknown";
 		}
 	}
+	
+	public int getLevelIncrease() {
+		switch(this) {
+		case OAK:
+			return 1;
+		case DARK_OAK:
+			return 1;
+		case BIRCH:
+			return 1;
+		case ACACIA:
+			return 1;
+		case JUNGLE:
+			return 1;
+		case SPRUCE:
+			return 1;
+		default:
+			return 1;
+		}
+	}
+	public int getDurationIncrease() {
+		switch(this) {
+		case OAK:
+			return 1;
+		case DARK_OAK:
+			return 1;
+		case BIRCH:
+			return 1;
+		case ACACIA:
+			return 1;
+		case JUNGLE:
+			return 1;
+		case SPRUCE:
+			return 1;
+		default:
+			return 1;
+		}
+	}
 }

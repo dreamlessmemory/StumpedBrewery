@@ -147,7 +147,7 @@ public class BreweryDistiller implements InventoryHolder {
 			if(item == null) {
 				continue;
 			} else {
-				brewingInventory.setItem(i, BrewItemFactory.getRuinedPotion());	
+				brewingInventory.setItem(i, BrewItemFactory.getRuinedBrew());	
 			}
 		}
 	}
@@ -175,7 +175,7 @@ public class BreweryDistiller implements InventoryHolder {
 		distilling = false;
 		finishedDistilling = true;
 		
-		BrewItemFactory.doDistillBrews((BrewerInventory) ((InventoryHolder)block.getState()).getInventory(), filterInventory);
+		BrewItemFactory.getDistilledBrews((BrewerInventory) ((InventoryHolder)block.getState()).getInventory(), filterInventory);
 		
 		//Set Hologram
 		//filterLine.setItemStack(new ItemStack(Material.POTION));

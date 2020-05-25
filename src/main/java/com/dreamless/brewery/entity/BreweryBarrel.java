@@ -87,7 +87,7 @@ public class BreweryBarrel {
 				if (item == null) {
 					continue;
 				}
-				items[i] = BrewItemFactory.getAgedPotion(item, time);
+				items[i] = BrewItemFactory.getAgedBrew(item, time, type);
 			}
 
 			// Drop items

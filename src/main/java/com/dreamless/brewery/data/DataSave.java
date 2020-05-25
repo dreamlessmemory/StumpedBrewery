@@ -1,4 +1,4 @@
-package com.dreamless.brewery.filedata;
+package com.dreamless.brewery.data;
 
 
 import org.bukkit.scheduler.BukkitRunnable;
@@ -13,7 +13,6 @@ public class DataSave extends BukkitRunnable {
 	public static int lastBackup = 0;
 	public static int lastSave = 1;
 	public static int autosave = 3;
-	final public static String dataVersion = "1.1";
 	public static DataSave running;
 
 	public boolean collected = false;

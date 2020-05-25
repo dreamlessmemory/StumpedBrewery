@@ -35,12 +35,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.dreamless.brewery.brew.BarrelType;
-import com.dreamless.brewery.database.BeweryRecipe;
+import com.dreamless.brewery.data.DataSave;
+import com.dreamless.brewery.data.DatabaseCommunication;
+import com.dreamless.brewery.data.LanguageReader;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
-import com.dreamless.brewery.filedata.DataSave;
-import com.dreamless.brewery.filedata.LanguageReader;
 import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
 import com.dreamless.brewery.listeners.CommandListener;
@@ -644,7 +644,7 @@ public class Brewery extends JavaPlugin {
 	public class RecipeRunnable implements Runnable {
 		@Override
 		public void run() {
-			BeweryRecipe.periodicPurge();
+			DatabaseCommunication.periodicPurge();
 		}
 	}
 }

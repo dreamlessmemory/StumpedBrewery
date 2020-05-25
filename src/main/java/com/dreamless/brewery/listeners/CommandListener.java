@@ -17,7 +17,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.database.BeweryRecipe;
+import com.dreamless.brewery.data.DatabaseCommunication;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import de.tr7zw.changeme.nbtapi.NBTItem;
@@ -254,12 +254,12 @@ public class CommandListener implements CommandExecutor {
 		} else {
 			claimed = !(args[1].equalsIgnoreCase("unclaimed"));
 		}
-		p.msg(sender, BeweryRecipe.listPlayerRecipes(player, claimed));
+		p.msg(sender, DatabaseCommunication.listPlayerRecipes(player, claimed));
 		
 	}
 	
 	public void cmdPurge(CommandSender sender) {
-		if(BeweryRecipe.purgeRecipes()) {
+		if(DatabaseCommunication.purgeRecipes()) {
 			p.msg(sender, "Recipes purged");
 		} else {
 			p.msg(sender, "Recipe purge failed");
@@ -271,7 +271,7 @@ public class CommandListener implements CommandExecutor {
 		if(args.length < 1) {
 			return;
 		}
-		BeweryRecipe.purgePlayer(args[1]);
+		DatabaseCommunication.purgePlayer(args[1]);
 		p.msg(sender, args[1] + "'s recipes have all been removed.");
 	}
 		public void cmdClaim (CommandSender sender, String[] args) {
@@ -291,7 +291,7 @@ public class CommandListener implements CommandExecutor {
 			if (hand != null) {//Something in the hand
 				NBTItem nbti = new NBTItem(hand);
 				if(nbti.hasKey("brewery")) {
-					BeweryRecipe.claimRecipe(player, newName);
+					DatabaseCommunication.claimRecipe(player, newName);
 				} else {
 					p.msg(sender, Brewery.getText("Error_ItemNotBreweryPotion"));
 				}
@@ -310,7 +310,7 @@ public class CommandListener implements CommandExecutor {
 			if (hand != null) {//Something in the hand
 				NBTItem nbti = new NBTItem(hand);
 				if(nbti.hasKey("brewery")) {
-					BeweryRecipe.relinquishRecipe(player);
+					DatabaseCommunication.relinquishRecipe(player);
 				} else {
 					p.msg(sender, Brewery.getText("Error_ItemNotBreweryPotion"));
 				}
@@ -345,7 +345,7 @@ public class CommandListener implements CommandExecutor {
 					if(nbti.hasKey("placedInBrewer")) {
 						p.msg(sender, "You cannot name brews that are aging or distilling.");
 					} else {
-					BeweryRecipe.renameRecipe(player, newName);
+					DatabaseCommunication.renameRecipe(player, newName);
 					}
 				} else {
 					p.msg(sender, Brewery.getText("Error_ItemNotBreweryPotion"));
@@ -380,7 +380,7 @@ public class CommandListener implements CommandExecutor {
 					if(nbti.hasKey("placedInBrewer")) {
 						p.msg(sender, "You cannot give flavor text to brews that are aging or distilling.");
 					} else {
-					BeweryRecipe.giveRecipeFlavorText(player, newFlavorText);
+					DatabaseCommunication.giveRecipeFlavorText(player, newFlavorText);
 					}
 				} else {
 					p.msg(sender, Brewery.getText("Error_ItemNotBreweryPotion"));

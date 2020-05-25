@@ -1,4 +1,4 @@
-package com.dreamless.brewery.filedata;
+package com.dreamless.brewery.data;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +33,7 @@ public class LanguageReader {
 		this.check();
 	}
 
+	// TODO: Update
 	private void setDefaults() {
 		
 		/* Player */

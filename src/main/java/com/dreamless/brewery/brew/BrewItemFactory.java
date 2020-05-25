@@ -11,18 +11,27 @@ import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.data.NBTConstants;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BrewItemFactory {
+	
+	
+	// NBT Keys
+	
 
+	// Fermentation
 	private static final double MAXIMUM_VALUE_SCALE = 1.0;
 	private static final int FALLOFF_START = 10;
 	private static final double MINIMUM_VALUE_SCALE = 0.25;
 	private static final double FALLOFF_RATE = 0.3;
+	
+	// Aging
 
 	private static enum BrewState{
 		FERMENTED, DISTILLED, FINISHED, RUINED;
@@ -69,19 +78,18 @@ public class BrewItemFactory {
 
 		// Custom NBT Setup
 		NBTItem nbti = new NBTItem(potion);
-		NBTCompound breweryMeta = nbti.addCompound("brewery"); // All brewery NBT gets set here.
-		NBTCompound aspects = breweryMeta.addCompound("aspects");
+		NBTCompound breweryMeta = nbti.addCompound(NBTConstants.BREWERY_TAG_STRING); // All brewery NBT gets set here.
+		NBTCompound aspects = breweryMeta.addCompound(NBTConstants.ASPECTS_TAG_STRING);
 
 		for(Entry<Aspect, Integer> entry : aspectMap.entrySet()) {
 			aspects.setInteger(entry.getKey().toString(), entry.getValue());
 		}
 
 		// Crafter
-		NBTCompound crafters = breweryMeta.addCompound("crafters");
-		crafters.setString(player.getDisplayName(), player.getDisplayName());
+		breweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, player.getDisplayName());
 
 		// Set state
-		breweryMeta.setString("state", BrewState.FERMENTED.toString());
+		breweryMeta.setString(NBTConstants.STATE_TAG_STRING, BrewState.FERMENTED.toString());
 
 		// Finish writing NBT
 		potion = nbti.getItem();
@@ -89,7 +97,7 @@ public class BrewItemFactory {
 		return potion;
 	}
 
-	public static void doDistillBrews(BrewerInventory brewerInventory, Inventory filterInventory) {
+	public static void getDistilledBrews(BrewerInventory brewerInventory, Inventory filterInventory) {
 
 		AspectMatrix matrix = new AspectMatrix();
 
@@ -110,30 +118,30 @@ public class BrewItemFactory {
 
 			//Set NBT
 			NBTItem nbti = new NBTItem(item);
-			if(!nbti.hasKey("brewery"))
+			if(!nbti.hasKey(NBTConstants.BREWERY_TAG_STRING))
 			{
 				continue;
 			}
 
-			brewerInventory.setItem(i, getDistilledPotion(nbti, effect));	
+			brewerInventory.setItem(i, getDistilledBrew(nbti, effect));	
 		}		
 	}
 
-	private static ItemStack getDistilledPotion(NBTItem item, BreweryEffect effect) {
+	private static ItemStack getDistilledBrew(NBTItem item, BreweryEffect effect) {
 		
 		// Extract info
-		NBTCompound originalNBT = item.getCompound("brewery");
-		NBTCompound itemAspects = originalNBT.getCompound("aspects");
+		NBTCompound originalNBT = item.getCompound(NBTConstants.BREWERY_TAG_STRING);
+		NBTCompound itemAspects = originalNBT.getCompound(NBTConstants.ASPECTS_TAG_STRING);
 		if(itemAspects == null || effect == BreweryEffect.NONE) {
-			return getRuinedPotion();
+			return getRuinedBrew();
 		}
 		
 		try {
-			if(BrewState.valueOf(originalNBT.getString("state")) != BrewState.FERMENTED) {
-				return getRuinedPotion();
+			if(BrewState.valueOf(originalNBT.getString(NBTConstants.STATE_TAG_STRING)) != BrewState.FERMENTED) {
+				return getRuinedBrew();
 			}
 		} catch (Exception e) {
-			return getRuinedPotion();
+			return getRuinedBrew();
 		}
 		
 		
@@ -153,15 +161,16 @@ public class BrewItemFactory {
 
 		// Custom NBT Setup
 		NBTItem nbti = new NBTItem(potion);
-		NBTCompound breweryMeta = nbti.addCompound("brewery"); // All brewery NBT gets set here.
+		NBTCompound breweryMeta = nbti.addCompound(NBTConstants.BREWERY_TAG_STRING); // All brewery NBT gets set here.
 
 		// Set state
-		breweryMeta.setString("crafter", originalNBT.getString("crafter"));
-		breweryMeta.setString("state", BrewState.DISTILLED.toString());
+		breweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, originalNBT.getString(NBTConstants.CRAFTER_TAG_STRING));
+		breweryMeta.setString(NBTConstants.STATE_TAG_STRING, BrewState.DISTILLED.toString());
 		
 		// Write Effects
 		//for(Entry<BreweryEffect, Integer> entry : set2.entrySet()) {
-		breweryMeta.setInteger(effect.name(), effect.getEffectStrength(aspectContents));
+		breweryMeta.setString(NBTConstants.EFFECT_NAME_TAG_STRING, effect.name());
+		breweryMeta.setInteger(NBTConstants.EFFECT_SCORE_TAG_STRING, effect.getEffectStrength(aspectContents));
 		//}
 
 		// Finish writing NBT
@@ -171,11 +180,56 @@ public class BrewItemFactory {
 	}
 
 	// TODO: Implement
-	public static ItemStack getAgedPotion(ItemStack item, int age) {
-		return item;
+	public static ItemStack getAgedBrew(ItemStack item, int age, BarrelType type) {
+		
+		NBTItem nbti = new NBTItem(item);
+		
+
+		NBTCompound breweryMeta = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
+		
+		if(breweryMeta == null)
+		{
+			return item;
+		}
+		
+		try {
+			if(BrewState.valueOf(breweryMeta.getString(NBTConstants.STATE_TAG_STRING)) != BrewState.DISTILLED) {
+				return getRuinedBrew();
+			}
+		} catch (Exception e) {
+			return getRuinedBrew();
+		}
+		
+		//TODO: Calculate effect score
+		BreweryEffect effect;
+		try {
+			effect = BreweryEffect.valueOf(breweryMeta.getString(NBTConstants.EFFECT_NAME_TAG_STRING));
+		} catch (Exception e) {
+			return getRuinedBrew();
+		}
+		int potencyScore = breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING) * type.getLevelIncrease();
+		int durationScore = breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING) * type.getDurationIncrease();
+		
+		
+		//TODO: Apply potion effect
+		ItemStack finalBrew = new ItemStack(Material.POTION);
+		PotionMeta potionMeta = (PotionMeta) finalBrew.getItemMeta();
+		potionMeta.addCustomEffect(new PotionEffect(effect.getPotionEffectType(), 
+				effect.getEffectDuration(potencyScore, durationScore), 
+				effect.getEffectLevel(potencyScore, durationScore), 
+				false, false, false), true);
+		
+//		potionMeta.add
+		
+		//TODO: Lookup recipe
+		
+		
+		
+		
+		return finalBrew;
 	}
 	
-	public static ItemStack getRuinedPotion() {		
+	public static ItemStack getRuinedBrew() {		
 		ItemStack item = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 
@@ -193,8 +247,8 @@ public class BrewItemFactory {
 		NBTItem nbti = new NBTItem(item);
 
 		//Tag as distilling brew
-		NBTCompound breweryMeta = nbti.getCompound("brewery");
-		breweryMeta.setInteger("state", BrewState.RUINED.ordinal());
+		NBTCompound breweryMeta = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
+		breweryMeta.setInteger(NBTConstants.STATE_TAG_STRING, BrewState.RUINED.ordinal());
 
 		return item;
 	}	
