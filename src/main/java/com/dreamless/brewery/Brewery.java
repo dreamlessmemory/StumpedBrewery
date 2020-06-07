@@ -467,6 +467,7 @@ public class Brewery extends JavaPlugin {
 		case "barrels":
 		case "brewtypes":
 		case "ingredients":
+		case "recipes":
 			return development? testdatabase : database;
 		default:
 			return database;

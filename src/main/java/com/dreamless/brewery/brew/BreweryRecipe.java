@@ -20,21 +20,16 @@ private static final int WRAP_SIZE = 30;
 	private final String inventorText;
     private ArrayList<String> flavorText = new ArrayList<String>();
     
-    public BreweryRecipe() {
-		this.name = "An Unknown Brew";
-		inventorText = "Not invented...";
-		this.flavorText.add("A strange brew with no effects...");
-	}
     
     public BreweryRecipe(String name, String inventorUUID, String flavorText) {
 		this.name = name;
-		inventorText = "First invented by " + getInventorName(inventorUUID);
+		inventorText = "First invented by " + (inventorUUID.isEmpty() ? "an unknown brewer" : getInventorName(inventorUUID));
 		this.flavorText.add(flavorText);
 	}
     
-    public BreweryRecipe(String inventorUUID) {
+    public BreweryRecipe() {
     	this.name = BreweryRecipe.generateNewRecipeName(); 
-		inventorText = "First invented by " + getInventorName(inventorUUID);
+		inventorText = "The inventor of this brew has not yet claimed this brew";
 		flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY +  Brewery.getText("Recipe_New_Flavortext"), WRAP_SIZE)));	
     }
 	
@@ -63,6 +58,14 @@ private static final int WRAP_SIZE = 30;
 		flavor.addAll(flavorText);
 		return flavor;
 		
+	}
+	
+	public String getFlavorTextString() {
+		String finalString = "";
+		for(String string : getFlavorText()) {
+			finalString = finalString.concat(string);
+		}
+		return finalString;
 	}
 	
 }

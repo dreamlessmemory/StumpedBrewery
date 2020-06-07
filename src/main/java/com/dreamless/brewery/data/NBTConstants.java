@@ -13,6 +13,4 @@ public final class NBTConstants {
 	public static final String POTENCY_SCORE_TAG_STRING = "potency";
 	public static final String DURATION_SCORE_TAG_STRING = "duration";
 	
-	public static final String MESSAGE_HEADER_STRING = ChatColor.GREEN + "[Brewery] " + ChatColor.RESET;
-	
 }

@@ -13,17 +13,12 @@ import org.bukkit.block.data.Directional;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.BrewItemFactory;
-import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
-
-import de.tr7zw.changeme.nbtapi.NBTCompound;
-import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BreweryBarrel {
 
@@ -41,7 +36,6 @@ public class BreweryBarrel {
 	public BreweryBarrel(Barrel block, BarrelType barrelType, int time) {
 		this.barrel = block;
 		this.time = time;
-		//this.aging = aging;
 		this.type = barrelType;
 
 		barrels.add(this);
@@ -73,7 +67,7 @@ public class BreweryBarrel {
 	}
 
 	// removes a barrel, throwing included potions to the ground
-	public void remove(Block broken, Player breaker) {
+	public void removeAndFinishBrewing(Block broken, Player breaker) {
 			for (HumanEntity human : barrel.getInventory().getViewers()) {
 				human.closeInventory();
 			}
@@ -103,8 +97,18 @@ public class BreweryBarrel {
 		barrels.remove(this);
 	}
 	
+	public void removeSelf() {
+		barrels.remove(this);
+	}
+	
+	
 	//////////////////////////////////////////////////////////////////////////
 	public static BreweryBarrel getBarrel(Block block) {
+		for(BreweryBarrel barrel : barrels) {
+			if(barrel.barrel.getBlock().equals(block)) {
+				return barrel;
+			}
+		}
 		return null;	
 	}
 	

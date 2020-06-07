@@ -3,7 +3,11 @@ package com.dreamless.brewery.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.text.ParseException;
+import java.util.UUID;
 
+import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -11,6 +15,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import com.dreamless.brewery.entity.BreweryCauldron;
@@ -102,4 +108,21 @@ public final class BreweryUtils {
         }  
         return capitalizeWord.trim(); 
 	}
+    
+    public static UUID getUUID(String name) throws ParseException, org.json.simple.parser.ParseException {
+        String url = "https://api.mojang.com/users/profiles/minecraft/"+name;
+        try {
+            String UUIDJson = IOUtils.toString(new URL(url), "US-ASCII");
+            if(UUIDJson.isEmpty()) {
+            	return null;
+            }
+            JSONObject UUIDObject = (JSONObject) JSONValue.parseWithException(UUIDJson);       
+            String tempID = UUIDObject.get("id").toString();
+            tempID = tempID.substring(0,  8) + "-" + tempID.substring(8,  12) + "-" + tempID.substring(12,  16) + "-" + tempID.substring(16,  20) + "-" + tempID.substring(20);
+            return UUID.fromString(tempID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }       
+        return null;
+    }
 }

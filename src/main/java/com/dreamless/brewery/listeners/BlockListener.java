@@ -7,6 +7,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
+
+import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryDistiller;
 
 public class BlockListener implements Listener {
@@ -32,29 +34,25 @@ public class BlockListener implements Listener {
 		if(block.getType() != Material.BARREL) {
 			return;
 		}
+		
+		BreweryBarrel barrel = BreweryBarrel.getBarrel(block);
+		if(barrel != null) {
+			event.setCancelled(true);
+			barrel.removeAndFinishBrewing(block, event.getPlayer());
+		}
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onBlockBurn(BlockBurnEvent event) {
 		//Brewery.breweryDriver.blockDestroy(event.getBlock(), null);
-	}
-	
-	/*
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBarrelPlace(BlockPlaceEvent event) {
-		Block placedBlock = event.getBlock();
-		if(placedBlock.getType() != Material.BARREL) {
-			Brewery.breweryDriver.debugLog("FAIL");
+		Block block = event.getBlock();
+		if(block.getType() != Material.BARREL) {
 			return;
 		}
-		ItemStack item = event.getItemInHand();
 		
-		NBTItem nbti = new NBTItem(item);
-		NBTCompound compound = nbti.getCompound("Brewery");
-		if(compound != null && compound.hasKey("BarrelType")) {
-			new BreweryBarrel((Barrel) placedBlock.getState(), BarrelType.valueOf(compound.getString("BarrelType")), 0, false);
-		} else {
-			Brewery.breweryDriver.debugLog("FAIL2");
+		BreweryBarrel barrel = BreweryBarrel.getBarrel(block);
+		if(barrel != null) {
+			barrel.removeSelf();
 		}
-	}*/
+	}
 }

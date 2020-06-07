@@ -129,24 +129,26 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	// TODO: Barrels
 	private void handleBarrel(PlayerInteractEvent event, Player player) {
 		// Get the barrel
 		BreweryBarrel barrel = BreweryBarrel.getBarrel(event.getClickedBlock());
 		
 		// If actually a barrel, cancel all interactions
 		if (barrel != null) {
+			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Section 2");
 			event.setCancelled(true);
 			return;
 		} 
 		
 		if (!player.hasPermission("brewery.openbarrel.big")) {
+			event.setCancelled(true);
 			Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoBarrelAccess"));
 			return;
 		}
 		
 		if (event.getMaterial() == Material.CLOCK) {
-			barrel = new BreweryBarrel((Barrel)event.getClickedBlock(), BarrelType.OAK, 0);
+			event.setCancelled(true);
+			barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), BarrelType.OAK, 0);
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 			Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
 		}
