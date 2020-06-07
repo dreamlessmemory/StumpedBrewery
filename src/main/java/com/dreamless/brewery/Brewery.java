@@ -446,12 +446,10 @@ public class Brewery extends JavaPlugin {
 			return database;
 		}
 		switch(type) {
-		case "cauldrons":
 		case "barrels":
-		case "brewtypes":
-		case "ingredients":
 		case "recipes":
 		case "players":
+		case "wakeup":
 			return development? testdatabase : database;
 		default:
 			return database;
