@@ -3,6 +3,13 @@ package com.dreamless.brewery.brew;
 public enum BarrelType {
 	OAK, DARK_OAK, BIRCH, ACACIA, JUNGLE, SPRUCE;
 	
+	// OAK - balanced
+	// DARK_OAK - Balanced?
+	// BIRCH - Duration > Level
+	// ACACIA - Duration >> Level
+	// JUNGLE - Level >> Duration
+	// SPRUCE - Level > Duration
+	
 	public String toString() {
 		switch(this) {
 		case OAK:
@@ -25,17 +32,17 @@ public enum BarrelType {
 	public int getLevelIncrease() {
 		switch(this) {
 		case OAK:
-			return 1;
+			return 3;
 		case DARK_OAK:
-			return 1;
+			return 3;
 		case BIRCH:
-			return 1;
+			return 2;
 		case ACACIA:
 			return 1;
 		case JUNGLE:
-			return 1;
+			return 5;
 		case SPRUCE:
-			return 1;
+			return 4;
 		default:
 			return 1;
 		}
@@ -43,17 +50,17 @@ public enum BarrelType {
 	public int getDurationIncrease() {
 		switch(this) {
 		case OAK:
-			return 1;
+			return 3;
 		case DARK_OAK:
-			return 1;
+			return 3;
 		case BIRCH:
-			return 1;
+			return 4;
 		case ACACIA:
-			return 1;
+			return 5;
 		case JUNGLE:
 			return 1;
 		case SPRUCE:
-			return 1;
+			return 2;
 		default:
 			return 1;
 		}

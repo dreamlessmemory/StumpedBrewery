@@ -1,6 +1,5 @@
 package com.dreamless.brewery.listeners;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Barrel;
@@ -25,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.Rarity;
+import com.dreamless.brewery.data.NBTConstants;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
@@ -54,7 +54,6 @@ public class PlayerListener implements Listener {
 					} else if (type == Material.BREWING_STAND) {
 						handleDistiller(event, player);
 					} else if (type == Material.BARREL) {
-						player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Section 1");
 						handleBarrel(event, player);
 					}
 				}
@@ -79,7 +78,6 @@ public class PlayerListener implements Listener {
 				BreweryCauldron.remove(cauldron);
 			} else if (materialInHand == Material.CLOCK) {
 				if (cauldron.isCooking()) {// Print time if cooking
-					// TODO: Stop cooking?
 					cauldron.printTime(player);
 				} else if (cauldron.getFillLevel() > 0) {
 					BreweryMessage result = cauldron.startCooking();
@@ -135,7 +133,6 @@ public class PlayerListener implements Listener {
 		
 		// If actually a barrel, cancel all interactions
 		if (barrel != null) {
-			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "Section 2");
 			event.setCancelled(true);
 			return;
 		} 
@@ -230,7 +227,7 @@ public class PlayerListener implements Listener {
 		if (item != null) {
 			if (item.getType() == Material.POTION) {
 				NBTItem nbti = new NBTItem(item);
-				if (nbti.hasKey("brewery")) {
+				if (nbti.hasKey(NBTConstants.BREWERY_TAG_STRING)) {
 					BPlayer.drink(player, item);
 				}
 			} else if (BPlayer.drainItems.containsKey(item.getType())) {

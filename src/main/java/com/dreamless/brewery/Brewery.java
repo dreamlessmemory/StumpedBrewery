@@ -151,19 +151,6 @@ public class Brewery extends JavaPlugin {
 		
 		readData();
 		
-		//Do not load anything if in dev mode
-		/*if(!development) {
-			readData();
-		} else {
-			Brewery.breweryDriver.debugLog("Loading disabled in development mode");
-		}*/
-
-		// Listeners
-		//blockListener = new BlockListener();
-		//playerListener = new PlayerListener();
-		//entityListener = new EntityListener();
-		//inventoryListener = new InventoryListener();
-		//worldListener = new WorldListener();
 		getCommand("Brewery").setExecutor(new CommandListener());
 
 		breweryDriver.getServer().getPluginManager().registerEvents(new BlockListener(), breweryDriver);
@@ -411,7 +398,7 @@ public class Brewery extends JavaPlugin {
 				//spigot
 				HashMap<String, Object> locationMap = gson.fromJson(result.getString("location"), new TypeToken<HashMap<String, Object>>(){}.getType());
 				debugLog(locationMap.toString());
-				Barrel worldBlock = (Barrel) (Location.deserialize(locationMap).getBlock());
+				Barrel worldBlock = (Barrel) (Location.deserialize(locationMap).getBlock().getState());
 				debugLog(worldBlock.toString());
 
 
@@ -429,7 +416,7 @@ public class Brewery extends JavaPlugin {
 	}
 	
 	private void loadPlayers() {
-		String playerQuery = "SELECT * FROM " + Brewery.database + "players";
+		String playerQuery = "SELECT * FROM " + Brewery.getDatabase("players") + "players";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(playerQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -446,7 +433,7 @@ public class Brewery extends JavaPlugin {
 	}
 	
 	private void loadWakeup() {
-		String wakeupQuery = "SELECT location FROM " + Brewery.database + "wakeup";
+		String wakeupQuery = "SELECT location FROM " + Brewery.getDatabase("wakeup") + "wakeup";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(wakeupQuery)){						
 			ResultSet result = stmt.executeQuery();
 			while (result.next()) {
@@ -469,6 +456,7 @@ public class Brewery extends JavaPlugin {
 		case "brewtypes":
 		case "ingredients":
 		case "recipes":
+		case "players":
 			return development? testdatabase : database;
 		default:
 			return database;
@@ -631,17 +619,6 @@ public class Brewery extends JavaPlugin {
 		}
 
 	}
-	/**
-	public class CauldronRunnable implements Runnable {
-		@Override
-		public void run() {
-			//reloader = null;
-			for (BreweryCauldron cauldron : BreweryCauldron.bcauldrons) {
-				cauldron.onUpdate();// runs every second
-			}
-		}
-
-	}*/
 	
 	public class RecipeRunnable implements Runnable {
 		@Override

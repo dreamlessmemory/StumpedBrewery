@@ -30,7 +30,6 @@ public class BreweryBarrel {
 	private Barrel barrel;
 	private int time;
 	private Hologram hologram;
-	//private boolean aging = false;
 	private BarrelType type;
 
 	public BreweryBarrel(Barrel block, BarrelType barrelType, int time) {
@@ -47,7 +46,7 @@ public class BreweryBarrel {
 	private void createHologram(Block block) {
 		Location above = block.getRelative(BlockFace.UP).getLocation();
 		above.setX(above.getX() + 0.5);
-		above.setY(above.getY() + 0.75);
+		above.setY(above.getY() + 1.0);
 		above.setZ(above.getZ() + 0.5);
 		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
 	}
@@ -55,7 +54,7 @@ public class BreweryBarrel {
 	private void updateHologram() {
 		hologram.clearLines();
 		hologram.appendTextLine(type.toString() + " barrel");
-	    hologram.appendTextLine("Aged " + (int) time + " years"); // TODO: Fix
+	    hologram.appendTextLine("Aged " + (int) time + " year" + (time == 1 ? "" : "s"));
 	}
 
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
@@ -139,16 +138,14 @@ public class BreweryBarrel {
 				// BlockData
 				String location = Brewery.gson.toJson(barrel.barrel.getLocation().serialize());
 				Brewery.breweryDriver.debugLog(location);
-	
-				// aging
-	
+				
 				String query = "REPLACE " + Brewery.getDatabase("barrels")
 						+ "barrels SET idbarrels=?, location=?, type=?, time=?";
 				try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);
 					stmt.setString(3, barrel.type.name());
-					stmt.setFloat(3, barrel.time);
+					stmt.setFloat(4, barrel.time);
 	
 					Brewery.breweryDriver.debugLog(stmt.toString());
 	

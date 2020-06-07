@@ -1,7 +1,5 @@
 package com.dreamless.brewery.data;
 
-import org.bukkit.ChatColor;
-
 public final class NBTConstants {
 
 	public static final String BREWERY_TAG_STRING = "brewery";

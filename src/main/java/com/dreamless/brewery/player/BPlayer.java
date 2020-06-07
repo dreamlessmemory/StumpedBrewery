@@ -26,7 +26,10 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.data.DatabaseCommunication;
+import com.dreamless.brewery.data.NBTConstants;
+
+import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BPlayer {
 	private static Map<String, BPlayer> players = new HashMap<String, BPlayer>();// Players name/uuid and BPlayer
@@ -181,10 +184,15 @@ public class BPlayer {
 				if (bPlayer == null) {
 					bPlayer = addPlayer(player);
 				}
-				bPlayer.drunkeness += DatabaseCommunication.getAlcohol(item);
+				
+				NBTItem nbti = new NBTItem(item);
+				NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
+				bPlayer.drunkeness += Math.min(30, brewery.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING) * 3);
 				bPlayer.drunkEffects = true;
 				
-				if(bPlayer.drunkeness > 100) bPlayer.drinkCap(player);
+				if(bPlayer.drunkeness > 100) {
+					bPlayer.drinkCap(player);
+				}
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
@@ -616,7 +624,7 @@ public class BPlayer {
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setBoolean(1, setDrunk);
 			stmt.setString(2, uuid);
-			//Brewery.breweryDriver.debugLog(stmt.toString());
+			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
