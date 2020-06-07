@@ -41,6 +41,7 @@ import com.dreamless.brewery.data.LanguageReader;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.item.BarrelLidItem;
 import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
 import com.dreamless.brewery.listeners.CommandListener;
@@ -73,13 +74,6 @@ public class Brewery extends JavaPlugin {
 	
 	//Effects
 	public static double effectLevel;
-
-	// Listeners
-	//public BlockListener blockListener;
-	//public PlayerListener playerListener;
-	//public EntityListener entityListener;
-	//public InventoryListener inventoryListener;
-	//public WorldListener worldListener;
 
 	// Language
 	public String language;
@@ -162,11 +156,12 @@ public class Brewery extends JavaPlugin {
 
 		// Heartbeat
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
-		//breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new CauldronRunnable(), 120, 20);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
-		if(!development) {
+		//if(!development) {
 			breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000	
-		}
+		//}
+		
+		BarrelLidItem.registerRecipes();
 		
 		this.log(this.getDescription().getName() + " enabled!");
 	}

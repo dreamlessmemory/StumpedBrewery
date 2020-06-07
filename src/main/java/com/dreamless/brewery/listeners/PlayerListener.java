@@ -28,6 +28,7 @@ import com.dreamless.brewery.data.NBTConstants;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.item.BarrelLidItem;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
@@ -142,12 +143,13 @@ public class PlayerListener implements Listener {
 			Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoBarrelAccess"));
 			return;
 		}
-		
-		if (event.getMaterial() == Material.CLOCK) {
+		BarrelType type = BarrelLidItem.getBarrelType(event.getItem());
+		if (type != null) {
 			event.setCancelled(true);
-			barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), BarrelType.OAK, 0);
+			barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), type, 0);
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 			Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
+			removeItemFromPlayerHand(player);
 		}
 	}
 

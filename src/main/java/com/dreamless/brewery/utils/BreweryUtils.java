@@ -5,14 +5,18 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.ChatPaginator;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.json.simple.JSONObject;
@@ -23,6 +27,8 @@ import com.dreamless.brewery.entity.BreweryCauldron;
 
 public final class BreweryUtils {
     
+	private static final int WRAP_SIZE = 30;
+	
     public static String toBase64(Inventory inventory) {
     	if(inventory == null)
         	return "";
@@ -124,5 +130,9 @@ public final class BreweryUtils {
             e.printStackTrace();
         }       
         return null;
+    }
+    
+    public static List<String> wordWrap(String input){
+    	return Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY + input, WRAP_SIZE));
     }
 }

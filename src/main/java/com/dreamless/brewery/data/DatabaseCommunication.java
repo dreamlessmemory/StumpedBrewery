@@ -22,7 +22,7 @@ public class DatabaseCommunication {
 	public static BreweryRecipe getRecipe(Player player, RecipeEntry entry){
 		//Prep the SQL
 		String query = "SELECT * FROM " + Brewery.getDatabase("recipes") + "recipes WHERE effectkey=?";
-		
+
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, entry.generateKey());
 			Brewery.breweryDriver.debugLog(stmt.toString());
@@ -65,7 +65,7 @@ public class DatabaseCommunication {
 		String query = "INSERT INTO " + Brewery.getDatabase("recipes") + "recipes (effectkey, claimed, name, inventor, flavortext) VALUES (?, ?, ?, ?, ?)";
 
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
-			
+
 			stmt.setString(1, effectkey);
 			stmt.setBoolean(2, false);
 			stmt.setString(3, brewname);
@@ -132,22 +132,23 @@ public class DatabaseCommunication {
 
 		//SQL
 		String recipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") + 
-				"recipes WHERE EXISTS (SELECT * FROM " + Brewery.getDatabase("recipes") +
-				"newrecipes WHERE claimed=false AND claimdate < ?)";
+				"recipes WHERE claimed=false AND NOT EXISTS (SELECT * FROM " + Brewery.getDatabase("recipes") +
+				"newrecipes WHERE " + Brewery.getDatabase("recipes")+ "recipes.effectkey=" + Brewery.getDatabase("recipes") + "newrecipes.effectkey)";
 		String newRecipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") +
 				"newrecipes WHERE claimdate < ?";
 
-		//Main Recipe List
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
+		//Claim Recipe List
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(newRecipeQuery)){
 			stmt.setString(1, sevenDaysAgo);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		//Claim Recipe List
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(newRecipeQuery)){
-			stmt.setString(1, sevenDaysAgo);
+
+		//Main Recipe List
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
+			//stmt.setString(1, sevenDaysAgo);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
@@ -251,12 +252,12 @@ public class DatabaseCommunication {
 	public static void claimRecipe(Player player, String newName) {
 		String uuid = player.getUniqueId().toString();
 		String effectkey = BrewItemFactory.extractEffectKey(player.getInventory().getItemInMainHand());
-		
+
 		if(effectkey == null) {
 			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "This is not a valid brew!");
 			return;
 		}
-		
+
 		if(newName.isEmpty()) {
 			newName = player.getDisplayName() + "'s " + effectkey;
 		}
