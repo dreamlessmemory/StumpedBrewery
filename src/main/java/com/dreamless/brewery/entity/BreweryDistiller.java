@@ -9,6 +9,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
@@ -137,7 +138,6 @@ public class BreweryDistiller implements InventoryHolder {
 	public void removeSelf() {
 		hologram.delete();
 		distillers.remove(this);
-		Brewery.breweryDriver.debugLog("Check distill list: " + distillers.size());
 	}
 	
 	public void ruinPotions() {
@@ -150,6 +150,16 @@ public class BreweryDistiller implements InventoryHolder {
 				brewingInventory.setItem(i, BrewItemFactory.getRuinedBrew());	
 			}
 		}
+	}
+	
+	public boolean isEmpty() {
+		for (ItemStack item : ((InventoryHolder)block.getState()).getInventory().getContents()) {
+			if(item != null) {
+				Brewery.breweryDriver.debugLog(item.toString());
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private void createHologram(Block block) {
@@ -186,6 +196,9 @@ public class BreweryDistiller implements InventoryHolder {
 		//Sound and particle effects
 		block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5, block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 		block.getWorld().playSound(block.getLocation(), Sound.ITEM_BOTTLE_FILL, (float)(Math.random()/8) + 0.1f, (float)(Math.random()/2) + 0.75f);
+		
+		// Clear inventory
+		filterInventory.clear();
 	}
 
 	@Override

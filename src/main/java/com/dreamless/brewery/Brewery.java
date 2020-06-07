@@ -45,6 +45,7 @@ import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
 import com.dreamless.brewery.listeners.CommandListener;
 import com.dreamless.brewery.listeners.EntityListener;
+import com.dreamless.brewery.listeners.InventoryListener;
 //import com.dreamless.brewery.listeners.InventoryListener;
 import com.dreamless.brewery.listeners.PlayerListener;
 import com.dreamless.brewery.listeners.WorldListener;
@@ -168,7 +169,7 @@ public class Brewery extends JavaPlugin {
 		breweryDriver.getServer().getPluginManager().registerEvents(new BlockListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new PlayerListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new EntityListener(), breweryDriver);
-		//breweryDriver.getServer().getPluginManager().registerEvents(inventoryListener, breweryDriver);
+		breweryDriver.getServer().getPluginManager().registerEvents(new InventoryListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new WorldListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new CauldronListener(), breweryDriver);
 

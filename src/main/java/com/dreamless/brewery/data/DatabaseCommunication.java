@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.brew.BreweryRecipe;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 
@@ -39,7 +40,7 @@ public class DatabaseCommunication {
 				BreweryRecipe newRecipe = new BreweryRecipe();
 
 				if(Brewery.newrecipes) {
-					addRecipeToClaimList(player.getUniqueId().toString(), entry.generateKey());
+					addRecipeToClaimList(player.getUniqueId().toString(), entry.generateKey(), newRecipe.getName());
 					addRecipeToMainList(entry.generateKey(), newRecipe.getName(), newRecipe.getFlavorTextString());
 				}
 
@@ -47,7 +48,9 @@ public class DatabaseCommunication {
 			} else {//Recipe Found
 				if(!results.getBoolean(DatabaseConstants.IS_CLAIMED_STRING)){//Exists, but not claimed
 					player.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + Brewery.getText("Recipe_New_Recipe"));
-					addRecipeToClaimList(player.getUniqueId().toString(), results.getString(DatabaseConstants.EFFECT_KEY_STRING));
+					addRecipeToClaimList(player.getUniqueId().toString(), 
+							results.getString(DatabaseConstants.EFFECT_KEY_STRING),
+							results.getString(DatabaseConstants.BREW_NAME_STRING));
 				}
 				return new BreweryRecipe(results.getString(DatabaseConstants.BREW_NAME_STRING), 
 						results.getString(DatabaseConstants.CLAIMANT_STRING), 
@@ -80,20 +83,20 @@ public class DatabaseCommunication {
 		}
 	}
 
-	private static void addRecipeToClaimList(String playerUuid, String effectkey){
+	private static void addRecipeToClaimList(String playerUuid, String effectkey, String name){
 		//Get time
 		java.util.Date dt = new java.util.Date();
 		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String currentTime = sdf.format(dt);
 
 		//Build SQL
-		String query = "INSERT INTO " + Brewery.getDatabase("recipes") + "newrecipes (effectkey, inventor, claimdate) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
+		String query = "INSERT INTO " + Brewery.getDatabase("recipes") + "newrecipes (effectkey, inventor, claimdate, name) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
 
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, effectkey);
 			stmt.setString(2, playerUuid);
 			stmt.setString(3, currentTime);
-			
+			stmt.setString(4, name);
 
 			Brewery.breweryDriver.debugLog(stmt.toString());
 
@@ -133,7 +136,7 @@ public class DatabaseCommunication {
 		//SQL
 		String recipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") + 
 				"recipes WHERE EXISTS (SELECT * FROM " + Brewery.getDatabase("recipes") +
-				"newrecipes WHERE isclaimed=false AND claimdate < ?)";
+				"newrecipes WHERE claimed=false AND claimdate < ?)";
 		String newRecipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") +
 				"newrecipes WHERE claimdate < ?";
 
@@ -156,8 +159,8 @@ public class DatabaseCommunication {
 	}
 
 	public static boolean purgeRecipes() {
-		String recipeQuery = "DELETE FROM recipes WHERE isclaimed=false";
-		String newRecipeQuery = "DELETE FROM newrecipes";
+		String recipeQuery = "DELETE FROM "  + Brewery.getDatabase("recipes") + "recipes WHERE claimed=false";
+		String newRecipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes";
 		try (PreparedStatement stmtMain = Brewery.connection.prepareStatement(recipeQuery); PreparedStatement stmtClaim = Brewery.connection.prepareStatement(newRecipeQuery)){
 			stmtMain.executeUpdate();
 			stmtClaim.executeUpdate();
@@ -187,7 +190,8 @@ public class DatabaseCommunication {
 		String queryMain = "DELETE FROM " + Brewery.getDatabase("recipes") + 
 				"recipes WHERE inventor=? OR NOT EXISTS (SELECT 1 FROM " + 
 				Brewery.getDatabase("recipes") + "newrecipes WHERE " + 
-				Brewery.getDatabase("recipes") + "newrecipes.effectkey=recipes.effectkey)";
+				Brewery.getDatabase("recipes") + "newrecipes.effectkey=" +
+				Brewery.getDatabase("recipes") +"recipes.effectkey)";
 
 		//Claim List
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryClaim)){
@@ -215,10 +219,10 @@ public class DatabaseCommunication {
 		String query;
 		if(claimed) {
 			query = "SELECT name FROM " + Brewery.getDatabase("recipes") + 
-					"recipes WHERE inventor=? AND NOT EXISTS (SELECT brewname FROM newrecipes WHERE " +
-					Brewery.getDatabase("recipes") + " recipes.effectkey = " + Brewery.getDatabase("recipes") + "newrecipes.effectkey)";
+					"recipes WHERE inventor=? AND NOT EXISTS (SELECT effectkey FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE " +
+					Brewery.getDatabase("recipes") + "recipes.effectkey = " + Brewery.getDatabase("recipes") + "newrecipes.effectkey)";
 		} else {
-			query = "SELECT brewname FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE inventor=?";
+			query = "SELECT name FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE inventor=?";
 		}
 
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){			
@@ -233,9 +237,9 @@ public class DatabaseCommunication {
 				int count = 1;
 				do {
 					if(claimed) {
-						list.add(count++ + " - " + results.getString("name"));
+						list.add(count++ + " - " + results.getString(DatabaseConstants.BREW_NAME_STRING));
 					} else {
-						list.add(results.getString("brewname"));
+						list.add(results.getString(DatabaseConstants.BREW_NAME_STRING));
 					}
 				} while (results.next());
 			}
@@ -249,20 +253,26 @@ public class DatabaseCommunication {
 
 	public static void claimRecipe(Player player, String newName) {
 		String uuid = player.getUniqueId().toString();
-		String currentRecipe = player.getInventory().getItemInMainHand().getItemMeta().getDisplayName();
+		String effectkey = BrewItemFactory.extractEffectKey(player.getInventory().getItemInMainHand());
+		
+		if(effectkey == null) {
+			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "This is not a valid brew!");
+			return;
+		}
+		
 		if(newName.isEmpty()) {
-			newName = player.getDisplayName() + "'s " + currentRecipe;
+			newName = player.getDisplayName() + "'s " + effectkey;
 		}
 
 		//SQL
 		String queryGetClaim = "SELECT * FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE inventor=? AND effectkey=?";
-		String queryUpdateRecipeTable = "UPDATE " + Brewery.getDatabase("recipes") + "recipes SET inventor=?, isclaimed=true, effectkey=? WHERE effectkey=?";
+		String queryUpdateRecipeTable = "UPDATE " + Brewery.getDatabase("recipes") + "recipes SET inventor=?, claimed=true, name=? WHERE effectkey=?";
 		String queryDeleteClaims = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE effectkey=?";
 
 		//Get Claim
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryGetClaim)){
 			stmt.setString(1, uuid);
-			stmt.setString(2, currentRecipe);
+			stmt.setString(2, effectkey);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			ResultSet results = stmt.executeQuery();
 			if(!results.next()) {//Didn't find
@@ -280,7 +290,7 @@ public class DatabaseCommunication {
 			//Prepare statement
 			stmt.setString(1, uuid);
 			stmt.setString(2, newName);
-			stmt.setString(3, currentRecipe);
+			stmt.setString(3, effectkey);
 
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			int updateResult = stmt.executeUpdate();
@@ -299,7 +309,7 @@ public class DatabaseCommunication {
 
 		//Delete all claims in newrecipes
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryDeleteClaims)){
-			stmt.setString(1, currentRecipe);
+			stmt.setString(1, effectkey);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {
@@ -318,18 +328,19 @@ public class DatabaseCommunication {
 		String uuid = player.getUniqueId().toString();
 		ItemStack item = player.getInventory().getItemInMainHand();
 		String currentRecipe = item.getItemMeta().getDisplayName();
-		NBTItem nbti = new NBTItem(item);
-		NBTCompound breweryMeta = nbti.getCompound("brewery");
-		String type = breweryMeta.getString("type");
+		String effectkey = BrewItemFactory.extractEffectKey(item);
+		//NBTItem nbti = new NBTItem(item);
+		//NBTCompound breweryMeta = nbti.getCompound("brewery");
+		//String type = breweryMeta.getString("type");
 
 		//SQL
-		String queryMainList = "DELETE FROM " + Brewery.getDatabase("recipes") + "recipes WHERE name=? AND inventor=?";
-		String queryClaimList = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE brewname=? AND inventor=?";
-		String queryPurgeClaims = "DELETE FROM " + Brewery.getDatabase("recipes") + "recipes WHERE NOT EXISTS (SELECT 1 FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE " + Brewery.getDatabase("recipes") + "newrecipes.brewname=?) AND name=? AND type=?";
+		String queryMainList = "DELETE FROM " + Brewery.getDatabase("recipes") + "recipes WHERE effectkey=? AND inventor=?";
+		String queryClaimList = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE effectkey=? AND inventor=?";
+		String queryPurgeClaims = "DELETE FROM " + Brewery.getDatabase("recipes") + "recipes WHERE NOT EXISTS (SELECT 1 FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE " + Brewery.getDatabase("recipes") + "newrecipes.effectkey=?) AND effectkey=?";
 
 		//Delete off of main list
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryMainList)) {
-			stmt.setString(1, currentRecipe);
+			stmt.setString(1, effectkey);
 			stmt.setString(2, uuid);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			int result = stmt.executeUpdate();
@@ -345,7 +356,7 @@ public class DatabaseCommunication {
 
 		//Delete off of claims list
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryClaimList)) {
-			stmt.setString(1, currentRecipe);
+			stmt.setString(1, effectkey);
 			stmt.setString(2, uuid);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			int result = stmt.executeUpdate();
@@ -361,9 +372,8 @@ public class DatabaseCommunication {
 
 		//Delete off of main list if it doesn't exist in claims
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryPurgeClaims)) {
-			stmt.setString(1, currentRecipe);
-			stmt.setString(2, currentRecipe);
-			stmt.setString(3, type);
+			stmt.setString(1, effectkey);
+			stmt.setString(2, effectkey);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
 		} catch (SQLException e1) {

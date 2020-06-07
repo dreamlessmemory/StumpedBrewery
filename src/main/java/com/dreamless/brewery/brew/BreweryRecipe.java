@@ -29,7 +29,7 @@ private static final int WRAP_SIZE = 30;
     
     public BreweryRecipe() {
     	this.name = BreweryRecipe.generateNewRecipeName(); 
-		inventorText = "The inventor of this brew has not yet claimed this brew";
+		inventorText = "First invented by an unknown brewer";
 		flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY +  Brewery.getText("Recipe_New_Flavortext"), WRAP_SIZE)));	
     }
 	
@@ -62,7 +62,7 @@ private static final int WRAP_SIZE = 30;
 	
 	public String getFlavorTextString() {
 		String finalString = "";
-		for(String string : getFlavorText()) {
+		for(String string : flavorText) {
 			finalString = finalString.concat(string);
 		}
 		return finalString;

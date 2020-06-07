@@ -26,17 +26,11 @@ import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BrewItemFactory {
 	
-	
-	// NBT Keys
-	
-
 	// Fermentation
 	private static final double MAXIMUM_VALUE_SCALE = 1.0;
 	private static final int FALLOFF_START = 10;
 	private static final double MINIMUM_VALUE_SCALE = 0.25;
 	private static final double FALLOFF_RATE = 0.3;
-	
-	// Aging
 
 	private static enum BrewState{
 		FERMENTED, DISTILLED, FINISHED, RUINED;
@@ -276,5 +270,26 @@ public class BrewItemFactory {
 		breweryMeta.setInteger(NBTConstants.STATE_TAG_STRING, BrewState.RUINED.ordinal());
 
 		return item;
-	}	
+	}
+	
+	public static String extractEffectKey(ItemStack itemStack) {
+		
+		NBTItem item = new NBTItem(itemStack);
+		
+		NBTCompound breweryMeta = item.getCompound(NBTConstants.BREWERY_TAG_STRING);
+		
+		if(breweryMeta == null) {
+			return null;
+		}
+		
+		String effectkey = "";
+		effectkey = effectkey.concat(breweryMeta.getString(NBTConstants.EFFECT_NAME_TAG_STRING));
+		effectkey = effectkey.concat("-");
+		effectkey = effectkey.concat(breweryMeta.getInteger(NBTConstants.POTENCY_SCORE_TAG_STRING).toString());
+		effectkey = effectkey.concat("-");
+		effectkey = effectkey.concat(breweryMeta.getInteger(NBTConstants.DURATION_SCORE_TAG_STRING).toString());
+		
+		return effectkey;
+	}
+	
 }
