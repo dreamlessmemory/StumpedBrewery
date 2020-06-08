@@ -49,19 +49,19 @@ public enum Rarity {
 	public final int getSaturation() {
 		switch(this) {
 		case COMMON:
-			return 10;
+			return 20;
 		case COMMON_PLUS:
-			return 5;
+			return 10;
 		case UNCOMMON:
-			return 30;
+			return 60;
 		case UNCOMMON_PLUS:
-			return 15;
+			return 30;
 		case RARE:
-			return 50;
+			return 100;
 		case RARE_PLUS:
-			return 25;
+			return 50;
 		case LEGENDARY:
-			return 70;
+			return 100;
 		default:
 			return 0;
 		}	

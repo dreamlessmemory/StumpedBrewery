@@ -11,9 +11,9 @@ public enum BreweryEffect {
 	ABSORPTION, DAMAGE_RESISTANCE, DOLPHINS_GRACE, FAST_DIGGING, FIRE_RESISTANCE, HEAL,	WATER_BREATHING, INCREASE_DAMAGE, INVISIBILITY, JUMP,	
 	LEVITATION,	LUCK, NIGHT_VISION,	REGENERATION, SATURATION, SLOW_FALLING,	SPEED, NONE;
 	
-	private static final int DURATION_SCORE_MULTIPLIER = 20 * 1;
+	private static final int DURATION_SCORE_MULTIPLIER = 20 * 5;
 	private static final double DURATION_TO_LEVEL_SCALE = 0.3;
-	private static final int LEVEL_THRESHOLD = 25;
+	private static final int LEVEL_THRESHOLD = 15;
 
 	// Get the list of effects
 	public static BreweryEffect getEffect(AspectMatrix matrix){	
