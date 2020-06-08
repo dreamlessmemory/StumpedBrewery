@@ -85,7 +85,7 @@ public class BrewItemFactory {
 		}
 
 		// Crafter
-		breweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, player.getDisplayName());
+		breweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, player.getName());
 
 		// Set state
 		breweryMeta.setString(NBTConstants.STATE_TAG_STRING, BrewState.FERMENTED.toString());
