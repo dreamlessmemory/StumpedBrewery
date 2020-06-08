@@ -44,6 +44,7 @@ public class PlayerListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		
 		if(event.getPlayer().getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
+			Brewery.breweryDriver.msg(event.getPlayer(), Brewery.getText("Player_CreativeNotAllowed"));
 			return;
 		}
 		
