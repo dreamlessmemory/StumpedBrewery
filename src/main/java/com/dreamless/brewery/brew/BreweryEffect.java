@@ -66,35 +66,138 @@ public enum BreweryEffect {
 		}
 	}
 
-	// TODO: Finish this
 	public BreweryEffectRequirement getEffectRequirement() {
 		BreweryEffectRequirement requirement;
 		switch(this){
 		case ABSORPTION:
+			requirement = new BreweryEffectRequirement(7);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 3);
+			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 1);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 1);
+			requirement.addAspectMinimalRequirement(Aspect.AQUATIC, 3);
+			break;
 		case DAMAGE_RESISTANCE:
+			requirement = new BreweryEffectRequirement(6);
+			requirement.addAspectMinimalRequirement(Aspect.LITHIC, 3);
+			requirement.addAspectMinimalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 0);
+			requirement.addAspectMaximalRequirement(Aspect.AQUATIC, 0);
+			break;
 		case DOLPHINS_GRACE:
+			requirement = new BreweryEffectRequirement(4);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 1);
+			requirement.addAspectMaximalRequirement(Aspect.PYROTIC, 2);
+			requirement.addAspectMinimalRequirement(Aspect.VOID, 2);
+			requirement.addAspectMinimalRequirement(Aspect.AQUATIC, 2);
+			break;
 		case FAST_DIGGING:
+			requirement = new BreweryEffectRequirement(8);
+			requirement.addAspectMinimalRequirement(Aspect.LITHIC, 3);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 1);
+			requirement.addAspectMaximalRequirement(Aspect.PYROTIC, 1);
+			requirement.addAspectMinimalRequirement(Aspect.AERIAL, 3);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 1);
+			requirement.addAspectMaximalRequirement(Aspect.AQUATIC, 1);
+			break;
 		case FIRE_RESISTANCE:
+			requirement = new BreweryEffectRequirement(6);
+			requirement.addAspectMinimalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 3);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 0);
+			requirement.addAspectMaximalRequirement(Aspect.AQUATIC, 0);
+			break;
 		case HEAL:
+			requirement = new BreweryEffectRequirement(5);
+			requirement.addAspectMinimalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.PYROTIC, 1);
+			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 2);
+			requirement.addAspectMinimalRequirement(Aspect.AQUATIC, 2);
+			break;
 		case WATER_BREATHING:
+			requirement = new BreweryEffectRequirement(5);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 1);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 1);
+			requirement.addAspectMaximalRequirement(Aspect.PYROTIC, 2);
+			requirement.addAspectMinimalRequirement(Aspect.AERIAL, 2);
+			requirement.addAspectMinimalRequirement(Aspect.AQUATIC, 2);
+			break;
 		case INCREASE_DAMAGE:
+			requirement = new BreweryEffectRequirement(4);
+			requirement.addAspectMinimalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 2);
+			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 2);
+			requirement.addAspectMaximalRequirement(Aspect.AQUATIC, 1);
+			break;
 		case INVISIBILITY:
-		case JUMP:
-		case LEVITATION:
-		case LUCK:
-		case NIGHT_VISION:
-		case REGENERATION:
-		case SATURATION:
-		case SLOW_FALLING:
 			requirement = new BreweryEffectRequirement(3);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMinimalRequirement(Aspect.INFERNAL, 1);
+			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 1);
+			requirement.addAspectMinimalRequirement(Aspect.AERIAL, 1);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 2);
+			requirement.addAspectMaximalRequirement(Aspect.AQUATIC, 2);
+			break;
+		case JUMP:
+			requirement = new BreweryEffectRequirement(2);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.PYROTIC, 1);
+			requirement.addAspectMinimalRequirement(Aspect.AERIAL, 2);
+			requirement.addAspectMinimalRequirement(Aspect.VOID, 1);
+			break;
+		case SLOW_FALLING:
+			requirement = new BreweryEffectRequirement(2);
 			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
 			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 2);
 			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 2);
 			requirement.addAspectMinimalRequirement(Aspect.VOID, 1);
 			break;
-		case SPEED:
-			requirement = new BreweryEffectRequirement(1);
+		case LUCK:
+			requirement = new BreweryEffectRequirement(7);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMinimalRequirement(Aspect.INFERNAL, 3);
+			requirement.addAspectMaximalRequirement(Aspect.PYROTIC, 1);
+			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 0);
+			requirement.addAspectMinimalRequirement(Aspect.VOID, 3);
+			requirement.addAspectMaximalRequirement(Aspect.AQUATIC, 2);
+			break;
+		case NIGHT_VISION:
+			requirement = new BreweryEffectRequirement(2);
+			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 2);
+			break;
+		case REGENERATION:
+			requirement = new BreweryEffectRequirement(6);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMinimalRequirement(Aspect.LITHIC, 1);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.PYROTIC, 1);
 			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 2);
+			requirement.addAspectMinimalRequirement(Aspect.AQUATIC, 3);
+			break;
+		case SATURATION:
+			requirement = new BreweryEffectRequirement(0);
+			break;
+		case LEVITATION:
+			requirement = new BreweryEffectRequirement(2);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 2);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 2);
+			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 2);
+			requirement.addAspectMinimalRequirement(Aspect.VOID, 1);
+			requirement.addAspectMaximalRequirement(Aspect.AQUATIC, 2);
+			break;
+		case SPEED:
+			requirement = new BreweryEffectRequirement(5);
+			requirement.addAspectMaximalRequirement(Aspect.LITHIC, 0);
+			requirement.addAspectMaximalRequirement(Aspect.INFERNAL, 1);
+			requirement.addAspectMinimalRequirement(Aspect.AERIAL, 3);
+			requirement.addAspectMinimalRequirement(Aspect.VOID, 2);
 			break;
 		default:
 			requirement = new BreweryEffectRequirement(0);
@@ -106,24 +209,82 @@ public enum BreweryEffect {
 		BreweryEffectAspectDistribution distribution = new BreweryEffectAspectDistribution();
 		switch(this){
 		case ABSORPTION:
+			distribution.addMultipler(Aspect.PYROTIC, 0.5);
+			distribution.addMultipler(Aspect.AQUATIC, 0.5);
+			break;
 		case DAMAGE_RESISTANCE:
+			distribution.addMultipler(Aspect.LITHIC, 0.6);
+			distribution.addMultipler(Aspect.INFERNAL, 0.4);
+			break;
 		case DOLPHINS_GRACE:
+			distribution.addMultipler(Aspect.VOID, 0.6);
+			distribution.addMultipler(Aspect.AQUATIC, 0.4);
+			break;
 		case FAST_DIGGING:
+			distribution.addMultipler(Aspect.LITHIC, 0.3);
+			distribution.addMultipler(Aspect.VOID, 0.35);
+			distribution.addMultipler(Aspect.AERIAL, 0.35);
+			break;
 		case FIRE_RESISTANCE:
+			distribution.addMultipler(Aspect.PYROTIC, 0.3);
+			distribution.addMultipler(Aspect.INFERNAL, 0.35);
+			distribution.addMultipler(Aspect.AQUATIC, 0.35);
+			break;
 		case HEAL:
+			distribution.addMultipler(Aspect.LITHIC, 0.5);
+			distribution.addMultipler(Aspect.AQUATIC, 0.5);
+			break;
 		case WATER_BREATHING:
+			distribution.addMultipler(Aspect.AERIAL, 0.5);
+			distribution.addMultipler(Aspect.VOID, 0.5);
+			break;
 		case INCREASE_DAMAGE:
+			distribution.addMultipler(Aspect.LITHIC, 0.3);
+			distribution.addMultipler(Aspect.INFERNAL, 0.35);
+			distribution.addMultipler(Aspect.PYROTIC, 0.35);
+			break;
 		case INVISIBILITY:
+			distribution.addMultipler(Aspect.INFERNAL, 0.3);
+			distribution.addMultipler(Aspect.VOID, 0.35);
+			distribution.addMultipler(Aspect.AERIAL, 0.35);
+			break;
 		case JUMP:
+			distribution.addMultipler(Aspect.AERIAL, 0.75);
+			distribution.addMultipler(Aspect.VOID, 0.25);
+			break;
 		case LEVITATION:
+			distribution.addMultipler(Aspect.AERIAL, 0.25);
+			distribution.addMultipler(Aspect.VOID, 0.75);
+			break;
 		case LUCK:
+			distribution.addMultipler(Aspect.PYROTIC, 0.15);
+			distribution.addMultipler(Aspect.AQUATIC, 0.15);
+			distribution.addMultipler(Aspect.VOID, 0.35);
+			distribution.addMultipler(Aspect.INFERNAL, 0.35);
+			break;
 		case NIGHT_VISION:
+			distribution.addMultipler(Aspect.VOID, 1.0);
+			break;
 		case REGENERATION:
+			distribution.addMultipler(Aspect.AQUATIC, 0.65);
+			distribution.addMultipler(Aspect.LITHIC, 0.35);
+			break;
 		case SATURATION:
+			distribution.addMultipler(Aspect.AERIAL, 0.25);
+			distribution.addMultipler(Aspect.LITHIC, 0.25);
+			distribution.addMultipler(Aspect.PYROTIC, 0.25);
+			distribution.addMultipler(Aspect.VOID, 0.25);
+			distribution.addMultipler(Aspect.INFERNAL, 0.25);
+			distribution.addMultipler(Aspect.AQUATIC, 0.25);
+			break;
 		case SLOW_FALLING:
+			distribution.addMultipler(Aspect.AERIAL, 0.5);
+			distribution.addMultipler(Aspect.AERIAL, 0.5);
 			break;
 		case SPEED:
-			distribution.addMultipler(Aspect.AERIAL, 1.0);
+			distribution.addMultipler(Aspect.AERIAL, 0.5);
+			distribution.addMultipler(Aspect.VOID, 0.5);
+			distribution.addMultipler(Aspect.PYROTIC, 0.5);
 			break;
 		default:
 			distribution.addMultipler(Aspect.AERIAL, 0);
@@ -131,26 +292,29 @@ public enum BreweryEffect {
 		return distribution;
 	}
 
-	//TODO: Finish this
 	public Color getColor() {
 		switch(this){
 		case ABSORPTION:
-		case DAMAGE_RESISTANCE:
-		case DOLPHINS_GRACE:
-		case FAST_DIGGING:
+		case REGENERATION:
 		case FIRE_RESISTANCE:
 		case HEAL:
-		case WATER_BREATHING:
 		case INCREASE_DAMAGE:
+			return Color.RED;
+		case DAMAGE_RESISTANCE:
+		case DOLPHINS_GRACE:
+		case WATER_BREATHING:
+			return Color.BLUE;
+		case LUCK:
+			return Color.LIME;
+		case SATURATION:
+		case FAST_DIGGING:
+			return Color.ORANGE;
+		case NIGHT_VISION:
+		case SLOW_FALLING:
+		case SPEED:
 		case INVISIBILITY:
 		case JUMP:
 		case LEVITATION:
-		case LUCK:
-		case NIGHT_VISION:
-		case REGENERATION:
-		case SATURATION:
-		case SLOW_FALLING:
-		case SPEED:
 			return Color.WHITE;
 		case NONE:
 			return Color.BLACK;
