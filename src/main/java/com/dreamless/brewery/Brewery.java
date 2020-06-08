@@ -71,6 +71,7 @@ public class Brewery extends JavaPlugin {
 	public static boolean loadwakeup;
 	public static boolean loadplayers;
 	public static boolean newrecipes;
+	public static boolean permitcreative;
 	
 	//Effects
 	public static double effectLevel;
@@ -298,6 +299,7 @@ public class Brewery extends JavaPlugin {
 		loadwakeup = currentConfig.getBoolean("loadwakeup", true);
 		loadplayers = currentConfig.getBoolean("loadplayers", true);
 		newrecipes = currentConfig.getBoolean("newrecipes", true);
+		permitcreative = currentConfig.getBoolean("permitcreative", false);
 		//Player
 		BPlayer.pukeItem = Material.matchMaterial(currentConfig.getString("pukeItem", "SOUL_SAND"));
 		BPlayer.hangoverTime = currentConfig.getInt("hangoverDays", 0) * 24 * 60;

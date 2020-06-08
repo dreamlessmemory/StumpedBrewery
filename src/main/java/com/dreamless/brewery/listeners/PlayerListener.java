@@ -1,5 +1,6 @@
 package com.dreamless.brewery.listeners;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Barrel;
@@ -41,6 +42,11 @@ public class PlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
+		
+		if(event.getPlayer().getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
+			return;
+		}
+		
 		Block clickedBlock = event.getClickedBlock();
 
 		if (clickedBlock != null) {
@@ -195,7 +201,7 @@ public class PlayerListener implements Listener {
 	 * HELPER METHODS
 	 *******************************/
 
-	public void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
+	private void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
 		if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {
 			event.getPlayer().getInventory().setItemInOffHand(new ItemStack(mat));
 		} else {
