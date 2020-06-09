@@ -52,9 +52,10 @@ public class BreweryBarrel {
 	}
 
 	private void updateHologram() {
+		int tempYear = (int)(time/minutesPerYear);		
 		hologram.clearLines();
 		hologram.appendTextLine(type.toString() + " barrel");
-	    hologram.appendTextLine("Aged " + (int) time + " year" + (time == 1 ? "" : "s"));
+	    hologram.appendTextLine("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
 	}
 
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
@@ -80,7 +81,7 @@ public class BreweryBarrel {
 				if (item == null) {
 					continue;
 				}
-				items[i] = BrewItemFactory.getAgedBrew(item, time, type);
+				items[i] = BrewItemFactory.getAgedBrew(item, (int)(time/minutesPerYear), type);
 			}
 
 			// Drop items

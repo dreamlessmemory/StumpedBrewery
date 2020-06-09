@@ -261,7 +261,7 @@ public class BrewItemFactory {
 		NBTItem nbti = new NBTItem(item);
 
 		//Tag as distilling brew
-		NBTCompound breweryMeta = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
+		NBTCompound breweryMeta = nbti.addCompound(NBTConstants.BREWERY_TAG_STRING);
 		breweryMeta.setInteger(NBTConstants.STATE_TAG_STRING, BrewState.RUINED.ordinal());
 
 		return item;

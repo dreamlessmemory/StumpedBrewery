@@ -11,8 +11,8 @@ public enum BreweryEffect {
 	ABSORPTION, DAMAGE_RESISTANCE, DOLPHINS_GRACE, FAST_DIGGING, FIRE_RESISTANCE, HEAL,	WATER_BREATHING, INCREASE_DAMAGE, INVISIBILITY, JUMP,	
 	LEVITATION,	LUCK, NIGHT_VISION,	REGENERATION, SATURATION, SLOW_FALLING,	SPEED, NONE;
 	
-	private static final int DURATION_SCORE_MULTIPLIER = 20 * 5;
-	private static final double DURATION_TO_LEVEL_SCALE = 0.3;
+	private static final int DURATION_SCORE_MULTIPLIER = 20 * 7;
+	private static final double DURATION_TO_LEVEL_SCALE = 0.5;
 	private static final int LEVEL_THRESHOLD = 15;
 
 	// Get the list of effects
@@ -170,6 +170,8 @@ public enum BreweryEffect {
 		case NIGHT_VISION:
 			requirement = new BreweryEffectRequirement(2);
 			requirement.addAspectMinimalRequirement(Aspect.PYROTIC, 2);
+			requirement.addAspectMaximalRequirement(Aspect.AERIAL, 2);
+			requirement.addAspectMaximalRequirement(Aspect.VOID, 2);
 			break;
 		case REGENERATION:
 			requirement = new BreweryEffectRequirement(6);
@@ -329,8 +331,8 @@ public enum BreweryEffect {
 		int total = 0;
 		HashMap<Aspect, Double> distributionHashMap = this.getEffectAspectDistribution().multiplierMap;
 		for(Entry<Aspect, Double> entry : distributionHashMap.entrySet()) {
-			if(distributionHashMap.containsKey(entry.getKey())){
-				total += containedAspects.get(entry.getKey()) * entry.getValue();	
+			if(distributionHashMap.containsKey(entry.getKey()) && containedAspects.containsKey(entry.getKey())){
+				total += containedAspects.get(entry.getKey()) * entry.getValue();
 			}
 		}
 		return total;

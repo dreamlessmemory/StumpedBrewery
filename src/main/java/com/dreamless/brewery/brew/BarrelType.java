@@ -40,9 +40,9 @@ public enum BarrelType {
 		case ACACIA:
 			return 1;
 		case JUNGLE:
-			return 5;
+			return 7;
 		case SPRUCE:
-			return 4;
+			return 5;
 		default:
 			return 1;
 		}
@@ -50,17 +50,17 @@ public enum BarrelType {
 	public int getDurationIncrease() {
 		switch(this) {
 		case OAK:
-			return 3;
+			return 10;
 		case DARK_OAK:
-			return 3;
+			return 10;
 		case BIRCH:
-			return 4;
+			return 15;
 		case ACACIA:
-			return 5;
+			return 20;
 		case JUNGLE:
-			return 1;
+			return 5;
 		case SPRUCE:
-			return 2;
+			return 7;
 		default:
 			return 1;
 		}

@@ -84,9 +84,9 @@ public enum Aspect {
 		case EMERALD:
 		case EMERALD_BLOCK:
 		case COCOA_BEANS:
-		case CARROT:
-		case POTATO:
-		case BEETROOT:
+		case CARROTS:
+		case POTATOES:
+		case BEETROOTS:
 		case WHEAT:
 		case BREAD:
 		case HAY_BLOCK:

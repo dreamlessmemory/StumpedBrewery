@@ -132,7 +132,7 @@ public class BPlayer {
 	public static void remove(Player player) {
 		players.remove(Brewery.playerString(player));
 		//SQL
-		String query = "INSERT INTO " + Brewery.getDatabase("players") + "players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
+		String query = "INSERT INTO " + Brewery.getDatabase("players") + "players (uuid, drunkeness, offlinedrunk) VALUES (?, 0, 0) ON DUPLICATE KEY UPDATE drunkeness=0, offlinedrunk=0";
 		try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, player.getUniqueId().toString());
 			//Brewery.breweryDriver.debugLog(stmt.toString());
@@ -148,7 +148,7 @@ public class BPlayer {
 				players.remove(entry.getKey());
 				
 				//SQL
-				String query = "INSERT INTO " + Brewery.getDatabase("players") + "players (uuid, quality, drunkeness, offlinedrunk) VALUES (?, 0, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
+				String query = "INSERT INTO " + Brewery.getDatabase("players") + "players (uuid, drunkeness, offlinedrunk) VALUES (?, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 					stmt.setString(1, entry.getKey());
 					Brewery.breweryDriver.debugLog(stmt.toString());

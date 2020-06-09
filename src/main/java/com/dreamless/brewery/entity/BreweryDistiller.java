@@ -9,6 +9,7 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BrewingStand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
@@ -119,11 +120,19 @@ public class BreweryDistiller implements InventoryHolder {
 		}
 	}
 
-	public void ejectAllFilters() {
-		for(ItemStack item : filterInventory) {
+	public void ejectAllFilters() {	
+		//ruin brew if distilling
+		if(distilling) {
+			ruinPotions();
+			Bukkit.getScheduler().cancelTask(runningDistillers.get(this));
+		}
+		for(ItemStack item: filterInventory) {
 			ejectItem(item);
 		}
-		remove(block);
+		distillers.remove(this);
+
+		//Remove hologram
+		hologram.delete();
 	}
 
 	public BreweryMessage startDistilling(Player player) {	
@@ -162,7 +171,7 @@ public class BreweryDistiller implements InventoryHolder {
 	private void createHologram(Block block) {
 		Location above = block.getRelative(BlockFace.UP).getLocation();
 		above.setX(above.getX()+ 0.5);
-		above.setY(above.getY()+ 1.25);
+		above.setY(above.getY()+ 0.75);
 		above.setZ(above.getZ()+ 0.5);
 		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
 
@@ -182,7 +191,7 @@ public class BreweryDistiller implements InventoryHolder {
 		distilling = false;
 		finishedDistilling = true;
 
-		BrewItemFactory.getDistilledBrews((BrewerInventory) ((InventoryHolder)block.getState()).getInventory(), filterInventory);
+		BrewItemFactory.getDistilledBrews(((BrewingStand)block.getState()).getInventory(), filterInventory);
 
 		//Effects
 		//Sound and particle effects

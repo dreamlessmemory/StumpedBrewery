@@ -9,15 +9,15 @@ public enum Rarity {
 		switch(this) {
 		case COMMON:
 		case COMMON_PLUS:
-			return 5;
+			return 3;
 		case UNCOMMON:
 		case UNCOMMON_PLUS:
-			return 7;
+			return 4;
 		case RARE:
 		case RARE_PLUS:
-			return 10;
+			return 6;
 		case LEGENDARY:
-			return 15;
+			return 8;
 		default:
 			return 0;
 		}	
@@ -27,19 +27,19 @@ public enum Rarity {
 	public final int getValue() {
 		switch(this) {
 		case COMMON:
-			return 1;
+			return 10;
 		case COMMON_PLUS:
-			return 2;
+			return 15;
 		case UNCOMMON:
-			return 3;
+			return 25;
 		case UNCOMMON_PLUS:
-			return 4;
+			return 35;
 		case RARE:
-			return 5;
+			return 50;
 		case RARE_PLUS:
-			return 6;
+			return 60;
 		case LEGENDARY:
-			return 7;
+			return 70;
 		default:
 			return 0;
 		}	
@@ -49,19 +49,19 @@ public enum Rarity {
 	public final int getSaturation() {
 		switch(this) {
 		case COMMON:
-			return 20;
+			return 100;
 		case COMMON_PLUS:
-			return 10;
-		case UNCOMMON:
-			return 60;
-		case UNCOMMON_PLUS:
-			return 30;
-		case RARE:
-			return 100;
-		case RARE_PLUS:
 			return 50;
+		case UNCOMMON:
+			return 150;
+		case UNCOMMON_PLUS:
+			return 105;
+		case RARE:
+			return 200;
+		case RARE_PLUS:
+			return 180;
 		case LEGENDARY:
-			return 100;
+			return 140;
 		default:
 			return 0;
 		}	

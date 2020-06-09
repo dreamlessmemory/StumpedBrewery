@@ -122,6 +122,7 @@ public class BreweryCauldron implements InventoryHolder {
 				block.getState().update();
 
 				if (level == 0) {
+					taskMap.get(bcauldron).cancel();
 					cauldronList.remove(bcauldron);
 					// Remove hologram
 					bcauldron.hologram.delete();
@@ -230,7 +231,8 @@ public class BreweryCauldron implements InventoryHolder {
 						block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 20, 0.15, 0.15, 0.15, 0.05);
 				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_BREWING_STAND_BREW,
 						(float) (Math.random() / 8) + 0.1f, (float) (Math.random() * 1.5) + 0.5f);
-			} else if (Math.random() > Brewery.effectLevel) {
+			} 
+			if (cookTime % 60 == 0) {
 				// Sound and particle effects
 				block.getWorld().spawnParticle(Particle.EXPLOSION_LARGE, block.getLocation().getX() + 0.5,
 						block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
@@ -359,7 +361,7 @@ public class BreweryCauldron implements InventoryHolder {
 	private ItemStack finishFermentation(int state, Player player) {
 
 		// Stop Task timer
-		taskMap.get(this).cancel();
+		//taskMap.get(this).cancel();
 		return BrewItemFactory.getFermentedBrew(player, inventory, state);
 	}
 
