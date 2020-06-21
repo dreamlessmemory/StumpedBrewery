@@ -55,6 +55,8 @@ public class PlayerListener implements Listener {
 				Player player = event.getPlayer();
 				if (!player.isSneaking()) {
 					Material type = clickedBlock.getType();
+					
+					//event.setCancelled(true);
 
 					// Interacting with a Cauldron
 					if (type == Material.CAULDRON) {
@@ -69,7 +71,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	private void handleCauldron(PlayerInteractEvent event, Player player) {
+	private void handleCauldron(PlayerInteractEvent event, Player player) {	
 		Block clickedBlock = event.getClickedBlock();
 		BreweryCauldron cauldron = BreweryCauldron.get(clickedBlock);
 		Material materialInHand = event.getMaterial();
@@ -77,14 +79,19 @@ public class PlayerListener implements Listener {
 
 		if (cauldron == null && BreweryCauldron.isUseableCauldron(clickedBlock)
 				&& Rarity.isValidIngredient(materialInHand)) {
+			
+			event.setCancelled(true);
+			
 			cauldron = new BreweryCauldron(clickedBlock);
 			cauldron.addIngredient(materialInHand);
 			removeItemFromPlayerHand(player);
 			return;
 		} else if (cauldron != null) {
 			if (materialInHand == Material.BUCKET) {
+				event.setCancelled(true);
 				BreweryCauldron.remove(cauldron);
 			} else if (materialInHand == Material.CLOCK) {
+				event.setCancelled(true);
 				if (cauldron.isCooking()) {// Print time if cooking
 					cauldron.printTime(player);
 				} else if (cauldron.getFillLevel() > 0) {
@@ -98,6 +105,7 @@ public class PlayerListener implements Listener {
 			} else if (materialInHand == Material.WOODEN_SHOVEL || materialInHand == Material.IRON_SHOVEL
 					|| materialInHand == Material.STONE_SHOVEL || materialInHand == Material.GOLDEN_SHOVEL
 					|| materialInHand == Material.DIAMOND_SHOVEL) {// Purge
+				event.setCancelled(true);
 				if (player.hasPermission("brewery.cauldron.insert") && !cauldron.isCooking()) {
 					BreweryCauldron.remove(cauldron);
 				} else {
@@ -125,11 +133,50 @@ public class PlayerListener implements Listener {
 					BreweryCauldron.remove(cauldron);
 				}
 			} else if (Rarity.isValidIngredient(materialInHand)){ // Add ingredient
+				event.setCancelled(true);
 				BreweryMessage response = cauldron.addIngredient(materialInHand);
 				if (response.getResult()) {
 					removeItemFromPlayerHand(player);
 				} else {
 					Brewery.breweryDriver.msg(player, response.getMessage());
+				}
+			}
+		}
+	}
+
+	private void handleDistiller(PlayerInteractEvent event, Player player) {
+		Block clickedBlock = event.getClickedBlock();
+		Material materialInHand = event.getMaterial();
+	
+		BreweryDistiller distiller = BreweryDistiller.get(clickedBlock);
+	
+		// Cancel interaction if distilling
+		if (distiller != null && distiller.isDistilling()) {
+			event.setCancelled(true);
+			return;
+		}
+	
+		if (BreweryDistiller.isValidFilter(materialInHand)) {
+			event.setCancelled(true);
+			if(distiller == null) {// New Distiller
+				distiller = new BreweryDistiller(clickedBlock);
+			}
+			if(distiller.addFilter(materialInHand)) {
+				removeItemFromPlayerHand(player);
+			}
+		} else if (materialInHand == Material.IRON_SHOVEL) { // Eject Filters
+			event.setCancelled(true);
+			distiller.ejectAllFilters();
+		} else if (materialInHand == Material.CLOCK) { // Start Distilling
+			event.setCancelled(true);
+			if (distiller != null) {
+				BreweryMessage breweryMessage = distiller.startDistilling(player);
+				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
+				if (breweryMessage.getResult()) {
+					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
+					BreweryDistiller.runningDistillers.put(distiller,
+							new BreweryDistiller.DistillerRunnable(BreweryDistiller.DEFAULT_CYCLE_LENGTH, distiller)
+									.runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
 				}
 			}
 		}
@@ -157,44 +204,6 @@ public class PlayerListener implements Listener {
 			event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
 			Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
 			removeItemFromPlayerHand(player);
-		}
-	}
-
-	private void handleDistiller(PlayerInteractEvent event, Player player) {
-		Block clickedBlock = event.getClickedBlock();
-		Material materialInHand = event.getMaterial();
-
-		BreweryDistiller distiller = BreweryDistiller.get(clickedBlock);
-
-		// Cancel interaction if distilling
-		if (distiller != null && distiller.isDistilling()) {
-			event.setCancelled(true);
-			return;
-		}
-
-		if (BreweryDistiller.isValidFilter(materialInHand)) {
-			event.setCancelled(true);
-			if(distiller == null) {// New Distiller
-				distiller = new BreweryDistiller(clickedBlock);
-			}
-			if(distiller.addFilter(materialInHand)) {
-				removeItemFromPlayerHand(player);
-			}
-		} else if (materialInHand == Material.IRON_SHOVEL) { // Eject Filters
-			event.setCancelled(true);
-			distiller.ejectAllFilters();
-		} else if (materialInHand == Material.CLOCK) { // Start Distilling
-			event.setCancelled(true);
-			if (distiller != null) {
-				BreweryMessage breweryMessage = distiller.startDistilling(player);
-				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
-				if (breweryMessage.getResult()) {
-					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
-					BreweryDistiller.runningDistillers.put(distiller,
-							new BreweryDistiller.DistillerRunnable(BreweryDistiller.DEFAULT_CYCLE_LENGTH, distiller)
-									.runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
-				}
-			}
 		}
 	}
 
