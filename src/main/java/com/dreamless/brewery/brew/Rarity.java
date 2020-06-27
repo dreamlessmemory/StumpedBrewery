@@ -162,6 +162,7 @@ public enum Rarity {
 		case HONEY_BOTTLE:
 		case HONEYCOMB:
 		case LAPIS_LAZULI:
+		case SWEET_BERRIES:
 			return UNCOMMON;
 		case SNOW_BLOCK:
 		case POPPED_CHORUS_FRUIT:

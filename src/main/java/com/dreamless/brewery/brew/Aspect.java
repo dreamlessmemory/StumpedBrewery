@@ -49,6 +49,7 @@ public enum Aspect {
 		case MILK_BUCKET:
 		case KELP:
 		case TALL_SEAGRASS:
+		case SWEET_BERRIES:
 			return AQUATIC;
 		case JUNGLE_SAPLING:
 		case JUNGLE_LEAVES:
