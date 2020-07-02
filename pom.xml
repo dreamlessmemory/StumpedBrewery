@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dreamless.StumpedBrewery</groupId>
 	<artifactId>StumpedBrewery</artifactId>
-	<version>4.0.0-STUMPED</version>
+	<version>4.1.0-STUMPED</version>
 	<name>StumpedBrewery</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
