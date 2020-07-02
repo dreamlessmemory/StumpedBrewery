@@ -55,7 +55,7 @@ import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mysql.jdbc.Connection;
+import java.sql.Connection;
 
 public class Brewery extends JavaPlugin {
 	//Params

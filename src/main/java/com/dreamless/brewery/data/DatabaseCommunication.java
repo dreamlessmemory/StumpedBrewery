@@ -16,7 +16,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.brew.BreweryRecipe;
-import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 public class DatabaseCommunication {
 	public static BreweryRecipe getRecipe(Player player, RecipeEntry entry){
@@ -297,7 +297,7 @@ public class DatabaseCommunication {
 				return;
 			} 
 		} catch (SQLException e1) {
-			if(e1 instanceof MySQLIntegrityConstraintViolationException) {
+			if(e1 instanceof SQLIntegrityConstraintViolationException) {
 				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "A brew with that name already exists!");
 			} else {
 				e1.printStackTrace();
@@ -403,7 +403,7 @@ public class DatabaseCommunication {
 			meta.setDisplayName(name);
 			item.setItemMeta(meta);
 		} catch (SQLException e1) {
-			if(e1 instanceof MySQLIntegrityConstraintViolationException) {
+			if(e1 instanceof SQLIntegrityConstraintViolationException) {
 				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "A brew with that name already exists!");
 			} else {
 				e1.printStackTrace();
