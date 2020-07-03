@@ -40,9 +40,9 @@ public enum BarrelType {
 		case ACACIA:
 			return 1;
 		case JUNGLE:
-			return 7;
-		case SPRUCE:
 			return 5;
+		case SPRUCE:
+			return 4;
 		default:
 			return 1;
 		}
@@ -54,9 +54,9 @@ public enum BarrelType {
 		case DARK_OAK:
 			return 10;
 		case BIRCH:
-			return 15;
+			return 12;
 		case ACACIA:
-			return 20;
+			return 15;
 		case JUNGLE:
 			return 5;
 		case SPRUCE:

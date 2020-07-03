@@ -11,9 +11,9 @@ public enum BreweryEffect {
 	ABSORPTION, DAMAGE_RESISTANCE, DOLPHINS_GRACE, FAST_DIGGING, FIRE_RESISTANCE, HEAL,	WATER_BREATHING, INCREASE_DAMAGE, INVISIBILITY, JUMP,	
 	LEVITATION,	LUCK, NIGHT_VISION,	REGENERATION, SATURATION, SLOW_FALLING,	SPEED, NONE;
 	
-	private static final int DURATION_SCORE_MULTIPLIER = 20 * 7;
-	private static final double DURATION_TO_LEVEL_SCALE = 0.5;
-	private static final int LEVEL_THRESHOLD = 15;
+	private static final int DURATION_SCORE_MULTIPLIER = 20 * 3;
+	private static final double DURATION_TO_LEVEL_SCALE = 0.15;
+	private static final int LEVEL_THRESHOLD = 35;
 
 	// Get the list of effects
 	public static BreweryEffect getEffect(AspectMatrix matrix){	
@@ -233,8 +233,8 @@ public enum BreweryEffect {
 			distribution.addMultipler(Aspect.AQUATIC, 0.35);
 			break;
 		case HEAL:
-			distribution.addMultipler(Aspect.LITHIC, 0.5);
-			distribution.addMultipler(Aspect.AQUATIC, 0.5);
+			distribution.addMultipler(Aspect.LITHIC, 0.15);
+			distribution.addMultipler(Aspect.AQUATIC, 0.15);
 			break;
 		case WATER_BREATHING:
 			distribution.addMultipler(Aspect.AERIAL, 0.5);
@@ -272,12 +272,12 @@ public enum BreweryEffect {
 			distribution.addMultipler(Aspect.LITHIC, 0.35);
 			break;
 		case SATURATION:
-			distribution.addMultipler(Aspect.AERIAL, 0.25);
-			distribution.addMultipler(Aspect.LITHIC, 0.25);
-			distribution.addMultipler(Aspect.PYROTIC, 0.25);
-			distribution.addMultipler(Aspect.VOID, 0.25);
-			distribution.addMultipler(Aspect.INFERNAL, 0.25);
-			distribution.addMultipler(Aspect.AQUATIC, 0.25);
+			distribution.addMultipler(Aspect.AERIAL, 0.05);
+			distribution.addMultipler(Aspect.LITHIC, 0.05);
+			distribution.addMultipler(Aspect.PYROTIC, 0.05);
+			distribution.addMultipler(Aspect.VOID, 0.05);
+			distribution.addMultipler(Aspect.INFERNAL, 0.05);
+			distribution.addMultipler(Aspect.AQUATIC, 0.05);
 			break;
 		case SLOW_FALLING:
 			distribution.addMultipler(Aspect.AERIAL, 0.5);
@@ -342,7 +342,7 @@ public enum BreweryEffect {
 		
 		double finalScore = potencyScore + (getPotionEffectType().isInstant() ? durationScore * DURATION_TO_LEVEL_SCALE : 0);
 		
-		return (int) finalScore/LEVEL_THRESHOLD;
+		return Math.max(4, (int)finalScore/LEVEL_THRESHOLD);
 	}
 	
 	public int getEffectDuration(int levelScore, int durationScore) {
