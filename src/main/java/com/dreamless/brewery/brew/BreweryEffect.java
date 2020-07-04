@@ -13,7 +13,7 @@ public enum BreweryEffect {
 	
 	private static final int DURATION_SCORE_MULTIPLIER = 20 * 3;
 	private static final double DURATION_TO_LEVEL_SCALE = 0.15;
-	private static final int LEVEL_THRESHOLD = 35;
+	private static final int LEVEL_THRESHOLD = 250;
 
 	// Get the list of effects
 	public static BreweryEffect getEffect(AspectMatrix matrix){	
@@ -338,14 +338,14 @@ public enum BreweryEffect {
 		return total;
 	}
 
-	public int getEffectLevel(int potencyScore, int durationScore) {
+	public int getEffectLevel(int potencyScore, int durationScore, BarrelType type) {
 		
 		double finalScore = potencyScore + (getPotionEffectType().isInstant() ? durationScore * DURATION_TO_LEVEL_SCALE : 0);
 		
-		return Math.max(4, (int)finalScore/LEVEL_THRESHOLD);
+		return Math.min(type.getLevelCap(), (int)finalScore/LEVEL_THRESHOLD);
 	}
 	
-	public int getEffectDuration(int levelScore, int durationScore) {
-		return getPotionEffectType().isInstant() ? 0 : (int) (DURATION_SCORE_MULTIPLIER * durationScore);
+	public int getEffectDuration(int levelScore, int durationScore, BarrelType type) {
+		return getPotionEffectType().isInstant() ? 0 : Math.min(type.getDurationCap(), (int) (DURATION_SCORE_MULTIPLIER * durationScore));
 	}
 }

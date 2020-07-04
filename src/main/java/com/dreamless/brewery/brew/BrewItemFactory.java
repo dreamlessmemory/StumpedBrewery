@@ -31,6 +31,7 @@ public class BrewItemFactory {
 	private static final int FALLOFF_START = 10;
 	private static final double MINIMUM_VALUE_SCALE = 0.25;
 	private static final double FALLOFF_RATE = 0.3;
+	private static final int SATURATION_LIMIT = 100;
 
 	private static enum BrewState{
 		FERMENTED, DISTILLED, FINISHED, RUINED;
@@ -39,7 +40,9 @@ public class BrewItemFactory {
 	public static ItemStack getFermentedBrew(Player player, Inventory cauldronInventory, int cookTime) {
 		int optimalCookTime = 0;
 
-		HashMap<AspectRarityPair, Integer> tempMap = new HashMap< AspectRarityPair, Integer>();
+		// Add together the value of the ingredients
+		HashMap<AspectRarityPair, Double> aspectRaritySaturationMap = new HashMap< AspectRarityPair, Double>();
+		HashMap<Aspect, Integer> aspectItemCountMap = new HashMap< Aspect, Integer>();
 		for(ItemStack itemStack : cauldronInventory.getContents())
 		{
 			if(itemStack == null) {
@@ -48,17 +51,31 @@ public class BrewItemFactory {
 			Aspect aspect = Aspect.getAspect(itemStack.getType());
 			Rarity rarity = Rarity.getRarity(itemStack.getType());
 			AspectRarityPair pairedAspectRarity = new  AspectRarityPair(aspect, rarity);
-			tempMap.put(pairedAspectRarity, tempMap.getOrDefault(pairedAspectRarity, 0) + rarity.getValue());
-			optimalCookTime += rarity.getCookTime();
+			aspectRaritySaturationMap.put(pairedAspectRarity, aspectRaritySaturationMap.getOrDefault(pairedAspectRarity, 0.0) + rarity.getSaturationBonus() * itemStack.getAmount());
+			aspectItemCountMap.put(aspect, aspectItemCountMap.getOrDefault(aspect, 0) + (itemStack.getAmount()*10));
+			optimalCookTime += rarity.getCookTime() * itemStack.getAmount();
 		}
 
-		// Set up final map
-		HashMap<Aspect, Integer> aspectMap = new HashMap<Aspect, Integer>();
-		for(Entry< AspectRarityPair, Integer> entry : tempMap.entrySet()) {
-			aspectMap.put(entry.getKey().aspect, aspectMap.getOrDefault(entry.getKey().aspect, 0) +
-					Math.max(entry.getKey().rarity.getSaturation(), entry.getValue()));
+		// Calculate Saturation Scores
+		HashMap<Aspect, Double> aspectSaturationScoreMap = new HashMap<Aspect, Double>();
+		for(Entry< AspectRarityPair, Double> entry : aspectRaritySaturationMap.entrySet()) {
+			aspectSaturationScoreMap.put(
+					entry.getKey().aspect, // Aspect 
+					aspectSaturationScoreMap.getOrDefault(entry.getKey().aspect, 0.0) + // The current value
+					Math.min(entry.getKey().rarity.getSaturationCap(), entry.getValue())); // The new value to add
+		}
+		
+		
+		// Calculate final Aspect Score
+		HashMap<Aspect, Integer> aspectMap = new HashMap<Aspect, Integer>();		
+		for(Entry< Aspect, Double> entry : aspectSaturationScoreMap.entrySet()) {
+			aspectMap.put(
+					entry.getKey(),  
+					(int) Math.ceil(Math.max(aspectItemCountMap.get(entry.getKey()), SATURATION_LIMIT) * // Item Score
+					(1 - entry.getValue()))); //  Saturation Score
 		}
 
+		// Calculate Cook time scaling
 		int deviation = Math.abs(optimalCookTime - cookTime);
 		final double scalar = (deviation < FALLOFF_START) ? 
 				MAXIMUM_VALUE_SCALE :  Math.max(MAXIMUM_VALUE_SCALE - (deviation * FALLOFF_RATE), MINIMUM_VALUE_SCALE);
@@ -200,15 +217,15 @@ public class BrewItemFactory {
 		} catch (Exception e) {
 			return getRuinedBrew();
 		}
-		int potencyScore = Math.min(breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING), age) * type.getLevelIncrease();
-		int durationScore = Math.min(breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING), age) * type.getDurationIncrease();
+		int potencyScore = Math.min((int)Math.ceil(breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING)/type.getAgingFactor()), age) * type.getLevelIncrease();
+		int durationScore = Math.min((int)Math.ceil(breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING)/type.getAgingFactor()), age) * type.getDurationIncrease();
 		
 		
 		ItemStack finalBrew = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) finalBrew.getItemMeta();
 		potionMeta.addCustomEffect(new PotionEffect(effect.getPotionEffectType(), 
-				effect.getEffectDuration(potencyScore, durationScore), 
-				effect.getEffectLevel(potencyScore, durationScore), 
+				effect.getEffectDuration(potencyScore, durationScore, type), 
+				effect.getEffectLevel(potencyScore, durationScore, type), 
 				false, false, false), true);
 		
 		RecipeEntry entry = new RecipeEntry(effect, potencyScore, durationScore);
@@ -222,8 +239,10 @@ public class BrewItemFactory {
 			e.printStackTrace();
 			return getRuinedBrew();
 		}
+		ArrayList<String> completedFlavorText = recipe.getFlavorText();
+		completedFlavorText.add("Crafted by " + breweryMeta.getString(NBTConstants.CRAFTER_TAG_STRING));
 		
-		potionMeta.setLore(recipe.getFlavorText());
+		potionMeta.setLore(completedFlavorText);
 		potionMeta.setDisplayName(recipe.getName());
 		potionMeta.setColor(effect.getColor());
 		finalBrew.setItemMeta(potionMeta);

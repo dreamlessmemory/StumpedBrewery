@@ -37,8 +37,7 @@ public class BlockListener implements Listener {
 		
 		BreweryBarrel barrel = BreweryBarrel.getBarrel(block);
 		if(barrel != null) {
-			event.setCancelled(true);
-			barrel.removeAndFinishBrewing(block, event.getPlayer());
+			barrel.removeSelf();
 		}
 	}
 

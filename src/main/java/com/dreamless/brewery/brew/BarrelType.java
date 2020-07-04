@@ -3,12 +3,7 @@ package com.dreamless.brewery.brew;
 public enum BarrelType {
 	OAK, DARK_OAK, BIRCH, ACACIA, JUNGLE, SPRUCE;
 	
-	// OAK - balanced
-	// DARK_OAK - Balanced?
-	// BIRCH - Duration > Level
-	// ACACIA - Duration >> Level
-	// JUNGLE - Level >> Duration
-	// SPRUCE - Level > Duration
+	private static final int TICKS_PER_MINUTE = 20 * 60; 
 	
 	public String toString() {
 		switch(this) {
@@ -31,38 +26,97 @@ public enum BarrelType {
 	
 	public int getLevelIncrease() {
 		switch(this) {
+		case ACACIA:
+			return 0;
+		case BIRCH:
+			return 0;
 		case OAK:
-			return 3;
+			return 50;
 		case DARK_OAK:
+			return 75;
+		case SPRUCE:
+			return 50;
+		case JUNGLE:
+			return 25;
+		default:
+			return 50;
+		}
+	}
+	
+	public double getAgingFactor() {
+		switch(this) {
+		case ACACIA:
+			return 1.0;
+		case BIRCH:
+			return 10.0;
+		case OAK:
+			return 30.0;
+		case DARK_OAK:
+			return 30.0;
+		case SPRUCE:
+			return 10.0;
+		case JUNGLE:
+			return 1.0;
+		default:
+			return 30;
+		}
+	}
+	
+	public int getDurationIncrease() {
+		switch(this) {
+		case ACACIA:
 			return 3;
 		case BIRCH:
-			return 2;
-		case ACACIA:
-			return 1;
-		case JUNGLE:
-			return 5;
+			return 25;
+		case OAK:
+			return 50;
+		case DARK_OAK:
+			return 30;
 		case SPRUCE:
+			return 10;
+		case JUNGLE:
+			return 1;
+		default:
+			return 30;
+		}
+	}
+	
+	public int getLevelCap() {
+		switch(this) {
+		case ACACIA:
+			return 0;
+		case BIRCH:
+			return 0;
+		case OAK:
+			return 1;
+		case DARK_OAK:
+			return 2;
+		case SPRUCE:
+			return 3;
+		case JUNGLE:
 			return 4;
 		default:
 			return 1;
 		}
 	}
-	public int getDurationIncrease() {
+	
+	public int getDurationCap() {
 		switch(this) {
-		case OAK:
-			return 10;
-		case DARK_OAK:
-			return 10;
-		case BIRCH:
-			return 12;
 		case ACACIA:
-			return 15;
-		case JUNGLE:
-			return 5;
+			return 15 * TICKS_PER_MINUTE;
+		case BIRCH:
+			return 10 * TICKS_PER_MINUTE;
+		case OAK:
+			return 7 * TICKS_PER_MINUTE;
+		case DARK_OAK:
+			return 6 * TICKS_PER_MINUTE;
 		case SPRUCE:
-			return 7;
+			return 5 * TICKS_PER_MINUTE;
+		case JUNGLE:
+			return 5 * TICKS_PER_MINUTE;
 		default:
-			return 1;
+			return 6 * TICKS_PER_MINUTE;
 		}
 	}
+	
 }

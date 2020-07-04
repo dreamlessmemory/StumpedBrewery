@@ -3,18 +3,15 @@ package com.dreamless.brewery.brew;
 import org.bukkit.Material;
 
 public enum Rarity {
-	COMMON, COMMON_PLUS, UNCOMMON, UNCOMMON_PLUS, RARE, RARE_PLUS, LEGENDARY, INVALID;
+	COMMON, UNCOMMON, RARE, LEGENDARY, INVALID;
 	
 	public final int getCookTime() {
 		switch(this) {
 		case COMMON:
-		case COMMON_PLUS:
 			return 3;
 		case UNCOMMON:
-		case UNCOMMON_PLUS:
 			return 4;
 		case RARE:
-		case RARE_PLUS:
 			return 6;
 		case LEGENDARY:
 			return 8;
@@ -23,45 +20,32 @@ public enum Rarity {
 		}	
 	}
 	
-	// TODO: Finalize
-	public final int getValue() {
+	public final double getSaturationBonus() {
 		switch(this) {
 		case COMMON:
-			return 10;
-		case COMMON_PLUS:
-			return 15;
+			return 0;
 		case UNCOMMON:
-			return 25;
-		case UNCOMMON_PLUS:
-			return 35;
+			return 0.04;
 		case RARE:
-			return 50;
-		case RARE_PLUS:
-			return 60;
+			return 0.07;
 		case LEGENDARY:
-			return 70;
+			return 0.3;
 		default:
 			return 0;
 		}	
 	}
 	
 	//TODO: Finalize
-	public final int getSaturation() {
+	public final double getSaturationCap() {
 		switch(this) {
 		case COMMON:
-			return 100;
-		case COMMON_PLUS:
-			return 50;
+			return 0;
 		case UNCOMMON:
-			return 150;
-		case UNCOMMON_PLUS:
-			return 105;
+			return 0.1;
 		case RARE:
-			return 200;
-		case RARE_PLUS:
-			return 180;
+			return 0.2;
 		case LEGENDARY:
-			return 140;
+			return 0.3;
 		default:
 			return 0;
 		}	
@@ -128,7 +112,6 @@ public enum Rarity {
 		case COOKED_SALMON:
 		case COOKED_COD:
 		case GLASS:
-			return COMMON_PLUS;
 		case DEAD_BUSH:
 		case GRASS:
 		case TALL_GRASS:
@@ -169,7 +152,6 @@ public enum Rarity {
 		case BONE_BLOCK:
 		case COOKED_PORKCHOP:
 		case HONEY_BLOCK:
-			return UNCOMMON_PLUS;
 		case GOLD_BLOCK:
 		case IRON_BLOCK:
 		case DIAMOND:

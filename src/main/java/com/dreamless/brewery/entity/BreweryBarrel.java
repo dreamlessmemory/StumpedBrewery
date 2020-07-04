@@ -98,6 +98,7 @@ public class BreweryBarrel {
 	}
 	
 	public void removeSelf() {
+		hologram.delete();
 		barrels.remove(this);
 	}
 	
