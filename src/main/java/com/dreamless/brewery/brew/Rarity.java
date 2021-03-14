@@ -8,11 +8,11 @@ public enum Rarity {
 	public final int getCookTime() {
 		switch(this) {
 		case COMMON:
-			return 3;
+			return 1; //3 
 		case UNCOMMON:
-			return 4;
+			return 1; //4
 		case RARE:
-			return 6;
+			return 1; //6
 		case LEGENDARY:
 			return 8;
 		default:
@@ -41,14 +41,30 @@ public enum Rarity {
 		case COMMON:
 			return 0;
 		case UNCOMMON:
-			return 0.1;
-		case RARE:
 			return 0.2;
-		case LEGENDARY:
+		case RARE:
 			return 0.3;
+		case LEGENDARY:
+			return 0.4;
 		default:
 			return 0;
 		}	
+	}
+	
+	public final int getItemContribution()
+	{
+		switch(this) {
+		case COMMON:
+			return 10;
+		case UNCOMMON:
+			return 5;
+		case RARE:
+			return 3;
+		case LEGENDARY:
+			return 1;
+		default:
+			return 0;
+		}
 	}
 	
 	public static Rarity getRarity(Material material) {
@@ -170,14 +186,13 @@ public enum Rarity {
 		case GLISTERING_MELON_SLICE:
 		case GOLDEN_CARROT:
 		case RABBIT_FOOT:
-		case DRAGON_BREATH:
 		case SHULKER_SHELL:
 			return RARE;
 		case SPONGE:
 		case DIAMOND_BLOCK:
 		case OBSIDIAN:
-		case DRAGON_EGG:
-		case BEACON:
+		case DRAGON_BREATH:
+		case BLUE_ICE:
 		case NETHER_STAR:
 		case WITHER_ROSE:
 			return LEGENDARY;

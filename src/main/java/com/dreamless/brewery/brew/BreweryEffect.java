@@ -335,7 +335,7 @@ public enum BreweryEffect {
 				total += containedAspects.get(entry.getKey()) * entry.getValue();
 			}
 		}
-		return total;
+		return Math.max(total, 1);
 	}
 
 	public int getEffectLevel(int potencyScore, int durationScore, BarrelType type) {

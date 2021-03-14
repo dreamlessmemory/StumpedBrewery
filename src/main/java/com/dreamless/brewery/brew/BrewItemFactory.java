@@ -48,13 +48,19 @@ public class BrewItemFactory {
 			if(itemStack == null) {
 				continue;
 			}
-			Aspect aspect = Aspect.getAspect(itemStack.getType());
+			ArrayList<Aspect> aspects = Aspect.getAspect(itemStack.getType());
 			Rarity rarity = Rarity.getRarity(itemStack.getType());
-			AspectRarityPair pairedAspectRarity = new  AspectRarityPair(aspect, rarity);
-			aspectRaritySaturationMap.put(pairedAspectRarity, aspectRaritySaturationMap.getOrDefault(pairedAspectRarity, 0.0) + rarity.getSaturationBonus() * itemStack.getAmount());
-			aspectItemCountMap.put(aspect, aspectItemCountMap.getOrDefault(aspect, 0) + (itemStack.getAmount()*10));
+			for(Aspect aspect : aspects)
+			{
+				AspectRarityPair pairedAspectRarity = new  AspectRarityPair(aspect, rarity);
+				aspectRaritySaturationMap.put(pairedAspectRarity, aspectRaritySaturationMap.getOrDefault(pairedAspectRarity, 0.0) + rarity.getSaturationBonus() * itemStack.getAmount());
+				aspectItemCountMap.put(aspect, aspectItemCountMap.getOrDefault(aspect, 0) + (itemStack.getAmount()*rarity.getItemContribution()));
+			}
 			optimalCookTime += rarity.getCookTime() * itemStack.getAmount();
 		}
+		
+		//Brewery.breweryDriver.debugLog("AICM: " + aspectItemCountMap.toString());
+		//Brewery.breweryDriver.debugLog("ARSM: " + aspectRaritySaturationMap.toString());
 
 		// Calculate Saturation Scores
 		HashMap<Aspect, Double> aspectSaturationScoreMap = new HashMap<Aspect, Double>();
@@ -65,23 +71,30 @@ public class BrewItemFactory {
 					Math.min(entry.getKey().rarity.getSaturationCap(), entry.getValue())); // The new value to add
 		}
 		
+		//Brewery.breweryDriver.debugLog("ASSM: " + aspectSaturationScoreMap.toString());
 		
 		// Calculate final Aspect Score
 		HashMap<Aspect, Integer> aspectMap = new HashMap<Aspect, Integer>();		
 		for(Entry< Aspect, Double> entry : aspectSaturationScoreMap.entrySet()) {
 			aspectMap.put(
 					entry.getKey(),  
-					(int) Math.ceil(Math.max(aspectItemCountMap.get(entry.getKey()), SATURATION_LIMIT) * // Item Score
-					(1 - entry.getValue()))); //  Saturation Score
+					(int) Math.ceil(Math.min(aspectItemCountMap.get(entry.getKey()), SATURATION_LIMIT) * // Item Score
+					(1 + entry.getValue()))); //  Saturation Score
 		}
+		
+		//Brewery.breweryDriver.debugLog("AM1: " + aspectMap.toString());
 
 		// Calculate Cook time scaling
 		int deviation = Math.abs(optimalCookTime - cookTime);
+		//Brewery.breweryDriver.debugLog("OPT: " + optimalCookTime + " ACT: " + cookTime);
 		final double scalar = (deviation < FALLOFF_START) ? 
 				MAXIMUM_VALUE_SCALE :  Math.max(MAXIMUM_VALUE_SCALE - (deviation * FALLOFF_RATE), MINIMUM_VALUE_SCALE);
 
 		// Update Map
-		aspectMap.forEach((aspect, value) -> aspectMap.replace(aspect, (int)(value * scalar)));  		
+		aspectMap.forEach((aspect, value) -> aspectMap.replace(aspect, (int)(value * scalar)));  
+		
+		//Brewery.breweryDriver.debugLog("AM2: " + aspectMap.toString());
+
 
 		// Create Item
 		ItemStack potion = new ItemStack(Material.POTION);

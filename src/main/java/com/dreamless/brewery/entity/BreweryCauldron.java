@@ -199,7 +199,7 @@ public class BreweryCauldron implements InventoryHolder {
 		for (int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
 			if (item != null) {
-				if (Aspect.getAspect(item.getType()) != Aspect.INVALID) {
+				if (!Aspect.getAspect(item.getType()).isEmpty()) {
 					if (usesBucket(item)) {
 						dumpItem(new ItemStack(Material.BUCKET));
 					}
@@ -254,7 +254,7 @@ public class BreweryCauldron implements InventoryHolder {
 	}
 	
 	public BreweryMessage addIngredient(Material ingredient) {
-		if(Aspect.getAspect(ingredient) != Aspect.INVALID) // Unnecessary?
+		if(!Aspect.getAspect(ingredient).isEmpty()) // Unnecessary?
 		{
 			if(!inventory.addItem(new ItemStack(ingredient)).isEmpty()) {
 				return new BreweryMessage(false, Brewery.getText("Fermentation_No_Space"));
