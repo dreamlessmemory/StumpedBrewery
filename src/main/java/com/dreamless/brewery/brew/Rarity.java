@@ -8,11 +8,11 @@ public enum Rarity {
 	public final int getCookTime() {
 		switch(this) {
 		case COMMON:
-			return 1; //3 
+			return 3; //3 
 		case UNCOMMON:
-			return 1; //4
+			return 4; //4
 		case RARE:
-			return 1; //6
+			return 6; //6
 		case LEGENDARY:
 			return 8;
 		default:
@@ -27,9 +27,9 @@ public enum Rarity {
 		case UNCOMMON:
 			return 0.04;
 		case RARE:
-			return 0.07;
+			return 0.1;
 		case LEGENDARY:
-			return 0.3;
+			return 0.4;
 		default:
 			return 0;
 		}	
@@ -41,9 +41,9 @@ public enum Rarity {
 		case COMMON:
 			return 0;
 		case UNCOMMON:
-			return 0.2;
+			return 0.25;
 		case RARE:
-			return 0.3;
+			return 0.35;
 		case LEGENDARY:
 			return 0.4;
 		default:
