@@ -54,7 +54,7 @@ public class BreweryDistiller implements InventoryHolder {
 		filterInventory = org.bukkit.Bukkit.createInventory(this, FILTER_LIMIT, "Distiller Filter Cache");
 
 		//Hologram
-		if(hologram == null) {
+		if(hologram == null && Brewery.hologramsEnabled) {
 			createHologram(block);
 		}
 
@@ -85,7 +85,10 @@ public class BreweryDistiller implements InventoryHolder {
 			distillers.remove(distiller);
 
 			//Remove hologram
-			distiller.hologram.delete();
+			if(distiller.hologram != null)
+			{
+				distiller.hologram.delete();
+			}
 
 			//ruin brew if distilling
 			if(distiller.distilling) {
@@ -113,7 +116,10 @@ public class BreweryDistiller implements InventoryHolder {
 		if(filterCounter < FILTER_LIMIT) {
 			filterInventory.addItem(new ItemStack(material));
 			++filterCounter;
-			secondStatusLine.setText(filterCounter +"/" + FILTER_LIMIT + " filters loaded");
+			if(hologram != null)
+			{
+				secondStatusLine.setText(filterCounter +"/" + FILTER_LIMIT + " filters loaded");
+			}
 			return true;
 		} else {
 			return false;
@@ -132,7 +138,9 @@ public class BreweryDistiller implements InventoryHolder {
 		distillers.remove(this);
 
 		//Remove hologram
-		hologram.delete();
+		if(hologram != null) {
+			hologram.delete();
+		}
 	}
 
 	public BreweryMessage startDistilling(Player player) {	
@@ -201,7 +209,10 @@ public class BreweryDistiller implements InventoryHolder {
 		// Clear inventory
 		filterInventory.clear();
 		// Remove self
-		hologram.delete();
+		if(hologram != null)
+		{
+			hologram.delete();
+		}
 		distillers.remove(this);
 	}
 
@@ -225,9 +236,11 @@ public class BreweryDistiller implements InventoryHolder {
 			cycles = distiller.filterCounter;
 			this.cycleLength = cycleLength;
 			this.distiller = distiller;
-
-			distiller.statusLine.setText("Now distilling...");
-			distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
+			if(distiller.hologram != null)
+			{
+				distiller.statusLine.setText("Now distilling...");
+				distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
+			}
 		}
 
 		@Override
@@ -247,7 +260,10 @@ public class BreweryDistiller implements InventoryHolder {
 					this.cancel();
 				}
 			} 
-			distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
+			if(distiller.hologram != null)
+			{
+				distiller.secondStatusLine.setText("Cycle " +  currentCycle + "/" + cycles + " : " + (cycleLength - currentTime) + " s remaining");
+			}
 		}
 	}
 }

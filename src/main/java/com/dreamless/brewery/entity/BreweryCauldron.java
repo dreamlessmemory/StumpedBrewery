@@ -16,7 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
-
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.brew.Aspect;
 import com.dreamless.brewery.brew.BrewItemFactory;
@@ -41,8 +40,11 @@ public class BreweryCauldron implements InventoryHolder {
 		cooking = false;
 		inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
 		cauldronList.add(this);
-		createHologram(block);
-		updateHologram(HologramActions.INIT);
+		if(Brewery.hologramsEnabled)
+		{
+			createHologram(block);
+			updateHologram(HologramActions.INIT);
+		}
 	}
 
 	// Retrieve cauldron from list by Block
@@ -59,13 +61,23 @@ public class BreweryCauldron implements InventoryHolder {
 	public static void remove(Block block) {
 		BreweryCauldron bcauldron = get(block);
 		if (bcauldron != null) {
+			Brewery.breweryDriver.debugLog("Removing Cauldron");
+			BukkitTask task = taskMap.get(bcauldron);
+			if(task != null) 
+			{
+				Brewery.breweryDriver.debugLog("Task stopped");
+				task.cancel();
+			}
 			if (!bcauldron.cooking) {
 				bcauldron.dumpContents();
 			}
 			cauldronList.remove(bcauldron);
-	
+
 			// Remove hologram
-			bcauldron.hologram.delete();
+			if(bcauldron.hologram != null)
+			{			
+				bcauldron.hologram.delete();
+			}
 		}
 	}
 
@@ -73,12 +85,22 @@ public class BreweryCauldron implements InventoryHolder {
 		if (!bcauldron.cooking) {
 			bcauldron.dumpContents();
 		}
+		Brewery.breweryDriver.debugLog("Removing Cauldron");
+		BukkitTask task = taskMap.get(bcauldron);
+		if(task != null) 
+		{
+			Brewery.breweryDriver.debugLog("Task stopped");
+			task.cancel();
+		}
 		cauldronList.remove(bcauldron);
-	
+
 		// Remove hologram
-		bcauldron.hologram.delete();
+		if(bcauldron.hologram != null)
+		{			
+			bcauldron.hologram.delete();
+		}
 	}
-	
+
 	// unloads cauldrons that are in a unloading world
 	// as they were written to file just before, this is safe to do
 	public static void onUnload(String name) {
@@ -88,7 +110,7 @@ public class BreweryCauldron implements InventoryHolder {
 			}
 		}
 	}
-	
+
 	public static void onDisable() {
 		cauldronList.clear();
 	}
@@ -113,19 +135,33 @@ public class BreweryCauldron implements InventoryHolder {
 				} else if (level <= 0) {
 					cauldronList.remove(bcauldron);
 					// Remove hologram
-					bcauldron.hologram.delete();
+					if(bcauldron.hologram != null)
+					{			
+						bcauldron.hologram.delete();
+					}
 					return false;
 				}
-
-				cauldronData.setLevel(--level);
-				block.setBlockData(cauldronData);
-				block.getState().update();
-
-				if (level == 0) {
-					taskMap.get(bcauldron).cancel();
+				if(--level > 0)
+				{
+					cauldronData.setLevel(level);
+					block.setBlockData(cauldronData);
+					block.getState().update();
+				}
+				else {
+					Brewery.breweryDriver.debugLog("Cauldron Emptied by water bottle");
+					BukkitTask task = taskMap.get(bcauldron);
+					if(task != null) 
+					{
+						task.cancel();
+					}
 					cauldronList.remove(bcauldron);
+
+					block.setType(Material.CAULDRON);
 					// Remove hologram
-					bcauldron.hologram.delete();
+					if(bcauldron.hologram != null)
+					{			
+						bcauldron.hologram.delete();
+					}
 				}
 				player.getInventory().addItem(potion);
 				return true;
@@ -133,7 +169,7 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 		return false;
 	}
-	
+
 	public static boolean isUseableCauldron (Block block) {
 		Material down = block.getRelative(BlockFace.DOWN).getType();
 		Material up = block.getRelative(BlockFace.UP).getType();
@@ -155,7 +191,7 @@ public class BreweryCauldron implements InventoryHolder {
 			Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoPermissions"));
 			return;
 		}
-		
+
 		if (cookTime > 1) {
 			Brewery.breweryDriver.msg(player,Brewery.getText("Player_CauldronInfo2", Integer.toString(cookTime)));
 		} else if (cookTime == 1) {
@@ -165,10 +201,16 @@ public class BreweryCauldron implements InventoryHolder {
 		}
 	}
 
-	
+
 	// 0 = empty, 1 = something in, 2 = full
 	public int getFillLevel() {
-		return ((Levelled)block.getState().getBlockData()).getLevel();
+		if(block.getType() == Material.CAULDRON)
+		{
+			return 0;
+		}
+		else {
+			return ((Levelled)block.getState().getBlockData()).getLevel();	
+		}
 	}
 
 	public BreweryMessage startCooking() {
@@ -178,18 +220,18 @@ public class BreweryCauldron implements InventoryHolder {
 
 		// Manage parameters
 		cooking = true;
-		
+
 		//Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
 		//		new BreweryCauldronRunnable(this), 0, 20);
 		taskMap.put(this, Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
 				new BreweryCauldronRunnable(this), 0, 20));
-		
+
 		// Create hologram
-		if (hologram == null) {
+		if (hologram == null && Brewery.hologramsEnabled) {
 			createHologram(block);
+			updateHologram(HologramActions.START_COOKING);
 		}
-		updateHologram(HologramActions.START_COOKING);
-		
+
 		// Return
 		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting"));
 	}
@@ -252,7 +294,7 @@ public class BreweryCauldron implements InventoryHolder {
 	public boolean isCooking() {
 		return cooking;
 	}
-	
+
 	public BreweryMessage addIngredient(Material ingredient) {
 		if(!Aspect.getAspect(ingredient).isEmpty()) // Unnecessary?
 		{
@@ -269,7 +311,7 @@ public class BreweryCauldron implements InventoryHolder {
 	public Inventory getInventory() {
 		return inventory;
 	}
-	
+
 	/**
 	 * PRIVATE METHODS
 	 */
@@ -300,6 +342,11 @@ public class BreweryCauldron implements InventoryHolder {
 	}
 
 	private void updateHologram(HologramActions action) {
+		if(!Brewery.hologramsEnabled)
+		{
+			return;
+		}
+
 		if(action == HologramActions.TICK) {// Time
 			int secondsCooked = cookTime % 60;
 			((TextLine)hologram.getLine(0)).setText(cookTime/60 + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
@@ -312,7 +359,7 @@ public class BreweryCauldron implements InventoryHolder {
 			for (int i = hologram.size()-1; i >= 2; i--){
 				hologram.removeLine(i);
 			}
-			
+
 			// Add new Ones
 			for (ItemStack itemStack : inventory.getContents()) {
 				if (itemStack != null) {
@@ -378,7 +425,7 @@ public class BreweryCauldron implements InventoryHolder {
 			cauldron.onUpdate();
 		}
 	}
-	
+
 	private enum HologramActions{
 		INIT, START_COOKING, ADD_INGREDIENT, TICK, STOP_COOKING;
 	}

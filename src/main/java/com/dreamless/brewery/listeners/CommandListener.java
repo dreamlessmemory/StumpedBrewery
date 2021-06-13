@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -288,7 +289,7 @@ public class CommandListener implements CommandExecutor {
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			ItemStack hand = player.getInventory().getItemInMainHand();
-			if (hand != null) {//Something in the hand
+			if (hand != null && hand.getType() != Material.AIR) {//Something in the hand
 				NBTItem nbti = new NBTItem(hand);
 				if(nbti.hasKey("brewery")) {
 					DatabaseCommunication.claimRecipe(player, newName);

@@ -38,9 +38,11 @@ public class BreweryBarrel {
 		this.type = barrelType;
 
 		barrels.add(this);
-
-		createHologram(block.getBlock());
-		updateHologram();
+		if(Brewery.hologramsEnabled)
+		{
+			createHologram(block.getBlock());
+			updateHologram();
+		}
 	}
 
 	private void createHologram(Block block) {
@@ -52,10 +54,13 @@ public class BreweryBarrel {
 	}
 
 	private void updateHologram() {
-		int tempYear = (int)(time/minutesPerYear);		
-		hologram.clearLines();
-		hologram.appendTextLine(type.toString() + " barrel");
-	    hologram.appendTextLine("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
+		if(hologram != null)
+		{
+			int tempYear = (int)(time/minutesPerYear);		
+			hologram.clearLines();
+			hologram.appendTextLine(type.toString() + " barrel");
+			hologram.appendTextLine("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
+		}
 	}
 
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
@@ -68,41 +73,47 @@ public class BreweryBarrel {
 
 	// removes a barrel, throwing included potions to the ground
 	public void removeAndFinishBrewing(Block broken, Player breaker) {
-			for (HumanEntity human : barrel.getInventory().getViewers()) {
-				human.closeInventory();
-			}
-			ItemStack[] items = barrel.getInventory().getContents();
-			barrel.getInventory().clear();
-			
-			// Finish Aging
-			for (int i = 0; i < items.length; i++) {
-				ItemStack item = items[i];
-				// Brewery.breweryDriver.debugLog("Pull item");
-				if (item == null) {
-					continue;
-				}
-				items[i] = BrewItemFactory.getAgedBrew(item, (int)(time/minutesPerYear), type);
-			}
+		for (HumanEntity human : barrel.getInventory().getViewers()) {
+			human.closeInventory();
+		}
+		ItemStack[] items = barrel.getInventory().getContents();
+		barrel.getInventory().clear();
 
-			// Drop items
-			Location dropLocation = barrel.getBlock().getRelative(((Directional)barrel.getBlockData()).getFacing()).getLocation().add(0.5, 0.5, 0.5);
-			for (ItemStack item : items) {
-				if (item != null) {
-						barrel.getWorld().dropItemNaturally(dropLocation, item);
-						barrel.getWorld().playSound(dropLocation, Sound.ENTITY_ITEM_PICKUP,
-								(float) (Math.random() / 2) + 0.75f, (float) (Math.random() / 2) + 0.75f);
-				}
+		// Finish Aging
+		for (int i = 0; i < items.length; i++) {
+			ItemStack item = items[i];
+			// Brewery.breweryDriver.debugLog("Pull item");
+			if (item == null) {
+				continue;
 			}
-		hologram.delete();
+			items[i] = BrewItemFactory.getAgedBrew(item, (int)(time/minutesPerYear), type);
+		}
+
+		// Drop items
+		Location dropLocation = barrel.getBlock().getRelative(((Directional)barrel.getBlockData()).getFacing()).getLocation().add(0.5, 0.5, 0.5);
+		for (ItemStack item : items) {
+			if (item != null) {
+				barrel.getWorld().dropItemNaturally(dropLocation, item);
+				barrel.getWorld().playSound(dropLocation, Sound.ENTITY_ITEM_PICKUP,
+						(float) (Math.random() / 2) + 0.75f, (float) (Math.random() / 2) + 0.75f);
+			}
+		}
+		if(hologram != null)
+		{	
+			hologram.delete();
+		}
 		barrels.remove(this);
 	}
-	
+
 	public void removeSelf() {
-		hologram.delete();
+		if(hologram != null)
+		{
+			hologram.delete();
+		}
 		barrels.remove(this);
 	}
-	
-	
+
+
 	//////////////////////////////////////////////////////////////////////////
 	public static BreweryBarrel getBarrel(Block block) {
 		for(BreweryBarrel barrel : barrels) {
@@ -112,7 +123,7 @@ public class BreweryBarrel {
 		}
 		return null;	
 	}
-	
+
 	// unloads barrels that are in a unloading world
 	public static void onUnload(String name) {
 		for (BreweryBarrel barrel : barrels) {
@@ -134,23 +145,23 @@ public class BreweryBarrel {
 	public static void save() {
 		int id = 0;
 		if (!barrels.isEmpty()) {
-	
+
 			for (BreweryBarrel barrel : barrels) {
 				Brewery.breweryDriver.debugLog("BARREL");
 				// BlockData
 				String location = Brewery.gson.toJson(barrel.barrel.getLocation().serialize());
 				Brewery.breweryDriver.debugLog(location);
-				
+
 				String query = "REPLACE " + Brewery.getDatabase("barrels")
-						+ "barrels SET idbarrels=?, location=?, type=?, time=?";
+				+ "barrels SET idbarrels=?, location=?, type=?, time=?";
 				try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)) {
 					stmt.setInt(1, id);
 					stmt.setString(2, location);
 					stmt.setString(3, barrel.type.name());
 					stmt.setFloat(4, barrel.time);
-	
+
 					Brewery.breweryDriver.debugLog(stmt.toString());
-	
+
 					stmt.executeUpdate();
 				} catch (SQLException e1) {
 					e1.printStackTrace();

@@ -75,6 +75,9 @@ public class Brewery extends JavaPlugin {
 	
 	//Effects
 	public static double effectLevel;
+	
+	// Hologram Control
+	public static boolean hologramsEnabled;
 
 	// Language
 	public String language;
@@ -116,12 +119,15 @@ public class Brewery extends JavaPlugin {
 			return;
 		}
 		
+		
+		hologramsEnabled = true;
 		//Check dependency
 		if (!Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays")) {
 			getLogger().severe("*** HolographicDisplays is not installed or not enabled. ***");
-			getLogger().severe("*** This plugin will be disabled. ***");
-			this.setEnabled(false);
-			return;
+			getLogger().severe("*** We will NOT have holograms for brews. ***");
+			hologramsEnabled = false;
+			//this.setEnabled(false);
+			//return;
 		}
 		
 		//Server Check
@@ -181,9 +187,20 @@ public class Brewery extends JavaPlugin {
 			return;
 		}
 
-		// save Data to Disk
-		DataSave.save();
-
+		
+		// Disable Server
+	    try { //using a try catch to catch connection errors (like wrong sql password...)
+	        if (connection!=null && !connection.isClosed()){ //checking if connection isn't null to
+	            //avoid receiving a nullpointer
+	        	
+	        	// save Data to Disk
+	    		DataSave.save();
+	            connection.close(); //closing the connection field variable.
+	        }
+	    } catch(Exception e) {
+	        e.printStackTrace();
+	    }
+		
 		// save LanguageReader
 		languageReader.save();
 
@@ -198,15 +215,7 @@ public class Brewery extends JavaPlugin {
 		Words.ignoreText.clear();
 		Words.commands = null;
 
-		// Disable Server
-	    try { //using a try catch to catch connection errors (like wrong sql password...)
-	        if (connection!=null && !connection.isClosed()){ //checking if connection isn't null to
-	            //avoid receiving a nullpointer
-	            connection.close(); //closing the connection field variable.
-	        }
-	    } catch(Exception e) {
-	        e.printStackTrace();
-	    }
+		
 		
 		this.log(this.getDescription().getName() + " disabled!");
 	}

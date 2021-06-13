@@ -44,7 +44,7 @@ public class PlayerListener implements Listener {
 	public void onPlayerInteract(PlayerInteractEvent event) {
 
 		if(event.getPlayer().getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
-			//Brewery.breweryDriver.msg(event.getPlayer(), Brewery.getText("Player_CreativeNotAllowed"));
+			Brewery.breweryDriver.msg(event.getPlayer(), Brewery.getText("Player_CreativeNotAllowed"));
 			return;
 		}
 
@@ -59,7 +59,7 @@ public class PlayerListener implements Listener {
 					//event.setCancelled(true);
 
 					// Interacting with a Cauldron
-					if (type == Material.CAULDRON) {
+					if (type == Material.WATER_CAULDRON) {
 						handleCauldron(event, player);
 					} else if (type == Material.BREWING_STAND) {
 						handleDistiller(event, player);
@@ -342,6 +342,10 @@ public class PlayerListener implements Listener {
 	}
 
 	private boolean isAxe(ItemStack item) {
+		if(item == null)
+		{
+			return false;
+		}
 		switch(item.getType()) {
 		case WOODEN_AXE:
 		case STONE_AXE:

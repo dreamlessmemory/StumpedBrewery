@@ -1,10 +1,10 @@
 name: StumpedBrewery
-version: 5.1.0
+version: 5.2.0
 description: Create various beverages through a database-driven system 
 main: com.dreamless.brewery.Brewery
-api-version: 1.16
+api-version: 1.17
 authors: [Milan Albrecht, Frank Baumann, ProgrammerDan, Sumire Kobayashi]
-depend: [HolographicDisplays]
+softdepend: [HolographicDisplays]
 commands:
   brewery:
     description: Command for Administration
