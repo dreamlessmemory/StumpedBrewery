@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dreamless.StumpedBrewery</groupId>
 	<artifactId>StumpedBrewery</artifactId>
-	<version>5.2.0</version>
+	<version>5.3.0</version>
 	<name>StumpedBrewery</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

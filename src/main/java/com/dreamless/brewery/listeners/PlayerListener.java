@@ -43,11 +43,6 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 
-		if(event.getPlayer().getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
-			Brewery.breweryDriver.msg(event.getPlayer(), Brewery.getText("Player_CreativeNotAllowed"));
-			return;
-		}
-
 		Block clickedBlock = event.getClickedBlock();
 
 		if (clickedBlock != null) {
@@ -59,11 +54,11 @@ public class PlayerListener implements Listener {
 					//event.setCancelled(true);
 
 					// Interacting with a Cauldron
-					if (type == Material.WATER_CAULDRON) {
+					if (type == Material.WATER_CAULDRON && checkCreative(player)) {
 						handleCauldron(event, player);
-					} else if (type == Material.BREWING_STAND) {
+					} else if (type == Material.BREWING_STAND  && checkCreative(player)) {
 						handleDistiller(event, player);
-					} else if (type == Material.BARREL) {
+					} else if (type == Material.BARREL  && checkCreative(player)) {
 						handleBarrel(event, player);
 					}
 				}
@@ -338,6 +333,18 @@ public class PlayerListener implements Listener {
 		} else {
 			itemInHand.setAmount(itemInHand.getAmount() - 1);
 			player.getInventory().setItemInMainHand(itemInHand);
+		}
+	}
+	
+	private boolean checkCreative(Player player)
+	{
+		if(player.getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
+			Brewery.breweryDriver.msg(player, Brewery.getText("Player_CreativeNotAllowed"));
+			return false;
+		}
+		else 
+		{
+			return true;
 		}
 	}
 
