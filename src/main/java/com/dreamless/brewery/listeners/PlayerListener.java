@@ -43,11 +43,6 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerInteract(PlayerInteractEvent event) {
 
-		if(event.getPlayer().getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
-			Brewery.breweryDriver.msg(event.getPlayer(), Brewery.getText("Player_CreativeNotAllowed"));
-			return;
-		}
-
 		Block clickedBlock = event.getClickedBlock();
 
 		if (clickedBlock != null) {
@@ -56,14 +51,14 @@ public class PlayerListener implements Listener {
 				if (!player.isSneaking()) {
 					Material type = clickedBlock.getType();
 
-					//event.setCancelled(true);
+					// event.setCancelled(true);
 
 					// Interacting with a Cauldron
-					if (type == Material.WATER_CAULDRON) {
+					if (type == Material.WATER_CAULDRON && checkCreative(player)) {
 						handleCauldron(event, player);
-					} else if (type == Material.BREWING_STAND) {
+					} else if (type == Material.BREWING_STAND && checkCreative(player)) {
 						handleDistiller(event, player);
-					} else if (type == Material.BARREL) {
+					} else if (type == Material.BARREL && checkCreative(player)) {
 						handleBarrel(event, player);
 					}
 				}
@@ -71,7 +66,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	private void handleCauldron(PlayerInteractEvent event, Player player) {			
+	private void handleCauldron(PlayerInteractEvent event, Player player) {
 		Block clickedBlock = event.getClickedBlock();
 		BreweryCauldron cauldron = BreweryCauldron.get(clickedBlock);
 		Material materialInHand = event.getMaterial();
@@ -132,7 +127,7 @@ public class PlayerListener implements Listener {
 					// will only remove when existing
 					BreweryCauldron.remove(cauldron);
 				}
-			} else if (Rarity.isValidIngredient(materialInHand)){ // Add ingredient
+			} else if (Rarity.isValidIngredient(materialInHand)) { // Add ingredient
 				event.setCancelled(true);
 				BreweryMessage response = cauldron.addIngredient(materialInHand);
 				if (response.getResult()) {
@@ -158,15 +153,17 @@ public class PlayerListener implements Listener {
 
 		if (BreweryDistiller.isValidFilter(materialInHand)) {
 			event.setCancelled(true);
-			if(distiller == null) {// New Distiller
+			if (distiller == null) {// New Distiller
 				distiller = new BreweryDistiller(clickedBlock);
 			}
-			if(distiller.addFilter(materialInHand)) {
+			if (distiller.addFilter(materialInHand)) {
 				removeItemFromPlayerHand(player);
 			}
 		} else if (materialInHand == Material.IRON_SHOVEL) { // Eject Filters
-			event.setCancelled(true);
-			distiller.ejectAllFilters();
+			if (distiller != null) {
+				event.setCancelled(true);
+				distiller.ejectAllFilters();
+			}
 		} else if (materialInHand == Material.CLOCK) { // Start Distilling
 			event.setCancelled(true);
 			if (distiller != null) {
@@ -176,7 +173,7 @@ public class PlayerListener implements Listener {
 					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
 					BreweryDistiller.runningDistillers.put(distiller,
 							new BreweryDistiller.DistillerRunnable(BreweryDistiller.DEFAULT_CYCLE_LENGTH, distiller)
-							.runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
+									.runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
 				}
 			}
 		}
@@ -189,7 +186,7 @@ public class PlayerListener implements Listener {
 		// If actually a barrel open if it's an ax
 		if (barrel != null) {
 			event.setCancelled(true);
-			if(isAxe(event.getItem())) {
+			if (isAxe(event.getItem())) {
 				barrel.removeAndFinishBrewing(event.getClickedBlock(), player);
 			}
 		} else {
@@ -197,7 +194,8 @@ public class PlayerListener implements Listener {
 			if (type != null) {
 				event.setCancelled(true);
 				barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), type, 0);
-				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f, 1.0f);
+				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f,
+						1.0f);
 				Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
 				removeItemFromPlayerHand(player);
 			}
@@ -341,19 +339,27 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+	private boolean checkCreative(Player player) {
+		if (player.getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
+			Brewery.breweryDriver.msg(player, Brewery.getText("Player_CreativeNotAllowed"));
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	private boolean isAxe(ItemStack item) {
-		if(item == null)
-		{
+		if (item == null) {
 			return false;
 		}
-		switch(item.getType()) {
+		switch (item.getType()) {
 		case WOODEN_AXE:
 		case STONE_AXE:
 		case IRON_AXE:
 		case GOLDEN_AXE:
 		case DIAMOND_AXE:
 			return true;
-		default: 
+		default:
 			return false;
 		}
 	}
