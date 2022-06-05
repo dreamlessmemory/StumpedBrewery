@@ -35,6 +35,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
 import com.dreamless.brewery.brew.BarrelType;
+import com.dreamless.brewery.brew.IngredientDatabase;
 import com.dreamless.brewery.data.DataSave;
 import com.dreamless.brewery.data.DatabaseCommunication;
 import com.dreamless.brewery.data.LanguageReader;
@@ -340,6 +341,7 @@ public class Brewery extends JavaPlugin {
 		/*** words.yml ***/
 		currentFile = new File(breweryDriver.getDataFolder(), "words.yml");
 		if(!currentFile.exists()) {
+			errorLog("Unable to get words.yaml file. Disabling Brewery!");
 			return false;
 		}
 		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
@@ -356,6 +358,23 @@ public class Brewery extends JavaPlugin {
 		Words.log = currentConfig.getBoolean("logRealChat", false);
 		Words.doSigns = currentConfig.getBoolean("distortSignText", false);
 		
+		/*** ingredients.csv ***/
+		currentFile = new File(breweryDriver.getDataFolder(), "ingredients.csv");
+		if(!currentFile.exists()) {
+			errorLog("Unable to get ingredients.csv file. Disabling Brewery!");
+			return false;
+		}
+		try {
+			if(!IngredientDatabase.readConfig(currentFile.getCanonicalPath()))
+			{
+				errorLog("Unable to parse ingredients.csv file. Disabling Brewery!");
+				return false;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 
 		return true;
 		
