@@ -135,4 +135,29 @@ public final class BreweryUtils {
     public static List<String> wordWrap(String input){
     	return Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY + input, WRAP_SIZE));
     }
+    
+	public static boolean usesBucket(ItemStack item) {
+		switch (item.getType()) {
+		case LAVA_BUCKET:
+		case MILK_BUCKET:
+		case WATER_BUCKET:
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+	public static boolean isAxe(ItemStack item) {
+		switch (item.getType()) {
+		case WOODEN_AXE:
+		case GOLDEN_AXE:
+		case STONE_AXE:
+		case IRON_AXE:
+		case DIAMOND_AXE:
+		case NETHERITE_AXE:
+			return true;
+		default:
+			return false;
+		}
+	}
 }

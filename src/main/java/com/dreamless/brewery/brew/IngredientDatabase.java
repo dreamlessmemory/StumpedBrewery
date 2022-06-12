@@ -12,19 +12,18 @@ import com.opencsv.CSVReader;
 public class IngredientDatabase {
 
 	private static HashMap<Material, IngredientData> ingredientDatabase = new HashMap<Material, IngredientData>();
+	private static final Material ALCOHOLIC_MATERIAL = Material.PHANTOM_MEMBRANE; // TODO: Make configurable
 	
 	public static Boolean readConfig(String file)
 	{	
 		try
 		{
-			//FileReader fileReader = new FileReader(file);
-			
 			CSVReader csvReader = new CSVReader(new FileReader(file));
 			String[] nextLine;
 			
 			while((nextLine = csvReader.readNext()) != null)
 			{
-				if(nextLine.length != 6)
+				if(nextLine.length != 7)
 				{
 					Brewery.breweryDriver.errorLog("Unable to add ingredient: " + nextLine[0]);
 					continue;
@@ -34,7 +33,8 @@ public class IngredientDatabase {
 						nextLine[2],
 						PotionEffectType.getByName(nextLine[3]),
 						nextLine[4],
-						Rarity.valueOf(nextLine[5]));
+						Rarity.valueOf(nextLine[5]),
+						Integer.parseInt(nextLine[6]));
 				ingredientDatabase.put(Material.getMaterial(nextLine[0]), data);
 			}
 		}
@@ -49,5 +49,15 @@ public class IngredientDatabase {
 	public static void clear()
 	{
 		ingredientDatabase.clear();
+	}
+	
+	public static boolean isIngredient(Material material)
+	{
+		return ingredientDatabase.containsKey(material);
+	}
+	
+	public static Material getAlcoholicIngredient()
+	{
+		return ALCOHOLIC_MATERIAL;
 	}
 }

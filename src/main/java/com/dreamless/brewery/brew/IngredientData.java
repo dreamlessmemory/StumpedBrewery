@@ -1,5 +1,6 @@
 package com.dreamless.brewery.brew;
 
+import org.bukkit.Color;
 import org.bukkit.potion.PotionEffectType;
 
 public class IngredientData {
@@ -9,6 +10,7 @@ public class IngredientData {
 	private final PotionEffectType POTION_EFFECT;
 	private final String FLAVOR_DESCRIPTOR;
 	private final Rarity RARITY;
+	private final Color COLOR;
 	/**
 	 * @param drinkName
 	 * @param alcoholicDrinkName
@@ -17,12 +19,13 @@ public class IngredientData {
 	 * @param rarity
 	 */
 	public IngredientData(String drinkName, String alcoholicDrinkName, PotionEffectType potionEffect,
-			String flavorDescriptor, Rarity rarity) {
+			String flavorDescriptor, Rarity rarity, int color) {
 		DRINK_NAME = drinkName;
 		ALCOHOLIC_DRINK_NAME = alcoholicDrinkName;
 		POTION_EFFECT = potionEffect;
 		FLAVOR_DESCRIPTOR = flavorDescriptor;
 		RARITY = rarity;
+		COLOR = Color.fromRGB(color);
 	}
 	/**
 	 * @return the drink name
@@ -55,6 +58,10 @@ public class IngredientData {
 		return RARITY;
 	}
 	
+	public Color getColor()
+	{
+		return COLOR;
+	}
 	
 	
 

@@ -180,4 +180,19 @@ public class BreweryBarrel {
 			e1.printStackTrace();
 		}
 	}
+	
+	public static boolean isBarrelLid(ItemStack item)
+	{
+		switch (item.getType()) {
+		case OAK_TRAPDOOR:
+		case DARK_OAK_TRAPDOOR:
+		case ACACIA_TRAPDOOR:
+		case JUNGLE_TRAPDOOR:
+		case BIRCH_TRAPDOOR:
+		case SPRUCE_TRAPDOOR:
+			return true;
+		default:
+			return false;
+		}
+	}
 }

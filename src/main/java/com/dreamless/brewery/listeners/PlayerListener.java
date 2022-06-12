@@ -29,11 +29,13 @@ import com.dreamless.brewery.data.NBTConstants;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryDistiller;
+import com.dreamless.brewery.entity.BreweryMashBarrel;
 import com.dreamless.brewery.item.BarrelLidItem;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
 import com.dreamless.brewery.utils.BreweryMessage;
+import com.dreamless.brewery.utils.BreweryUtils;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
@@ -190,14 +192,21 @@ public class PlayerListener implements Listener {
 				barrel.removeAndFinishBrewing(event.getClickedBlock(), player);
 			}
 		} else {
-			BarrelType type = BarrelLidItem.getBarrelType(event.getItem());
-			if (type != null) {
-				event.setCancelled(true);
-				barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), type, 0);
-				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f,
-						1.0f);
-				Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
-				removeItemFromPlayerHand(player);
+			if(BreweryBarrel.isBarrelLid(event.getItem()))
+			{
+				BarrelType type = BarrelLidItem.getBarrelType(event.getItem());
+				if (type != null) {
+					event.setCancelled(true);
+					barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), type, 0);
+					event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f,
+							1.0f);
+					Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
+					removeItemFromPlayerHand(player);
+				}
+			}
+			else if (BreweryUtils.isAxe(event.getItem()))
+			{
+				BreweryMashBarrel.getMashBucket(event.getClickedBlock(), player);
 			}
 		}
 	}
