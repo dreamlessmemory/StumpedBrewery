@@ -23,7 +23,7 @@ public class CauldronListener implements Listener {
 		if(event.getNewState().getBlockData().getMaterial() == Material.CAULDRON)
 		{
 			Brewery.breweryDriver.debugLog("Cauldron emptied");
-			BreweryCauldron.remove(event.getBlock());
+			//BreweryCauldron.remove(event.getBlock());
 		} 
 		else
 		{

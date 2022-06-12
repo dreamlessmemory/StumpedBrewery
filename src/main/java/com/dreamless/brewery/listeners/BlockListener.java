@@ -9,24 +9,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 
 import com.dreamless.brewery.entity.BreweryBarrel;
-import com.dreamless.brewery.entity.BreweryDistiller;
 
 public class BlockListener implements Listener {
-	
-	// Remove Distiller
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onBrewingStandBreak(BlockBreakEvent event) {
-		Block block = event.getBlock();
-		if(block.getType() != Material.BREWING_STAND) {
-			return;
-		}
-		BreweryDistiller distiller = BreweryDistiller.get(block);
-		if(distiller == null) {
-			return;
-		}
-		BreweryDistiller.remove(block);
-	}
-	
+		
 	// Remove Barrels
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onBarrelBreak(BlockBreakEvent event) {

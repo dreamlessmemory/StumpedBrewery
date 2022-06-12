@@ -24,7 +24,7 @@ import com.dreamless.brewery.utils.BreweryMessage;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
-
+@Deprecated
 public class BreweryDistiller implements InventoryHolder {
 
 	public static ArrayList<BreweryDistiller> distillers = new ArrayList<BreweryDistiller>();

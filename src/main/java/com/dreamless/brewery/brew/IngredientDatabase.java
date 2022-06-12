@@ -60,4 +60,9 @@ public class IngredientDatabase {
 	{
 		return ALCOHOLIC_MATERIAL;
 	}
+	
+	public static IngredientData getIngredientData(Material material)
+	{
+		return ingredientDatabase.get(material);
+	}
 }
