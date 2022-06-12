@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -112,6 +113,18 @@ public final class BreweryUtils {
             String afterfirst=w.substring(1);  
             capitalizeWord+=first+afterfirst.toLowerCase()+" ";  
         }  
+        return capitalizeWord.trim(); 
+	}
+    
+    public static String getMaterialName(Material material, boolean allLower) {
+    	String words[]=material.toString().split("_");  
+    	String capitalizeWord="";  
+    	for(String w:words){  
+    		String first=w.substring(0,1);  
+    		String afterfirst=w.substring(1);  
+    		capitalizeWord+= (allLower ? first.toLowerCase() : first)
+    				+ afterfirst.toLowerCase()+" ";  
+    	}  
         return capitalizeWord.trim(); 
 	}
     

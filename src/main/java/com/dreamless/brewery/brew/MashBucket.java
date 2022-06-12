@@ -2,7 +2,9 @@ package com.dreamless.brewery.brew;
 
 import java.util.ArrayList;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -30,18 +32,18 @@ public class MashBucket {
 	private ArrayList<String> getFlavorText()
 	{
 		// Primary
-		String flavourText = "A bucket of mashed " + primaryIngredient.getType().toString();
+		String flavourText = "A bucket of mashed " + BreweryUtils.getMaterialName(primaryIngredient.getType(), true);
 
 		// Secondary
 		if(secondaryIngredient != null)
 		{
-			flavourText += " mixed with " + secondaryIngredient.getType().toString();
+			flavourText += " mixed with " + BreweryUtils.getMaterialName(secondaryIngredient.getType(), true);
 		}
 
 		// Flavor
 		if(flavorIngredient != null)
 		{
-			flavourText += " and flavoured with " + flavorIngredient.getType().toString();
+			flavourText += " and flavoured with " + BreweryUtils.getMaterialName(flavorIngredient.getType(), true);
 		}
 
 		flavourText += "."; // End this.
@@ -54,18 +56,21 @@ public class MashBucket {
 			switch(alcoholIngredient.getAmount())
 			{
 			case 1:
-				flavourText += " slightly ";
+				flavourText += " slightly";
 				break;
 			case 2:
 			case 3:
-				flavourText += " moderately ";
+				flavourText += " moderately";
 				break;
 			case 4:
 			case 5:
-				flavourText += " moderately ";
+				flavourText += " heavily";
+				break;
 			}
 			flavourText += " alcoholic.";
 		}
+		
+		flavourText += " There is enough material to fill " + primaryIngredient.getAmount() * 3 + " bottles."; 
 
 		// Word Wrap
 		ArrayList<String> flavourList = new ArrayList<String>();
@@ -77,7 +82,7 @@ public class MashBucket {
 
 	private String getName()
 	{
-		String name = "Bucket of Mashed " + primaryIngredient.getType().toString();
+		String name = "Bucket of Mashed " + BreweryUtils.getMaterialName(primaryIngredient.getType(), false);
 		return name;
 	}
 
@@ -100,15 +105,15 @@ public class MashBucket {
 		// Secondary NBT
 		if(secondaryIngredient != null)
 		{
-			nbtCompound.setString(NBTConstants.MASH_BUCKET_PRIMARY_STRING, secondaryIngredient.getType().name());
-			nbtCompound.setInteger(NBTConstants.MASH_BUCKET_PRIMARY_COUNT, secondaryIngredient.getAmount());
+			nbtCompound.setString(NBTConstants.MASH_BUCKET_SECONDARY_STRING, secondaryIngredient.getType().name());
+			nbtCompound.setInteger(NBTConstants.MASH_BUCKET_SECONDARY_COUNT, secondaryIngredient.getAmount());
 		}
 
 		// Flavor NBT
 		if(flavorIngredient != null)
 		{
-			nbtCompound.setString(NBTConstants.MASH_BUCKET_PRIMARY_STRING, flavorIngredient.getType().name());
-			nbtCompound.setInteger(NBTConstants.MASH_BUCKET_PRIMARY_COUNT, flavorIngredient.getAmount());
+			nbtCompound.setString(NBTConstants.MASH_BUCKET_FLAVOUR_STRING, flavorIngredient.getType().name());
+			nbtCompound.setInteger(NBTConstants.MASH_BUCKET_FLAVOUR_COUNT, flavorIngredient.getAmount());
 		}
 
 		// Alcohol
@@ -132,7 +137,7 @@ public class MashBucket {
 		// Finish
 		////////////////////////////////////
 
-		return new ItemStack(Material.WATER_BUCKET);
+		return mashBucket;
 	}
 
 	public ArrayList<ItemStack> getContents()
@@ -154,5 +159,79 @@ public class MashBucket {
 			contents.add(alcoholIngredient);
 		}
 		return contents;
+	}
+	
+	public static boolean isMashBucket(ItemStack item)
+	{
+		NBTItem nbti = new NBTItem(item);
+		NBTCompound nbtCompound= nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
+		if(nbtCompound != null && 
+				nbtCompound.getString(NBTConstants.ITEM_TYPE_STRING).equals(NBTConstants.MASH_BUCKET_TAG_STRING))
+		{
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public static void dumpContents(ItemStack bucket, Location location)
+	{
+		if(!isMashBucket(bucket))
+		{
+			return;
+		}
+		
+		ArrayList<ItemStack> contents = new ArrayList<ItemStack>();
+		NBTItem nbti = new NBTItem(bucket);
+		NBTCompound nbtCompound= nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
+		
+		//Primary
+		if(nbtCompound.hasKey(NBTConstants.MASH_BUCKET_PRIMARY_STRING) && nbtCompound.hasKey(NBTConstants.MASH_BUCKET_PRIMARY_COUNT))
+		{
+		contents.add(
+				new ItemStack(
+						Material.getMaterial(nbtCompound.getString(NBTConstants.MASH_BUCKET_PRIMARY_STRING)), 
+						nbtCompound.getInteger(NBTConstants.MASH_BUCKET_PRIMARY_COUNT)));
+		}
+		else 
+		{
+			return; // malformed
+		}
+		
+		//Secondary
+		if(nbtCompound.hasKey(NBTConstants.MASH_BUCKET_SECONDARY_STRING) && nbtCompound.hasKey(NBTConstants.MASH_BUCKET_SECONDARY_COUNT))
+		{
+			contents.add(
+					new ItemStack(
+							Material.getMaterial(nbtCompound.getString(NBTConstants.MASH_BUCKET_SECONDARY_STRING)), 
+							nbtCompound.getInteger(NBTConstants.MASH_BUCKET_SECONDARY_COUNT)));
+		}
+		
+		//Flavour
+		if(nbtCompound.hasKey(NBTConstants.MASH_BUCKET_FLAVOUR_STRING) && nbtCompound.hasKey(NBTConstants.MASH_BUCKET_FLAVOUR_COUNT))
+		{
+			contents.add(
+					new ItemStack(
+							Material.getMaterial(nbtCompound.getString(NBTConstants.MASH_BUCKET_FLAVOUR_STRING)), 
+							nbtCompound.getInteger(NBTConstants.MASH_BUCKET_FLAVOUR_COUNT)));
+		}
+		
+		//Alcohol
+		if(nbtCompound.hasKey(NBTConstants.MASH_BUCKET_ALCOHOL_STRING) && nbtCompound.hasKey(NBTConstants.MASH_BUCKET_ALCOHOL_COUNT))
+		{
+			contents.add(
+					new ItemStack(
+							Material.getMaterial(nbtCompound.getString(NBTConstants.MASH_BUCKET_ALCOHOL_STRING)), 
+							nbtCompound.getInteger(NBTConstants.MASH_BUCKET_ALCOHOL_COUNT)));
+		}
+		
+		// Drop everything relevant
+		for (ItemStack item : contents) {
+			if (item != null) {
+				location.getWorld().dropItemNaturally(location, item);
+				location.getWorld().playSound(location, Sound.ENTITY_ITEM_PICKUP,
+						(float) (Math.random() / 2) + 0.75f, (float) (Math.random() / 2) + 0.75f);
+			}
+		}
 	}
 }

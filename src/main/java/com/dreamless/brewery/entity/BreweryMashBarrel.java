@@ -46,7 +46,7 @@ public class BreweryMashBarrel {
 			}
 			
 			// Add an empty bucket if needed
-			if(BreweryUtils.usesBucket(item))
+			if(index != 0 && BreweryUtils.usesBucket(item))
 			{
 				dropList.add(new ItemStack(Material.BUCKET));
 			}
@@ -69,14 +69,15 @@ public class BreweryMashBarrel {
 	private static boolean validate(Inventory inventory, Player player)
 	{
 		// Water Bucket
-		if(inventory.getItem(0).getType() != Material.WATER_BUCKET)
+		if(inventory.getItem(0) == null ||
+				inventory.getItem(0).getType() != Material.WATER_BUCKET)
 		{
 			Brewery.breweryDriver.msg(player, "You need a water bucket in the first slot!");
 			return false;
 		}
 
 		// Primary
-		if(inventory.getItem(1) == null ||
+		if(inventory.getItem(1) != null &&
 				!IngredientDatabase.isIngredient(inventory.getItem(1).getType()))
 		{
 			Brewery.breweryDriver.msg(player, "You need a valid primary ingredient in the second slot!");
@@ -84,23 +85,23 @@ public class BreweryMashBarrel {
 		}
 
 		// Secondary
-		if(inventory.getItem(2) == null ||
-				!IngredientDatabase.isIngredient(inventory.getItem(0).getType()))
+		if(inventory.getItem(2) != null &&
+				!IngredientDatabase.isIngredient(inventory.getItem(2).getType()))
 		{
 			Brewery.breweryDriver.msg(player, "You need a valid secondary ingredient in the third slot!");
 			return false;
 		}
 
 		// Flavor
-		if(inventory.getItem(3) == null ||
-				!IngredientDatabase.isIngredient(inventory.getItem(0).getType()))
+		if(inventory.getItem(3) != null &&
+				!IngredientDatabase.isIngredient(inventory.getItem(3).getType()))
 		{
 			Brewery.breweryDriver.msg(player, "You need a valid flavor ingredient in the fourth slot!");
 			return false;
 		}
 
 		// Alcohol
-		if(inventory.getItem(4) == null ||
+		if(inventory.getItem(4) != null &&
 				IngredientDatabase.getAlcoholicIngredient() != inventory.getItem(4).getType())
 		{
 			Brewery.breweryDriver.msg(player, "You need a valid alcoholic ingredient in the fifth slot!");
