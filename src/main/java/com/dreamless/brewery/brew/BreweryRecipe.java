@@ -23,7 +23,7 @@ private static final int WRAP_SIZE = 30;
     public BreweryRecipe(String name, String inventorUUID, String flavorText) {
 		this.name = name;
 		inventorText = "Crafted by " + (inventorUUID.isEmpty() ? "an unknown brewer" : getInventorName(inventorUUID));
-		this.flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY + flavorText, WRAP_SIZE)));
+		this.flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(flavorText, WRAP_SIZE)));
 	}
     
     public BreweryRecipe(String inventorUUID) {

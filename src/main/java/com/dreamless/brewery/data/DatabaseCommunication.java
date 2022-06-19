@@ -11,10 +11,8 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.brew.BreweryRecipe;
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -214,137 +212,6 @@ public class DatabaseCommunication {
 			list.add("Error trying to get your list");
 			e1.printStackTrace();
 			return list;
-		}
-	}
-
-	public static void claimRecipe(Player player, String newName) {
-		String uuid = player.getUniqueId().toString();
-		String effectkey = BrewItemFactory.extractEffectKey(player.getInventory().getItemInMainHand());
-
-		if(effectkey == null) {
-			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "This is not a valid brew!");
-			return;
-		}
-
-		if(newName.isEmpty()) {
-			newName = player.getDisplayName() + "'s " + effectkey;
-		}
-
-		//SQL
-		String queryGetClaim = "SELECT * FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE inventor=? AND effectkey=?";
-		String queryUpdateRecipeTable = "UPDATE " + Brewery.getDatabase("recipes") + "recipes SET inventor=?, claimed=true, name=? WHERE effectkey=?";
-		String queryDeleteClaims = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE effectkey=?";
-
-		//Get Claim
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryGetClaim)){
-			stmt.setString(1, uuid);
-			stmt.setString(2, effectkey);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			ResultSet results = stmt.executeQuery();
-			if(!results.next()) {//Didn't find
-				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You do not have any rights to claim this brew!");
-				return;
-			}			
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			return;
-		}
-
-
-		//Update recipe table
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryUpdateRecipeTable)){
-			//Prepare statement
-			stmt.setString(1, uuid);
-			stmt.setString(2, newName);
-			stmt.setString(3, effectkey);
-
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			int updateResult = stmt.executeUpdate();
-			if(updateResult == 0) {
-				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "No brew exists? Contant MemoryReborn!");
-				return;
-			} 
-		} catch (SQLException e1) {
-			if(e1 instanceof SQLIntegrityConstraintViolationException) {
-				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "A brew with that name already exists!");
-			} else {
-				e1.printStackTrace();
-			}
-			return;
-		}
-
-		//Delete all claims in newrecipes
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryDeleteClaims)){
-			stmt.setString(1, effectkey);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			stmt.executeUpdate();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-		player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You've claimed " + newName + "!");
-
-		//rename item
-		ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
-		meta.setDisplayName(newName);
-		player.getInventory().getItemInMainHand().setItemMeta(meta);
-	}
-
-	public static void relinquishRecipe(Player player) {
-		//Potion stuff
-		String uuid = player.getUniqueId().toString();
-		ItemStack item = player.getInventory().getItemInMainHand();
-		String currentRecipe = item.getItemMeta().getDisplayName();
-		String effectkey = BrewItemFactory.extractEffectKey(item);
-		//NBTItem nbti = new NBTItem(item);
-		//NBTCompound breweryMeta = nbti.getCompound("brewery");
-		//String type = breweryMeta.getString("type");
-
-		//SQL
-		String queryMainList = "DELETE FROM " + Brewery.getDatabase("recipes") + "recipes WHERE effectkey=? AND inventor=?";
-		String queryClaimList = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE effectkey=? AND inventor=?";
-		String queryPurgeClaims = "DELETE FROM " + Brewery.getDatabase("recipes") + "recipes WHERE NOT EXISTS (SELECT 1 FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE " + Brewery.getDatabase("recipes") + "newrecipes.effectkey=?) AND effectkey=?";
-
-		//Delete off of main list
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryMainList)) {
-			stmt.setString(1, effectkey);
-			stmt.setString(2, uuid);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			int result = stmt.executeUpdate();
-			if(result > 0) {
-				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You've relinquished your rights to " + currentRecipe);
-				return; 
-				//We return here. If no one had claimed it, then inventor is null. If there's an inventor, there's nothing on the claims list.
-			}
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			return;
-		} 
-
-		//Delete off of claims list
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryClaimList)) {
-			stmt.setString(1, effectkey);
-			stmt.setString(2, uuid);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			int result = stmt.executeUpdate();
-			if(result == 0) {
-				player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You do not have rights to " + currentRecipe);
-				return;
-			}
-			player.sendMessage(ChatColor.DARK_GREEN + "[Brewery] " + ChatColor.RESET + "You've relinquished your rights to " + currentRecipe);
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			return;
-		}  	
-
-		//Delete off of main list if it doesn't exist in claims
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryPurgeClaims)) {
-			stmt.setString(1, effectkey);
-			stmt.setString(2, effectkey);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			stmt.executeUpdate();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			return;
 		}
 	}
 

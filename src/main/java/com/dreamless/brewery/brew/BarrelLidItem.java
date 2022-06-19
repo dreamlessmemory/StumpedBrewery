@@ -1,4 +1,4 @@
-package com.dreamless.brewery.item;
+package com.dreamless.brewery.brew;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -7,7 +7,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.data.NBTConstants;
 import com.dreamless.brewery.utils.BreweryUtils;
 

@@ -22,13 +22,13 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.brew.BarrelLidItem;
 import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.MashBucket;
 import com.dreamless.brewery.data.NBTConstants;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.entity.BreweryMashBarrel;
-import com.dreamless.brewery.item.BarrelLidItem;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;

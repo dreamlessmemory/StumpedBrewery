@@ -34,6 +34,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.dreamless.brewery.brew.BarrelLidItem;
 import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.IngredientDatabase;
 import com.dreamless.brewery.data.DataSave;
@@ -41,8 +42,6 @@ import com.dreamless.brewery.data.DatabaseCommunication;
 import com.dreamless.brewery.data.LanguageReader;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
-import com.dreamless.brewery.entity.BreweryDistiller;
-import com.dreamless.brewery.item.BarrelLidItem;
 import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
 import com.dreamless.brewery.listeners.CommandListener;
@@ -317,7 +316,6 @@ public class Brewery extends JavaPlugin {
 		
 		//difficulty settings
 		BreweryBarrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
-		BreweryDistiller.DEFAULT_CYCLE_LENGTH = currentConfig.getInt("distillcycle", 40);
 		
 		//Effects
 		effectLevel = currentConfig.getDouble("effectLevel", 0.35);

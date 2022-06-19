@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -99,14 +98,6 @@ public class CommandListener implements CommandExecutor {
 
 			if (sender.hasPermission("brewery.cmd.purge")) {
 				cmdPurgePlayer(sender, args);
-			} else {
-				p.msg(sender, Brewery.getText("Error_NoPermissions"));
-			}
-
-		} else if ((cmd.equalsIgnoreCase("release") || cmd.equalsIgnoreCase("relinquish")) && Brewery.newrecipes) {
-
-			if (sender.hasPermission("brewery.cmd.claim")) {
-				cmdRelease(sender);
 			} else {
 				p.msg(sender, Brewery.getText("Error_NoPermissions"));
 			}
@@ -267,55 +258,7 @@ public class CommandListener implements CommandExecutor {
 		DatabaseCommunication.purgePlayer(args[1]);
 		p.msg(sender, args[1] + "'s recipes have all been removed.");
 	}
-		public void cmdClaim (CommandSender sender, String[] args) {
-		//Parse the name
-		String newName = "";
-		for(int i = 1; i < args.length; i++) {
-			newName += args[i] + " ";
-		}
-		newName = newName.trim();
-		if(newName.contains("#")) {
-			p.msg(sender, "You cannot use # in a name!");
-			return;
-		}
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			ItemStack hand = player.getInventory().getItemInMainHand();
-			if (hand != null && hand.getType() != Material.AIR) {//Something in the hand
-				NBTItem nbti = new NBTItem(hand);
-				if(nbti.hasKey("brewery")) {
-					DatabaseCommunication.claimRecipe(player, newName);
-				} else {
-					p.msg(sender, Brewery.getText("Error_ItemNotBreweryPotion"));
-				}
-			} else {
-				p.msg(sender, Brewery.getText("Error_ItemNotPotion"));
-			}
-		} else {
-			p.msg(sender, Brewery.getText("Error_PlayerCommand"));
-		}
-	}
 	
-	public void cmdRelease (CommandSender sender) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			ItemStack hand = player.getInventory().getItemInMainHand();
-			if (hand != null) {//Something in the hand
-				NBTItem nbti = new NBTItem(hand);
-				if(nbti.hasKey("brewery")) {
-					DatabaseCommunication.relinquishRecipe(player);
-				} else {
-					p.msg(sender, Brewery.getText("Error_ItemNotBreweryPotion"));
-				}
-			} else {
-				p.msg(sender, Brewery.getText("Error_ItemNotPotion"));
-			}
-		} else {
-			p.msg(sender, Brewery.getText("Error_PlayerCommand"));
-		}
-			
-		
-	}
 	public void cmdRename(CommandSender sender, String[] args) {
 		if (sender instanceof Player) {
 			//Check if given a name
