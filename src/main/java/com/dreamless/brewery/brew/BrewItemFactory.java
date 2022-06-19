@@ -18,7 +18,6 @@ import org.bukkit.potion.PotionEffect;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.data.DatabaseCommunication;
 import com.dreamless.brewery.data.NBTConstants;
-import com.dreamless.brewery.data.RecipeEntry;
 import com.dreamless.brewery.utils.BreweryUtils;
 
 import de.tr7zw.changeme.nbtapi.NBTCompound;
@@ -206,69 +205,50 @@ public class BrewItemFactory {
 		return potion;
 	}
 
-	public static ItemStack getAgedBrew(ItemStack item, int age, BarrelType type) {
+	
+public static ItemStack getAgedBrew(MashBucket item, int age, BarrelType type) 
+{
+		IngredientData primaryIngredientData = IngredientDatabase.getIngredientData(item.getPrimaryIngredient().getType());
+		IngredientData secondaryIngredientData = IngredientDatabase.getIngredientData(item.getSecondaryIngredient().getType());
+	
+		int potencyScore = Math.min((int)Math.ceil(secondaryIngredientData.getRarity().getEffectPotency()/type.getAgingFactor()), age) * type.getLevelIncrease();
+		int durationScore = Math.min((int)Math.ceil(secondaryIngredientData.getRarity().getEffectPotency()/type.getAgingFactor()), age) * type.getDurationIncrease();
 		
-		NBTItem nbti = new NBTItem(item);
-		NBTCompound breweryMeta = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
-		
-		if(breweryMeta == null)
-		{
-			return item;
-		}
-		
-		try {
-			if(BrewState.valueOf(breweryMeta.getString(NBTConstants.STATE_TAG_STRING)) != BrewState.DISTILLED) {
-				return getRuinedBrew();
-			}
-		} catch (Exception e) {
-			return getRuinedBrew();
-		}
-
-		BreweryEffect effect;
-		try {
-			effect = BreweryEffect.valueOf(breweryMeta.getString(NBTConstants.EFFECT_NAME_TAG_STRING));
-		} catch (Exception e) {
-			return getRuinedBrew();
-		}
-		int potencyScore = Math.min((int)Math.ceil(breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING)/type.getAgingFactor()), age) * type.getLevelIncrease();
-		int durationScore = Math.min((int)Math.ceil(breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING)/type.getAgingFactor()), age) * type.getDurationIncrease();
-		
-		
+		// Create Base item
 		ItemStack finalBrew = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) finalBrew.getItemMeta();
-		potionMeta.addCustomEffect(new PotionEffect(effect.getPotionEffectType(), 
-				effect.getEffectDuration(potencyScore, durationScore, type), 
-				effect.getEffectLevel(potencyScore, durationScore, type), 
+		potionMeta.addCustomEffect(new PotionEffect(secondaryIngredientData.getPotionEffectType(), 
+				BreweryEffect.calcuateEffectDuration(secondaryIngredientData.getPotionEffectType(), durationScore, type), 
+				BreweryEffect.calculateEffectLevel(secondaryIngredientData.getPotionEffectType(), potencyScore, durationScore, type), 
 				false, false, false), true);
 		
-		RecipeEntry entry = new RecipeEntry(effect, potencyScore, durationScore);
+		// Get Recipe
+		DrinkRecipe drinkRecipe = item.getDrinkRecipe(type.toString());
 		
-		BreweryRecipe recipe;
+		BreweryRecipe recipe = null;
 		try {
 			recipe = DatabaseCommunication.getRecipe(
-					Bukkit.getPlayer(BreweryUtils.getUUID(breweryMeta.getString(NBTConstants.CRAFTER_TAG_STRING))),
-					entry);
+					Bukkit.getPlayer(BreweryUtils.getUUID(item.getCrafter())),
+					drinkRecipe.hashCode());
 		} catch (ParseException | org.json.simple.parser.ParseException e) {
 			e.printStackTrace();
-			return getRuinedBrew();
 		}
-		ArrayList<String> completedFlavorText = recipe.getFlavorText();
-		completedFlavorText.add("Crafted by " + breweryMeta.getString(NBTConstants.CRAFTER_TAG_STRING));
 		
-		potionMeta.setLore(completedFlavorText);
+		// Set Meta
+		potionMeta.setLore(recipe.getFlavorText());
 		potionMeta.setDisplayName(recipe.getName());
-		potionMeta.setColor(effect.getColor());
+		potionMeta.setColor(primaryIngredientData.getColor());
 		finalBrew.setItemMeta(potionMeta);
 		
 		// Set NBT tags
-		nbti = new NBTItem(finalBrew);
+		NBTItem nbti = new NBTItem(finalBrew);
 		NBTCompound newBreweryMeta = nbti.addCompound(NBTConstants.BREWERY_TAG_STRING);
-		newBreweryMeta.setString(NBTConstants.EFFECT_NAME_TAG_STRING, effect.toString());
-		newBreweryMeta.setInteger(NBTConstants.POTENCY_SCORE_TAG_STRING, entry.getPotencyScore());
-		newBreweryMeta.setInteger(NBTConstants.DURATION_SCORE_TAG_STRING, entry.getDurationScore());
-		newBreweryMeta.setInteger(NBTConstants.EFFECT_SCORE_TAG_STRING, breweryMeta.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING));
-		newBreweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, breweryMeta.getString(NBTConstants.CRAFTER_TAG_STRING));
-		newBreweryMeta.setString(NBTConstants.STATE_TAG_STRING, BrewState.FINISHED.toString());
+		newBreweryMeta.setString(NBTConstants.EFFECT_NAME_TAG_STRING, secondaryIngredientData.getPotionEffectType().toString());
+		newBreweryMeta.setInteger(NBTConstants.POTENCY_SCORE_TAG_STRING, potencyScore);
+		newBreweryMeta.setInteger(NBTConstants.DURATION_SCORE_TAG_STRING, durationScore);
+		newBreweryMeta.setInteger(NBTConstants.EFFECT_SCORE_TAG_STRING, secondaryIngredientData.getRarity().getEffectPotency());
+		newBreweryMeta.setInteger(NBTConstants.ALCOHOL_LEVEL_TAG_STRING, drinkRecipe.getAlcoholLevel());
+		newBreweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, item.getCrafter());
 		
 		finalBrew = nbti.getItem();
 		

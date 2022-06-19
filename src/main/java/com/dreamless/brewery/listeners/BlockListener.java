@@ -23,6 +23,7 @@ public class BlockListener implements Listener {
 		BreweryBarrel barrel = BreweryBarrel.getBarrel(block);
 		if(barrel != null) {
 			barrel.removeSelf();
+			// TODO: drop items, flood area
 		}
 	}
 

@@ -19,12 +19,13 @@ import com.dreamless.brewery.brew.BreweryRecipe;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 public class DatabaseCommunication {
-	public static BreweryRecipe getRecipe(Player player, RecipeEntry entry){
+	
+	public static BreweryRecipe getRecipe(Player player, int recipeHash){
 		//Prep the SQL
-		String query = "SELECT * FROM " + Brewery.getDatabase("recipes") + "recipes WHERE effectkey=?";
+		String query = "SELECT * FROM " + Brewery.getDatabase("recipes") + "recipes WHERE id=?";
 
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
-			stmt.setString(1, entry.generateKey());
+			stmt.setString(1, String.valueOf(recipeHash));
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			ResultSet results;
 			results = stmt.executeQuery();
@@ -34,43 +35,36 @@ public class DatabaseCommunication {
 				player.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + Brewery.getText("Recipe_New_Recipe"));
 
 				// Get New Recipe
-				BreweryRecipe newRecipe = new BreweryRecipe();
+				BreweryRecipe newRecipe = new BreweryRecipe(player.getUniqueId().toString());
 
 				if(Brewery.newrecipes) {
-					addRecipeToClaimList(player.getUniqueId().toString(), entry.generateKey(), newRecipe.getName());
-					addRecipeToMainList(entry.generateKey(), newRecipe.getName(), newRecipe.getFlavorTextString());
+					addRecipeToDatabase(recipeHash, newRecipe.getName(), player.getUniqueId().toString(), newRecipe.getFlavorTextString());
 				}
 
 				return newRecipe;				
 			} else {//Recipe Found
-				if(!results.getBoolean(DatabaseConstants.IS_CLAIMED_STRING)){//Exists, but not claimed
-					player.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + Brewery.getText("Recipe_New_Recipe"));
-					addRecipeToClaimList(player.getUniqueId().toString(), 
-							results.getString(DatabaseConstants.EFFECT_KEY_STRING),
-							results.getString(DatabaseConstants.BREW_NAME_STRING));
-				}
 				return new BreweryRecipe(results.getString(DatabaseConstants.BREW_NAME_STRING), 
 						results.getString(DatabaseConstants.CLAIMANT_STRING), 
 						results.getString(DatabaseConstants.FLAVORTEXT_STRING));
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
-		} 
-		return new BreweryRecipe();
+		}
+		// This really shouldn't be called...
+		return new BreweryRecipe("");
 	}
 
-	private static void addRecipeToMainList(String effectkey, String brewname, String flavortext){
+	private static void addRecipeToDatabase(int hashCode, String brewname, String crafter, String flavortext){
 
 		//Build SQL
-		String query = "INSERT INTO " + Brewery.getDatabase("recipes") + "recipes (effectkey, claimed, name, inventor, flavortext) VALUES (?, ?, ?, ?, ?)";
+		String query = "INSERT INTO " + Brewery.getDatabase("recipes") + "recipes (id, name, inventor, flavortext) VALUES (?, ?, ?, ?)";
 
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 
-			stmt.setString(1, effectkey);
-			stmt.setBoolean(2, false);
-			stmt.setString(3, brewname);
-			stmt.setString(4, "");
-			stmt.setString(5, flavortext);
+			stmt.setString(1, String.valueOf(hashCode));
+			stmt.setString(2, brewname);
+			stmt.setString(3, crafter);
+			stmt.setString(4, flavortext);
 
 			Brewery.breweryDriver.debugLog(stmt.toString());
 
@@ -79,30 +73,6 @@ public class DatabaseCommunication {
 			e1.printStackTrace();
 		}
 	}
-
-	private static void addRecipeToClaimList(String playerUuid, String effectkey, String name){
-		//Get time
-		java.util.Date dt = new java.util.Date();
-		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		String currentTime = sdf.format(dt);
-
-		//Build SQL
-		String query = "INSERT INTO " + Brewery.getDatabase("recipes") + "newrecipes (effectkey, inventor, claimdate, name) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE inventor=inventor";
-
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
-			stmt.setString(1, effectkey);
-			stmt.setString(2, playerUuid);
-			stmt.setString(3, currentTime);
-			stmt.setString(4, name);
-
-			Brewery.breweryDriver.debugLog(stmt.toString());
-
-			stmt.executeUpdate();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-	}
-
 
 	public static int getRecipeCount(){
 		int count = 0;
@@ -131,9 +101,9 @@ public class DatabaseCommunication {
 
 
 		//SQL
-		String recipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") + 
-				"recipes WHERE claimed=false AND NOT EXISTS (SELECT * FROM " + Brewery.getDatabase("recipes") +
-				"newrecipes WHERE " + Brewery.getDatabase("recipes")+ "recipes.effectkey=" + Brewery.getDatabase("recipes") + "newrecipes.effectkey)";
+//		String recipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") + 
+//				"recipes WHERE claimed=false AND NOT EXISTS (SELECT * FROM " + Brewery.getDatabase("recipes") +
+//				"newrecipes WHERE " + Brewery.getDatabase("recipes")+ "recipes.effectkey=" + Brewery.getDatabase("recipes") + "newrecipes.effectkey)";
 		String newRecipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") +
 				"newrecipes WHERE claimdate < ?";
 
@@ -147,21 +117,19 @@ public class DatabaseCommunication {
 		}
 
 		//Main Recipe List
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
-			//stmt.setString(1, sevenDaysAgo);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			stmt.executeUpdate();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
+//		try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
+//			//stmt.setString(1, sevenDaysAgo);
+//			Brewery.breweryDriver.debugLog(stmt.toString());
+//			stmt.executeUpdate();
+//		} catch (SQLException e1) {
+//			e1.printStackTrace();
+//		}
 	}
 
 	public static boolean purgeRecipes() {
 		String recipeQuery = "DELETE FROM "  + Brewery.getDatabase("recipes") + "recipes WHERE claimed=false";
-		String newRecipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes";
-		try (PreparedStatement stmtMain = Brewery.connection.prepareStatement(recipeQuery); PreparedStatement stmtClaim = Brewery.connection.prepareStatement(newRecipeQuery)){
+		try (PreparedStatement stmtMain = Brewery.connection.prepareStatement(recipeQuery)){
 			stmtMain.executeUpdate();
-			stmtClaim.executeUpdate();
 			return true;
 		} catch (SQLException e1) {
 			e1.printStackTrace();

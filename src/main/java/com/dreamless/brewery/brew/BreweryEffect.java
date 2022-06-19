@@ -348,4 +348,15 @@ public enum BreweryEffect {
 	public int getEffectDuration(int levelScore, int durationScore, BarrelType type) {
 		return getPotionEffectType().isInstant() ? 0 : Math.min(type.getDurationCap(), (int) (DURATION_SCORE_MULTIPLIER * durationScore));
 	}
+	
+	public static int calculateEffectLevel(PotionEffectType effect, int potencyScore, int durationScore, BarrelType type) {
+		
+		double finalScore = potencyScore + (effect.isInstant() ? durationScore * DURATION_TO_LEVEL_SCALE : 0);
+		
+		return Math.min(type.getLevelCap(), (int)finalScore/LEVEL_THRESHOLD);
+	}
+	
+	public static int calcuateEffectDuration(PotionEffectType effect, int score, BarrelType type) {
+		return effect.isInstant() ? 0 : Math.min(type.getDurationCap(), (int) (DURATION_SCORE_MULTIPLIER * score));
+	}
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -16,17 +17,23 @@ import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class MashBucket {
 
+	private static final int NUM_BOTTLES_PER_PRIMARY_INGREDIENT = 3;
+	private static final int PROOF_PER_ITEM = 20;
+	private static final int MAX_PROOF = 100;
+
 	private final ItemStack primaryIngredient;
 	private final ItemStack secondaryIngredient;
 	private final ItemStack flavorIngredient;
 	private final ItemStack alcoholIngredient;
+	private final String crafter;
 
-	public MashBucket(ItemStack primary, ItemStack secondary, ItemStack flavor, ItemStack alcohol)
+	public MashBucket(ItemStack primary, ItemStack secondary, ItemStack flavor, ItemStack alcohol, Player player)
 	{
 		primaryIngredient = primary;
 		secondaryIngredient = secondary;
 		flavorIngredient = flavor;
 		alcoholIngredient = alcohol;
+		crafter = player.getName();
 	}
 
 	//////////////////////////////////
@@ -67,11 +74,19 @@ public class MashBucket {
 								new ItemStack(
 										Material.getMaterial(nbtCompound.getString(NBTConstants.BUCKET_ALCOHOL_STRING)), 
 										nbtCompound.getInteger(NBTConstants.BUCKET_ALCOHOL_COUNT)) :
-											null;	
+											null;
+
+		// Player
+		crafter = nbtCompound.getString(NBTConstants.CRAFTER_TAG_STRING);
 	}
 
 	public static boolean isMashBucket(ItemStack item)
 	{
+		if(item == null || item.getType() == Material.AIR)
+		{
+			return false;
+		}
+		
 		NBTItem nbti = new NBTItem(item);
 		NBTCompound nbtCompound= nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
 		if(nbtCompound != null && 
@@ -82,7 +97,7 @@ public class MashBucket {
 
 		return false;
 	}
-	
+
 	public static boolean isFermentedBucket(ItemStack item)
 	{
 		NBTItem nbti = new NBTItem(item);
@@ -203,6 +218,50 @@ public class MashBucket {
 		return contents;
 	}
 
+	/**
+	 * @return the primaryIngredient
+	 */
+	public ItemStack getPrimaryIngredient() {
+		return primaryIngredient;
+	}
+
+	/**
+	 * @return the secondaryIngredient
+	 */
+	public ItemStack getSecondaryIngredient() {
+		return secondaryIngredient;
+	}
+
+	/**
+	 * @return the flavorIngredient
+	 */
+	public ItemStack getFlavorIngredient() {
+		return flavorIngredient;
+	}
+
+	/**
+	 * @return the alcoholIngredient
+	 */
+	public ItemStack getAlcoholIngredient() {
+		return alcoholIngredient;
+	}
+
+	public String getCrafter()
+	{
+		return crafter;
+	}
+
+	public int getNumberOfFillableBottles()
+	{
+		return primaryIngredient.getAmount() *  NUM_BOTTLES_PER_PRIMARY_INGREDIENT;
+	}
+
+	public DrinkRecipe getDrinkRecipe(String barrelType)
+	{
+		int alcoholLevel = Math.min(MAX_PROOF, PROOF_PER_ITEM * alcoholIngredient.getAmount());
+		return new DrinkRecipe(primaryIngredient.getType(), secondaryIngredient.getType(), flavorIngredient.getType(), barrelType, alcoholLevel, crafter);
+	}
+
 	private ItemStack getNBTBucket(String bucketTypeString)
 	{
 		ItemStack mashBucket = new ItemStack(Material.WATER_BUCKET);
@@ -239,6 +298,9 @@ public class MashBucket {
 			nbtCompound.setString(NBTConstants.BUCKET_ALCOHOL_STRING, alcoholIngredient.getType().name());
 			nbtCompound.setInteger(NBTConstants.BUCKET_ALCOHOL_COUNT, alcoholIngredient.getAmount());
 		}
+
+		// Crafter
+		nbtCompound.setString(NBTConstants.CRAFTER_TAG_STRING, crafter);
 
 		return nbti.getItem();
 	}
@@ -284,7 +346,7 @@ public class MashBucket {
 			flavourText += " alcoholic.";
 		}
 
-		flavourText += " There is enough material to fill " + primaryIngredient.getAmount() * 3 + " bottles."; 
+		flavourText += " There is enough material to fill " + getNumberOfFillableBottles() + " bottles."; 
 
 		// Word Wrap
 		ArrayList<String> flavourList = new ArrayList<String>();
@@ -343,7 +405,7 @@ public class MashBucket {
 			flavourText += " alcoholic.";
 		}
 
-		flavourText += " There is enough material to fill " + primaryIngredient.getAmount() * 3 + " bottles."; 
+		flavourText += " There is enough material to fill " + getNumberOfFillableBottles() + " bottles."; 
 
 		// Word Wrap
 		ArrayList<String> flavourList = new ArrayList<String>();

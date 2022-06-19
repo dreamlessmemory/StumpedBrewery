@@ -14,6 +14,7 @@ public final class NBTConstants {
 	public static final String EFFECT_SCORE_TAG_STRING = "effectstrength";
 	public static final String POTENCY_SCORE_TAG_STRING = "potency";
 	public static final String DURATION_SCORE_TAG_STRING = "duration";
+	public static final String ALCOHOL_LEVEL_TAG_STRING = "alcohol";
 	
 	// Lid
 	public static final String WOOD_TYPE_TAG_STRING = "woodtype";

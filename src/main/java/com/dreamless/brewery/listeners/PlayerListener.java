@@ -112,7 +112,7 @@ public class PlayerListener implements Listener {
 		if (cauldron != null && materialInHand == Material.BUCKET)
 		{
 			event.setCancelled(true);
-			player.getInventory().setItemInMainHand(cauldron.getFermentedBucket());
+			player.getInventory().setItemInMainHand(cauldron.getFermentedBucket()); // TODO: Don't remove bucket stack
 			Brewery.breweryDriver.msg(player, "You've cooked up a " + player.getInventory().getItemInMainHand().getItemMeta().getDisplayName());
 			return;
 		}
@@ -129,13 +129,19 @@ public class PlayerListener implements Listener {
 			if (isAxe(event.getItem())) {
 				barrel.removeAndFinishBrewing(event.getClickedBlock(), player);
 			}
-		} else {
+			else
+			{
+				Brewery.breweryDriver.msg(player, "You need an axe to open a barrel.");
+			}
+		} 
+		else 
+		{
 			if(event.getItem() == null)
 			{
 				// Just exit
 				return;
 			}
-			if(BreweryBarrel.isBarrelLid(event.getItem()))
+			if(BreweryBarrel.isBarrelLid(event.getItem()) && BreweryBarrel.isValidAgingBarrel(player, event.getClickedBlock()))
 			{
 				BarrelType type = BarrelLidItem.getBarrelType(event.getItem());
 				if (type != null) {

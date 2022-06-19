@@ -67,6 +67,18 @@ public enum Rarity {
 		}
 	}
 	
+	public final int getEffectPotency()
+	{
+		switch(this) {
+		case COMMON:
+			return 50;
+		case RARE:
+			return 100;
+		default:
+			return 50;
+		}
+	}
+	
 	public static Rarity getRarity(Material material) {
 		switch(material) {
 		case OAK_LEAVES:

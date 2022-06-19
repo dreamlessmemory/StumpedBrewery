@@ -176,18 +176,25 @@ public class BPlayer {
 			if(!results.next()) {
 				return; //Get out, by default people don't want to be drunk
 			} else {
-				if(!results.getBoolean("drunkeffects")) {
-					return;//Player does not want to be drunk
+//				if(!results.getBoolean("drunkeffects")) {
+//					return;//Player does not want to be drunk
+//				}
+				
+
+				NBTItem nbti = new NBTItem(item);
+				NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
+				if(!brewery.hasKey(NBTConstants.ALCOHOL_LEVEL_TAG_STRING))
+				{
+					return;// Non-alcoholic
 				}
+				
 				//Player Management
 				BPlayer bPlayer = get(player);
 				if (bPlayer == null) {
 					bPlayer = addPlayer(player);
 				}
 				
-				NBTItem nbti = new NBTItem(item);
-				NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
-				bPlayer.drunkeness += Math.min(30, brewery.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING) * 3);
+				bPlayer.drunkeness += brewery.getInteger(NBTConstants.ALCOHOL_LEVEL_TAG_STRING);
 				bPlayer.drunkEffects = true;
 				
 				if(bPlayer.drunkeness > 100) {
