@@ -280,50 +280,6 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 		return new BreweryMessage(true, "");
 	}
 
-//	private void createHologram(Block block) {
-//		Location above = block.getRelative(BlockFace.UP).getLocation();
-//		above.setX(above.getX() + 0.5);
-//		above.setY(above.getY() + 0.75);
-//		above.setZ(above.getZ() + 0.5);
-//		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
-//	}
-
-//	private void updateHologram(HologramActions action) {
-//		if(!Brewery.hologramsEnabled)
-//		{
-//			return;
-//		}
-//
-//		if(action == HologramActions.TICK) {// Time
-//			int secondsCooked = cookTime % 60;
-//			((TextLine)hologram.getLine(0)).setText(cookTime/60 + ":" + (secondsCooked < 10 ? "0" : "") + secondsCooked);
-//		}	else if (action == HologramActions.START_COOKING) {
-//			((TextLine)hologram.getLine(1)).setText("Cooking...");
-//		} else if (action == HologramActions.STOP_COOKING) { // 
-//			((TextLine)hologram.getLine(1)).setText("Cooking Stopped");
-//		} else if (action == HologramActions.ADD_INGREDIENT) { // Inventory
-//			// Clean out past lines
-//			for (int i = hologram.size()-1; i >= 2; i--){
-//				hologram.removeLine(i);
-//			}
-//
-//			// Add new Ones
-//			for (ItemStack itemStack : inventory.getContents()) {
-//				if (itemStack != null) {
-//					hologram.appendTextLine(BreweryUtils.getItemName(itemStack) + " x" + itemStack.getAmount());
-//				}
-//			}
-//			// Location above = block.getRelative(BlockFace.UP).getLocation().add(0.5, 0.75
-//			// + (hologram.size()-2) * 0.25, 0.5);
-//			hologram.teleport(
-//					block.getRelative(BlockFace.UP).getLocation().add(0.5, 0.75 + (hologram.size() - 2) * 0.25, 0.5));
-//		} else if (action == HologramActions.INIT) {
-//			hologram.clearLines();
-//			hologram.appendTextLine("0:00");
-//			hologram.appendTextLine("Ready...");
-//		}
-//	}
-
 	private void dumpContents() {
 		for (ItemStack item : mashBucket.getContents()) {
 			if (item != null) {
@@ -354,7 +310,4 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 		}
 	}
 
-//	private enum HologramActions{
-//		INIT, START_COOKING, ADD_INGREDIENT, TICK, STOP_COOKING;
-//	}
 }

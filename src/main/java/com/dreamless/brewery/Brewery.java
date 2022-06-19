@@ -38,14 +38,12 @@ import com.dreamless.brewery.brew.BarrelLidItem;
 import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.IngredientDatabase;
 import com.dreamless.brewery.data.DataSave;
-import com.dreamless.brewery.data.DatabaseCommunication;
 import com.dreamless.brewery.data.LanguageReader;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
 import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
 import com.dreamless.brewery.listeners.CommandListener;
-import com.dreamless.brewery.listeners.EntityListener;
 import com.dreamless.brewery.listeners.InventoryListener;
 import com.dreamless.brewery.listeners.PlayerListener;
 import com.dreamless.brewery.listeners.WorldListener;
@@ -150,7 +148,6 @@ public class Brewery extends JavaPlugin {
 
 		breweryDriver.getServer().getPluginManager().registerEvents(new BlockListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new PlayerListener(), breweryDriver);
-		breweryDriver.getServer().getPluginManager().registerEvents(new EntityListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new InventoryListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new WorldListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new CauldronListener(), breweryDriver);
@@ -158,9 +155,6 @@ public class Brewery extends JavaPlugin {
 		// Heartbeat
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
-		//if(!development) {
-			breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000	
-		//}
 		
 		BarrelLidItem.registerRecipes();
 		
@@ -635,10 +629,4 @@ public class Brewery extends JavaPlugin {
 
 	}
 	
-	public class RecipeRunnable implements Runnable {
-		@Override
-		public void run() {
-			DatabaseCommunication.periodicPurge();
-		}
-	}
 }

@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
@@ -86,56 +85,7 @@ public class DatabaseCommunication {
 		} 
 		return count;
 	}
-
-	public static void periodicPurge() {
-		Brewery.breweryDriver.debugLog("Purging unclaimed recipies");
-		//Get time
-		java.util.Date dt = new java.util.Date(System.currentTimeMillis());
-		java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(dt);
-		cal.add(Calendar.DATE, -7);
-		String sevenDaysAgo = sdf.format(cal.getTime());
-
-
-		//SQL
-//		String recipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") + 
-//				"recipes WHERE claimed=false AND NOT EXISTS (SELECT * FROM " + Brewery.getDatabase("recipes") +
-//				"newrecipes WHERE " + Brewery.getDatabase("recipes")+ "recipes.effectkey=" + Brewery.getDatabase("recipes") + "newrecipes.effectkey)";
-		String newRecipeQuery = "DELETE FROM " + Brewery.getDatabase("recipes") +
-				"newrecipes WHERE claimdate < ?";
-
-		//Claim Recipe List
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(newRecipeQuery)){
-			stmt.setString(1, sevenDaysAgo);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			stmt.executeUpdate();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-		}
-
-		//Main Recipe List
-//		try (PreparedStatement stmt = Brewery.connection.prepareStatement(recipeQuery)){
-//			//stmt.setString(1, sevenDaysAgo);
-//			Brewery.breweryDriver.debugLog(stmt.toString());
-//			stmt.executeUpdate();
-//		} catch (SQLException e1) {
-//			e1.printStackTrace();
-//		}
-	}
-
-	public static boolean purgeRecipes() {
-		String recipeQuery = "DELETE FROM "  + Brewery.getDatabase("recipes") + "recipes WHERE claimed=false";
-		try (PreparedStatement stmtMain = Brewery.connection.prepareStatement(recipeQuery)){
-			stmtMain.executeUpdate();
-			return true;
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			return false;
-		}
-
-	}
-
+	
 	public static void purgePlayer(String name) {
 		//Get UUID of player
 		UUID uuid;
@@ -150,24 +100,9 @@ public class DatabaseCommunication {
 		}
 
 		String uuidString = uuid.toString();
-		String queryClaim = "DELETE FROM " + Brewery.getDatabase("recipes") + "newrecipes WHERE inventor=?";
-		String queryMain = "DELETE FROM " + Brewery.getDatabase("recipes") + 
-				"recipes WHERE inventor=? OR NOT EXISTS (SELECT 1 FROM " + 
-				Brewery.getDatabase("recipes") + "newrecipes WHERE " + 
-				Brewery.getDatabase("recipes") + "newrecipes.effectkey=" +
-				Brewery.getDatabase("recipes") +"recipes.effectkey)";
-
+		String query = "DELETE FROM " + Brewery.getDatabase("recipes") + "recipes WHERE inventor=?";
 		//Claim List
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryClaim)){
-			stmt.setString(1, uuidString);
-			Brewery.breweryDriver.debugLog(stmt.toString());
-			stmt.executeUpdate();
-		} catch (SQLException e1) {
-			e1.printStackTrace();
-			return;
-		} 
-		//Main List
-		try (PreparedStatement stmt = Brewery.connection.prepareStatement(queryMain)){
+		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
 			stmt.setString(1, uuidString);
 			Brewery.breweryDriver.debugLog(stmt.toString());
 			stmt.executeUpdate();
@@ -255,7 +190,7 @@ public class DatabaseCommunication {
 
 		String query = "UPDATE " + Brewery.getDatabase("recipes") + "recipes SET flavortext=? WHERE inventor=? AND name=?";
 		try (PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
-			stmt.setString(1, flavortext);
+			stmt.setString(1, ChatColor.GRAY + flavortext);
 			stmt.setString(2, uuid);
 			stmt.setString(3, currentRecipe);
 			Brewery.breweryDriver.debugLog(stmt.toString());

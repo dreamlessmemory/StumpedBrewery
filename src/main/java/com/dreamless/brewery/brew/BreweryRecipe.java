@@ -27,20 +27,26 @@ private static final int WRAP_SIZE = 30;
 	}
     
     public BreweryRecipe(String inventorUUID) {
-    	this.name = BreweryRecipe.generateNewRecipeName(); 
+    	this.name = BreweryRecipe.generateNewRecipeName(inventorUUID); 
 		inventorText = "Crafted by " + (inventorUUID.isEmpty() ? "an unknown brewer" : getInventorName(inventorUUID));
 		flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY +  Brewery.getText("Recipe_New_Flavortext"), WRAP_SIZE)));	
     }
 	
-	private static String generateNewRecipeName() {
-		return "Novel Brew #" + DatabaseCommunication.getRecipeCount();
+	private static String generateNewRecipeName(String inventorUUID) {
+		if(inventorUUID != null) {
+			return getInventorName(inventorUUID) + "'s Novel Brew #" + DatabaseCommunication.getRecipeCount();
+		}
+		else
+		{
+			return "Novel Brew #" + DatabaseCommunication.getRecipeCount();
+		}
 	}
 
 	public String getName() {
 		return name;
 	}
 	
-	private String getInventorName(String inventorUUID) {
+	private static String getInventorName(String inventorUUID) {
 		String inventorName = "an unknown brewer";
 		if(inventorUUID != null) {
 			Player inventor = Bukkit.getOfflinePlayer(UUID.fromString(inventorUUID)).getPlayer();

@@ -86,14 +86,6 @@ public class CommandListener implements CommandExecutor {
 				p.msg(sender, Brewery.getText("Error_NoPermissions"));
 			}
 
-		} else if (cmd.equalsIgnoreCase("purge")) {
-
-			if (sender.hasPermission("brewery.cmd.purge")) {
-				cmdPurge(sender);
-			} else {
-				p.msg(sender, Brewery.getText("Error_NoPermissions"));
-			}
-
 		} else if (cmd.equalsIgnoreCase("purgeplayer")) {
 
 			if (sender.hasPermission("brewery.cmd.purge")) {
@@ -241,16 +233,7 @@ public class CommandListener implements CommandExecutor {
 		p.msg(sender, DatabaseCommunication.listPlayerRecipes(player, claimed));
 		
 	}
-	
-	public void cmdPurge(CommandSender sender) {
-		if(DatabaseCommunication.purgeRecipes()) {
-			p.msg(sender, "Recipes purged");
-		} else {
-			p.msg(sender, "Recipe purge failed");
-		}
 		
-	}
-	
 	public void cmdPurgePlayer(CommandSender sender, String[] args) {
 		if(args.length < 1) {
 			return;
