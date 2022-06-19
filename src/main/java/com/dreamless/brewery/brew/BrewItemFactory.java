@@ -208,8 +208,15 @@ public class BrewItemFactory {
 	
 public static ItemStack getAgedBrew(MashBucket item, int age, BarrelType type) 
 {
+		if(item == null)
+		{
+			return getRuinedBrew();
+		}
+	
+	
 		IngredientData primaryIngredientData = IngredientDatabase.getIngredientData(item.getPrimaryIngredient().getType());
 		IngredientData secondaryIngredientData = IngredientDatabase.getIngredientData(item.getSecondaryIngredient().getType());
+		IngredientData flavorIngredientData = IngredientDatabase.getIngredientData(item.getFlavorIngredient().getType());
 	
 		int potencyScore = Math.min((int)Math.ceil(secondaryIngredientData.getRarity().getEffectPotency()/type.getAgingFactor()), age) * type.getLevelIncrease();
 		int durationScore = Math.min((int)Math.ceil(secondaryIngredientData.getRarity().getEffectPotency()/type.getAgingFactor()), age) * type.getDurationIncrease();
@@ -235,7 +242,28 @@ public static ItemStack getAgedBrew(MashBucket item, int age, BarrelType type)
 		}
 		
 		// Set Meta
-		potionMeta.setLore(recipe.getFlavorText());
+		// Setup flavortext
+		ArrayList<String> fullFlavorText = new ArrayList<String>();
+		
+		// Drink Type
+		String drinkType = primaryIngredientData.getDrinkName();
+		
+		// Flavor
+		if(drinkRecipe.getFlavorIngredient() != null)
+		{
+			drinkType += ", " + flavorIngredientData.getFlavorDescriptor() + " flavor";
+		}
+		
+		// Alcohol
+		if(drinkRecipe.getAlcoholLevel() > 0)
+		{
+			drinkType += ", " + drinkRecipe.getAlcoholLevel() + " Proof";
+		}
+		// Construct flavor text list
+		fullFlavorText.add(drinkType);
+		fullFlavorText.addAll(recipe.getFlavorText());
+		
+		potionMeta.setLore(fullFlavorText);
 		potionMeta.setDisplayName(recipe.getName());
 		potionMeta.setColor(primaryIngredientData.getColor());
 		finalBrew.setItemMeta(potionMeta);

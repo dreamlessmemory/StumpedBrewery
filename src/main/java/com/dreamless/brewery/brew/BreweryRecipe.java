@@ -19,12 +19,11 @@ private static final int WRAP_SIZE = 30;
 	private final String name;
 	private final String inventorText;
     private ArrayList<String> flavorText = new ArrayList<String>();
-    
-    //TODO: Alcohol
+
     public BreweryRecipe(String name, String inventorUUID, String flavorText) {
 		this.name = name;
 		inventorText = "Crafted by " + (inventorUUID.isEmpty() ? "an unknown brewer" : getInventorName(inventorUUID));
-		this.flavorText.add(flavorText);
+		this.flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY + flavorText, WRAP_SIZE)));
 	}
     
     public BreweryRecipe(String inventorUUID) {

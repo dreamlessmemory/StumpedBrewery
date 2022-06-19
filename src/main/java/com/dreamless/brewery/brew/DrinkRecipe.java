@@ -7,7 +7,6 @@ import org.bukkit.Material;
 public class DrinkRecipe {
 	
 	private final Material primaryIngredient;
-
 	private final Material secondaryIngredient;
 	private final Material flavorIngredient;
 	private final String barrelType;
@@ -24,6 +23,41 @@ public class DrinkRecipe {
 		this.crafter = crafter;
 	}
 	
+	/**
+	 * @return the primaryIngredient
+	 */
+	public Material getPrimaryIngredient() {
+		return primaryIngredient;
+	}
+
+	/**
+	 * @return the secondaryIngredient
+	 */
+	public Material getSecondaryIngredient() {
+		return secondaryIngredient;
+	}
+
+	/**
+	 * @return the flavorIngredient
+	 */
+	public Material getFlavorIngredient() {
+		return flavorIngredient;
+	}
+
+	/**
+	 * @return the barrelType
+	 */
+	public String getBarrelType() {
+		return barrelType;
+	}
+
+	/**
+	 * @return the crafter
+	 */
+	public String getCrafter() {
+		return crafter;
+	}
+
 	/**
 	 * @return the alcoholLevel
 	 */

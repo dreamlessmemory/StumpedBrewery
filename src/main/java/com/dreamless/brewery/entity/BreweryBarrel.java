@@ -23,6 +23,7 @@ import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.brew.MashBucket;
+import com.dreamless.brewery.data.MessageConstants;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 
@@ -93,6 +94,10 @@ public class BreweryBarrel {
 					(float) (Math.random() / 2) + 0.75f, (float) (Math.random() / 2) + 0.75f);
 		}
 		
+		// Effects
+		barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
+				barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		barrel.getWorld().playSound(barrel.getLocation(), Sound.BLOCK_ANVIL_USE, 2.0f, 1.0f);
 	}
 	
 	private void playAgingEffect()
@@ -141,6 +146,14 @@ public class BreweryBarrel {
 		{
 			barrel.getInventory().addItem(finalBrew);
 		}
+		
+		//effects
+		barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
+				barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		barrel.getWorld().playSound(barrel.getLocation(), Sound.BLOCK_CHEST_OPEN, 2.0f, 1.0f);
+		
+		// Message player
+		breaker.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + Brewery.getText("Barrel_Finish_Aging"));
 		
 		// Update Hologram if possible
 		if(hologram != null)

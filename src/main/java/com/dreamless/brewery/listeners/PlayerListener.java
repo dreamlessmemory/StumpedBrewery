@@ -96,7 +96,8 @@ public class PlayerListener implements Listener {
 				&& MashBucket.isMashBucket(item))
 		{
 			cauldron = new BreweryCauldron(clickedBlock, event.getItem());
-			Brewery.breweryDriver.msg(player, Brewery.getText("Fermentation_Start_Fermenting"));
+			Brewery.breweryDriver.msg(player, Brewery.getText("Fermentation_Start_Fermenting") + 
+					event.getItem().getItemMeta().getDisplayName());
 		}
 		else
 		{
@@ -112,8 +113,11 @@ public class PlayerListener implements Listener {
 		if (cauldron != null && materialInHand == Material.BUCKET)
 		{
 			event.setCancelled(true);
-			player.getInventory().setItemInMainHand(cauldron.getFermentedBucket()); // TODO: Don't remove bucket stack
-			Brewery.breweryDriver.msg(player, "You've cooked up a " + player.getInventory().getItemInMainHand().getItemMeta().getDisplayName());
+			
+			ItemStack returnedItem = cauldron.getFermentedBucket();
+			player.getInventory().addItem(returnedItem);
+			removeItemFromPlayerHand(player);
+			Brewery.breweryDriver.msg(player, "You've cooked up a " + returnedItem.getItemMeta().getDisplayName());
 			return;
 		}
 		

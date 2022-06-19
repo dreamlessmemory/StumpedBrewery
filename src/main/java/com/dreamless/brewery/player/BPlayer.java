@@ -173,33 +173,30 @@ public class BPlayer {
 			stmt.setString(1, player.getUniqueId().toString());
 			//Brewery.breweryDriver.debugLog(stmt.toString());
 			ResultSet results = stmt.executeQuery();
-			if(!results.next()) {
-				return; //Get out, by default people don't want to be drunk
-			} else {
-//				if(!results.getBoolean("drunkeffects")) {
-//					return;//Player does not want to be drunk
-//				}
-				
+			if(results.next()) {
+				if(!results.getBoolean("drunkeffects")) {
+					return;//Player does not want to be drunk
+				}
+			}
 
-				NBTItem nbti = new NBTItem(item);
-				NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
-				if(!brewery.hasKey(NBTConstants.ALCOHOL_LEVEL_TAG_STRING))
-				{
-					return;// Non-alcoholic
-				}
-				
-				//Player Management
-				BPlayer bPlayer = get(player);
-				if (bPlayer == null) {
-					bPlayer = addPlayer(player);
-				}
-				
-				bPlayer.drunkeness += brewery.getInteger(NBTConstants.ALCOHOL_LEVEL_TAG_STRING);
-				bPlayer.drunkEffects = true;
-				
-				if(bPlayer.drunkeness > 100) {
-					bPlayer.drinkCap(player);
-				}
+			NBTItem nbti = new NBTItem(item);
+			NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
+			if(!brewery.hasKey(NBTConstants.ALCOHOL_LEVEL_TAG_STRING))
+			{
+				return;// Non-alcoholic
+			}
+
+			//Player Management
+			BPlayer bPlayer = get(player);
+			if (bPlayer == null) {
+				bPlayer = addPlayer(player);
+			}
+
+			bPlayer.drunkeness += brewery.getInteger(NBTConstants.ALCOHOL_LEVEL_TAG_STRING);
+			bPlayer.drunkEffects = true;
+
+			if(bPlayer.drunkeness > 100) {
+				bPlayer.drinkCap(player);
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();

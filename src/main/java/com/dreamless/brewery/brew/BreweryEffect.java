@@ -13,7 +13,7 @@ public enum BreweryEffect {
 	
 	private static final int DURATION_SCORE_MULTIPLIER = 20 * 3;
 	private static final double DURATION_TO_LEVEL_SCALE = 0.15;
-	private static final int LEVEL_THRESHOLD = 250;
+	private static final int LEVEL_THRESHOLD = 50;
 
 	// Get the list of effects
 	public static BreweryEffect getEffect(AspectMatrix matrix){	

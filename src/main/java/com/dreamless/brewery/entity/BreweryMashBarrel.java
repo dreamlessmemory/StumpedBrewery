@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.brew.IngredientDatabase;
 import com.dreamless.brewery.brew.MashBucket;
+import com.dreamless.brewery.data.MessageConstants;
 import com.dreamless.brewery.utils.BreweryUtils;
 
 public class BreweryMashBarrel {
@@ -34,7 +36,8 @@ public class BreweryMashBarrel {
 		
 		// Create mash barrel
 		MashBucket mashBucket = new MashBucket(inventory.getItem(1),inventory.getItem(2),inventory.getItem(3),inventory.getItem(4), player);
-		dropList.add(mashBucket.getItem());
+		ItemStack mashBucketItem = mashBucket.getItem();
+		dropList.add(mashBucketItem);
 		
 		// Clear out spaces
 		for (int index = 0; index <= 4; index++)
@@ -54,6 +57,13 @@ public class BreweryMashBarrel {
 			inventory.setItem(index, null);
 		}
 		
+		// Effects
+		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5,
+				block.getLocation().getY() + 1.5, block.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		block.getWorld().playSound(block.getLocation(), Sound.BLOCK_ANVIL_LAND, 2.0f, 1.0f);
+		
+		// Inform player
+		player.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + "You created a " + mashBucketItem.getItemMeta().getDisplayName());
 
 		// Drop everything relevant
 		Location dropLocation = block.getRelative(((Directional)block.getBlockData()).getFacing()).getLocation().add(0.5, 0.5, 0.5);

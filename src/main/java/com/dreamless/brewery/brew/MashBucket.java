@@ -258,7 +258,7 @@ public class MashBucket {
 
 	public DrinkRecipe getDrinkRecipe(String barrelType)
 	{
-		int alcoholLevel = Math.min(MAX_PROOF, PROOF_PER_ITEM * alcoholIngredient.getAmount());
+		int alcoholLevel = alcoholIngredient == null ? 0 :  Math.min(MAX_PROOF, PROOF_PER_ITEM * alcoholIngredient.getAmount());
 		return new DrinkRecipe(primaryIngredient.getType(), secondaryIngredient.getType(), flavorIngredient.getType(), barrelType, alcoholLevel, crafter);
 	}
 
