@@ -65,13 +65,13 @@ public enum BarrelType {
 	public int getDurationCap() {
 		switch(this) {
 		case ACACIA:
-			return 7 * TICKS_PER_MINUTE;
+			return 10 * TICKS_PER_MINUTE;
 		case BIRCH:
-			return 6 * TICKS_PER_MINUTE;
+			return 8 * TICKS_PER_MINUTE;
 		case OAK:
 			return 2 * TICKS_PER_MINUTE;
 		case DARK_OAK:
-			return 5 * TICKS_PER_MINUTE;
+			return 6 * TICKS_PER_MINUTE;
 		case SPRUCE:
 			return 4 * TICKS_PER_MINUTE;
 		case JUNGLE:
