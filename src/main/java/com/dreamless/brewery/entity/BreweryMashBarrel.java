@@ -37,7 +37,8 @@ public class BreweryMashBarrel {
 		// Create mash barrel
 		MashBucket mashBucket = new MashBucket(inventory.getItem(1),inventory.getItem(2),inventory.getItem(3),inventory.getItem(4), player);
 		ItemStack mashBucketItem = mashBucket.getItem();
-		dropList.add(mashBucketItem);
+		
+		dropList.addAll(player.getInventory().addItem(mashBucketItem).values());
 		
 		// Clear out spaces
 		for (int index = 0; index <= 4; index++)

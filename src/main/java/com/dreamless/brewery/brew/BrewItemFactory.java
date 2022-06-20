@@ -55,8 +55,8 @@ public class BrewItemFactory {
 			
 			// Get Effect type, level, and duration
 			PotionEffectType effect = secondaryIngredientData.getPotionEffectType();
-			int effectLevel = (int)(rawScore/100 * (type.getLevelCap())); // In level
-			int durationScore = effect.isInstant() ? 0 : (int)(type.getDurationCap() * (rawScore / 100)); // In ticks
+			int effectLevel = Math.min(type.getLevelCap(), (int)(rawScore/100 * (type.getLevelCap()))); // In level
+			int durationScore = effect.isInstant() ? 0 : Math.min(type.getDurationCap(), (int)(type.getDurationCap() * (rawScore / 100))); // In ticks
 
 			potionMeta.addCustomEffect(new PotionEffect(
 					effect, // Effect Type 
@@ -82,7 +82,7 @@ public class BrewItemFactory {
 		ArrayList<String> fullFlavorText = new ArrayList<String>();
 
 		// Drink Type
-		String drinkType = primaryIngredientData.getDrinkName();
+		String drinkType = drinkRecipe.getAlcoholLevel() > 0 ? primaryIngredientData.getAlcoholicDrinkName() : primaryIngredientData.getDrinkName();
 
 		// Flavor
 		if(drinkRecipe.getFlavorIngredient() != null)
@@ -90,17 +90,19 @@ public class BrewItemFactory {
 			drinkType += ", " + flavorIngredientData.getFlavorDescriptor() + " flavor";
 		}
 
+		String secondLine = "";
 		// Alcohol
 		if(drinkRecipe.getAlcoholLevel() > 0)
 		{
-			drinkType += ", " + drinkRecipe.getAlcoholLevel() + " Proof";
+			secondLine += drinkRecipe.getAlcoholLevel() + " Proof";
 		}
 
 		// Age
-		drinkType += getAgedString(age, type);
+		secondLine += getAgedString(age, type, drinkRecipe.getAlcoholLevel() > 0);
 
 		// Construct flavor text list
 		fullFlavorText.add(drinkType);
+		fullFlavorText.add(secondLine);
 		fullFlavorText.addAll(recipe.getFlavorText());
 
 		potionMeta.setLore(fullFlavorText);
@@ -135,7 +137,7 @@ public class BrewItemFactory {
 		return item;
 	}
 
-	private static String getAgedString(int age, BarrelType type)
+	private static String getAgedString(int age, BarrelType type, boolean isStandalone)
 	{
 		if(type == BarrelType.OAK)
 		{
@@ -143,14 +145,26 @@ public class BrewItemFactory {
 		}
 		else
 		{
-			if(age == 1)
+			String rValue = "";
+			if(!isStandalone)
 			{
-				return ", aged 1 year";
+				rValue += ", a";
 			}
 			else
 			{
-				return ", aged " + age + " years"; 
+				rValue += "A";
 			}
+			
+			// Handle Plural
+			if(age == 1)
+			{
+				rValue+= "ged 1 year";
+			}
+			else
+			{
+				rValue+="ged " + age + " years"; 
+			}
+			return rValue;
 		}
 	}
 }

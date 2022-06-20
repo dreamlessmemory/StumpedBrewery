@@ -100,39 +100,6 @@ public class BreweryBarrel {
 		barrel.getWorld().playSound(barrel.getLocation(), Sound.BLOCK_ANVIL_USE, 2.0f, 1.0f);
 	}
 
-	private void playAgingEffect()
-	{
-		if(time % minutesPerYear == 0)
-		{
-			barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
-					barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-			barrel.getWorld().playSound(barrel.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0f, 1.0f);
-		}
-		else
-		{
-			barrel.getWorld().spawnParticle(Particle.END_ROD, barrel.getLocation().getX() + 0.5,
-					barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-		}
-	}
-
-	private void createHologram(Block block) {
-		Location above = block.getRelative(BlockFace.UP).getLocation();
-		above.setX(above.getX() + 0.5);
-		above.setY(above.getY() + 1.0);
-		above.setZ(above.getZ() + 0.5);
-		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
-	}
-
-	private void updateHologram() {
-		if(hologram != null)
-		{
-			int tempYear = (int)(time/minutesPerYear);		
-			hologram.clearLines();
-			hologram.appendTextLine(type.toString() + " barrel");
-			hologram.appendTextLine("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
-		}
-	}
-
 	public boolean hasPermsOpen(Player player, PlayerInteractEvent event) {
 		if (!player.hasPermission("brewery.openbarrel.big")) {
 			Brewery.breweryDriver.msg(player, Brewery.getText("Error_NoBarrelAccess"));
@@ -177,6 +144,20 @@ public class BreweryBarrel {
 			hologram.delete();
 		}
 		barrels.remove(this);
+	}
+	
+	public String getAgeMessage()
+	{
+		int years = (int) (time/minutesPerYear);
+		switch(years)
+		{
+		case 0:
+			return "This barrel has yet to age";
+		case 1:
+			return "This barrel has aged 1 year";
+		default:
+			return "This barrel has aged " + years + " years"; 
+		}
 	}
 
 
@@ -282,5 +263,38 @@ public class BreweryBarrel {
 			return false;
 		}
 		return true;
+	}
+
+	private void playAgingEffect()
+	{
+		if(time % minutesPerYear == 0)
+		{
+			barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
+					barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+			barrel.getWorld().playSound(barrel.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0f, 1.0f);
+		}
+		else
+		{
+			barrel.getWorld().spawnParticle(Particle.END_ROD, barrel.getLocation().getX() + 0.5,
+					barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		}
+	}
+
+	private void createHologram(Block block) {
+		Location above = block.getRelative(BlockFace.UP).getLocation();
+		above.setX(above.getX() + 0.5);
+		above.setY(above.getY() + 1.0);
+		above.setZ(above.getZ() + 0.5);
+		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
+	}
+
+	private void updateHologram() {
+		if(hologram != null)
+		{
+			int tempYear = (int)(time/minutesPerYear);		
+			hologram.clearLines();
+			hologram.appendTextLine(type.toString() + " barrel");
+			hologram.appendTextLine("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
+		}
 	}
 }

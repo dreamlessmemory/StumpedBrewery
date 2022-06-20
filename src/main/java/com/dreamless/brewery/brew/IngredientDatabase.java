@@ -23,18 +23,20 @@ public class IngredientDatabase {
 			
 			while((nextLine = csvReader.readNext()) != null)
 			{
-				if(nextLine.length != 7)
+				if(nextLine.length != 9)
 				{
 					Brewery.breweryDriver.errorLog("Unable to add ingredient: " + nextLine[0]);
 					continue;
 				}
 				IngredientData data = new IngredientData(
-						nextLine[1], 
-						nextLine[2],
-						PotionEffectType.getByName(nextLine[3]),
-						nextLine[4],
-						Rarity.valueOf(nextLine[5]),
-						Integer.parseInt(nextLine[6]));
+						nextLine[1], // Name
+						nextLine[2], // Alcoholic Name
+						PotionEffectType.getByName(nextLine[3]), // Effect
+						nextLine[4], // flavor
+						Rarity.valueOf(nextLine[5]), // Rarity
+						Integer.parseInt(nextLine[6]), // Red
+						Integer.parseInt(nextLine[7]), // Green
+						Integer.parseInt(nextLine[8])); // Blue
 				ingredientDatabase.put(Material.getMaterial(nextLine[0]), data);
 			}
 		}

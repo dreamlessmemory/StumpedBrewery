@@ -130,8 +130,13 @@ public class PlayerListener implements Listener {
 		// If actually a barrel open if it's an ax
 		if (barrel != null) {
 			event.setCancelled(true);
-			if (isAxe(event.getItem())) {
+			ItemStack item = event.getItem();
+			if (isAxe(item)) {
 				barrel.removeAndFinishBrewing(event.getClickedBlock(), player);
+			}
+			else if (item != null && item.getType() == Material.CLOCK)
+			{
+				Brewery.breweryDriver.msg(player, barrel.getAgeMessage());
 			}
 			else
 			{

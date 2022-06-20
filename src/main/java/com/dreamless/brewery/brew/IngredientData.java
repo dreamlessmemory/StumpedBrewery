@@ -19,13 +19,13 @@ public class IngredientData {
 	 * @param rarity
 	 */
 	public IngredientData(String drinkName, String alcoholicDrinkName, PotionEffectType potionEffect,
-			String flavorDescriptor, Rarity rarity, int color) {
+			String flavorDescriptor, Rarity rarity, int colorRed, int colorGreen, int colorBlue) {
 		DRINK_NAME = drinkName;
 		ALCOHOLIC_DRINK_NAME = alcoholicDrinkName;
 		POTION_EFFECT = potionEffect;
 		FLAVOR_DESCRIPTOR = flavorDescriptor;
 		RARITY = rarity;
-		COLOR = Color.fromRGB(color);
+		COLOR = Color.fromRGB(colorRed, colorGreen, colorBlue);
 	}
 	/**
 	 * @return the drink name

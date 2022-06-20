@@ -32,6 +32,9 @@ import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BPlayer {
+	
+	public static int drinkRestoration = 3;
+	
 	private static Map<String, BPlayer> players = new HashMap<String, BPlayer>();// Players name/uuid and BPlayer
 	private static Map<Player, MutableInt> pTasks = new HashMap<Player, MutableInt>();// Player and count
 	private static int taskId;
@@ -201,6 +204,13 @@ public class BPlayer {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+		
+		// Refill player hunger
+		int foodLevel = player.getFoodLevel() + drinkRestoration; 
+		player.setFoodLevel(Math.min(foodLevel, 20));
+		
+		float saturationLevel = player.getSaturation() + drinkRestoration;
+		player.setSaturation(Math.min(saturationLevel, 20));
 	}
 
 	// Player has drunken too much
