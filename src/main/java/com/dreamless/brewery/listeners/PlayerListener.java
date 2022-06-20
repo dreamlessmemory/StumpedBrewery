@@ -140,7 +140,7 @@ public class PlayerListener implements Listener {
 			}
 			else
 			{
-				Brewery.breweryDriver.msg(player, "You need an axe to open a barrel.");
+				Brewery.breweryDriver.msg(player, "You need an axe to open a Brewery barrel.");
 			}
 		} 
 		else 

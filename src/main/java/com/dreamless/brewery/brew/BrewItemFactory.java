@@ -137,7 +137,7 @@ public class BrewItemFactory {
 		return item;
 	}
 
-	private static String getAgedString(int age, BarrelType type, boolean isStandalone)
+	private static String getAgedString(int age, BarrelType type, boolean isAlcoholic)
 	{
 		if(type == BarrelType.OAK)
 		{
@@ -146,13 +146,13 @@ public class BrewItemFactory {
 		else
 		{
 			String rValue = "";
-			if(!isStandalone)
+			if(!isAlcoholic)
 			{
-				rValue += ", a";
+				rValue += "A";
 			}
 			else
 			{
-				rValue += "A";
+				rValue += ", a";
 			}
 			
 			// Handle Plural

@@ -83,8 +83,7 @@ public class BreweryBarrel {
 		}
 
 		// Set Contents
-		barrel.getInventory().clear();
-		barrel.getInventory().setItem(0, new ItemStack(Material.GLASS_BOTTLE, numberOfBrews));
+		barrel.getInventory().setItem(1, new ItemStack(Material.GLASS_BOTTLE, numberOfBrews));
 
 		// Drop
 		Location dropLocation = barrel.getBlock().getRelative(((Directional)barrel.getBlockData()).getFacing()).getLocation().add(0.5, 0.5, 0.5);
@@ -152,11 +151,11 @@ public class BreweryBarrel {
 		switch(years)
 		{
 		case 0:
-			return "This barrel has yet to age";
+			return "This " + type.toString() + " barrel has yet to age";
 		case 1:
-			return "This barrel has aged 1 year";
+			return "This " + type.toString() + " barrel has aged 1 year";
 		default:
-			return "This barrel has aged " + years + " years"; 
+			return "This " + type.toString() + " barrel has aged " + years + " years"; 
 		}
 	}
 
