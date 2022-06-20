@@ -69,15 +69,15 @@ public enum BarrelType {
 		case BIRCH:
 			return 8 * TICKS_PER_MINUTE;
 		case OAK:
-			return 2 * TICKS_PER_MINUTE;
+			return (int) (0.5 * TICKS_PER_MINUTE);
 		case DARK_OAK:
-			return 6 * TICKS_PER_MINUTE;
+			return 4 * TICKS_PER_MINUTE;
 		case SPRUCE:
-			return 4 * TICKS_PER_MINUTE;
-		case JUNGLE:
-			return 4 * TICKS_PER_MINUTE;
-		default:
 			return 2 * TICKS_PER_MINUTE;
+		case JUNGLE:
+			return 2 * TICKS_PER_MINUTE;
+		default:
+			return (int) (0.5 * TICKS_PER_MINUTE);
 		}
 	}
 	

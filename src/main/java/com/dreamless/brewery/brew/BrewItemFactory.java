@@ -102,7 +102,10 @@ public class BrewItemFactory {
 
 		// Construct flavor text list
 		fullFlavorText.add(drinkType);
-		fullFlavorText.add(secondLine);
+		if(!secondLine.isBlank())
+		{
+			fullFlavorText.add(secondLine);
+		}
 		fullFlavorText.addAll(recipe.getFlavorText());
 
 		potionMeta.setLore(fullFlavorText);
