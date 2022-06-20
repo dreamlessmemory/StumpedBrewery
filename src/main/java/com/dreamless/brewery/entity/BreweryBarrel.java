@@ -55,7 +55,7 @@ public class BreweryBarrel {
 			createHologram(block.getBlock());
 			updateHologram();
 		}
-		
+
 		ItemStack[] items = barrel.getInventory().getContents();
 		mash = new MashBucket(items[0]);
 
@@ -73,7 +73,7 @@ public class BreweryBarrel {
 		{
 			dropList.add(new ItemStack((Material.GLASS_BOTTLE), items[1].getAmount() - numberOfBrews));
 		}
-		
+
 		// Add other items		
 		for (int i = 2; i < items.length; i++) {
 			ItemStack item = items[i];
@@ -81,7 +81,7 @@ public class BreweryBarrel {
 				dropList.add(item);
 			}
 		}
-		
+
 		// Set Contents
 		barrel.getInventory().clear();
 		barrel.getInventory().setItem(0, new ItemStack(Material.GLASS_BOTTLE, numberOfBrews));
@@ -93,18 +93,26 @@ public class BreweryBarrel {
 			barrel.getWorld().playSound(dropLocation, Sound.ENTITY_ITEM_PICKUP,
 					(float) (Math.random() / 2) + 0.75f, (float) (Math.random() / 2) + 0.75f);
 		}
-		
+
 		// Effects
 		barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
 				barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 		barrel.getWorld().playSound(barrel.getLocation(), Sound.BLOCK_ANVIL_USE, 2.0f, 1.0f);
 	}
-	
+
 	private void playAgingEffect()
 	{
-		barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
-				barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
-		barrel.getWorld().playSound(barrel.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0f, 1.0f);
+		if(time % minutesPerYear == 0)
+		{
+			barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
+					barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+			barrel.getWorld().playSound(barrel.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 2.0f, 1.0f);
+		}
+		else
+		{
+			barrel.getWorld().spawnParticle(Particle.END_ROD, barrel.getLocation().getX() + 0.5,
+					barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
+		}
 	}
 
 	private void createHologram(Block block) {
@@ -146,15 +154,15 @@ public class BreweryBarrel {
 		{
 			barrel.getInventory().addItem(finalBrew);
 		}
-		
+
 		//effects
 		barrel.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, barrel.getLocation().getX() + 0.5,
 				barrel.getLocation().getY() + 1.5, barrel.getLocation().getZ() + 0.5, 10, 0.5, 0.5, 0.5);
 		barrel.getWorld().playSound(barrel.getLocation(), Sound.BLOCK_CHEST_OPEN, 2.0f, 1.0f);
-		
+
 		// Message player
 		breaker.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + Brewery.getText("Barrel_Finish_Aging"));
-		
+
 		// Update Hologram if possible
 		if(hologram != null)
 		{	

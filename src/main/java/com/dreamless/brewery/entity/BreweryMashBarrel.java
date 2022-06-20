@@ -63,7 +63,7 @@ public class BreweryMashBarrel {
 		block.getWorld().playSound(block.getLocation(), Sound.BLOCK_ANVIL_LAND, 2.0f, 1.0f);
 		
 		// Inform player
-		player.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + "You created a " + mashBucketItem.getItemMeta().getDisplayName());
+		player.sendMessage(MessageConstants.MESSAGE_HEADER_STRING + "You created a " + mashBucketItem.getItemMeta().getDisplayName().toLowerCase());
 
 		// Drop everything relevant
 		Location dropLocation = block.getRelative(((Directional)block.getBlockData()).getFacing()).getLocation().add(0.5, 0.5, 0.5);

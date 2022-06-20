@@ -17,28 +17,21 @@ import com.dreamless.brewery.Brewery;
 import com.dreamless.brewery.brew.MashBucket;
 import com.dreamless.brewery.utils.BreweryMessage;
 
-public class BreweryCauldron /*implements InventoryHolder */ {
+public class BreweryCauldron {
+	
+	public static int totalCookTime = 5;
 	private static CopyOnWriteArrayList<BreweryCauldron> cauldronList = new CopyOnWriteArrayList<BreweryCauldron>();
 	private static HashMap<BreweryCauldron, BukkitTask> taskMap = new HashMap<>();
-	private static int totalCookTime = 5;
 
 	private final Block block;
 	private final MashBucket mashBucket;
 	private int cookTime = 0; // Seconds
 	private boolean cooking = true;
-	//private Hologram hologram;
-	//private Inventory inventory;
 
 	public BreweryCauldron(Block block, ItemStack bucket) {
 		this.block = block;
-		//inventory = org.bukkit.Bukkit.createInventory(this, 9, "Brewery Cauldron");
 		mashBucket = new MashBucket(bucket);
 		cauldronList.add(this);
-//		if(Brewery.hologramsEnabled)
-//		{
-//			createHologram(block);
-//			updateHologram(HologramActions.INIT);
-//		}
 		startCooking();
 	}
 
@@ -67,12 +60,6 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 				bcauldron.dumpContents();
 			}
 			cauldronList.remove(bcauldron);
-
-			// Remove hologram
-//			if(bcauldron.hologram != null)
-//			{			
-//				bcauldron.hologram.delete();
-//			}
 		}
 	}
 
@@ -88,12 +75,6 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 			task.cancel();
 		}
 		cauldronList.remove(bcauldron);
-
-		// Remove hologram
-//		if(bcauldron.hologram != null)
-//		{			
-//			bcauldron.hologram.delete();
-//		}
 	}
 
 	// unloads cauldrons that are in a unloading world
@@ -149,17 +130,6 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 	}
 
 
-	// 0 = empty, 1 = something in, 2 = full
-	public int getFillLevel() {
-		if(block.getType() == Material.CAULDRON)
-		{
-			return 0;
-		}
-		else {
-			return ((Levelled)block.getState().getBlockData()).getLevel();	
-		}
-	}
-
 	public BreweryMessage startCooking() {
 		// Set Feedback effects
 		block.getWorld().spawnParticle(Particle.VILLAGER_HAPPY, block.getLocation().getX() + 0.5,
@@ -168,16 +138,8 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 		// Manage parameters
 		cooking = true;
 
-		//Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
-		//		new BreweryCauldronRunnable(this), 0, 20);
 		taskMap.put(this, Bukkit.getScheduler().runTaskTimer(Brewery.breweryDriver,
 				new BreweryCauldronRunnable(this), 0, 20));
-
-		// Create hologram
-//		if (hologram == null && Brewery.hologramsEnabled) {
-//			createHologram(block);
-//			updateHologram(HologramActions.START_COOKING);
-//		}
 
 		// Return
 		return new BreweryMessage(true, Brewery.getText("Fermentation_Start_Fermenting"));
@@ -197,9 +159,6 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 				remove(block);
 				return;
 			}
-
-			// Update Sign
-			//updateHologram(HologramActions.TICK);
 
 			++cookTime;
 			// Bubble effects
@@ -239,8 +198,6 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 			if (cooking) {
 				cooking = false;
 				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 2.0f, 1.0f);
-				//updateHologram(HologramActions.STOP_COOKING);
-				//hologram.appendTextLine("Fermentation stopped");
 			}
 		}
 	}
@@ -255,8 +212,22 @@ public class BreweryCauldron /*implements InventoryHolder */ {
 			task.cancel();
 		}
 		
+		// Just in case, stop cooking
+		cooking = false;
+		
 		// Remove from cauldrons
 		cauldronList.remove(this);
+	}
+
+	// 0 = empty, 1 = something in, 2 = full
+	private int getFillLevel() {
+		if(block.getType() == Material.CAULDRON)
+		{
+			return 0;
+		}
+		else {
+			return ((Levelled)block.getState().getBlockData()).getLevel();	
+		}
 	}
 
 	/**

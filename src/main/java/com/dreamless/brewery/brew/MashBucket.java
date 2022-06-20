@@ -258,8 +258,11 @@ public class MashBucket {
 
 	public DrinkRecipe getDrinkRecipe(String barrelType)
 	{
+		Material primaryMaterial = primaryIngredient == null ? null : primaryIngredient.getType();
+		Material secondaryMaterial = secondaryIngredient == null ? null : secondaryIngredient.getType();
+		Material flavorMaterial = flavorIngredient == null ? null : flavorIngredient.getType();
 		int alcoholLevel = alcoholIngredient == null ? 0 :  Math.min(MAX_PROOF, PROOF_PER_ITEM * alcoholIngredient.getAmount());
-		return new DrinkRecipe(primaryIngredient.getType(), secondaryIngredient.getType(), flavorIngredient.getType(), barrelType, alcoholLevel, crafter);
+		return new DrinkRecipe(primaryMaterial, secondaryMaterial, flavorMaterial, barrelType, alcoholLevel, crafter);
 	}
 
 	private ItemStack getNBTBucket(String bucketTypeString)

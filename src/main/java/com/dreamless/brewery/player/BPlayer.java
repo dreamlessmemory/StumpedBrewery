@@ -56,7 +56,7 @@ public class BPlayer {
 	private int offlineDrunk = 0;// drunkeness when gone offline
 	private Vector push = new Vector(0, 0, 0);
 	private int time = 20;
-	private boolean drunkEffects = false;
+	private boolean drunkEffects = true;
 
 	public BPlayer() {
 	}

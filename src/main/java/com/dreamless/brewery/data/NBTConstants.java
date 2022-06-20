@@ -25,8 +25,8 @@ public final class NBTConstants {
 	public static final String BUCKET_PRIMARY_COUNT = "primary_count";
 	public static final String BUCKET_SECONDARY_STRING = "secondary_ingredient";
 	public static final String BUCKET_SECONDARY_COUNT = "secondary_count";
-	public static final String BUCKET_FLAVOUR_STRING = "primary_ingredient";
-	public static final String BUCKET_FLAVOUR_COUNT = "primary_count";
+	public static final String BUCKET_FLAVOUR_STRING = "flavor_ingredient";
+	public static final String BUCKET_FLAVOUR_COUNT = "flavor_count";
 	public static final String BUCKET_ALCOHOL_STRING = "alcohol_ingredient";
 	public static final String BUCKET_ALCOHOL_COUNT = "alcohol_count";
 	public static final String FERMENTED_BUCKET_TAG_STRING = "fermented_bucket";

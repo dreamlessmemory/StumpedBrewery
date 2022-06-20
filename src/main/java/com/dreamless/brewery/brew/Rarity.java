@@ -7,11 +7,11 @@ public enum Rarity {
 	{
 		switch(this) {
 		case COMMON:
-			return 50;
+			return 75;
 		case RARE:
 			return 100;
 		default:
-			return 50;
+			return 75;
 		}
 	}
 	

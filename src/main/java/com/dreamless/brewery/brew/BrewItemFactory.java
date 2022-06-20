@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.dreamless.brewery.data.DatabaseCommunication;
 import com.dreamless.brewery.data.NBTConstants;
@@ -17,36 +18,60 @@ import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BrewItemFactory {
 
-	public static ItemStack getAgedBrew(MashBucket item, int age, BarrelType type) 
+	public static ItemStack getAgedBrew(MashBucket mashBucket, int age, BarrelType type) 
 	{
-		if(item == null)
+		// Error case - somehow the barrel got emptied
+		if(mashBucket == null)
 		{
 			return getRuinedBrew();
 		}
 
+		// Primary Ingredient
+		IngredientData primaryIngredientData = IngredientDatabase.getIngredientData(mashBucket.getPrimaryIngredient().getType());
 
-		IngredientData primaryIngredientData = IngredientDatabase.getIngredientData(item.getPrimaryIngredient().getType());
-		IngredientData secondaryIngredientData = IngredientDatabase.getIngredientData(item.getSecondaryIngredient().getType());
-		IngredientData flavorIngredientData = IngredientDatabase.getIngredientData(item.getFlavorIngredient().getType());
-
-		int potencyScore = Math.min((int)Math.ceil(secondaryIngredientData.getRarity().getEffectPotency()/type.getAgingFactor()), age) * type.getLevelIncrease();
-		int durationScore = Math.min((int)Math.ceil(secondaryIngredientData.getRarity().getEffectPotency()/type.getAgingFactor()), age) * type.getDurationIncrease();
+		// Secondary Ingredient
+		IngredientData secondaryIngredientData = mashBucket.getSecondaryIngredient() == null ? 
+				null :  IngredientDatabase.getIngredientData(mashBucket.getSecondaryIngredient().getType());
+		IngredientData flavorIngredientData = mashBucket.getFlavorIngredient() == null ? 
+				null :  IngredientDatabase.getIngredientData(mashBucket.getFlavorIngredient().getType());
 
 		// Create Base item
 		ItemStack finalBrew = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) finalBrew.getItemMeta();
-		potionMeta.addCustomEffect(new PotionEffect(secondaryIngredientData.getPotionEffectType(), 
-				BreweryEffect.calcuateEffectDuration(secondaryIngredientData.getPotionEffectType(), durationScore, type), 
-				BreweryEffect.calculateEffectLevel(secondaryIngredientData.getPotionEffectType(), potencyScore, durationScore, type), 
-				false, false, false), true);
+
+		// Apply Potion Effect
+		if(mashBucket.getSecondaryIngredient() != null)
+		{
+			// Get Base score
+			double rawScore = secondaryIngredientData.getRarity().getEffectPotency();
+			// Scale score based on number of ingredients, i.e. do we have enough material
+			if(mashBucket.getPrimaryIngredient().getAmount() > mashBucket.getSecondaryIngredient().getAmount())
+			{
+				rawScore = rawScore * (mashBucket.getSecondaryIngredient().getAmount()/mashBucket.getPrimaryIngredient().getAmount());
+			}
+
+			// Scale score based on how much we have aged, i.e. did we age long enough
+			rawScore *= age / type.getAgingRequirement();
+			
+			// Get Effect type, level, and duration
+			PotionEffectType effect = secondaryIngredientData.getPotionEffectType();
+			int effectLevel = (int)(rawScore/100 * (type.getLevelCap())); // In level
+			int durationScore = effect.isInstant() ? 0 : (int)(type.getDurationCap() * (rawScore / 100)); // In ticks
+
+			potionMeta.addCustomEffect(new PotionEffect(
+					effect, // Effect Type 
+					durationScore, // Duration 
+					effectLevel, // Level
+					false, false, false), true);
+		}
 
 		// Get Recipe
-		DrinkRecipe drinkRecipe = item.getDrinkRecipe(type.toString());
+		DrinkRecipe drinkRecipe = mashBucket.getDrinkRecipe(type.toString());
 
 		BreweryRecipe recipe = null;
 		try {
 			recipe = DatabaseCommunication.getRecipe(
-					Bukkit.getPlayer(BreweryUtils.getUUID(item.getCrafter())),
+					Bukkit.getPlayer(BreweryUtils.getUUID(mashBucket.getCrafter())),
 					drinkRecipe.hashCode());
 		} catch (ParseException | org.json.simple.parser.ParseException e) {
 			e.printStackTrace();
@@ -70,6 +95,10 @@ public class BrewItemFactory {
 		{
 			drinkType += ", " + drinkRecipe.getAlcoholLevel() + " Proof";
 		}
+
+		// Age
+		drinkType += getAgedString(age, type);
+
 		// Construct flavor text list
 		fullFlavorText.add(drinkType);
 		fullFlavorText.addAll(recipe.getFlavorText());
@@ -82,19 +111,15 @@ public class BrewItemFactory {
 		// Set NBT tags
 		NBTItem nbti = new NBTItem(finalBrew);
 		NBTCompound newBreweryMeta = nbti.addCompound(NBTConstants.BREWERY_TAG_STRING);
-		newBreweryMeta.setString(NBTConstants.EFFECT_NAME_TAG_STRING, secondaryIngredientData.getPotionEffectType().toString());
-		newBreweryMeta.setInteger(NBTConstants.POTENCY_SCORE_TAG_STRING, potencyScore);
-		newBreweryMeta.setInteger(NBTConstants.DURATION_SCORE_TAG_STRING, durationScore);
-		newBreweryMeta.setInteger(NBTConstants.EFFECT_SCORE_TAG_STRING, secondaryIngredientData.getRarity().getEffectPotency());
 		newBreweryMeta.setInteger(NBTConstants.ALCOHOL_LEVEL_TAG_STRING, drinkRecipe.getAlcoholLevel());
-		newBreweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, item.getCrafter());
+		newBreweryMeta.setString(NBTConstants.CRAFTER_TAG_STRING, mashBucket.getCrafter());
 
 		finalBrew = nbti.getItem();
 
 		return finalBrew;
 	}
 
-	public static ItemStack getRuinedBrew() {		
+	private static ItemStack getRuinedBrew() {		
 		ItemStack item = new ItemStack(Material.POTION);
 		PotionMeta potionMeta = (PotionMeta) item.getItemMeta();
 
@@ -110,4 +135,22 @@ public class BrewItemFactory {
 		return item;
 	}
 
+	private static String getAgedString(int age, BarrelType type)
+	{
+		if(type == BarrelType.OAK)
+		{
+			return "";
+		}
+		else
+		{
+			if(age == 1)
+			{
+				return ", aged 1 year";
+			}
+			else
+			{
+				return ", aged " + age + " years"; 
+			}
+		}
+	}
 }

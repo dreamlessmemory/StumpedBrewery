@@ -310,6 +310,7 @@ public class Brewery extends JavaPlugin {
 		
 		//difficulty settings
 		BreweryBarrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
+		BreweryCauldron.totalCookTime = currentConfig.getInt("cookTime", 15);
 		
 		//Effects
 		effectLevel = currentConfig.getDouble("effectLevel", 0.35);

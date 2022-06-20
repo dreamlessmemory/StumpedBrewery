@@ -96,8 +96,8 @@ public class PlayerListener implements Listener {
 				&& MashBucket.isMashBucket(item))
 		{
 			cauldron = new BreweryCauldron(clickedBlock, event.getItem());
-			Brewery.breweryDriver.msg(player, Brewery.getText("Fermentation_Start_Fermenting") + 
-					event.getItem().getItemMeta().getDisplayName());
+			Brewery.breweryDriver.msg(player, Brewery.getText("Fermentation_Start_Fermenting") + " " +  
+					event.getItem().getItemMeta().getDisplayName().toLowerCase());
 		}
 		else
 		{
@@ -117,7 +117,7 @@ public class PlayerListener implements Listener {
 			ItemStack returnedItem = cauldron.getFermentedBucket();
 			player.getInventory().addItem(returnedItem);
 			removeItemFromPlayerHand(player);
-			Brewery.breweryDriver.msg(player, "You've cooked up a " + returnedItem.getItemMeta().getDisplayName());
+			Brewery.breweryDriver.msg(player, "You've cooked up a " + returnedItem.getItemMeta().getDisplayName().toLowerCase());
 			return;
 		}
 		
