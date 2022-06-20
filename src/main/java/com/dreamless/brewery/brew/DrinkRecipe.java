@@ -67,8 +67,10 @@ public class DrinkRecipe {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(alcoholLevel, barrelType, crafter, flavorIngredient, primaryIngredient,
-				secondaryIngredient);
+		String primaryString = primaryIngredient == null ? "" : primaryIngredient.toString();
+		String secondaryString = secondaryIngredient == null ? "" : secondaryIngredient.toString();
+		String flavorString = flavorIngredient == null ? "" : flavorIngredient.toString();
+		return Objects.hash(alcoholLevel, barrelType, crafter, primaryString, secondaryString, flavorString);
 	}
 
 	@Override
