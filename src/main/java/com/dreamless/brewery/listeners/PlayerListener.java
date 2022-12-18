@@ -99,10 +99,6 @@ public class PlayerListener implements Listener {
 			Brewery.breweryDriver.msg(player, Brewery.getText("Fermentation_Start_Fermenting") + " " +  
 					event.getItem().getItemMeta().getDisplayName().toLowerCase());
 		}
-		else
-		{
-			event.setCancelled(true);
-		}
 	}
 	
 	private void handleWaterCauldron(PlayerInteractEvent event, Player player) {
@@ -309,7 +305,6 @@ public class PlayerListener implements Listener {
 
 	private boolean checkCreative(Player player) {
 		if (player.getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
-			Brewery.breweryDriver.msg(player, Brewery.getText("Player_CreativeNotAllowed"));
 			return false;
 		} else {
 			return true;

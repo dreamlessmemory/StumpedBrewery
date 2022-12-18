@@ -51,7 +51,7 @@ public class BrewItemFactory {
 			}
 
 			// Scale score based on how much we have aged, i.e. did we age long enough
-			rawScore *= age / type.getAgingRequirement();
+			rawScore *= Math.min(age / type.getAgingRequirement(), 1.0);
 			
 			// Get Effect type, level, and duration
 			PotionEffectType effect = secondaryIngredientData.getPotionEffectType();

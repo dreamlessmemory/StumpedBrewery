@@ -64,11 +64,7 @@ public class BreweryBarrel {
 		// Add Empty Bucket
 		dropList.add(new ItemStack(Material.BUCKET));
 		// Add Unneeded Bottles
-		numberOfBrews = Math.min(mash.getNumberOfFillableBottles(), items[1].getAmount());
-		if(numberOfBrews > MAX_BREWS_PER_BARREL)
-		{
-			numberOfBrews = MAX_BREWS_PER_BARREL;
-		}
+		numberOfBrews = Math.min(MAX_BREWS_PER_BARREL, Math.min(mash.getNumberOfFillableBottles(), items[1].getAmount()));
 		if(numberOfBrews < items[1].getAmount())
 		{
 			dropList.add(new ItemStack((Material.GLASS_BOTTLE), items[1].getAmount() - numberOfBrews));
