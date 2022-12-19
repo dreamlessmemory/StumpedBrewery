@@ -103,7 +103,7 @@ public class BrewItemFactory {
 
 		// Construct flavor text list
 		fullFlavorText.add(drinkType);
-		if(!secondLine.isBlank())
+		if(!secondLine.isEmpty())
 		{
 			fullFlavorText.add(secondLine);
 		}
