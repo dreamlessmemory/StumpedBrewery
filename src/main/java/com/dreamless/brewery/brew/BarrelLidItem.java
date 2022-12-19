@@ -1,13 +1,12 @@
-package com.dreamless.brewery.item;
+package com.dreamless.brewery.brew;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import com.dreamless.brewery.Brewery;
-import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.data.NBTConstants;
 import com.dreamless.brewery.utils.BreweryUtils;
 
@@ -15,6 +14,9 @@ import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BarrelLidItem {
+	
+	private static final int LID_CREATION_TIME = 20 * 2;
+	private static final int LID_EXP = 8;
 	
 	public static void registerRecipes() {
 		Bukkit.addRecipe(lidRecipeFactory(Material.OAK_TRAPDOOR, "brewery_oak_lid", "Oak Lid", BarrelType.OAK, "Barrel_Oak_Lid"));
@@ -44,13 +46,9 @@ public class BarrelLidItem {
 		return itemStack;
 	}
 	
-	private static ShapelessRecipe lidRecipeFactory(Material lidtype, String keyname, String displayname, BarrelType barrelType, String flavortext) {
+	private static FurnaceRecipe lidRecipeFactory(Material lidtype, String keyname, String displayname, BarrelType barrelType, String flavortext) {
 		NamespacedKey key = new NamespacedKey(Brewery.breweryDriver, keyname);
-		ShapelessRecipe recipe = new ShapelessRecipe(key, lidItemFactory(lidtype, displayname, barrelType, flavortext));
-		
-		recipe.addIngredient(lidtype);
-		recipe.addIngredient(Material.SUGAR);
-				
+		FurnaceRecipe recipe = new FurnaceRecipe(key, lidItemFactory(lidtype, displayname, barrelType, flavortext), lidtype, LID_CREATION_TIME, LID_EXP);				
 		return recipe;
 	}
 	

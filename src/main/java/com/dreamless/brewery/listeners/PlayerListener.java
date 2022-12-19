@@ -19,21 +19,20 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.dreamless.brewery.Brewery;
+import com.dreamless.brewery.brew.BarrelLidItem;
 import com.dreamless.brewery.brew.BarrelType;
-import com.dreamless.brewery.brew.Rarity;
+import com.dreamless.brewery.brew.MashBucket;
 import com.dreamless.brewery.data.NBTConstants;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
-import com.dreamless.brewery.entity.BreweryDistiller;
-import com.dreamless.brewery.item.BarrelLidItem;
+import com.dreamless.brewery.entity.BreweryMashBarrel;
 import com.dreamless.brewery.player.BPlayer;
 import com.dreamless.brewery.player.Wakeup;
 import com.dreamless.brewery.player.Words;
-import com.dreamless.brewery.utils.BreweryMessage;
+import com.dreamless.brewery.utils.BreweryUtils;
 
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
@@ -52,14 +51,36 @@ public class PlayerListener implements Listener {
 					Material type = clickedBlock.getType();
 
 					// event.setCancelled(true);
-
-					// Interacting with a Cauldron
-					if (type == Material.WATER_CAULDRON && checkCreative(player)) {
+					
+					if(!checkCreative(player))
+					{
+						return;
+					}
+					
+					switch(type)
+					{
+					case CAULDRON:
 						handleCauldron(event, player);
-					} else if (type == Material.BREWING_STAND && checkCreative(player)) {
-						handleDistiller(event, player);
-					} else if (type == Material.BARREL && checkCreative(player)) {
+						break;
+					case WATER_CAULDRON:
+						handleWaterCauldron(event, player);
+						break;
+					case BARREL:
 						handleBarrel(event, player);
+						break;
+					default:
+						if (MashBucket.isMashBucket(event.getItem()))
+						{
+							MashBucket.dumpContents(event.getItem(), event.getClickedBlock().getLocation());
+						}
+						break;
+					}
+				}
+				else
+				{
+					if (MashBucket.isMashBucket(event.getItem()))
+					{
+						MashBucket.dumpContents(event.getItem(), event.getClickedBlock().getLocation());
 					}
 				}
 			}
@@ -69,114 +90,33 @@ public class PlayerListener implements Listener {
 	private void handleCauldron(PlayerInteractEvent event, Player player) {
 		Block clickedBlock = event.getClickedBlock();
 		BreweryCauldron cauldron = BreweryCauldron.get(clickedBlock);
-		Material materialInHand = event.getMaterial();
 		ItemStack item = event.getItem();
 
 		if (cauldron == null && BreweryCauldron.isUseableCauldron(clickedBlock)
-				&& Rarity.isValidIngredient(materialInHand)) {
-
-			event.setCancelled(true);
-
-			cauldron = new BreweryCauldron(clickedBlock);
-			cauldron.addIngredient(materialInHand);
-			removeItemFromPlayerHand(player);
-			return;
-		} else if (cauldron != null) {
-			if (materialInHand == Material.BUCKET) {
-				event.setCancelled(true);
-				BreweryCauldron.remove(cauldron);
-			} else if (materialInHand == Material.CLOCK) {
-				event.setCancelled(true);
-				if (cauldron.isCooking()) {// Print time if cooking
-					cauldron.printTime(player);
-				} else if (cauldron.getFillLevel() > 0) {
-					BreweryMessage result = cauldron.startCooking();
-					if (result.getResult()) {// Start cooking
-						clickedBlock.getWorld().playSound(clickedBlock.getLocation(),
-								Sound.ENTITY_PLAYER_SPLASH_HIGH_SPEED, 1.0f, 1.0f);
-					}
-					Brewery.breweryDriver.msg(player, result.getMessage());
-				}
-			} else if (materialInHand == Material.WOODEN_SHOVEL || materialInHand == Material.IRON_SHOVEL
-					|| materialInHand == Material.STONE_SHOVEL || materialInHand == Material.GOLDEN_SHOVEL
-					|| materialInHand == Material.DIAMOND_SHOVEL) {// Purge
-				event.setCancelled(true);
-				if (player.hasPermission("brewery.cauldron.insert") && !cauldron.isCooking()) {
-					BreweryCauldron.remove(cauldron);
-				} else {
-					Brewery.breweryDriver.msg(player, Brewery.getText("Perms_NoCauldronInsert"));
-				}
-			} else if (materialInHand == Material.GLASS_BOTTLE) { // fill a glass bottle with potion
-				if (cauldron.isCooking() && player.getInventory().firstEmpty() != -1 || item.getAmount() == 1) {
-					if (BreweryCauldron.fillBottle(player, clickedBlock)) {
-						event.setCancelled(true);
-						if (player.hasPermission("brewery.cauldron.fill")) {
-							if (item.getAmount() > 1) {
-								item.setAmount(item.getAmount() - 1);
-							} else {
-								setItemInHand(event, Material.AIR, false);
-							}
-						}
-					}
-				} else {
-					event.setCancelled(true);
-				}
-			} else if (materialInHand == Material.WATER_BUCKET) { // reset cauldron when refilling to prevent unlimited
-				// source of potions
-				if (cauldron.getFillLevel() != 0 && cauldron.getFillLevel() < 2) {
-					// will only remove when existing
-					BreweryCauldron.remove(cauldron);
-				}
-			} else if (Rarity.isValidIngredient(materialInHand)) { // Add ingredient
-				event.setCancelled(true);
-				BreweryMessage response = cauldron.addIngredient(materialInHand);
-				if (response.getResult()) {
-					removeItemFromPlayerHand(player);
-				} else {
-					Brewery.breweryDriver.msg(player, response.getMessage());
-				}
-			}
+				&& MashBucket.isMashBucket(item))
+		{
+			cauldron = new BreweryCauldron(clickedBlock, event.getItem());
+			Brewery.breweryDriver.msg(player, Brewery.getText("Fermentation_Start_Fermenting") + " " +  
+					event.getItem().getItemMeta().getDisplayName().toLowerCase());
 		}
 	}
-
-	private void handleDistiller(PlayerInteractEvent event, Player player) {
+	
+	private void handleWaterCauldron(PlayerInteractEvent event, Player player) {
 		Block clickedBlock = event.getClickedBlock();
+		BreweryCauldron cauldron = BreweryCauldron.get(clickedBlock);
 		Material materialInHand = event.getMaterial();
-
-		BreweryDistiller distiller = BreweryDistiller.get(clickedBlock);
-
-		// Cancel interaction if distilling
-		if (distiller != null && distiller.isDistilling()) {
+		
+		if (cauldron != null && materialInHand == Material.BUCKET)
+		{
 			event.setCancelled(true);
+			
+			ItemStack returnedItem = cauldron.getFermentedBucket();
+			player.getInventory().addItem(returnedItem);
+			removeItemFromPlayerHand(player);
+			Brewery.breweryDriver.msg(player, "You've cooked up a " + returnedItem.getItemMeta().getDisplayName().toLowerCase());
 			return;
 		}
-
-		if (BreweryDistiller.isValidFilter(materialInHand)) {
-			event.setCancelled(true);
-			if (distiller == null) {// New Distiller
-				distiller = new BreweryDistiller(clickedBlock);
-			}
-			if (distiller.addFilter(materialInHand)) {
-				removeItemFromPlayerHand(player);
-			}
-		} else if (materialInHand == Material.IRON_SHOVEL) { // Eject Filters
-			if (distiller != null) {
-				event.setCancelled(true);
-				distiller.ejectAllFilters();
-			}
-		} else if (materialInHand == Material.CLOCK) { // Start Distilling
-			event.setCancelled(true);
-			if (distiller != null) {
-				BreweryMessage breweryMessage = distiller.startDistilling(player);
-				Brewery.breweryDriver.msg(player, breweryMessage.getMessage());
-				if (breweryMessage.getResult()) {
-					clickedBlock.getWorld().playSound(clickedBlock.getLocation(), Sound.BLOCK_FIRE_AMBIENT, 2.0f, 1.0f);
-					BreweryDistiller.runningDistillers.put(distiller,
-							new BreweryDistiller.DistillerRunnable(BreweryDistiller.DEFAULT_CYCLE_LENGTH, distiller)
-									.runTaskTimer(Brewery.breweryDriver, 20, 20).getTaskId());
-				}
-			}
-		}
+		
 	}
 
 	private void handleBarrel(PlayerInteractEvent event, Player player) {
@@ -186,18 +126,42 @@ public class PlayerListener implements Listener {
 		// If actually a barrel open if it's an ax
 		if (barrel != null) {
 			event.setCancelled(true);
-			if (isAxe(event.getItem())) {
+			ItemStack item = event.getItem();
+			if (isAxe(item)) {
 				barrel.removeAndFinishBrewing(event.getClickedBlock(), player);
 			}
-		} else {
-			BarrelType type = BarrelLidItem.getBarrelType(event.getItem());
-			if (type != null) {
+			else if (item != null && item.getType() == Material.CLOCK)
+			{
+				Brewery.breweryDriver.msg(player, barrel.getAgeMessage());
+			}
+			else
+			{
+				Brewery.breweryDriver.msg(player, "You need an axe to open a Brewery barrel.");
+			}
+		} 
+		else 
+		{
+			if(event.getItem() == null)
+			{
+				// Just exit
+				return;
+			}
+			if(BreweryBarrel.isBarrelLid(event.getItem()) && BreweryBarrel.isValidAgingBarrel(player, event.getClickedBlock()))
+			{
+				BarrelType type = BarrelLidItem.getBarrelType(event.getItem());
+				if (type != null) {
+					event.setCancelled(true);
+					barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), type, 0);
+					event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f,
+							1.0f);
+					Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
+					removeItemFromPlayerHand(player);
+				}
+			}
+			else if (BreweryUtils.isAxe(event.getItem()))
+			{
 				event.setCancelled(true);
-				barrel = new BreweryBarrel((Barrel) event.getClickedBlock().getState(), type, 0);
-				event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1.0f,
-						1.0f);
-				Brewery.breweryDriver.msg(player, Brewery.getText("Barrel_Start_Aging"));
-				removeItemFromPlayerHand(player);
+				BreweryMashBarrel.getMashBucket(event.getClickedBlock(), player);
 			}
 		}
 	}
@@ -206,13 +170,13 @@ public class PlayerListener implements Listener {
 	 * HELPER METHODS
 	 *******************************/
 
-	private void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
-		if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {
-			event.getPlayer().getInventory().setItemInOffHand(new ItemStack(mat));
-		} else {
-			event.getPlayer().getInventory().setItemInMainHand(new ItemStack(mat));
-		}
-	}
+//	private void setItemInHand(PlayerInteractEvent event, Material mat, boolean swapped) {
+//		if ((event.getHand() == EquipmentSlot.OFF_HAND) != swapped) {
+//			event.getPlayer().getInventory().setItemInOffHand(new ItemStack(mat));
+//		} else {
+//			event.getPlayer().getInventory().setItemInMainHand(new ItemStack(mat));
+//		}
+//	}
 
 	/*******************************
 	 * PLAYER/DRUNKENESS INTERACTIONS
@@ -341,7 +305,6 @@ public class PlayerListener implements Listener {
 
 	private boolean checkCreative(Player player) {
 		if (player.getGameMode() == GameMode.CREATIVE && !Brewery.permitcreative) {
-			Brewery.breweryDriver.msg(player, Brewery.getText("Player_CreativeNotAllowed"));
 			return false;
 		} else {
 			return true;

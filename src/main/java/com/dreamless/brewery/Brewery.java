@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -34,20 +34,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+import com.dreamless.brewery.brew.BarrelLidItem;
 import com.dreamless.brewery.brew.BarrelType;
+import com.dreamless.brewery.brew.IngredientDatabase;
 import com.dreamless.brewery.data.DataSave;
-import com.dreamless.brewery.data.DatabaseCommunication;
 import com.dreamless.brewery.data.LanguageReader;
 import com.dreamless.brewery.entity.BreweryBarrel;
 import com.dreamless.brewery.entity.BreweryCauldron;
-import com.dreamless.brewery.entity.BreweryDistiller;
-import com.dreamless.brewery.item.BarrelLidItem;
 import com.dreamless.brewery.listeners.BlockListener;
 import com.dreamless.brewery.listeners.CauldronListener;
 import com.dreamless.brewery.listeners.CommandListener;
-import com.dreamless.brewery.listeners.EntityListener;
 import com.dreamless.brewery.listeners.InventoryListener;
-//import com.dreamless.brewery.listeners.InventoryListener;
 import com.dreamless.brewery.listeners.PlayerListener;
 import com.dreamless.brewery.listeners.WorldListener;
 import com.dreamless.brewery.player.BPlayer;
@@ -151,7 +148,6 @@ public class Brewery extends JavaPlugin {
 
 		breweryDriver.getServer().getPluginManager().registerEvents(new BlockListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new PlayerListener(), breweryDriver);
-		breweryDriver.getServer().getPluginManager().registerEvents(new EntityListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new InventoryListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new WorldListener(), breweryDriver);
 		breweryDriver.getServer().getPluginManager().registerEvents(new CauldronListener(), breweryDriver);
@@ -159,9 +155,6 @@ public class Brewery extends JavaPlugin {
 		// Heartbeat
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new BreweryRunnable(), 650, 1200);
 		breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new DrunkRunnable(), 120, 120);
-		//if(!development) {
-			breweryDriver.getServer().getScheduler().runTaskTimer(breweryDriver, new RecipeRunnable(), 650, 216000);//3 hours = 216000	
-		//}
 		
 		BarrelLidItem.registerRecipes();
 		
@@ -317,7 +310,7 @@ public class Brewery extends JavaPlugin {
 		
 		//difficulty settings
 		BreweryBarrel.minutesPerYear = currentConfig.getDouble("minutesPerYear", 10.0);
-		BreweryDistiller.DEFAULT_CYCLE_LENGTH = currentConfig.getInt("distillcycle", 40);
+		BreweryCauldron.totalCookTime = currentConfig.getInt("cookTime", 15);
 		
 		//Effects
 		effectLevel = currentConfig.getDouble("effectLevel", 0.35);
@@ -340,6 +333,7 @@ public class Brewery extends JavaPlugin {
 		/*** words.yml ***/
 		currentFile = new File(breweryDriver.getDataFolder(), "words.yml");
 		if(!currentFile.exists()) {
+			errorLog("Unable to get words.yaml file. Disabling Brewery!");
 			return false;
 		}
 		currentConfig = YamlConfiguration.loadConfiguration(currentFile);
@@ -356,6 +350,23 @@ public class Brewery extends JavaPlugin {
 		Words.log = currentConfig.getBoolean("logRealChat", false);
 		Words.doSigns = currentConfig.getBoolean("distortSignText", false);
 		
+		/*** ingredients.csv ***/
+		currentFile = new File(breweryDriver.getDataFolder(), "ingredients.csv");
+		if(!currentFile.exists()) {
+			errorLog("Unable to get ingredients.csv file. Disabling Brewery!");
+			return false;
+		}
+		try {
+			if(!IngredientDatabase.readConfig(currentFile.getCanonicalPath()))
+			{
+				errorLog("Unable to parse ingredients.csv file. Disabling Brewery!");
+				return false;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
 
 		return true;
 		
@@ -619,10 +630,4 @@ public class Brewery extends JavaPlugin {
 
 	}
 	
-	public class RecipeRunnable implements Runnable {
-		@Override
-		public void run() {
-			DatabaseCommunication.periodicPurge();
-		}
-	}
 }

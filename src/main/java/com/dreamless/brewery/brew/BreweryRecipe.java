@@ -19,29 +19,34 @@ private static final int WRAP_SIZE = 30;
 	private final String name;
 	private final String inventorText;
     private ArrayList<String> flavorText = new ArrayList<String>();
-    
-    
+
     public BreweryRecipe(String name, String inventorUUID, String flavorText) {
 		this.name = name;
-		inventorText = "First invented by " + (inventorUUID.isEmpty() ? "an unknown brewer" : getInventorName(inventorUUID));
-		this.flavorText.add(flavorText);
+		inventorText = "Crafted by " + (inventorUUID.isEmpty() ? "an unknown brewer" : getInventorName(inventorUUID));
+		this.flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(flavorText, WRAP_SIZE)));
 	}
     
-    public BreweryRecipe() {
-    	this.name = BreweryRecipe.generateNewRecipeName(); 
-		inventorText = "First invented by an unknown brewer";
+    public BreweryRecipe(String inventorUUID) {
+    	this.name = BreweryRecipe.generateNewRecipeName(inventorUUID); 
+		inventorText = "Crafted by " + (inventorUUID.isEmpty() ? "an unknown brewer" : getInventorName(inventorUUID));
 		flavorText.addAll(Arrays.asList(ChatPaginator.wordWrap(ChatColor.GRAY +  Brewery.getText("Recipe_New_Flavortext"), WRAP_SIZE)));	
     }
 	
-	private static String generateNewRecipeName() {
-		return "Novel Brew #" + DatabaseCommunication.getRecipeCount();
+	private static String generateNewRecipeName(String inventorUUID) {
+		if(inventorUUID != null) {
+			return getInventorName(inventorUUID) + "'s Novel Brew #" + DatabaseCommunication.getRecipeCount();
+		}
+		else
+		{
+			return "Novel Brew #" + DatabaseCommunication.getRecipeCount();
+		}
 	}
 
 	public String getName() {
 		return name;
 	}
 	
-	private String getInventorName(String inventorUUID) {
+	private static String getInventorName(String inventorUUID) {
 		String inventorName = "an unknown brewer";
 		if(inventorUUID != null) {
 			Player inventor = Bukkit.getOfflinePlayer(UUID.fromString(inventorUUID)).getPlayer();

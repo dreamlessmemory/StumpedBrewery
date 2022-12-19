@@ -9,5 +9,4 @@ public final class DatabaseConstants {
 	public static final String FLAVORTEXT_STRING = "flavortext";
 	public static final String CLAIMANT_STRING = "inventor";
 	
-	
 }

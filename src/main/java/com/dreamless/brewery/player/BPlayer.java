@@ -1,8 +1,5 @@
 package com.dreamless.brewery.player;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,14 +29,14 @@ import de.tr7zw.changeme.nbtapi.NBTCompound;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 
 public class BPlayer {
+
+	public static int drinkRestoration = 3;
+
 	private static Map<String, BPlayer> players = new HashMap<String, BPlayer>();// Players name/uuid and BPlayer
 	private static Map<Player, MutableInt> pTasks = new HashMap<Player, MutableInt>();// Player and count
 	private static int taskId;
 	private static boolean modAge = true;
 	private static Random pukeRand;
-	private static Method gh;
-	private static Field age;
-
 	// Settings
 	public static Map<Material, Integer> drainItems = new HashMap<Material, Integer>();// DrainItem Material and Strength
 	public static Material pukeItem;
@@ -56,7 +53,7 @@ public class BPlayer {
 	private int offlineDrunk = 0;// drunkeness when gone offline
 	private Vector push = new Vector(0, 0, 0);
 	private int time = 20;
-	private boolean drunkEffects = false;
+	private boolean drunkEffects = true;
 
 	public BPlayer() {
 	}
@@ -146,7 +143,7 @@ public class BPlayer {
 		for (Map.Entry<String, BPlayer> entry : players.entrySet()) {
 			if (entry.getValue() == this) {
 				players.remove(entry.getKey());
-				
+
 				//SQL
 				String query = "INSERT INTO " + Brewery.getDatabase("players") + "players (uuid, drunkeness, offlinedrunk) VALUES (?, 0, 0) ON DUPLICATE KEY UPDATE quality=0, drunkeness=0, offlinedrunk=0";
 				try(PreparedStatement stmt = Brewery.connection.prepareStatement(query)){
@@ -173,30 +170,41 @@ public class BPlayer {
 			stmt.setString(1, player.getUniqueId().toString());
 			//Brewery.breweryDriver.debugLog(stmt.toString());
 			ResultSet results = stmt.executeQuery();
-			if(!results.next()) {
-				return; //Get out, by default people don't want to be drunk
-			} else {
+			if(results.next()) {
 				if(!results.getBoolean("drunkeffects")) {
 					return;//Player does not want to be drunk
 				}
-				//Player Management
-				BPlayer bPlayer = get(player);
-				if (bPlayer == null) {
-					bPlayer = addPlayer(player);
-				}
-				
-				NBTItem nbti = new NBTItem(item);
-				NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
-				bPlayer.drunkeness += Math.min(30, brewery.getInteger(NBTConstants.EFFECT_SCORE_TAG_STRING) * 3);
-				bPlayer.drunkEffects = true;
-				
-				if(bPlayer.drunkeness > 100) {
-					bPlayer.drinkCap(player);
-				}
+			}
+
+			NBTItem nbti = new NBTItem(item);
+			NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
+			if(!brewery.hasKey(NBTConstants.ALCOHOL_LEVEL_TAG_STRING))
+			{
+				return;// Non-alcoholic
+			}
+
+			//Player Management
+			BPlayer bPlayer = get(player);
+			if (bPlayer == null) {
+				bPlayer = addPlayer(player);
+			}
+
+			bPlayer.drunkeness += brewery.getInteger(NBTConstants.ALCOHOL_LEVEL_TAG_STRING);
+			bPlayer.drunkEffects = true;
+
+			if(bPlayer.drunkeness > 100) {
+				bPlayer.drinkCap(player);
 			}
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
+
+		// Refill player hunger
+		int foodLevel = player.getFoodLevel() + drinkRestoration; 
+		player.setFoodLevel(Math.min(foodLevel, 20));
+
+		float saturationLevel = player.getSaturation() + drinkRestoration;
+		player.setSaturation(Math.min(saturationLevel, 20));
 	}
 
 	// Player has drunken too much
@@ -453,38 +461,20 @@ public class BPlayer {
 		Item item = player.getWorld().dropItem(loc, new ItemStack(pukeItem));
 		item.setVelocity(direction);
 		item.setPickupDelay(32767); // Item can never be picked up when pickup delay is 32767
-		//item.setTicksLived(6000 - pukeDespawntime); // Well this does not work...
 		if (modAge) {
-			if (pukeDespawntime >= 5800) {
-				return;
-			}
-			try {
-				if (gh == null) {
-					gh = Class.forName(Brewery.breweryDriver.getServer().getClass().getPackage().getName() + ".entity.CraftItem").getMethod("getHandle", (Class<?>[]) null);
-				}
-				Object entityItem = gh.invoke(item, (Object[]) null);
-				if (age == null) {
-					age = entityItem.getClass().getDeclaredField("age");
-					age.setAccessible(true);
-				}
 
-				// Setting the age determines when an item is despawned. At age 6000 it is removed.
-				if (pukeDespawntime <= 0) {
-					// Just show the item for a tick
-					age.setInt(entityItem, 5999);
-				} else if (pukeDespawntime <= 120) {
-					// it should despawn in less than 6 sec. Add up to half of that randomly
-					age.setInt(entityItem, 6000 - pukeDespawntime + pukeRand.nextInt((int) (pukeDespawntime / 2F)));
-				} else {
-					// Add up to 5 sec randomly
-					age.setInt(entityItem, 6000 - pukeDespawntime + pukeRand.nextInt(100));
-				}
-				return;
-			} catch (InvocationTargetException | ClassNotFoundException | NoSuchFieldException | IllegalAccessException | NoSuchMethodException e) {
-				e.printStackTrace();
+			// Setting the age determines when an item is despawned. At age 6000 it is removed.
+			if (pukeDespawntime <= 0) {
+				// Just show the item for a tick
+				item.setTicksLived(5999);
+			} else if (pukeDespawntime <= 120) {
+				// it should despawn in less than 6 sec. Add up to half of that randomly
+				item.setTicksLived(6000 - pukeDespawntime + pukeRand.nextInt((int) (pukeDespawntime / 2F)));
+			} else {
+				// Add up to 5 sec randomly
+				item.setTicksLived(6000 - pukeDespawntime + pukeRand.nextInt(100));
 			}
-			modAge = false;
-			Brewery.breweryDriver.errorLog("Failed to set Despawn Time on item " + pukeItem.name());
+			//Brewery.breweryDriver.errorLog("Failed to set Despawn Time on item " + pukeItem.name());
 		}
 	}
 
