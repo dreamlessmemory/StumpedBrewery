@@ -1,0 +1,85 @@
+# config for Brewery.jar
+
+
+# -- Settings --
+# Defaults are written in []
+# Deleting of single settings disables them
+
+#SQL settings
+username: 
+password: 
+url: 
+database: 
+prefix: brewery_
+testprefix: brewery_test_
+
+# If the player wakes up at /home when logging in after excessive drinking (/home plugin must be installed!) [true]
+enableHome: true
+
+# Type of the home-teleport: ['cmd: home']
+# bed = Player will be teleported to his spawn bed
+# 'cmd: home' = /home will be executed by the player. He has to have permissions for it without any delay!
+# 'cmd: spawn' = /spawn will be executed by the player.
+# 'cmd: whatever' = /whatever will be executed by the player.
+homeType: 'cmd: home'
+
+# If the player "wakes up" at a random place when offline for some time while drinking (the places have to be defined with '/brew Wakeup add' through an admin)
+# The Player wakes at the nearest of two random places of his world [true]
+enableWake: true
+
+# If the Player may have to try multiple times when logging in while extremely drunk [true]
+enableLoginDisallow: false
+
+# If the Player faints shortly (gets kicked from the server) if he drinks the max amount of alcohol possible [false]
+enableKickOnOverdrink: false
+
+# If the Player vomits on high drunkeness (drops item defined below) [true]
+# The item can not be collected and stays on the ground until it despawns.
+enablePuke: true
+
+# Item that is dropped multiple times uncollectable when puking [SOUL_SAND]
+pukeItem: SOUL_SAND
+
+# Time in seconds until the pukeitems despawn, (mc default is 300 = 5 min) [60]
+# If the item despawn time was changed in the spigot.yml, the pukeDespawntime changes as well.
+pukeDespawntime: 15
+
+# Turn on for debug logs
+debug: false
+
+# Allow use of Brewery in creative
+permitcreative: false
+
+# Turn on to enable saving/loading
+development: false
+loadbarrels: true
+loadwakeup: true
+loadplayers: true
+newrecipes: true
+
+#how often effects play
+effectsLevel: 0.35
+
+# Time (in days) that drunkeness-data stays in memory after a player goes offline, to apply hangover etc. [7]
+hangoverDays: 7
+
+# Color the Item information (lore) depending on quality while it is 1. in a barrel and/or 2. in a brewing stand [true, true]
+colorInBarrels: true
+colorInBrewer: true
+
+# If a Large Barrel can be opened by clicking on any of its blocks, not just Spigot or Sign. This is always true for Small Barrels. [true]
+openLargeBarrelEverywhere: true
+
+# Autosave interval in minutes [3]
+autosave: 3
+
+# Consumable Item/strength. Decreases the alcohol level by <strength> when consumed. (list)
+
+drainItems:
+- BREAD/40
+- MILK_BUCKET/20
+- HONEY_BOTTLE/20
+
+# Difficulty Settings
+minutesPerYear: 3
+cookTime: 15

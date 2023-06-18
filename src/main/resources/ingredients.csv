@@ -1,0 +1,89 @@
+#Material,Non Alcoholic Drink Name,Alcoholic Drink Name,PotionEffect,Flavor,Rariry,Red,Green,Blue
+ACACIA_LEAVES,Acacia Tea,Acacia Kombucha,REGENERATION,tangy and fresh,RARE,176,191,134
+ACACIA_SAPLING,Acacia Tisane,Acacia Cocktail,DAMAGE_RESISTANCE,tangy and woody,COMMON,161,65,10
+ALLIUM,Allium Tea,Allium Cocktail,FIRE_RESISTANCE,garlic,COMMON,216,128,232
+APPLE,Apple Juice,Apple Cider,REGENERATION,sweet and crisp,COMMON,216,66,34
+AZURE_BLUET,Azure Tea,Azure Cocktail,NIGHT_VISION,astringent and floral,RARE,177,175,201
+BEETROOT,Beet Juice,Beet Wine,SPEED,earthy and sweet,COMMON,164,30,30
+BIRCH_LEAVES,Birch Tea,Birch Komucha,SPEED,spicy and fresh,RARE,128,167,85
+BIRCH_SAPLING,Birch Tisane,Birch Cocktail,REGENERATION,spicy and woody,COMMON,199,184,135
+BLAZE_POWDER,Blaze Tincture,Blaze Cockatil,INCREASE_DAMAGE,spicy,RARE,255,213,0
+BLUE_ORCHID,Orchid Tea,Orchid Tea,HEAL,fresh and floral,RARE,82,96,209
+BONE,Bone Broth,Bone Broth,DAMAGE_RESISTANCE,umami,COMMON,255,248,227
+BROWN_MUSHROOM,Mushroom Broth,Mushroom Cocktail,INVISIBILITY,earthy and umami,COMMON,119,74,63
+CACTUS,Cactus Juice,Cactus Wine,FIRE_RESISTANCE,sharp,RARE,91,113,68
+CARROTS,Carrot Juice,Carrot Wine,NIGHT_VISION,sweet and woody,COMMON,255,145,0
+CHORUS_FLOWER,Chorus Tea,Chorus Liqour,JUMP,citrus and floral,COMMON,151,131,163
+CHORUS_FRUIT,Chorus Juice,Chorus Wine,INVISIBILITY,citrus,COMMON,151,131,163
+COCOA_BEANS,Hot Chocolate,Chocolate Liquor,HEALTH_BOOST,chocolate,RARE,79,29,0
+DANDELION,Dandelion Tea,Dandelion Tea,HERO_OF_THE_VILLAGE,herbacious and floral,COMMON,255,235,120
+DARK_OAK_LEAVES,Dark Oak Tea,Hard Dark Oak Tea,DAMAGE_RESISTANCE,toasted vanilla and fresh,COMMON,34,97,30
+DARK_OAK_SAPLING,Dark Oak Tisane,Dark Oak Cocktail,DAMAGE_RESISTANCE,toasted vanilla and woody,COMMON,56,34,22
+DIAMOND,Diamond Mineral Water,Diamond Tonic,DAMAGE_RESISTANCE,sparkling,RARE,237,249,250
+DRAGON'S_BREATH,Draconic Potion,Draconic Elixir,FAST_DIGGING,spicy and smokey,RARE,234,0,255
+EGG,Eggnog,Hard Eggnog,JUMP,rich,COMMON,239,227,183
+EMERALD,Emerald Mineral Water,Emerald Tonic,HEAL,soft,COMMON,49,142,46
+ENDER_PEARL,Endwater,Endspirit,INVISIBILITY,milky,RARE,71,255,234
+EYE_OF_ENDER,Endsight Potion,Endsight Draught,JUMP,spicy and milky,COMMON,71,255,142
+FERMENTED_SPIDER_EYE,Spider Draught,Spider Draught,INCREASE_DAMAGE,pungent ,RARE,209,0,45
+FERN,Fern Tea,Fern Cocktail,DAMAGE_RESISTANCE,herbacious,RARE,4,99,17
+GHAST_TEAR,Ghast Tincture,Ghast Cocktail,REGENERATION,salty,RARE,229,241,232
+GLISTERING_MELON,Glisterning Potion,Glistering Draught,HEAL,sweet and spicy,RARE,245,141,130
+GLOWSTONE_DUST,Glowstone Tincture,Glowstone Draught,HEAL,tart and sour,COMMON,252,229,73
+GOLD_NUGGET,Golden Mineral Water,Golden Draught,HEALTH_BOOST,metallic and rich,COMMON,204,156,0
+GOLDEN_APPLE,Golden Apple Juice,Golden Cider,HERO_OF_THE_VILLAGE,metallic and crisp,RARE,255,224,44
+GOLDEN_CARROT,Golden Carrot Juice,Golden Carrot Wine,NIGHT_VISION,sweet and rich,RARE,255,192,44
+GRASS,Sweet Sorghum,Absinthe,NIGHT_VISION,grassy,COMMON,115,171,106
+GUNPOWDER,Gunpowder Tincture,Gunpowder Cocktail,BAD_OMEN,smokey and chalky,COMMON,131,131,131
+HONEY,Honey Drops,Mead,JUMP,sweet and smokey,COMMON,216,179,53
+IRON_NUGGET,Iron Mineral Water,Iron Draught,INCREASE_DAMAGE,metallic,COMMON,110,107,99
+JUNGLE_LEAVES,Jungle Tea,Jungle Kombucha,INCREASE_DAMAGE,nutty and fresh,RARE,14,150,16
+JUNGLE_SAPLING,Jungle Tisane,Jungle Cocktail,INCREASE_DAMAGE,nutty and woody,COMMON,133,97,65
+KELP,Kelp Broth,Kelp Spirits,WATER_BREATHING,fishy and salty,COMMON,30,51,37
+LAPIS_LAZULI,Lapis Mineral Water,Lapis Draught,INVISIBILITY,vibrant,RARE,72,60,232
+LILAC,Liliac Tea,Liliac Kombucha,WATER_BREATHING,delicate and floral,RARE,212,186,249
+LILY_PAD,Lily Tea,Lily Kombucha,WATER_BREATHING,grassy and crisp,COMMON,14,150,16
+MAGMA_CREAM,Cream of Magma,Magma Draught,FIRE_RESISTANCE,spicy and rich,RARE,250,80,50
+MELON,Melon Juice,Melon Cocktail,HEAL,sweet and cool,COMMON,206,73,80
+MILK_BUCKET,Dairy Cream,Arkhi,WATER_BREATHING,creamy,COMMON,245,243,230
+NETHER_WART,Nether Broth,Nether Cocktail,WATER_BREATHING,bitter,COMMON,191,0,26
+OAK_LEAVES,Oak Tea,Oak Kombucha,SPEED,vanilla and fresh,COMMON,34,97,30
+OAK_SAPLING,Oak Tisane,Oak Cocktail,HEAL,vanilla and woody,COMMON,186,155,87
+ORANGE_TULIP,Orange Tulip Tea,Orange Tulip Cocktail,HEALTH_BOOST,tobacco and floral,RARE,241,128,60
+OXEYE_DAISY,Daisy Tea,Daisy Cocktail,INVISIBILITY,peppery and floral,COMMON,255,254,235
+PEONY,Peony Tea,Peony Cocktail,DAMAGE_RESISTANCE,sweet and floral,RARE,255,216,241
+PINK_TULIP,Pink Tulip Tea,Pink Tulip Cocktail,FAST_DIGGING,cloying and floral,COMMON,255,173,226
+POISONOUS_POTATO,Potato Mash,Whisky,BAD_OMEN,bitter and sickly,COMMON,214,255,8
+POPPED_CHORUS_FRUIT,Light Chorus Juice,Chorus Cocktail,JUMP,chalky,COMMON,251,212,255
+POPPY,Poppy Tea,Poppy Kombucha,INCREASE_DAMAGE,nutty and floral,COMMON,204,9,6
+POTATO,Potato Stew,Vodka,HEALTH_BOOST,starchy,COMMON,161,146,76
+PRISMARINE_CRYSTAL,Light Prismarine Tonic,Light Prismarine Tincture,CONDUIT_POWER,fishy and sparkling,RARE,167,250,220
+PRISMARINE_SHARD,Dark Prismarine Tonic,Dark Prismarine Tincture,DOLPHINS_GRACE,fishy and sharp,RARE,101,207,168
+PUMPKIN,Pumpkin Juice,Pumpkin Cider,NIGHT_VISION,sweet and nutty,COMMON,238,114,38
+PUMPKIN_SEED,Pumpkin Tea,Pumpkin Kobucha,SPEED,salty and nutty,RARE,255,227,166
+PUFFERFISH,Pufferfish Soup,Pufferfish Srew,BAD_OMEN,tingly and fresh,RARE,247,230,230
+QUARTZ,Quartz Mineral Water,Quartz Tincture,HEALTH_BOOST,milky and sharp,COMMON,245,241,239
+RABBIT_FOOT,Rabbit Broth,Rabbit Stew,JUMP,gamey,RARE,194,124,109
+RAW_CHICKEN,Chicken Broth,Chicken Stew,JUMP,cool and meaty,COMMON,194,124,109
+RAW_COD,Cod Broth,Code Stew,WATER_BREATHING,milky and sweet,COMMON,255,238,222
+RAW_SALMON,Salmon Broth,Salmon Stew,DOLPHINS_GRACE,buttery and robust,COMMON,255,130,92
+RAW_TROPICAL_FISH,Tropical Fish Broth,Tropical Fish Stew,CONDUIT_POWER,fishy,COMMON,0,17,255
+RAW_PORKCHOP,Pork Broth,Pork Stew,INCREASE_DAMAGE,gamey and umami,COMMON,194,124,109
+RED_MUSHROOM,Dark Mushroom Broth,Dark Mushroom Stew,REGENERATION,bitter and umami,COMMON,163,0,0
+RED_TULIP,Red Tulip Tea,Red Tulip Kombucha,HEAL,spicy and floral,RARE,243,82,45
+REDSTONE,Energy Drink,Hard Energy Drink,DAMAGE_RESISTANCE,metallic and sharp,COMMON,255,48,0
+ROSE_BUSH,Rose Tea,Rose Cocktail,HEAL,fruity and floral,COMMON,199,41,4
+ROTTEN_FLESH,Zombie Broth,Zombie Cocktail,BAD_OMEN,rancid,COMMON,115,113,55
+SLIME_BALL,Slime Tincture,Slime Cocktail,DAMAGE_RESISTANCE,gooey,COMMON,134,243,45
+SNOW_BALL,Cold Tonic,Snowy Cocktail,FIRE_RESISTANCE,frosty,COMMON,216,239,240
+SPIDER_EYE,Spider Broth,Spider Cocktail,INCREASE_DAMAGE,salty and umami,COMMON,84,14,39
+SPRUCE_LEAVES,Spruce Tea,Spruce Kombucha,INCREASE_DAMAGE,citrus and fresh,COMMON,31,68,12
+SPRUCE_SAPLING,Spruce Tisane,Spruce Cocktail,INCREASE_DAMAGE,citrus and woody,COMMON,97,153,97
+SUGAR,Soda,Hard Soda,SPEED,sweet,COMMON,245,243,232
+SUGARCANE,Molassass,Rum,SPEED,sweet and grassy,COMMON,236,255,204
+SUNFLOWER,Sunflower Tea,Sunflower Cocktail,FAST_DIGGING,bright and floral,COMMON,247,223,31
+SEAGRASS,Steam Malt,Steam Beer,CONDUIT_POWER,fishy and grassy,COMMON,20,128,63
+VINES,Stewed Greens,Green Draguht,NIGHT_VISION,herbacious and crisp,COMMON,0,196,78
+WHEAT,Wheat Malt,Beer,INCREASE_DAMAGE,malty,COMMON,252,226,76
+WHITE_TULIP,White Tulip Tea,White Tulip Kombucha,INCREASE_DAMAGE,cool and floral,RARE,255,253,245
+WITHER_ROSE,Wither Tea,Wither Draught,BAD_OMEN,ashy,RARE,67,14,0

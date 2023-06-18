@@ -1,0 +1,136 @@
+# Brew
+Brew_-times: -times
+Brew_BadPotion: Ruined Potion
+Brew_BarrelRiped: Barrel aged
+Brew_DistillUndefined: Indefinable Distillate
+Brew_Distilled: Distilled
+Brew_HundredsOfYears: Hundreds of Years
+Brew_Ingredients: Ingredients
+Brew_MinutePluralPostfix: s
+Brew_OneYear: One Year
+Brew_ThickBrew: Muddy Brew
+Brew_Undefined: Indefinable Brew
+Brew_UnfinishedPotion: Fermented Brew
+Brew_DistilledPotion: Distilled Brew
+Brew_Woodtype: Woodtype
+Brew_Years: Years
+Brew_fermented: fermented
+Brew_minute: minute
+
+#Fermentation
+Fermentation_No_Ingredients: No items were acceptable ingredients!
+Fermentation_No_Heat: There is no heat source.
+Fermentation_No_Space_Above: The space above the cauldron is not clear.
+Fermentation_Start_Fermenting: The cauldron begins to ferment a 
+Fermentation_No_Cauldron: There is no cauldron at here.
+Fermentation_Not_Valid: This is not a valid ingredient.
+Fermentation_No_Space: The cauldron is too full of ingredients.
+
+
+#Aging
+Barrel_Empty: This barrel is empty.
+Barrel_Start_Aging: The barrel has been sealed.
+Barrel_Finish_Aging: The barrel has been unsealed.
+Barrel_Oak_Lid: A barrel lid made from oak wood. Brews aged in an oak barrel age quickly but are very mild.
+Barrel_Dark_Oak_Lid: A barrel lid made from dark oak wood. Brews aged in a dark oak barrel strike a good balance between the flavor's strength and how long it lingers.
+Barrel_Birch_Lid: A barrel lid made from birch wood. Brews aged in a birch barrel have a lighter taste that lingers a bit longer.
+Barrel_Spruce_Lid: A barrel lid made from spruce wood. Brews aged in a spruce barrel have a stronger flavour that diminishes quickly.
+Barrel_Jungle_Lid: A barrel lid made from jungle wood. Brews aged in an jungle wood barrel have a powerful taste but dissipates very quickly.
+Barrel_Acacia_Lid: A barrel lid made from acacia wood. Brews aged in an acacia barrel have a very delicate flavour that lasts quite a while.
+
+#Distilling
+Distiller_No_Filters: No appropriate filters were loaded.
+Distiller_Remove_Brews: Finished brews need to be removed before stilling a new batch.
+Distiller_No_Brews: There are no brews to distill.
+Distiller_Started: Distilling started
+
+#Recipies
+Recipe_New_Recipe: You have developed a new drink!
+Recipe_New_Flavortext: A novel drink.
+
+
+
+# CMD
+CMD_CopyNotPersistent: '&eThese copies of this Brew will not be persistent or static!'
+CMD_Copy_Error: '&6&v1 &cPotions did not fit into your inventory'
+CMD_Info_Drunk: '&v1 is &6&v2% &fdrunk'
+CMD_Info_NotDrunk: '&v1 is not drunk'
+CMD_NonStatic: '&ePotion is not static anymore and will normally age in barrels.'
+CMD_PersistRemove: '&cPersistent Brews cannot be removed from the Database. It would render any copies of them useless!'
+CMD_Persistent: '&aPotion is now Persistent and Static and may now be copied like any other item. You can remove the persistence with the same command.'
+CMD_Player: '&a&v1 is now &6&v2% &adrunk'
+CMD_Player_Error: '&cThe quality has to be between 1 and 10!'
+CMD_Reload: '&aConfig was successfully reloaded'
+CMD_Static: '&aPotion is now static and will not change in barrels or brewing stands.'
+CMD_UnLabel: '&aLabel removed!'
+CMD_UnPersist: '&aPersistence and static Removed. &eEvery Potential copy NOT made with ''/brew copy'' could become useless now!'
+
+# Error
+Error_ConfigUpdate: 'Unknown Brewery config version: v&v1, config was not updated!'
+Error_ItemNotPotion: '&cThe item in your hand could not be identified as a potion!'
+Error_ItemNotBreweryPotion: '&cThe item in your hand could not be identified as a brewery item!'
+Error_NoBarrelAccess: '&cYou don''t have permissions to access this barrel!'
+Error_NoBrewName: '&cNo Recipe with Name: ''&v1&c'' found!'
+Error_NoPermissions: '&cYou don''t have permissions to do this!'
+Error_PersistStatic: '&cPersistent potions are always static!'
+Error_PlayerCommand: '&cThis command can only be executed as a player!'
+Error_Recipeload: '&cNot all recipes could be restored: More information in the server log!'
+Error_ShowHelp: Use &6/brew help &fto display the help
+Error_UnknownCommand: Unknown Command
+
+# Etc
+Etc_Barrel: Barrel
+Etc_Page: Page
+Etc_Usage: 'Usage:'
+
+# Help
+Help_Copy: '&6/brew copy [Quantity]&9 Copies the potion in your hand'
+Help_Create: '&6/brew create <Recipe> [Player] &9Create a Brew'
+Help_Delete: '&6/brew delete &9Deletes the potion in your hand'
+Help_Help: '&6/brew help [Page] &9Shows a specific help-page'
+Help_Info: '&6/brew info&9 Displays your current Drunkeness'
+Help_InfoOther: '&6/brew info [Player]&9 Displays the current Drunkenessof [Player]'
+Help_Persist: '&6/brew persist &9Make Brew persistent -> copyable by any plugin and technique'
+Help_Player: '&6/brew <Player> <%Drunkeness>&9 Sets Drunkeness of a Player'
+Help_Reload: '&6/brew reload &9Reload config'
+Help_Static: '&6/brew static &9Make Brew static -> No further ageing or distilling'
+Help_UnLabel: '&6/brew unlabel &9Removes the detailled label of a potion'
+Help_Wakeup: '&6/brew wakeup list <Page>&9 Lists all wakeup points'
+Help_WakeupAdd: '&6/brew wakeup add &9Adds a wakeup point at your current position'
+Help_WakeupCheck: '&6/brew wakeup check &9Teleports to all wakeup points'
+Help_WakeupCheckSpecific: '&6/brew wakeup check <id> &9Teleports to the wakeup point with <id>'
+Help_WakeupList: '&6/brew wakeup list <Page> [World]&9 Lists all wakeup points of <world>'
+Help_WakeupRemove: '&6/brew wakeup remove <id> &9Removes the wakeup point with <id>'
+
+# Perms
+Perms_NoBarrelCreate: '&cYou don''t have permissions to create barrels!'
+Perms_NoBigBarrelCreate: '&cYou don''t have permissions to create big barrels!'
+Perms_NoCauldronFill: '&cYou don''t have permissions to fill bottles from this cauldron!'
+Perms_NoCauldronInsert: '&cYou don''t have permissions to put ingredients into cauldrons!'
+Perms_NoSmallBarrelCreate: '&cYou don''t have permissions to create small barrels!'
+
+# Player
+Player_BarrelCreated: Barrel created
+Player_CantDrink: You can't drink any more.
+Player_CauldronContents: 'This cauldron contains... &v1'
+Player_CauldronInfo2: 'This cauldron has been boiling for &v1 minutes.'
+Player_CauldronInfo1: 'This cauldron has been boiling for 1 minute.'
+Player_CauldronInfo0: 'This cauldron has just started boiling.'
+Player_DrunkPassOut: You drank too much and passed out.
+Player_LoginDeny: Your character tries to log in, but is too drunk to find the server. Try again!
+Player_LoginDenyLong: Your character is really drunk and has passed out. Try again in 10 minutes!
+Player_TriedToSay: '&v1 tried to say: &0&v2'
+Player_Wake: Ohh no! I cannot remember how I got here...
+Player_WakeAlreadyDeleted: '&cThe Wakeup Point with the id: &6&v1 &chas already been deleted!'
+Player_WakeCancel: '&6Wakeup Point Check was cancelled'
+Player_WakeCreated: '&aWakeup Point with id: &6&v1 &awas created successfully!'
+Player_WakeDeleted: '&aThe Wakeup Point with the id: &6&v1 &awas successfully deleted!'
+Player_WakeFilled: '&cThe Wakeup Point with the id: &6&v1&c at position &6&v2 &v3, &v4, &v5&c is filled with Blocks!'
+Player_WakeHint1: 'To Next Wakeup Point: Punch your fist in the air'
+Player_WakeHint2: 'To Cancel: &9/br wakeup cancel'
+Player_WakeLast: '&aThis was the last Wakeup Point'
+Player_WakeNoCheck: '&cNo Wakeup Point Check is currently active'
+Player_WakeNoPoints: '&cThere are no Wakeup Points!'
+Player_WakeNotExist: '&cThe Wakeup Point with the id: &6&v1 &cdoesn''t exist!'
+Player_WakeTeleport: 'Teleport to Wakeup Point with the id: &6&v1&f At position: &6&v2 &v3, &v4, &v5'
+Player_CreativeNotAllowed: Brewery cannot be used in Creative Mode
