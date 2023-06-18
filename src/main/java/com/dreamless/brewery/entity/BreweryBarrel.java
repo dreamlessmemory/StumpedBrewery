@@ -24,8 +24,8 @@ import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.brew.MashBucket;
 import com.dreamless.brewery.data.MessageConstants;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
+import me.filoghost.holographicdisplays.api.hologram.Hologram;
 
 public class BreweryBarrel {
 
@@ -280,16 +280,16 @@ public class BreweryBarrel {
 		above.setX(above.getX() + 0.5);
 		above.setY(above.getY() + 1.0);
 		above.setZ(above.getZ() + 0.5);
-		hologram = HologramsAPI.createHologram(Brewery.breweryDriver, above);
+		hologram = HolographicDisplaysAPI.get(Brewery.breweryDriver).createHologram(above);
 	}
 
 	private void updateHologram() {
 		if(hologram != null)
 		{
 			int tempYear = (int)(time/minutesPerYear);		
-			hologram.clearLines();
-			hologram.appendTextLine(type.toString() + " barrel");
-			hologram.appendTextLine("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
+			hologram.getLines().clear();
+			hologram.getLines().appendText(type.toString() + " barrel");
+			hologram.getLines().appendText("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
 		}
 	}
 }

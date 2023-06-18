@@ -10,37 +10,18 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.compiler.release>17</maven.compiler.release>
 	</properties>
 	<build>
-		<!--surceDirectory>src</sourceDirectory -->
-		<resources>
-			<!-- Static resources -->
-			<resource>
-				<filtering>true</filtering>
-				<directory>${project.basedir}/resources</directory>
-				<includes>
-					<include>**/*.yml</include>
-				</includes>
-				<excludes>
-					<exclude>target/**</exclude>
-					<exclude>.travis.yml</exclude>
-				</excludes>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.0</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>shade</id>
@@ -64,23 +45,8 @@
 	</build>
 	<repositories>
 		<repository>
-			<id>md_5-public</id>
-			<url>http://repo.md-5.net/content/groups/public/</url>
-		</repository>
-		<repository>
 			<id>spigot-repo</id>
-			<url>
-				http://repo.mvdw-software.be/content/groups/public/
-				<!--https://hub.spigotmc.org/nexus/content/groups/public/-->
-			</url>
-		</repository>
-		<repository>
-			<id>spigot-repo-snapshots</id>
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-		</repository>
-		<repository>
-			<id>vault-repo</id>
-			<url>http://nexus.hc.to/content/repositories/pub_releases</url>
 		</repository>
 		<repository>
 			<id>codemc-repo</id>
@@ -90,26 +56,33 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
+		<repository>
+			<id>commons-io</id>
+			<url>https://repo1.maven.org/maven2/commons-io/commons-io/</url>
+		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.19.4-R0.1-SNAPSHOT</version>
-			<!--change this value depending on the version -->
-			<type>jar</type>
+			<version>1.20.1-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>bungeecord-chat</artifactId>
+					<groupId>net.md-5</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20190722</version>
+			<version>20230227</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.6</version>
+    		<groupId>commons-io</groupId>
+    		<artifactId>commons-io</artifactId>
+    		<version>2.13.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
@@ -117,20 +90,26 @@
 			<version>1.1.1</version>
 		</dependency>
 		<dependency>
-			<groupId>com.gmail.filoghost.holographicdisplays</groupId>
-			<artifactId>holographicdisplays-api</artifactId>
-			<version>2.4.9</version>
-			<scope>provided</scope>
+    		<groupId>me.filoghost.holographicdisplays</groupId>
+    		<artifactId>holographicdisplays-api</artifactId>
+    		<version>3.0.3</version>
+    		<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>de.tr7zw</groupId>
 			<artifactId>item-nbt-api</artifactId>
-			<version>2.11.2</version>
+			<version>2.11.3</version>
 		</dependency>
 		<dependency>
      		<groupId>com.opencsv</groupId>
 		    <artifactId>opencsv</artifactId>
      		<version>5.5</version>
+  			<exclusions>
+  				<exclusion>
+  					<artifactId>commons-text</artifactId>
+  					<groupId>org.apache.commons</groupId>
+  				</exclusion>
+  			</exclusions>
   		</dependency>
 	</dependencies>
 	<distributionManagement>

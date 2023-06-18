@@ -52,16 +52,16 @@ public class MashBucket {
 
 		//Secondary
 		secondaryIngredient = 
-				(nbtCompound.hasKey(NBTConstants.BUCKET_SECONDARY_STRING) && 
-						nbtCompound.hasKey(NBTConstants.BUCKET_SECONDARY_COUNT)) ?
+				(nbtCompound.hasTag(NBTConstants.BUCKET_SECONDARY_STRING) && 
+						nbtCompound.hasTag(NBTConstants.BUCKET_SECONDARY_COUNT)) ?
 								new ItemStack(
 										Material.getMaterial(nbtCompound.getString(NBTConstants.BUCKET_SECONDARY_STRING)), 
 										nbtCompound.getInteger(NBTConstants.BUCKET_SECONDARY_COUNT)) :
 											null;		
 		//Flavour
 		flavorIngredient = 
-				(nbtCompound.hasKey(NBTConstants.BUCKET_FLAVOUR_STRING) && 
-						nbtCompound.hasKey(NBTConstants.BUCKET_FLAVOUR_COUNT)) ?
+				(nbtCompound.hasTag(NBTConstants.BUCKET_FLAVOUR_STRING) && 
+						nbtCompound.hasTag(NBTConstants.BUCKET_FLAVOUR_COUNT)) ?
 								new ItemStack(
 										Material.getMaterial(nbtCompound.getString(NBTConstants.BUCKET_FLAVOUR_STRING)), 
 										nbtCompound.getInteger(NBTConstants.BUCKET_FLAVOUR_COUNT)) :
@@ -69,8 +69,8 @@ public class MashBucket {
 
 		//Alcohol
 		alcoholIngredient = 
-				(nbtCompound.hasKey(NBTConstants.BUCKET_ALCOHOL_STRING) && 
-						nbtCompound.hasKey(NBTConstants.BUCKET_ALCOHOL_COUNT)) ?
+				(nbtCompound.hasTag(NBTConstants.BUCKET_ALCOHOL_STRING) && 
+						nbtCompound.hasTag(NBTConstants.BUCKET_ALCOHOL_COUNT)) ?
 								new ItemStack(
 										Material.getMaterial(nbtCompound.getString(NBTConstants.BUCKET_ALCOHOL_STRING)), 
 										nbtCompound.getInteger(NBTConstants.BUCKET_ALCOHOL_COUNT)) :
@@ -123,7 +123,7 @@ public class MashBucket {
 		NBTCompound nbtCompound= nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);
 
 		//Primary
-		if(nbtCompound.hasKey(NBTConstants.BUCKET_PRIMARY_STRING) && nbtCompound.hasKey(NBTConstants.BUCKET_PRIMARY_COUNT))
+		if(nbtCompound.hasTag(NBTConstants.BUCKET_PRIMARY_STRING) && nbtCompound.hasTag(NBTConstants.BUCKET_PRIMARY_COUNT))
 		{
 			contents.add(
 					new ItemStack(
@@ -136,7 +136,7 @@ public class MashBucket {
 		}
 
 		//Secondary
-		if(nbtCompound.hasKey(NBTConstants.BUCKET_SECONDARY_STRING) && nbtCompound.hasKey(NBTConstants.BUCKET_SECONDARY_COUNT))
+		if(nbtCompound.hasTag(NBTConstants.BUCKET_SECONDARY_STRING) && nbtCompound.hasTag(NBTConstants.BUCKET_SECONDARY_COUNT))
 		{
 			contents.add(
 					new ItemStack(
@@ -145,7 +145,7 @@ public class MashBucket {
 		}
 
 		//Flavour
-		if(nbtCompound.hasKey(NBTConstants.BUCKET_FLAVOUR_STRING) && nbtCompound.hasKey(NBTConstants.BUCKET_FLAVOUR_COUNT))
+		if(nbtCompound.hasTag(NBTConstants.BUCKET_FLAVOUR_STRING) && nbtCompound.hasTag(NBTConstants.BUCKET_FLAVOUR_COUNT))
 		{
 			contents.add(
 					new ItemStack(
@@ -154,7 +154,7 @@ public class MashBucket {
 		}
 
 		//Alcohol
-		if(nbtCompound.hasKey(NBTConstants.BUCKET_ALCOHOL_STRING) && nbtCompound.hasKey(NBTConstants.BUCKET_ALCOHOL_COUNT))
+		if(nbtCompound.hasTag(NBTConstants.BUCKET_ALCOHOL_STRING) && nbtCompound.hasTag(NBTConstants.BUCKET_ALCOHOL_COUNT))
 		{
 			contents.add(
 					new ItemStack(

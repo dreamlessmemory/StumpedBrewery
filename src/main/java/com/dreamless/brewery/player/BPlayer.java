@@ -178,7 +178,7 @@ public class BPlayer {
 
 			NBTItem nbti = new NBTItem(item);
 			NBTCompound brewery = nbti.getCompound(NBTConstants.BREWERY_TAG_STRING);	
-			if(!brewery.hasKey(NBTConstants.ALCOHOL_LEVEL_TAG_STRING))
+			if(!brewery.hasTag(NBTConstants.ALCOHOL_LEVEL_TAG_STRING))
 			{
 				return;// Non-alcoholic
 			}

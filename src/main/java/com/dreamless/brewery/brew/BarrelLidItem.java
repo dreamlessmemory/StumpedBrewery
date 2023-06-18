@@ -75,7 +75,7 @@ public class BarrelLidItem {
 		if(nbtCompound == null) {
 			return false;
 		}
-		return nbtCompound.hasKey(NBTConstants.WOOD_TYPE_TAG_STRING);
+		return nbtCompound.hasTag(NBTConstants.WOOD_TYPE_TAG_STRING);
 	}
 	
 	public static BarrelType getBarrelType(ItemStack item) {
@@ -84,7 +84,7 @@ public class BarrelLidItem {
 		}
 		NBTItem nbtItem = new NBTItem(item);
 		NBTCompound nbtCompound = nbtItem.getCompound(NBTConstants.BREWERY_TAG_STRING);
-		if(nbtCompound == null || !nbtCompound.hasKey(NBTConstants.WOOD_TYPE_TAG_STRING)) {
+		if(nbtCompound == null || !nbtCompound.hasTag(NBTConstants.WOOD_TYPE_TAG_STRING)) {
 			return null;
 		}
 		return BarrelType.valueOf(nbtCompound.getString(NBTConstants.WOOD_TYPE_TAG_STRING));

@@ -260,8 +260,8 @@ public class CommandListener implements CommandExecutor {
 			ItemStack hand = player.getInventory().getItemInMainHand();
 			if (hand != null) {//Something in the hand
 				NBTItem nbti = new NBTItem(hand);
-				if(nbti.hasKey("brewery")) {
-					if(nbti.hasKey("placedInBrewer")) {
+				if(nbti.hasTag("brewery")) {
+					if(nbti.hasTag("placedInBrewer")) {
 						p.msg(sender, "You cannot name brews that are aging or distilling.");
 					} else {
 					DatabaseCommunication.renameRecipe(player, newName);
@@ -295,8 +295,8 @@ public class CommandListener implements CommandExecutor {
 			ItemStack hand = player.getInventory().getItemInMainHand();
 			if (hand != null) {//Something in the hand
 				NBTItem nbti = new NBTItem(hand);
-				if(nbti.hasKey("brewery")) {
-					if(nbti.hasKey("placedInBrewer")) {
+				if(nbti.hasTag("brewery")) {
+					if(nbti.hasTag("placedInBrewer")) {
 						p.msg(sender, "You cannot give flavor text to brews that are aging or distilling.");
 					} else {
 					DatabaseCommunication.giveRecipeFlavorText(player, newFlavorText);

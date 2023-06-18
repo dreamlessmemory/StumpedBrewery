@@ -204,7 +204,7 @@ public class PlayerListener implements Listener {
 		if (item != null) {
 			if (item.getType() == Material.POTION) {
 				NBTItem nbti = new NBTItem(item);
-				if (nbti.hasKey(NBTConstants.BREWERY_TAG_STRING)) {
+				if (nbti.hasTag(NBTConstants.BREWERY_TAG_STRING)) {
 					BPlayer.drink(player, item);
 				}
 			} else if (BPlayer.drainItems.containsKey(item.getType())) {
