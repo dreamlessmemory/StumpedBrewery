@@ -1,5 +1,5 @@
 name: StumpedBrewery
-version: 6.0.2
+version: 6.0.3
 description: Create various beverages through a database-driven system 
 main: com.dreamless.brewery.Brewery
 api-version: '1.20'
