@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dreamless.StumpedBrewery</groupId>
 	<artifactId>StumpedBrewery</artifactId>
-	<version>6.0.3</version>
+	<version>6.1.0</version>
 	<name>StumpedBrewery</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -90,11 +90,11 @@
 			<version>1.1.1</version>
 		</dependency>
 		<dependency>
-    		<groupId>me.filoghost.holographicdisplays</groupId>
-    		<artifactId>holographicdisplays-api</artifactId>
-    		<version>3.0.4-SNAPSHOT</version>
-    		<scope>provided</scope>
-		</dependency>
+        <groupId>com.github.decentsoftware-eu</groupId>
+        	<artifactId>decentholograms</artifactId>
+        	<version>2.8.4</version>
+        	<scope>provided</scope>
+    	</dependency>
 		<dependency>
 			<groupId>de.tr7zw</groupId>
 			<artifactId>item-nbt-api</artifactId>

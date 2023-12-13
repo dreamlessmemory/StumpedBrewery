@@ -24,8 +24,9 @@ import com.dreamless.brewery.brew.BarrelType;
 import com.dreamless.brewery.brew.BrewItemFactory;
 import com.dreamless.brewery.brew.MashBucket;
 import com.dreamless.brewery.data.MessageConstants;
-import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
-import me.filoghost.holographicdisplays.api.hologram.Hologram;
+
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 
 public class BreweryBarrel {
 
@@ -53,7 +54,6 @@ public class BreweryBarrel {
 		if(Brewery.hologramsEnabled)
 		{
 			createHologram(block.getBlock());
-			updateHologram();
 		}
 
 		ItemStack[] items = barrel.getInventory().getContents();
@@ -280,16 +280,16 @@ public class BreweryBarrel {
 		above.setX(above.getX() + 0.5);
 		above.setY(above.getY() + 1.0);
 		above.setZ(above.getZ() + 0.5);
-		hologram = HolographicDisplaysAPI.get(Brewery.breweryDriver).createHologram(above);
+		hologram = DHAPI.createHologram(above.toString(), above);
+		DHAPI.addHologramLine(hologram, type.toString() + " barrel");
+		DHAPI.addHologramLine(hologram, "Has yet to age");
 	}
 
 	private void updateHologram() {
 		if(hologram != null)
 		{
-			int tempYear = (int)(time/minutesPerYear);		
-			hologram.getLines().clear();
-			hologram.getLines().appendText(type.toString() + " barrel");
-			hologram.getLines().appendText("Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
+			int tempYear = (int)(time/minutesPerYear);
+			DHAPI.setHologramLine(hologram, 1, "Aged " + tempYear + " year" + (tempYear == 1 ? "" : "s"));
 		}
 	}
 }
